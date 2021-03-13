@@ -9,3 +9,5 @@ target/
 config/
 .classpath
 .factorypath
+src/.classpath
+src/.factorypath
