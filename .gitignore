@@ -1,0 +1,9 @@
+*.class
+token.*
+old-token.*
+bin/
+target/
+.settings/
+.vscode/
+.idea/
+config/
