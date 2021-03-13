@@ -7,3 +7,5 @@ target/
 .vscode/
 .idea/
 config/
+.classpath
+.factorypath
