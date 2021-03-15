@@ -17,10 +17,13 @@ import schoolbot.SchoolbotConstants;
 import schoolbot.commands.misc.Ask;
 import schoolbot.commands.misc.Eval;
 import schoolbot.commands.misc.Format;
+import schoolbot.commands.misc.Hello;
 import schoolbot.commands.misc.Time;
 import schoolbot.commands.*;
+import schoolbot.commands.admin.Clear;
 import schoolbot.commands.admin.Prune;
 import schoolbot.commands.misc.Uptime;
+import schoolbot.commands.school.Wolfram;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.util.Embed;
@@ -30,24 +33,27 @@ public class CommandHandler
 {
     private final Schoolbot schoolbot;
     private final Map<String, Command> commands;
+    private EventWaiter waiter;
 
-    public CommandHandler(Schoolbot schoolbot) 
+    public CommandHandler(Schoolbot schoolbot, EventWaiter waiter) 
     {
         this.schoolbot = schoolbot;
+        this.waiter = waiter;
         this.commands = generateCommandsMap();
-
     }
 
-    public Map<String, Command> generateCommandsMap()
+    private Map<String, Command> generateCommandsMap()
     {
         List<Command> comList = List.of(
                                 new Uptime(),
-                                new schoolbot.commands.school.Wolfram(),
+                                new Wolfram(),
                                 new Ask(),
                                 new Format(),
                                 new Time(),
                                 new Eval(),
-                                new Prune());
+                                new Prune(),
+                                new Clear(waiter),
+                                new Hello(waiter));
 
         Map<String, Command> comsHashMap = new LinkedHashMap<>();
         for (Command com : comList)
@@ -59,7 +65,7 @@ public class CommandHandler
                 comsHashMap.put(aliases, com);
             }
         }
-    
+        schoolbot.getLogger().info("{} have been sucessfully loaded!", comList);
         return comsHashMap;
     }
 
@@ -100,7 +106,8 @@ public class CommandHandler
     }
 
 
-    public Map<String, Command> getCommands() {
+    public Map<String, Command> getCommands() 
+    {
         return commands;
     }
 

@@ -28,13 +28,15 @@ public class Prune extends Command
     public void run(CommandEvent event) 
     {
         List<Message> filteredMessages = event.getTextChannel().getIterableHistory().stream()
-                                                                                     .filter(msg -> msg.getContentRaw().startsWith("-"))
-                                                                                     .filter(msg -> msg.getAuthor().getId().equals(SchoolbotConstants.GENIUS_ID_STRING))
-                                                                                     .takeWhile(msg -> Duration.between(event.getMessage().getTimeCreated(), msg.getTimeCreated()).toHours() >= 24)
-                                                                                     .collect(Collectors.toList());
-        event.getChannel().purgeMessages(filteredMessages);
+                                                                        .filter(msg -> msg.getAuthor().getId().equals(SchoolbotConstants.GENIUS_ID_STRING) || msg.getContentRaw().startsWith("-"))
+                                                                        .filter(msg -> Duration.between(msg.getTimeCreated(), event.getMessage().getTimeCreated()).toHours() <= 24)
+                                                                        .limit(100)
+                                                                        .collect(Collectors.toList());
+
         
-        event.sendMessage(Emoji.RECYCLE.getAsChat() + " Cleared `" + filteredMessages.size() + "` messages!");
+        event.getChannel().purgeMessages(filteredMessages);
+
+        event.sendSelfDeletingMessage(Emoji.RECYCLE.getAsChat() + " Cleared `" + filteredMessages.size() + "` messages!");
     }
     
 }

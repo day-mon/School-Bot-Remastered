@@ -3,6 +3,7 @@ package schoolbot.natives.objects.command;
 import java.awt.Color;
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -81,7 +82,7 @@ public class CommandEvent
     {
         return event.getMessage();
     }   
-    
+
     public boolean memberPermissionCheck(List<Permission> list) 
     {
         return (getMember() != null && getMember().hasPermission(event.getChannel(), list));
@@ -110,12 +111,20 @@ public class CommandEvent
                         .queue();
     }
 
+
     public void sendMessage(EmbedBuilder embedBuilder, Color color)
     {
         getChannel().sendMessage(
             embedBuilder.setColor(color)
                         .setTimestamp(Instant.now()).build())
                         .queue();
+    }
+
+    public void sendSelfDeletingMessage(String message)
+    {
+        getChannel().sendMessage(message).queue(deleting -> {
+            deleting.delete().queueAfter(10, TimeUnit.SECONDS);
+        });
     }
     
 }

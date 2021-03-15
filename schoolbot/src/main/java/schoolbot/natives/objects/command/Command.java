@@ -8,10 +8,12 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import schoolbot.Schoolbot;
 import schoolbot.handlers.CommandCooldownHandler;
 import schoolbot.natives.util.Embed;
 import schoolbot.natives.objects.misc.Emoji;
@@ -142,9 +144,11 @@ public abstract class Command
        }
        else 
        {
+           event.getSchoolbot().getLogger().info("{} has been executed by {} using the args {}", this.name, event.getUser().getName(), event.getArgs());
            run(event);
        } 
     }
+
 
     /**
      * ... is like saying String[]
@@ -170,7 +174,8 @@ public abstract class Command
      * 
      * @return enabled?
      */
-    public boolean isEnabled() {
+    public boolean isEnabled() 
+    {
         return this.enabled;
     }
 
@@ -179,7 +184,8 @@ public abstract class Command
      * 
      * @param enabled {@code true} for enabled or {@code false} for disabled.
      */
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(boolean enabled) 
+    {
         this.enabled = enabled;
     }
     
@@ -191,7 +197,14 @@ public abstract class Command
      * 
      * @return the name of the command
      */
-    public String getName() {
+    public String getName() 
+    {
         return name;
     }
+
+    @Override
+    public String toString() {
+        return this.name;
+    }
+
 }

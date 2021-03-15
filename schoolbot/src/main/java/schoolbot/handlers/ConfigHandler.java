@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
+import schoolbot.Schoolbot;
 import schoolbot.natives.objects.config.ConfigOption;
 
 public class ConfigHandler
@@ -18,14 +19,16 @@ public class ConfigHandler
     public static final File CONFIG_FOLDER = new File("config");
     public static final File CONFIG_FILE = new File(CONFIG_FOLDER, "schoolbot.cfg");
     private final List<ConfigurationValue> configValues;
+    private final Schoolbot schoolbot;
 
 
-
-    public ConfigHandler()
+    public ConfigHandler(Schoolbot schoolbot)
     {
         initFolder();
         initFile();
         this.configValues = loadValues();
+        this.schoolbot = schoolbot;
+        
     }
 
     private void initFolder()
@@ -36,7 +39,7 @@ public class ConfigHandler
         }
         catch (Exception e)
         {
-            // have a logger
+            schoolbot.getLogger().error("CONFIG FOLDER COULD NOT BE CREATED");
             System.exit(1);
         }
     }
@@ -48,8 +51,8 @@ public class ConfigHandler
             CONFIG_FILE.createNewFile();
         }
         catch (Exception e)
-        {
-
+        {   
+            schoolbot.getLogger().error("CONFIG FILE COULD NOT BE CREATED");
             System.exit(1);
         }
     }
@@ -116,7 +119,7 @@ public class ConfigHandler
 		{
 			for(ConfigurationValue configurationValue : configValues)
 			{
-				if(configurationValue.key.equals(configOption.getKey())
+				if(configurationValue.key.equals(configOption.getKey()))
 				{
 					return configurationValue.getValue();
 				}
@@ -144,7 +147,8 @@ public class ConfigHandler
 		}
 		catch(Exception exception)
 		{
-			System.out.println("A config error occurred");
+            schoolbot.getLogger().error("CONFIG ERROR HAS OCCURED", exception);
+
 			exception.printStackTrace();
 		}
 	}

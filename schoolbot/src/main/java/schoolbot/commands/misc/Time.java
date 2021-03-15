@@ -49,12 +49,13 @@ public class Time extends Command
                 df.setTimeZone(TimeZone.getTimeZone(timeZone));
                 event.sendMessage(new EmbedBuilder()
                                     .setDescription("TimeZone name: " + df.getTimeZone().getDisplayName() 
-                                                    + "TimeZone time: " + df.format(new Date())
-                                                    + "TimeZone ID: " + df.getTimeZone().getID()));
+                                                    + "\nTimeZone time: " + df.format(new Date())
+                                                    + "\nTimeZone ID: " + df.getTimeZone().getID()));
             }
             else
             { 
-                if (!timeZones.contains(event.getArgs().get(0))) //This is good practice
+                String timeZoneCheck = event.getArgs().size() <= 3 ? event.getArgs().get(0).toUpperCase() : event.getArgs().get(0);
+                if (!timeZones.contains(timeZoneCheck)) //This is good practice
                 {
                     Embed.error(event, "That is not a valid timezone!");
                     return;
@@ -62,7 +63,7 @@ public class Time extends Command
 
                 DateFormat df = new SimpleDateFormat(); //This is outdated 
 
-                df.setTimeZone(TimeZone.getTimeZone(event.getArgs().get(0)));
+                df.setTimeZone(TimeZone.getTimeZone(timeZoneCheck));
                 event.sendMessage(new EmbedBuilder()
                                     .setDescription("TimeZone name: " + df.getTimeZone().getDisplayName() 
                                                     + "\nTimeZone time: " + df.format(new Date())
