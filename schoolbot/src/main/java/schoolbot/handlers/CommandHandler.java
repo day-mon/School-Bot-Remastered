@@ -1,7 +1,5 @@
 package schoolbot.handlers;
 
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,20 +7,15 @@ import java.util.stream.Collectors;
 
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 
-import net.dv8tion.jda.api.entities.Emote;
-import net.dv8tion.jda.api.entities.Activity.Emoji;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
-import schoolbot.commands.misc.Ask;
-import schoolbot.commands.misc.Eval;
-import schoolbot.commands.misc.Format;
-import schoolbot.commands.misc.Hello;
-import schoolbot.commands.misc.Time;
-import schoolbot.commands.*;
+import schoolbot.commands.misc.*;
+import schoolbot.commands.admin.Eval;
 import schoolbot.commands.admin.Clear;
 import schoolbot.commands.admin.Prune;
-import schoolbot.commands.misc.Uptime;
+import schoolbot.commands.school.Professor;
+import schoolbot.commands.school.School;
 import schoolbot.commands.school.Wolfram;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
@@ -52,8 +45,11 @@ public class CommandHandler
                                 new Time(),
                                 new Eval(),
                                 new Prune(),
+                                new Google(),
                                 new Clear(waiter),
-                                new Hello(waiter));
+                                new Hello(waiter),
+                                new School(waiter),
+                                new Professor());
 
         Map<String, Command> comsHashMap = new LinkedHashMap<>();
         for (Command com : comList)
@@ -99,8 +95,20 @@ public class CommandHandler
          */
         // Removing command call 
         filteredArgs.remove(0);
-        com.process(new CommandEvent(event, com, filteredArgs, schoolbot));
+        CommandEvent commandEvent = new CommandEvent(event, com, filteredArgs, schoolbot);
 
+        if (!com.hasChildren())
+        {
+            com.process(commandEvent);
+        }
+        com.getChildren()
+                    .stream()
+                    .filter(child -> child.getName().split(child.getParent().getName())[1].equalsIgnoreCase(filteredArgs.get(0)))
+                    .findFirst()
+                    .ifPresentOrElse(
+                            child -> child.process(new CommandEvent(event, child, filteredArgs.subList(1, filteredArgs.size()), schoolbot)),
+                            () -> com.process(commandEvent)
+                    );
 
 
     }

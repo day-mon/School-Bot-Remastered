@@ -16,6 +16,7 @@ public class Format extends Command
     @Override
     public void run(CommandEvent event) 
     {
+        /*
         event.sendMessage(new EmbedBuilder()
         .setDescription("""
                         Surrond code with:
@@ -29,7 +30,9 @@ public class Format extends Command
                         This character can be found at the top left of your keyboard!
                         """)
         .setColor(SchoolbotConstants.DEFAULT_EMBED_COLOR));
-        /* Java 8 Version
+        *
+         */
+
         event.sendMessage(new EmbedBuilder()
                             .setDescription("Surrond code with: \n \\`\\`\\` language " +
                                             "\n Person p = new Person(); \\`\\`\\` " +
@@ -39,6 +42,6 @@ public class Format extends Command
                                             "\n\n This character can be found at the top left of your keyboard")
 
                             .setColor(SchoolbotConstants.DEFAULT_EMBED_COLOR));
-                            */
+
     }
 }

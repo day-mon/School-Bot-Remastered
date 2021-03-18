@@ -1,10 +1,10 @@
-package schoolbot.natives;
+package schoolbot.natives.objects.school;
 
 import java.io.Serializable;
 import java.util.HashMap;
 
 import net.dv8tion.jda.internal.entities.GuildImpl;
-import schoolbot.natives.util.Majors;
+
 
 public class Professor implements Serializable {
 
@@ -23,7 +23,6 @@ public class Professor implements Serializable {
     private String lastName;
     private int age;
     private String officeHours;
-    private Majors department;
     private School professorsSchool;
 
     public Professor() {
@@ -140,9 +139,7 @@ public class Professor implements Serializable {
         return firstName;
     }
 
-    /**
-     * @param name the name to set
-     */
+
     public void setfirstName(String firstName) {
         this.firstName = firstName;
     }

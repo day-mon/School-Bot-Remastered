@@ -40,11 +40,11 @@ public class Formatter {
         int hour = Integer.parseInt(time.contains(":") ? time.split(":")[0] : time.replace("am", "").replace("pm", ""))
                 + (am ? 0 : 12);
         hour = (hour == 12 && am ? 0 : hour);
-        /*
-        String d = Ryan.today.getMonth().getValue() + "/" + Ryan.today.getDayOfMonth() + "/" + Ryan.today.getYear()
-                + " " + hour + ":" + (mins == 0 ? "00" : mins);
-                */
-        return sdf.parse(d);
+
+        //String d = Ryan.today.getMonth().getValue() + "/" + Ryan.today.getDayOfMonth() + "/" + Ryan.today.getYear()
+          //      + " " + hour + ":" + (mins == 0 ? "00" : mins);
+
+        return null;
     }
 
     public static String formatMatrix(double[][] a) {

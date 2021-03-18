@@ -1,4 +1,4 @@
-package schoolbot.natives;
+package schoolbot.natives.objects.school;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.internal.entities.GuildImpl;
-import schoolbot.natives.util.Majors;
 
 /**
  * A student: Joshigakusei's way of handling users.
@@ -45,7 +44,6 @@ public class Student {
      * List of student's majors/minors
      * 
      */
-    private LinkedList<Majors> majors;
     /**
      * Student's real name
      * 
@@ -71,7 +69,6 @@ public class Student {
 
     /**
      * 
-     * @param guild Guild the student is a member of.
      * @param user  User account.
      */
     public Student(User user) {
@@ -80,20 +77,16 @@ public class Student {
         this.myClasses = null;
         this.mySchool = null;
         this.GPA = -1.0;
-        this.majors = null;
         this.realName = "N/A";
         assignments = new HashMap<>();
 
     }
 
-    public Student(User user, School mySch, double GPA, Majors[] major, String realName) {
+    public Student(User user, School mySch, double GPA, String realName) {
         this.studentUser = user;
         this.myClasses = new HashMap<String, Classroom>();
         this.mySchool = mySch;
         this.GPA = GPA;
-        this.majors = new LinkedList<Majors>();
-        for (Majors maj : major)
-            this.majors.add(maj);
         this.realName = realName;
         assignments = new HashMap<>();
     }
@@ -111,9 +104,6 @@ public class Student {
     /**
      * @param major Major to add to this student's list
      */
-    public void addMajor(String major) {
-        this.majors.add(Majors.valueOf(major.toUpperCase()));
-    }
 
     /**
      * Remove a class from this student's schedule.
@@ -175,13 +165,6 @@ public class Student {
         GPA = gPA;
     }
 
-    public LinkedList<Majors> getMajors() {
-        return majors;
-    }
-
-    public void setMajors(LinkedList<Majors> majors) {
-        this.majors = majors;
-    }
 
     public String getRealName() {
         return realName;
@@ -220,8 +203,7 @@ public class Student {
     // DEFAULT OVERRIDES
     @Override
     public String toString() {
-        return "Name: " + realName + "\n" + "School" + mySchool.getSchoolName() + "\n" + "Major: " + majors.getFirst()
-                + "\n" + "GPA: " + GPA + "\n" + "Contact: " + emailPrefix + mySchool.getEmailSuffix() + "\n"
+        return "Name: " + realName + "\n" + "School" + mySchool.getSchoolName()  +"\n" + "GPA: " + GPA + "\n" + "Contact: " + emailPrefix + mySchool.getEmailSuffix() + "\n"
                 + "Amount of classes" + myClasses.size() + "\n" + "-------------------------------------------------";
     }
 
@@ -232,7 +214,6 @@ public class Student {
         long temp;
         temp = Double.doubleToLongBits(GPA);
         result = prime * result + (int) (temp ^ (temp >>> 32));
-        result = prime * result + ((majors == null) ? 0 : majors.hashCode());
         result = prime * result + ((myClasses == null) ? 0 : myClasses.hashCode());
         result = prime * result + ((mySchool == null) ? 0 : mySchool.hashCode());
         result = prime * result + ((realName == null) ? 0 : realName.hashCode());
@@ -249,11 +230,6 @@ public class Student {
             return false;
         Student other = (Student) obj;
         if (Double.doubleToLongBits(GPA) != Double.doubleToLongBits(other.GPA))
-            return false;
-        if (majors == null) {
-            if (other.majors != null)
-                return false;
-        } else if (!majors.equals(other.majors))
             return false;
         if (myClasses == null) {
             if (other.myClasses != null)

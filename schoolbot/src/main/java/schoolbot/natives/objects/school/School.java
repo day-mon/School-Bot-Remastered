@@ -1,4 +1,4 @@
-package schoolbot.natives;
+package schoolbot.natives.objects.school;
 
 import java.awt.Color;
 import java.io.Serializable;

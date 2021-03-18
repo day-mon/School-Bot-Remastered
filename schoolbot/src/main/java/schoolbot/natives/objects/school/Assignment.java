@@ -1,5 +1,6 @@
 package schoolbot.natives.objects.school;
 
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;

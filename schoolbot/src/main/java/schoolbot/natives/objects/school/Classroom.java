@@ -1,4 +1,4 @@
-package schoolbot.natives;
+package schoolbot.natives.objects.school;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -7,6 +7,12 @@ import javax.management.relation.RoleList;
 
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.internal.entities.GuildImpl;
+import schoolbot.natives.objects.school.*;
+import schoolbot.natives.objects.school.School;
+import schoolbot.natives.objects.school.Student;
+
+import schoolbot.natives.objects.school.Assignment;
+import schoolbot.natives.objects.school.Professor;
 
 public class Classroom implements Serializable {
 
@@ -36,7 +42,7 @@ public class Classroom implements Serializable {
     }
 
     public Classroom(GuildImpl guild, String className, String classID, String classNum, String time, int credits,
-            Professor professor, School school, String textChannel, long textChannelID) {
+                     Professor professor, School school, String textChannel, long textChannelID) {
         this.guild = guild;
         this.classID = classID;
         this.time = time;

@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import schoolbot.Schoolbot;
+import schoolbot.SchoolbotConstants;
 import schoolbot.handlers.CommandCooldownHandler;
 import schoolbot.natives.util.Embed;
 import schoolbot.natives.objects.misc.Emoji;
@@ -29,6 +30,8 @@ public abstract class Command
     private List<Permission> commandPermissions;
 
     private List<Permission> selfPermissions;
+
+    private List<Command> children;
 
     private boolean enabled;
 
@@ -46,16 +49,43 @@ public abstract class Command
 
     private long cooldown;
 
+    private final Command parent;
+
 
 
     /**
      * Command constructor with aliases for the command.
      * 
-     * @param aliases command aliases
+     * @param description command aliases
+     * @parm syntax
+     * @param minimalArgs
      */
     protected Command(String description, String syntax, int minimalArgs) 
     {
         this.name = this.getClass().getSimpleName();
+        this.description = description;
+        this.parent = null;
+        this.syntax = syntax;
+        this.enabled = true;
+        this.cooldown = 1000;
+        this.minimalArgs = minimalArgs;
+        this.calls = new ArrayList<>();
+        this.commandPermissions = new ArrayList<>();
+        this.selfPermissions = new ArrayList<>();
+        this.children = new ArrayList<>();
+    }
+
+    /**
+     *
+     * @param parent
+     * @param description
+     * @param syntax
+     * @param minimalArgs
+     */
+    protected Command(Command parent, String description, String syntax, int minimalArgs)
+    {
+        this.name = this.getClass().getSimpleName();
+        this.parent = parent;
         this.description = description;
         this.syntax = syntax;
         this.enabled = true;
@@ -64,33 +94,46 @@ public abstract class Command
         this.calls = new ArrayList<>();
         this.commandPermissions = new ArrayList<>();
         this.selfPermissions = new ArrayList<>();
+        this.children = new ArrayList<>();
     }
 
     /**
      * What the command will do on call.
      * 
-     * @param args Arguments sent to the command.
+     * @param event Arguments sent to the command.
      */
     public abstract void run(CommandEvent event);
 
+    /**
+     *
+     * @return
+     */
     public  String getDescription() 
     {
         return this.description;
     }
 
+    /**
+     *
+     * @return
+     */
     public List<Permission> getSelfPermissions()
     {
         return selfPermissions;
     }
 
+    /**
+     *
+     * @return
+     */
     public String getUsage() 
     {
         return this.usage;
     }
 
-    public String getUsageExample() 
+    public String getUsageExample()
     {
-        return this.usageExample;
+        return SchoolbotConstants.DEFAULT_PREFIX + this.calls.get(0) + " " + this.syntax;
     }
 
     public List<String> getCalls() 
@@ -169,6 +212,12 @@ public abstract class Command
 		this.selfPermissions.addAll(List.of(permissions));
 	}
 
+	public void addChildren(Command... children)
+    {
+        this.children.addAll(List.of(children));
+    }
+
+
     /**
      * Check whether the current command is enabled or not.
      * 
@@ -178,6 +227,12 @@ public abstract class Command
     {
         return this.enabled;
     }
+
+    public boolean hasChildren()
+    {
+        return !getChildren().isEmpty();
+    }
+
 
     /**
      * Set this command to be enabled or disabled.
@@ -200,6 +255,15 @@ public abstract class Command
     public String getName() 
     {
         return name;
+    }
+
+    public List<Command> getChildren()
+    {
+        return children;
+    }
+
+    public Command getParent() {
+        return parent;
     }
 
     @Override
