@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.internal.entities.GuildImpl;
 
-public class School implements Serializable {
+public class   School implements Serializable {
 
     /**
      *

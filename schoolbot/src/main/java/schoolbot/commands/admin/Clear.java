@@ -32,6 +32,10 @@ public class Clear extends Command {
         super("Clears messages in the text channel that the command was executed in", "[optional: number]",  0);
         addCalls("purge", "clean", "clear");
         addPermissions(Permission.ADMINISTRATOR);
+        addSelfPermissions(Permission.MESSAGE_MANAGE);
+        addChildren(
+                new ClearUser(this, waiter)
+        );
         this.waiter = waiter;
 
     }
@@ -57,8 +61,7 @@ public class Clear extends Command {
 
             // The warning here is annoying, suppress if you must; I don't even think it's possible for Member to return null here.
 
-            if (member.hasPermission(Permission.MESSAGE_MANAGE)) {
-                channel.sendMessage(
+            channel.sendMessage(
                         "You are about to delete 100 messages, click the checkmark to continue, click the X to cancel."
                 ).queue(prompt -> {
                     prompt.addReaction("\u2705").queue(); // Checkmark.
@@ -103,7 +106,7 @@ public class Clear extends Command {
                         channel.sendMessage("You did not respond in time.").queue();
                     });
                 });
-            }
+
         }
         else
         {

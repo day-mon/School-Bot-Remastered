@@ -182,8 +182,11 @@ public abstract class Command
        }
        else if (event.getArgs().size() < minimalArgs)
        {
-            // minimal args requirement isnt met!
             Embed.error(event, "This minimal amount of args for this command is " + minimalArgs);
+       }
+       else if (event.getUser().isBot())
+       {
+           Embed.error(event, "You are a bot silly goose :P");
        }
        else 
        {

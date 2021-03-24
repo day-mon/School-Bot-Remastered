@@ -42,6 +42,8 @@ public class Eval extends Command {
 		SCRIPT_ENGINE.put("jda", event.getJDA());
 		SCRIPT_ENGINE.put("author", event.getUser());
 
+
+
 		StringBuilder imports = new StringBuilder();
 		DEFAULT_IMPORTS.forEach(imp -> imports.append("import ").append(imp).append(".*; "));
 		String code = String.join(" ", event.getArgs());

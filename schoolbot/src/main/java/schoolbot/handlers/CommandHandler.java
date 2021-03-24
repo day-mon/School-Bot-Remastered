@@ -14,6 +14,7 @@ import schoolbot.commands.misc.*;
 import schoolbot.commands.admin.Eval;
 import schoolbot.commands.admin.Clear;
 import schoolbot.commands.admin.Prune;
+import schoolbot.commands.school.ListElectives;
 import schoolbot.commands.school.Professor;
 import schoolbot.commands.school.School;
 import schoolbot.commands.school.Wolfram;
@@ -49,6 +50,7 @@ public class CommandHandler
                                 new Clear(waiter),
                                 new Hello(waiter),
                                 new School(waiter),
+                                new ListElectives(),
                                 new Professor());
 
         Map<String, Command> comsHashMap = new LinkedHashMap<>();
