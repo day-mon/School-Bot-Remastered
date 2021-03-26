@@ -7,11 +7,6 @@ public class BotInfo
 {
      public BotInfo(){};
 
-     public static String getJavaVersion()
-     {
-         return System.getProperty("java.version");
-     }
-
      public static String getGithubRepo()
      {
          return "https://github.com/tykoooo/School-Bot-Remastered";

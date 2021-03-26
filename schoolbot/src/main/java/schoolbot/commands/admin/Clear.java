@@ -29,10 +29,10 @@ public class Clear extends Command {
     private final EventWaiter waiter;
 
     public Clear(EventWaiter waiter) {
-        super("Clears messages in the text channel that the command was executed in", "[optional: number]",  0);
+        super("Clears messages in the text channel that the command was executed in", "[optional: number]", 0);
         addCalls("purge", "clean", "clear");
-        addPermissions(Permission.ADMINISTRATOR);
-        addSelfPermissions(Permission.MESSAGE_MANAGE);
+        //  addPermissions(Permission.ADMINISTRATOR);
+        // addSelfPermissions(Permission.MESSAGE_MANAGE);
         addChildren(
                 new ClearUser(this, waiter)
         );

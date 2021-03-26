@@ -1,10 +1,15 @@
 package schoolbot.commands.misc;
 
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+import schoolbot.handlers.CommandCooldownHandler;
+import schoolbot.handlers.CommandHandler;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
+import schoolbot.natives.objects.info.SystemInfo;
 
 public class Google extends Command
 {
@@ -28,13 +33,16 @@ public class Google extends Command
                     .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
                     .referrer("http://www.google.com")
                     .get();
-            System.out.println(doc.text());
-            System.out.println(doc.getElementById("web_content_wrapper").text());
+
+            String toSend = String.format("http://%s - %s - %s", doc.getElementsByClass("link-text").get(0).text(), doc.select("a[href]").get(0).text(), doc.getElementsByClass("result-snippet").get(0).text());
+
+            event.sendMessage(toSend);
+            CommandCooldownHandler.addCooldown(event.getMember(), this);
 
         }
         catch (Exception e)
         {
-            System.out.println("Retard");
+            event.sendMessage("No results found for `" + event.getArgs().get(0) + "`");
         }
     }
 }

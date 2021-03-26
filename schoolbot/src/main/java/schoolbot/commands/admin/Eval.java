@@ -24,9 +24,9 @@ public class Eval extends Command {
 	public Eval()
 	{
 		super("Evaluates Java code.", "[code]", 1);
-		addPermissions(Permission.ADMINISTRATOR);
+		// addPermissions(Permission.ADMINISTRATOR);
 		addCalls("eval", "evaluate", "code");
-	} 
+	}
 
 	@Override
 	public void run(CommandEvent event)
@@ -41,7 +41,7 @@ public class Eval extends Command {
 		SCRIPT_ENGINE.put("args", event.getArgs());
 		SCRIPT_ENGINE.put("jda", event.getJDA());
 		SCRIPT_ENGINE.put("author", event.getUser());
-
+		SCRIPT_ENGINE.put("guild", event.getGuild());
 
 
 		StringBuilder imports = new StringBuilder();

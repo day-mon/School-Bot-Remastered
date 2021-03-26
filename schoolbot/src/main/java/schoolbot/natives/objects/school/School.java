@@ -16,19 +16,21 @@ public class   School implements Serializable {
      */
     private static final long serialVersionUID = 7699216426153116210L;
     private String schoolName;
-    private Role serverRole;
+    private long roleID;
     private String schoolreference;
     private String emailSuffix;
-    private transient GuildImpl guild;
+    private long guildID;
     private HashMap<String, Classroom> listOfClasses;
     private HashMap<String, Student> listOfStudents;
     private HashMap<String, Professor> listOfProfessors;
 
-    public School() {
+    public School()
+    {
 
     }
 
-    public School(String schoolName) {
+    public School(String schoolName)
+    {
         this.schoolName = schoolName;
         listOfClasses = new HashMap<>();
         listOfProfessors = new HashMap<>();
@@ -36,9 +38,10 @@ public class   School implements Serializable {
 
     }
 
-    public School(GuildImpl guild, String schoolName, String emailSuffix, String schoolreference) {
+    public School(long guildID, String schoolName, String emailSuffix, String schoolreference)
+    {
         this.schoolName = schoolName;
-        this.guild = guild;
+        this.guildID = guildID;
         this.emailSuffix = emailSuffix;
         this.schoolreference = schoolreference;
         listOfClasses = new HashMap<>();
@@ -47,7 +50,8 @@ public class   School implements Serializable {
     }
 
     public School(String schoolname, String emailSuffix, HashMap<String, Classroom> listOfClasses,
-            HashMap<String, Student> listOfStudents) {
+                  HashMap<String, Student> listOfStudents)
+    {
         this.schoolName = schoolname;
         this.emailSuffix = emailSuffix;
         this.listOfClasses = listOfClasses;
@@ -66,34 +70,41 @@ public class   School implements Serializable {
     }
 
     /**
-     * 
      * @return school name
      */
-    public String getSchoolName() {
+    public String getSchoolName()
+    {
         return schoolName;
     }
 
-    public HashMap<String, Professor> getListOfProfessors() {
+    public HashMap<String, Professor> getListOfProfessors()
+    {
         return listOfProfessors;
     }
 
-    public String getEmailSuffix() {
+    public String getEmailSuffix()
+    {
         return emailSuffix;
     }
 
-    public String getSchoolreference() {
+    public String getSchoolreference()
+    {
         return schoolreference;
     }
 
-    public GuildImpl getGuild() {
-        return guild;
+    public long getGuildID()
+    {
+        return guildID;
     }
 
-    public double getAverageGPA() {
+    public double getAverageGPA()
+    {
         int avg = 0;
-        for (Student student : listOfStudents.values()) {
+        for (Student student : listOfStudents.values())
+        {
             double num = student.getGPA();
-            if (num > 0) {
+            if (num > 0)
+            {
                 avg += num;
             }
         }
@@ -101,20 +112,27 @@ public class   School implements Serializable {
         return avg;
     }
 
-    public void setSchoolreference(String schoolreference) {
+    public void setSchoolreference(String schoolreference)
+    {
         this.schoolreference = schoolreference;
     }
 
+
+    public void setGuildID(long guildID)
+    {
+        this.guildID = guildID;
+    }
+
     /**
-     * 
      * @return
      */
-    public HashMap<String, Student> getListOfStudents() {
+    public HashMap<String, Student> getListOfStudents()
+    {
         return listOfStudents;
     }
 
     /**
-     * 
+     *
      * @param listOfClasses
      */
     public void setListOfClasses(HashMap<String, Classroom> listOfClasses) {
@@ -122,7 +140,7 @@ public class   School implements Serializable {
     }
 
     /**
-     * 
+     *
      * @param listOfStudents
      */
     public void setListOfStudents(HashMap<String, Student> listOfStudents) {
@@ -130,7 +148,7 @@ public class   School implements Serializable {
     }
 
     /**
-     * 
+     *
      * @param schoolName
      */
     public void setSchoolName(String schoolName) {
@@ -164,26 +182,42 @@ public class   School implements Serializable {
 
     public boolean removeClazz(Classroom clazz) {
         if (!listOfClasses.containsKey(clazz.getClassNum()))
+        {
             return false;
+        }
         else
+        {
             listOfClasses.remove(clazz.getClassNum());
+        }
         return true;
     }
 
-    public void addProfessor(Professor prof) {
+    public void addProfessor(Professor prof)
+    {
         listOfProfessors.putIfAbsent(prof.getEmailPrefix(), prof);
     }
 
-    public boolean removeProfessor(Professor prof) {
+    public boolean removeProfessor(Professor prof)
+    {
         if (!listOfProfessors.containsKey(prof.getEmailPrefix()))
+        {
             return false;
+        }
         else
+        {
             listOfProfessors.remove(prof.getEmailPrefix());
+        }
         return true;
 
     }
 
-    public EmbedBuilder getAsEmbed() {
+    public void setRoleID(long roleID)
+    {
+        this.roleID = roleID;
+    }
+
+    public EmbedBuilder getAsEmbed()
+    {
         Date dateGenerated = new Date();
         EmbedBuilder pretyifyEmbed = new EmbedBuilder();
         pretyifyEmbed.setTitle(":books: " + captializer(schoolName) + " :books:");
@@ -240,9 +274,7 @@ public class   School implements Serializable {
 
     @Override
     public String toString() {
-        return "School Name: " + schoolName + "\n" + "School email suffix: " + emailSuffix + "\n"
-                + "Amount of Classes: " + listOfClasses.size() + "\n" + "Amount of Professors: "
-                + listOfProfessors.size() + "\n" + "Average GPA: " + getAverageGPA();
+        return "School Name: " + schoolName + "\n" + "School email suffix: " + emailSuffix + "\n";
     }
 
     @Override
@@ -254,7 +286,6 @@ public class   School implements Serializable {
         result = prime * result + ((listOfProfessors == null) ? 0 : listOfProfessors.hashCode());
         result = prime * result + ((listOfStudents == null) ? 0 : listOfStudents.hashCode());
         result = prime * result + ((schoolName == null) ? 0 : schoolName.hashCode());
-        result = prime * result + ((serverRole == null) ? 0 : serverRole.hashCode());
         return result;
     }
 
@@ -291,11 +322,6 @@ public class   School implements Serializable {
             if (other.schoolName != null)
                 return false;
         } else if (!schoolName.equals(other.schoolName))
-            return false;
-        if (serverRole == null) {
-            if (other.serverRole != null)
-                return false;
-        } else if (!serverRole.equals(other.serverRole))
             return false;
         return true;
     }

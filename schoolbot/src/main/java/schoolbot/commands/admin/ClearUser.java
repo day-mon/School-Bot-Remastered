@@ -24,9 +24,7 @@ public class ClearUser extends Command
     public ClearUser(Command parent, EventWaiter waiter)
     {
         super(parent, "", "", 1);
-
         this.waiter = waiter;
-
         addPermissions(Permission.ADMINISTRATOR);
         addSelfPermissions(Permission.MESSAGE_MANAGE);
     }

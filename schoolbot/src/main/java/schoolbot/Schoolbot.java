@@ -2,7 +2,6 @@ package schoolbot;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
 import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
@@ -13,19 +12,19 @@ import net.dv8tion.jda.api.JDAInfo;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.ReadyEvent;
-import org.openqa.selenium.devtools.v86.database.Database;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import schoolbot.events.MessageRecieve;
+import schoolbot.listener.MainListener;
 import schoolbot.handlers.CommandHandler;
 import schoolbot.handlers.ConfigHandler;
 import schoolbot.handlers.DatabaseHandler;
 import schoolbot.natives.objects.config.ConfigOption;
 import schoolbot.natives.objects.info.BotInfo;
+import schoolbot.natives.objects.info.SystemInfo;
 
 
 public class Schoolbot extends ListenerAdapter
@@ -55,8 +54,8 @@ public class Schoolbot extends ListenerAdapter
 		this.jda = JDABuilder.createDefault(configHandler.getString(ConfigOption.TOKEN))
 			.addEventListeners(
 					this,
-				new MessageRecieve(this),
-				eventWaiter)
+					new MainListener(this),
+					eventWaiter)
 				.setActivity(Activity.playing("building..."))
 				.setStatus(OnlineStatus.DO_NOT_DISTURB)
 				.build();
@@ -67,13 +66,14 @@ public class Schoolbot extends ListenerAdapter
 	{
 		event.getJDA().getPresence().setPresence(OnlineStatus.ONLINE, Activity.competing("Weierman's Lab Speed Run"));
 
-		getLogger().info("Account:           "  + event.getJDA().getSelfUser());
-		getLogger().info("Java Version:      "  + BotInfo.getJavaVersion());
-		getLogger().info("JDA Version:       "  + JDAInfo.VERSION);
-		getLogger().info("Schoolbot Version: "  + BotInfo.getSchoolbotVersion());
-		getLogger().info("Operating System:  "  + System.getProperty("os.name"));
-		getLogger().info("Github Repo:       "  + BotInfo.getGithubRepo());
-		getLogger().info("Startup Time:      "  + Duration.between(getBotStartTime(), LocalDateTime.now()).toMillisPart()+ "ms");
+
+		getLogger().info("Account:           " + event.getJDA().getSelfUser());
+		getLogger().info("Java Version:      " + SystemInfo.getJavaVersion());
+		getLogger().info("JDA Version:       " + JDAInfo.VERSION);
+		getLogger().info("Schoolbot Version: " + BotInfo.getSchoolbotVersion());
+		getLogger().info("Operating System:  " + SystemInfo.getOperatingSystem());
+		getLogger().info("Github Repo:       " + BotInfo.getGithubRepo());
+		getLogger().info("Startup Time:      " + Duration.between(getBotStartTime(), LocalDateTime.now()).toMillisPart() + "ms");
 
 
 	}

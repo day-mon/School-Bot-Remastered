@@ -8,12 +8,7 @@ import java.util.concurrent.TimeUnit;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.SelfUser;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
@@ -43,22 +38,27 @@ public class CommandEvent
         return schoolbot;
     }
 
-    public Command getCommand() 
+    public Command getCommand()
     {
         return command;
     }
 
-    public List<String> getArgs() 
+    public List<String> getArgs()
     {
         return args;
     }
 
-    public TextChannel getTextChannel() 
+    public Guild getGuild()
+    {
+        return event.getGuild();
+    }
+
+    public TextChannel getTextChannel()
     {
         return event.getChannel();
     }
 
-    public User getUser() 
+    public User getUser()
     {
         return event.getAuthor();
     }

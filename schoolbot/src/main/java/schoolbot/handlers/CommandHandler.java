@@ -14,10 +14,7 @@ import schoolbot.commands.misc.*;
 import schoolbot.commands.admin.Eval;
 import schoolbot.commands.admin.Clear;
 import schoolbot.commands.admin.Prune;
-import schoolbot.commands.school.ListElectives;
-import schoolbot.commands.school.Professor;
-import schoolbot.commands.school.School;
-import schoolbot.commands.school.Wolfram;
+import schoolbot.commands.school.*;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.util.Embed;
@@ -39,19 +36,22 @@ public class CommandHandler
     private Map<String, Command> generateCommandsMap()
     {
         List<Command> comList = List.of(
-                                new Uptime(),
-                                new Wolfram(),
-                                new Ask(),
-                                new Format(),
-                                new Time(),
-                                new Eval(),
-                                new Prune(),
-                                new Google(),
-                                new Clear(waiter),
-                                new Hello(waiter),
-                                new School(waiter),
-                                new ListElectives(),
-                                new Professor());
+                new Uptime(),
+                new Wolfram(),
+                new Ask(),
+                new Format(),
+                new Time(),
+                new Eval(),
+                new Prune(),
+                new Google(),
+                new Clear(waiter),
+                new Hello(waiter),
+                new School(waiter),
+                new ListElectives(),
+                new LeetCode(),
+                new ListSchools(waiter),
+                new FindPittStudent(),
+                new Professor());
 
         Map<String, Command> comsHashMap = new LinkedHashMap<>();
         for (Command com : comList)
@@ -102,6 +102,7 @@ public class CommandHandler
         if (!com.hasChildren())
         {
             com.process(commandEvent);
+            return;
         }
         com.getChildren()
                     .stream()
