@@ -2,6 +2,7 @@ package schoolbot;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.EnumSet;
 
 import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
@@ -12,6 +13,8 @@ import net.dv8tion.jda.api.JDAInfo;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.ReadyEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,16 +53,26 @@ public class Schoolbot extends ListenerAdapter
 	}
 
 	public void build() throws LoginException, InterruptedException
-	{
-		this.jda = JDABuilder.createDefault(configHandler.getString(ConfigOption.TOKEN))
-			.addEventListeners(
-					this,
-					new MainListener(this),
-					eventWaiter)
-				.setActivity(Activity.playing("building..."))
-				.setStatus(OnlineStatus.DO_NOT_DISTURB)
-				.build();
-	}
+    {
+        this.jda = JDABuilder.createDefault(
+                configHandler.getString(ConfigOption.TOKEN),
+                GatewayIntent.GUILD_MEMBERS,
+                GatewayIntent.GUILD_EMOJIS,
+
+                GatewayIntent.DIRECT_MESSAGES,
+                GatewayIntent.DIRECT_MESSAGE_REACTIONS,
+
+                GatewayIntent.GUILD_MESSAGES,
+                GatewayIntent.GUILD_MESSAGE_REACTIONS,
+                GatewayIntent.GUILD_VOICE_STATES)
+                .addEventListeners(
+                        this,
+                        new MainListener(this),
+                        eventWaiter)
+                .setActivity(Activity.playing("building..."))
+                .setStatus(OnlineStatus.DO_NOT_DISTURB)
+                .build();
+    }
 
 	@Override
 	public void onReady(@Nonnull ReadyEvent event)

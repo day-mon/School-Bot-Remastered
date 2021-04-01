@@ -10,23 +10,22 @@ import net.dv8tion.jda.internal.entities.GuildImpl;
 
 /**
  * A student: Joshigakusei's way of handling users.
- * 
+ *
  * @author Elsklivet#8867
  */
 @Deprecated
-public class Student {
+public class Student
+{
     /**
      *
      */
     private static final long serialVersionUID = -7534317990933684475L;
     /**
      * School this student is attending.
-     * 
      */
     private School mySchool;
     /**
      * List of classes this student is in.
-     * 
      */
     private HashMap<String, Classroom> myClasses;
 
@@ -37,16 +36,14 @@ public class Student {
 
     /**
      * Student's GPA.
-     * 
      */
     private double GPA;
     /**
      * List of student's majors/minors
-     * 
+     *
      */
     /**
      * Student's real name
-     * 
      */
     private String realName;
 
@@ -57,21 +54,21 @@ public class Student {
 
 
     /**
-     * 
+     *
      */
     private User studentUser;
 
     /**
-     * 
+     *
      * @param guild
      * @param user
      */
 
     /**
-     * 
-     * @param user  User account.
+     * @param user User account.
      */
-    public Student(User user) {
+    public Student(User user)
+    {
 
         this.studentUser = user;
         this.myClasses = null;
@@ -82,7 +79,8 @@ public class Student {
 
     }
 
-    public Student(User user, School mySch, double GPA, String realName) {
+    public Student(User user, School mySch, double GPA, String realName)
+    {
         this.studentUser = user;
         this.myClasses = new HashMap<String, Classroom>();
         this.mySchool = mySch;
@@ -93,11 +91,12 @@ public class Student {
 
     /**
      * Remove a class from this student's schedule.
-     * 
+     *
      * @param clazz Class ({@code Classroom}) to remove
      * @return
      */
-    public void addClass(Classroom clazz) {
+    public void addClass(Classroom clazz)
+    {
         this.myClasses.putIfAbsent(clazz.getClassID(), clazz);
     }
 
@@ -107,24 +106,29 @@ public class Student {
 
     /**
      * Remove a class from this student's schedule.
-     * 
+     *
      * @param clazz Class ({@code Classroom}) to remove
      * @return
      */
-    public boolean removeClass(Classroom clazz) {
-        if (myClasses.containsKey(clazz.getClassID())) {
+    public boolean removeClass(Classroom clazz)
+    {
+        if (myClasses.containsKey(clazz.getClassID()))
+        {
             myClasses.remove(clazz.getClassID());
             return true;
         }
         return false;
     }
 
-    public void addAssignment(Assignment assignemnt) {
+    public void addAssignment(Assignment assignemnt)
+    {
         assignments.putIfAbsent(assignemnt, false);
     }
 
-    public boolean removeAssignment(Assignment assignemnt) {
-        if (assignments.containsKey(assignemnt)) {
+    public boolean removeAssignment(Assignment assignemnt)
+    {
+        if (assignments.containsKey(assignemnt))
+        {
             assignments.remove(assignemnt);
             return true;
         }
@@ -133,48 +137,59 @@ public class Student {
 
     // #region GETTER SETTERS
     // -------------------------------------------------------
-    public School getSchool() {
+    public School getSchool()
+    {
         return mySchool;
     }
 
-    public void setSchool(School mySchool) {
+    public void setSchool(School mySchool)
+    {
         this.mySchool = mySchool;
     }
 
-    public HashMap<String, Classroom> getClasses() {
+    public HashMap<String, Classroom> getClasses()
+    {
         return myClasses;
     }
 
-    public void setClasses(HashMap<String, Classroom> myClasses) {
+    public void setClasses(HashMap<String, Classroom> myClasses)
+    {
         this.myClasses = myClasses;
     }
 
-    public double getGPA() {
+    public double getGPA()
+    {
         return GPA;
     }
 
-    public String getEmailPrefix() {
+    public String getEmailPrefix()
+    {
         return emailPrefix;
     }
 
-    public User getSUser() {
+    public User getSUser()
+    {
         return this.studentUser;
     }
 
-    public void setGPA(double gPA) {
+    public void setGPA(double gPA)
+    {
         GPA = gPA;
     }
 
 
-    public String getRealName() {
+    public String getRealName()
+    {
         return realName;
     }
 
-    public void setEmailPrefix(String emailPrefix) {
+    public void setEmailPrefix(String emailPrefix)
+    {
         this.emailPrefix = emailPrefix;
     }
 
-    public void setRealName(String realName) {
+    public void setRealName(String realName)
+    {
         this.realName = realName;
     }
     // #endregion
@@ -183,32 +198,36 @@ public class Student {
     /**
      * Saves this instance to its respective save file by writing a comma-separated
      * line of the variable values.
-     * 
+     *
      * @implNote Variables are written out in order they appear in class.
      */
-    public void save() {
+    public void save()
+    {
         // pass
     }
 
     /**
      * Get this student's data as a pretty MessageEmbed.
-     * 
+     *
      * @return {@code MessageEmbed} to send in discord messages.
      */
-    public MessageEmbed getAsEmbed() {
+    public MessageEmbed getAsEmbed()
+    {
         return null; // this fat cock will be from
-                     // {JDA/src/main/java/net/dv8tion/jda/api/entities/MessageEmbed.java}
+        // {JDA/src/main/java/net/dv8tion/jda/api/entities/MessageEmbed.java}
     }
 
     // DEFAULT OVERRIDES
     @Override
-    public String toString() {
-        return "Name: " + realName + "\n" + "School" + mySchool.getSchoolName()  +"\n" + "GPA: " + GPA + "\n" + "Contact: " + emailPrefix + mySchool.getEmailSuffix() + "\n"
+    public String toString()
+    {
+        return "Name: " + realName + "\n" + "School" + mySchool.getSchoolName() + "\n" + "GPA: " + GPA + "\n" + "Contact: " + emailPrefix + mySchool.getEmailSuffix() + "\n"
                 + "Amount of classes" + myClasses.size() + "\n" + "-------------------------------------------------";
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         final int prime = 31;
         int result = super.hashCode();
         long temp;
@@ -221,31 +240,58 @@ public class Student {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj)
+    {
         if (this == obj)
+        {
             return true;
+        }
         if (!super.equals(obj))
+        {
             return false;
+        }
         if (getClass() != obj.getClass())
+        {
             return false;
+        }
         Student other = (Student) obj;
         if (Double.doubleToLongBits(GPA) != Double.doubleToLongBits(other.GPA))
+        {
             return false;
-        if (myClasses == null) {
+        }
+        if (myClasses == null)
+        {
             if (other.myClasses != null)
+            {
                 return false;
-        } else if (!myClasses.equals(other.myClasses))
+            }
+        }
+        else if (!myClasses.equals(other.myClasses))
+        {
             return false;
-        if (mySchool == null) {
+        }
+        if (mySchool == null)
+        {
             if (other.mySchool != null)
+            {
                 return false;
-        } else if (!mySchool.equals(other.mySchool))
+            }
+        }
+        else if (!mySchool.equals(other.mySchool))
+        {
             return false;
-        if (realName == null) {
+        }
+        if (realName == null)
+        {
             if (other.realName != null)
+            {
                 return false;
-        } else if (!realName.equals(other.realName))
+            }
+        }
+        else if (!realName.equals(other.realName))
+        {
             return false;
+        }
         return true;
     }
 

@@ -40,10 +40,12 @@ public class DatabaseHandler {
     {
         try
         {
-
-            Statement statement = dbConnection.createStatement();
+            PreparedStatement myStatement =
+                    dbConnection.prepareStatement("INSERT INTO ? VALUES ?");
+            // Statement statement = dbConnection.createStatement();
             String SQLString = String.format("INSERT INTO %s VALUES %s", table, query);
-            statement.executeUpdate(SQLString);
+            PreparedStatement statement = dbConnection.prepareStatement(SQLString);
+
             return true;
         }
         catch (Exception e)

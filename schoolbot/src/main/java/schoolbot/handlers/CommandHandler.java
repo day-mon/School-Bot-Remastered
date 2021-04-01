@@ -48,7 +48,6 @@ public class CommandHandler
                 new Hello(waiter),
                 new School(waiter),
                 new ListElectives(),
-                new LeetCode(),
                 new ListSchools(waiter),
                 new FindPittStudent(),
                 new Professor());

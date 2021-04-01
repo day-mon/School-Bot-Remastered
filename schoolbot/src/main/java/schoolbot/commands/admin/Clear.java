@@ -2,6 +2,7 @@
 package schoolbot.commands.admin;
 
 // Imports
+
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
@@ -25,10 +26,12 @@ import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.List;
 
-public class Clear extends Command {
+public class Clear extends Command
+{
     private final EventWaiter waiter;
 
-    public Clear(EventWaiter waiter) {
+    public Clear(EventWaiter waiter)
+    {
         super("Clears messages in the text channel that the command was executed in", "[optional: number]", 0);
         addCalls("purge", "clean", "clear");
         //  addPermissions(Permission.ADMINISTRATOR);
@@ -40,7 +43,8 @@ public class Clear extends Command {
 
     }
 
-    public void run(CommandEvent event) {
+    public void run(CommandEvent event)
+    {
         if (event.getArgs().isEmpty())
         {
             MessageChannel channel = event.getChannel();
@@ -49,9 +53,8 @@ public class Clear extends Command {
             User author = event.getUser();
 
 
-
-
-            if (!message.isFromGuild()) {
+            if (!message.isFromGuild())
+            {
                 author.openPrivateChannel().flatMap(privateChannel -> privateChannel.sendMessage(
                         "This command must be used in a guild."
                 )).queue();
@@ -62,50 +65,58 @@ public class Clear extends Command {
             // The warning here is annoying, suppress if you must; I don't even think it's possible for Member to return null here.
 
             channel.sendMessage(
-                        "You are about to delete 100 messages, click the checkmark to continue, click the X to cancel."
-                ).queue(prompt -> {
-                    prompt.addReaction("\u2705").queue(); // Checkmark.
-                    prompt.addReaction("\u274E").queue(); // X-Mark.
+                    "You are about to delete 100 messages, click the checkmark to continue, click the X to cancel."
+            ).queue(prompt ->
+            {
+                prompt.addReaction("\u2705").queue(); // Checkmark.
+                prompt.addReaction("\u274E").queue(); // X-Mark.
 
-                    this.waiter.waitForEvent(MessageReactionAddEvent.class, reactionEvent -> reactionEvent.getMessageIdLong() == prompt.getIdLong()
-                            && Objects.equals(reactionEvent.getUser(), author) || Objects.equals(reactionEvent.getUser().getId(), SchoolbotConstants.GENIUS_OWNER_ID), reactionEvent -> {
+                this.waiter.waitForEvent(MessageReactionAddEvent.class, reactionEvent -> reactionEvent.getMessageIdLong() == prompt.getIdLong()
+                        && Objects.equals(reactionEvent.getUser(), author) || Objects.equals(reactionEvent.getUser().getId(), SchoolbotConstants.GENIUS_OWNER_ID), reactionEvent ->
+                {
 
-                        switch (reactionEvent.getReaction().getReactionEmote().getName()) {
-                            case "\u2705": {
-                                prompt.getChannel().getIterableHistory()
-                                        .takeAsync(100)
-                                        .thenApplyAsync(channelMessages -> {
-                                            List<Message> deletableMessages = channelMessages.stream()
-                                                    .filter(messages -> messages.getTimeCreated().isBefore(
-                                                            OffsetDateTime.now().plus(2, ChronoUnit.WEEKS)
-                                                    )).collect(Collectors.toList());
+                    switch (reactionEvent.getReaction().getReactionEmote().getName())
+                    {
+                        case "\u2705":
+                        {
+                            prompt.getChannel().getIterableHistory()
+                                    .takeAsync(100)
+                                    .thenApplyAsync(channelMessages ->
+                                    {
+                                        List<Message> deletableMessages = channelMessages.stream()
+                                                .filter(messages -> messages.getTimeCreated().isBefore(
+                                                        OffsetDateTime.now().plus(2, ChronoUnit.WEEKS)
+                                                )).collect(Collectors.toList());
 
-                                            channel.purgeMessages(deletableMessages);
+                                        channel.purgeMessages(deletableMessages);
 
-                                            return deletableMessages.size();
-                                        }).whenCompleteAsync((messagesTotal, throwable) -> channel.sendMessage(
-                                        "Successfully purged `" + messagesTotal + "` messages."
-                                ).queue(botMessage -> botMessage.delete().queueAfter(5, TimeUnit.SECONDS)));
+                                        return deletableMessages.size();
+                                    }).whenCompleteAsync((messagesTotal, throwable) -> channel.sendMessage(
+                                    "Successfully purged `" + messagesTotal + "` messages."
+                            ).queue(botMessage -> botMessage.delete().queueAfter(5, TimeUnit.SECONDS)));
 
-                                break;
-                            }
-                            case "\u274E": {
-                                channel.sendMessage("Operation was successfully cancelled.").queue();
-
-                                break;
-                            }
-                            default: {
-                                channel.sendMessage("You did not select one of the available options.").queue();
-
-                                break;
-                            }
+                            break;
                         }
-                    }, 15, TimeUnit.SECONDS, () -> {
-                        prompt.delete().queue();
+                        case "\u274E":
+                        {
+                            channel.sendMessage("Operation was successfully cancelled.").queue();
 
-                        channel.sendMessage("You did not respond in time.").queue();
-                    });
+                            break;
+                        }
+                        default:
+                        {
+                            channel.sendMessage("You did not select one of the available options.").queue();
+
+                            break;
+                        }
+                    }
+                }, 15, TimeUnit.SECONDS, () ->
+                {
+                    prompt.delete().queue();
+
+                    channel.sendMessage("You did not respond in time.").queue();
                 });
+            });
 
         }
         else
@@ -114,13 +125,14 @@ public class Clear extends Command {
             if (!Checks.isNumber(numcheck))
             {
                 Embed.error(event, "This is not a number! " +
-                                           "\nUsage: " + this.getUsageExample());
+                        "\nUsage: " + this.getUsageExample());
                 return;
             }
             int messagesToRemove = Integer.parseInt(numcheck);
             event.getChannel().getIterableHistory()
                     .takeAsync(messagesToRemove)
-                    .thenApplyAsync(channelMessages -> {
+                    .thenApplyAsync(channelMessages ->
+                    {
                         List<Message> filteredDeletedMessages = channelMessages.stream()
                                 .filter(messages -> messages.getTimeCreated().isBefore(
                                         OffsetDateTime.now().plus(2, ChronoUnit.WEEKS)

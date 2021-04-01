@@ -1,5 +1,8 @@
 package schoolbot.listener;
 
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
@@ -9,6 +12,8 @@ import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
 
 import javax.annotation.Nonnull;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 public class MainListener implements EventListener
 {
@@ -20,7 +25,7 @@ public class MainListener implements EventListener
     }
 
 
-    public void onEvent(@Nonnull GenericEvent event)
+    public synchronized void onEvent(@Nonnull GenericEvent event)
     {
         if (event instanceof GuildMessageReceivedEvent)
         {
@@ -28,7 +33,6 @@ public class MainListener implements EventListener
             User author = ((GuildMessageReceivedEvent) event).getAuthor();
 
             schoolbot.getLogger().info(author.getAsTag() + " has sent: " + message);
-
 
             if (!message.startsWith(SchoolbotConstants.DEFAULT_PREFIX))
             {
@@ -41,6 +45,22 @@ public class MainListener implements EventListener
 
         else if (event instanceof GuildMemberJoinEvent)
         {
+            TextChannel channel = ((GuildMemberJoinEvent) event).getGuild().getDefaultChannel();
+            Guild guild = ((GuildMemberJoinEvent) event).getGuild();
+            String guildName = ((GuildMemberJoinEvent) event).getGuild().getName();
+            User user = ((GuildMemberJoinEvent) event).getUser();
+
+
+            channel.sendMessage(new EmbedBuilder()
+                    .setTitle("Welcome to " + guildName, "http://pittmainrejects.net")
+                    .setFooter("Joined on: " + LocalDateTime.now())
+                    .addField("User information",
+                            "`User joined:`" + user.getName() + "\n" + "`Account creation date:` " + user.getTimeCreated(), false)
+                    .addField("Sever Information",
+                            "`Server count:`  " + guild.getMemberCount() + "\n" + "`Server name:`  " + guild.getName(), false)
+                    .addField("Description",
+                            "Welcome " + user.getName() + " if you are here you probably have no clue what you are doing like all " + guild.getMemberCount() + " of us. If you need some help you can mention anyone indivisually or mention the role of the class in which you need help in. Mention anyone in 8 and above for roles.", false)
+                    .build()).queue();
 
         }
     }

@@ -38,8 +38,7 @@ public class SchoolAdd extends Command
 
         MessageChannel channel = event.getChannel();
         User user = event.getUser();
-        
-        /*
+
         channel.sendMessage("Hello " + event.getMember().getNickname() + " You would like to add a school? What is this name?: ")
                 .queue(reply ->
                 {
@@ -157,7 +156,6 @@ public class SchoolAdd extends Command
                             });
                 });
 
-         */
 
     }
 
