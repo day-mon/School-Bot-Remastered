@@ -26,7 +26,10 @@ public class DatabaseHandler {
 
         try
         {
-            dbConnection = DriverManager.getConnection("jdbc:mysql://" + configHandler.getString(ConfigOption.DBHOSTNAME), configHandler.getString(ConfigOption.DBUSER), configHandler.getString(ConfigOption.DBPASSWORD));
+            dbConnection = DriverManager.getConnection("jdbc:mysql://" +
+                    configHandler.getString(ConfigOption.DBHOSTNAME),
+                    configHandler.getString(ConfigOption.DBUSER),
+                    configHandler.getString(ConfigOption.DBPASSWORD));
         }
         catch (Exception e)
         {
@@ -36,70 +39,10 @@ public class DatabaseHandler {
         }
     }
 
-    public boolean writeToTable(String table, String query)
-    {
-        try
-        {
-            PreparedStatement myStatement =
-                    dbConnection.prepareStatement("INSERT INTO ? VALUES ?");
-            // Statement statement = dbConnection.createStatement();
-            String SQLString = String.format("INSERT INTO %s VALUES %s", table, query);
-            PreparedStatement statement = dbConnection.prepareStatement(SQLString);
-
-            return true;
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean removeFromTable(String table, String query)
-    {
-        try (Statement statement = dbConnection.createStatement())
-        {
-            String SQLString = String.format("DELETE FROM %s WHERE %s", table, query);
-            statement.execute(SQLString);
-            return true;
-        }
-        catch (Exception e)
-        {
-            System.out.println("failed");
-            e.printStackTrace();
-            return false;
-        }
-    }
 
 
-    public List<School> getSchools()
-    {
-        List<School> schools = new ArrayList<>();
-        School school = null;
-        ResultSet rs = null;
-        try
-        {
-            Statement statement = dbConnection.createStatement();
-            rs = statement.executeQuery("SELECT * FROM schools");
-
-            while (rs.next())
-            {
-                school = new School();
-                school.setSchoolName(rs.getString("school_name"));
-                school.setRoleID(rs.getLong("role_id"));
-                school.setEmailSuffix(rs.getString("school_email_suffix"));
-                school.setGuildID(rs.getLong("guild_id"));
-                schools.add(school);
-            }
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
 
 
-        return schools;
-    }
 
 
     public Connection getDbConnection()
