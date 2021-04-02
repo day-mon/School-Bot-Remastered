@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class Clear extends Command
 {
@@ -34,8 +35,8 @@ public class Clear extends Command
     {
         super("Clears messages in the text channel that the command was executed in", "[optional: number]", 0);
         addCalls("purge", "clean", "clear");
-        //  addPermissions(Permission.ADMINISTRATOR);
-        // addSelfPermissions(Permission.MESSAGE_MANAGE);
+        addPermissions(Permission.ADMINISTRATOR);
+        addSelfPermissions(Permission.MESSAGE_MANAGE);
         addChildren(
                 new ClearUser(this, waiter)
         );

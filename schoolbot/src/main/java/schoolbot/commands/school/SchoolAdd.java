@@ -11,6 +11,7 @@ import schoolbot.handlers.ConfigHandler;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.objects.config.ConfigOption;
+import schoolbot.natives.util.DatabaseUtil;
 import schoolbot.natives.util.Embed;
 
 import javax.management.relation.Role;
@@ -20,8 +21,9 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.Optional;
 
-public class SchoolAdd extends Command
+public class    SchoolAdd extends Command
 {
     private final EventWaiter waiter;
 
@@ -126,11 +128,16 @@ public class SchoolAdd extends Command
                                                             });
                                                 });
 
-                                                String sxx = String.format("('%s', %d, '%s', %d)",
-                                                        action.getMessage().getContentRaw(), event.getChannel().getIdLong(), action1.getMessage().getContentRaw(), event.getChannel().getIdLong());
+
+                                                Optional<Long> role = Optional.of(fart);
+
+                                                String school_id = action.getMessage().getContentRaw();
+                                                String school_email_suffix = action.getMessage().getContentRaw();
+                                                long guildID = event.getGuild().getIdLong();
+                                                long role_id =
 
 
-                                                if (event.getSchoolbot().getDatabaseHandler().writeToTable("schools (school_id, role_id, school_email_suffix, guild id)", sxx))
+                                                if (DatabaseUtil.addSchool(,))
                                                 {
                                                     channel.sendMessage("Database updated successfully!").queue();
                                                     channel.sendMessage(new EmbedBuilder()
