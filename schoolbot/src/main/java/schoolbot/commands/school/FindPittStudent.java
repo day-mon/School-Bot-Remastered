@@ -2,13 +2,11 @@ package schoolbot.commands.school;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import okhttp3.*;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
 
-import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,20 +25,30 @@ public class FindPittStudent extends Command
 
         try
         {
-            HttpClient client = HttpClient.newHttpClient();
 
-            HttpRequest request = HttpRequest.newBuilder()
-                    .POST(createPostBody("Damon ", "list"))
-                    .uri(URI.create(URL))
+            OkHttpClient client = new OkHttpClient();
+
+            RequestBody formBody = new FormBody.Builder()
+                    .add("search", event.getArgs().get(0))
+                    .add("layout", "list")
                     .build();
 
-            String response = client.send(request, HttpResponse.BodyHandlers.ofString()).body();
+            Request request = new Request.Builder()
+                    .url(URL)
+                    .addHeader("User-Agent", "School bot (https://github.com/tykoooo/School-Bot-Remastered)")
+                    .post(formBody)
+                    .build();
 
-            System.out.println(response);
+            Response response = client.newCall(request).execute();
+
+            if (response.isSuccessful())
+            {
+                System.out.println(response.body().string());
+            }
         }
         catch (Exception e)
         {
-            System.out.println("fop");
+            e.printStackTrace();
         }
     }
 

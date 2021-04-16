@@ -1,55 +1,53 @@
 package schoolbot;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.EnumSet;
-
-import javax.annotation.Nonnull;
-import javax.security.auth.login.LoginException;
-
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
-
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.JDAInfo;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.ReadyEvent;
-import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import schoolbot.listener.MainListener;
 import schoolbot.handlers.CommandHandler;
 import schoolbot.handlers.ConfigHandler;
 import schoolbot.handlers.DatabaseHandler;
+import schoolbot.handlers.MessageHandler;
+import schoolbot.listener.MainListener;
 import schoolbot.natives.objects.config.ConfigOption;
 import schoolbot.natives.objects.info.BotInfo;
 import schoolbot.natives.objects.info.SystemInfo;
 
+import javax.annotation.Nonnull;
+import javax.security.auth.login.LoginException;
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 
 public class Schoolbot extends ListenerAdapter
 {
-	
+
 	private final LocalDateTime botStartTime;
 	private final CommandHandler commandHandler;
 	private final ConfigHandler configHandler;
 	private final EventWaiter eventWaiter;
 	private final DatabaseHandler databaseHandler;
+	private final MessageHandler messageHandler;
 	private final Logger logger;
-	
+
 	private JDA jda;
 
 	public Schoolbot()
 	{
 		this.logger = LoggerFactory.getLogger(Schoolbot.class);
+		this.messageHandler = new MessageHandler(this);
 		this.eventWaiter = new EventWaiter();
 		this.configHandler = new ConfigHandler(this);
 		this.commandHandler = new CommandHandler(this, eventWaiter);
 		this.databaseHandler = new DatabaseHandler(this);
-		this.botStartTime = LocalDateTime.now();	
+		this.botStartTime = LocalDateTime.now();
 	}
 
 	public void build() throws LoginException, InterruptedException
@@ -106,22 +104,28 @@ public class Schoolbot extends ListenerAdapter
 		return botStartTime;
 	}
 
-	public Logger getLogger() 
+	public Logger getLogger()
 	{
 		return logger;
 	}
 
-	public ConfigHandler getConfigHandler() 
+	public ConfigHandler getConfigHandler()
 	{
 		return configHandler;
 	}
 
-	public EventWaiter getEventWaiter() 
+	public EventWaiter getEventWaiter()
 	{
 		return eventWaiter;
 	}
 
-	public DatabaseHandler getDatabaseHandler() {
+	public DatabaseHandler getDatabaseHandler()
+	{
 		return databaseHandler;
+	}
+
+	public MessageHandler getMessageHandler()
+	{
+		return messageHandler;
 	}
 }

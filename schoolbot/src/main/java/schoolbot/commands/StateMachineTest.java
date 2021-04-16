@@ -1,50 +1,50 @@
 package schoolbot.commands;
 
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.events.GenericEvent;
+import net.dv8tion.jda.api.hooks.EventListener;
 
-import javax.annotation.Nonnull;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
 
-public class StateMachineTest extends ListenerAdapter
+public class StateMachineTest<T extends GenericEvent> implements EventListener
 {
-    private final long channelID, authorID;
-
+    private Predicate<T> check;
+    private BiFunction<Integer, T, Integer> biFunction;
+    private Class<T> clazz;
     private int state = 0;
 
-    public StateMachineTest(long channelID, long authorID)
+    public StateMachineTest(Predicate<T> check, BiFunction<Integer, T, Integer> biFunction, Class<T> clazz)
     {
-        this.channelID = channelID;
-        this.authorID = authorID;
+        this.clazz = clazz;
+        this.check = check;
+        this.biFunction = biFunction;
     }
 
-    @Override
-    public void onMessageReceived(@Nonnull MessageReceivedEvent event)
+
+    public void onEvent(GenericEvent event)
     {
-        if (event.getAuthor().getIdLong() != authorID)
+        if (clazz.isInstance(event))
         {
-            return;
+            T castedEvent = clazz.cast(event);
+            if (check.test(castedEvent))
+            {
+                state = biFunction.apply(state, castedEvent);
+            }
         }
-        if (event.getChannel().getIdLong() != channelID)
-        {
-            return;
-        }
-
-        MessageChannel channel = event.getChannel();
-        String message = event.getMessage().getContentRaw();
-
-        switch (state)
-        {
-            case 0:
-                channel.sendMessage("Hello " + event.getMember().getNickname() + " You would like to add a school? What is this name?: ").queue();
-                state = 1;
-                break;
-            case 1:
-                channel.sendMessage("Your school name is " + message).queue();
-                break;
-
-        }
-
-
     }
+
+   
+   
+
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
 }

@@ -1,32 +1,31 @@
 package schoolbot.handlers;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
-
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
-import schoolbot.commands.misc.*;
-import schoolbot.commands.admin.Eval;
 import schoolbot.commands.admin.Clear;
+import schoolbot.commands.admin.Eval;
 import schoolbot.commands.admin.Prune;
+import schoolbot.commands.misc.*;
 import schoolbot.commands.school.*;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.util.Embed;
 import schoolbot.natives.util.Parser;
 
-public class CommandHandler 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class CommandHandler
 {
     private final Schoolbot schoolbot;
     private final Map<String, Command> commands;
     private EventWaiter waiter;
 
-    public CommandHandler(Schoolbot schoolbot, EventWaiter waiter) 
+    public CommandHandler(Schoolbot schoolbot, EventWaiter waiter)
     {
         this.schoolbot = schoolbot;
         this.waiter = waiter;
@@ -62,7 +61,7 @@ public class CommandHandler
                 comsHashMap.put(aliases, com);
             }
         }
-        schoolbot.getLogger().info("{} have been sucessfully loaded!", comList);
+        schoolbot.getLogger().info("{} have been successfully loaded!", comList);
         return comsHashMap;
     }
 

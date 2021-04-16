@@ -1,15 +1,10 @@
 package schoolbot.natives.objects.school;
 
-import java.awt.Color;
 import java.io.Serializable;
-import java.util.Date;
 import java.util.HashMap;
 
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.internal.entities.GuildImpl;
-
-public class   School implements Serializable {
+public class School implements Serializable
+{
 
     /**
      *
@@ -216,65 +211,13 @@ public class   School implements Serializable {
         this.roleID = roleID;
     }
 
-    public EmbedBuilder getAsEmbed()
-    {
-        Date dateGenerated = new Date();
-        EmbedBuilder pretyifyEmbed = new EmbedBuilder();
-        pretyifyEmbed.setTitle(":books: " + captializer(schoolName) + " :books:");
-        pretyifyEmbed.setColor(Color.blue);
-        pretyifyEmbed.setTitle(":books: University Information :books:");
-        pretyifyEmbed.setDescription("School name: " + schoolName + "\n" + "Number of students: " + listOfClasses.size()
-                + "\n" + "Number of classes: " + listOfStudents.size());
-        pretyifyEmbed.setFooter("Generated on: " + dateGenerated.getMonth() + "/" + dateGenerated.getDay() + "/"
-                + dateGenerated.getYear());
-        return pretyifyEmbed;
 
-    }
-
-    private String captializer(String str) {
-        // if string is null or empty, return empty string
-        if (str == null || str.length() == 0)
-            return "";
-
-        /*
-         * if string contains only one char, make it capital and return
-         */
-        if (str.length() == 1)
-            return str.toUpperCase();
-
-        /*
-         * Split the string by space
-         */
-        String[] words = str.split(" ");
-
-        // create empty StringBuilder with same length as string
-        StringBuilder sbCapitalizedWords = new StringBuilder(str.length());
-
-        /*
-         * For each word, 1. get first character using substring 2. Make it upper case
-         * and append to string builder 3. append the rest of the characters as-is to
-         * string builder 4. append space to string builder
-         */
-        for (String word : words) {
-
-            if (word.length() > 1)
-                sbCapitalizedWords.append(word.substring(0, 1).toUpperCase()).append(word.substring(1));
-            else
-                sbCapitalizedWords.append(word.toUpperCase());
-
-            sbCapitalizedWords.append(" ");
-        }
-
-        /*
-         * convert StringBuilder to string, also remove last space from it using trim
-         * method
-         */
-        return sbCapitalizedWords.toString().trim();
-    }
 
     @Override
     public String toString() {
-        return "School Name: " + schoolName + "\n" + "School email suffix: " + emailSuffix + "\n";
+        return "School Name: " + schoolName + "\n" +
+                "School email suffix: " + emailSuffix + "\n" +
+                "School Role: " + roleID;
     }
 
     @Override

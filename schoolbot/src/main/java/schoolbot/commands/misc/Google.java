@@ -1,15 +1,10 @@
 package schoolbot.commands.misc;
 
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import schoolbot.handlers.CommandCooldownHandler;
-import schoolbot.handlers.CommandHandler;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.objects.info.SystemInfo;
 import schoolbot.natives.util.Checks;
 import schoolbot.natives.util.Embed;
 
@@ -19,6 +14,7 @@ public class Google extends Command
     {
         super("Looks up google query", "[query]", 1);
         addCalls("g");
+        addCooldown(5000L);
     }
 
     @Override
@@ -71,7 +67,7 @@ public class Google extends Command
             }
             catch (Exception e)
             {
-                event.sendMessage("No results found for `" + event.getArgs().get(0) + "`");
+                event.sendMessage("No results found for `" + event.getArgs().get(0) + "` for search result `#" + num + "`");
             }
         }
     }

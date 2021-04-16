@@ -1,11 +1,10 @@
 package schoolbot.handlers;
 
+import net.dv8tion.jda.api.entities.Member;
+import schoolbot.natives.objects.command.Command;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import net.dv8tion.jda.api.entities.Member;
-import schoolbot.Schoolbot;
-import schoolbot.natives.objects.command.Command;
 
 public class CommandCooldownHandler 
 {

@@ -10,30 +10,36 @@ public class Parser
     {
         List<String> args = new ArrayList<>();
 
-        /**
-         * Split args by spaces
+        /*
+          Split args by spaces
          */
-        String splitArgs[] = stringArgs.split("\\s+");
-        int quoteCount =  0; 
-        String tempString = "";
+        String[] splitArgs = stringArgs.split("\\s+");
+        int quoteCount = 0;
+        StringBuilder tempString = new StringBuilder();
 
         for (int i = 0; i < splitArgs.length; i++)
         {
-            if (splitArgs[i].contains("\'"))
+            if (splitArgs[i].contains("'"))
             {
                 quoteCount++;
                 int temp = i;
 
                 while (temp != splitArgs.length && quoteCount != 2)
                 {
-                    tempString+= splitArgs[i] + " ";
-                    if(i+1 !=splitArgs.length)i++; else break;
-                    if(i != temp && splitArgs[i].contains("\'")) {quoteCount++; tempString+= splitArgs[i];};
+                    tempString.append(splitArgs[i]).append(" ");
+                    if (i + 1 != splitArgs.length) i++;
+                    else break;
+                    if (i != temp && splitArgs[i].contains("'"))
+                    {
+                        quoteCount++;
+                        tempString.append(splitArgs[i]);
+                    }
+                    ;
                 }
-                tempString = tempString.trim().replaceAll("\'", "");
-                args.add(tempString);
+                tempString = new StringBuilder(tempString.toString().trim().replaceAll("'", ""));
+                args.add(tempString.toString());
                 quoteCount = 0;
-                tempString = "";
+                tempString = new StringBuilder();
             }
             else 
             {

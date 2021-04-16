@@ -1,18 +1,16 @@
 package schoolbot.handlers;
 
-import net.dv8tion.jda.api.EmbedBuilder;
 import schoolbot.Schoolbot;
 import schoolbot.natives.objects.config.ConfigOption;
-import schoolbot.natives.objects.school.School;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.Connection;
+import java.sql.DriverManager;
 
-public class DatabaseHandler {
-    private Schoolbot schoolbot;
+public class DatabaseHandler
+{
+    private final Schoolbot schoolbot;
     private Connection dbConnection;
-    private ConfigHandler configHandler;
+    private final ConfigHandler configHandler;
 
     public DatabaseHandler(Schoolbot schoolbot)
     {
@@ -27,7 +25,7 @@ public class DatabaseHandler {
         try
         {
             dbConnection = DriverManager.getConnection("jdbc:mysql://" +
-                    configHandler.getString(ConfigOption.DBHOSTNAME),
+                            configHandler.getString(ConfigOption.DBHOSTNAME),
                     configHandler.getString(ConfigOption.DBUSER),
                     configHandler.getString(ConfigOption.DBPASSWORD));
         }
@@ -40,13 +38,9 @@ public class DatabaseHandler {
     }
 
 
-
-
-
-
-
     public Connection getDbConnection()
     {
+        initConnection();
         return dbConnection;
     }
 }

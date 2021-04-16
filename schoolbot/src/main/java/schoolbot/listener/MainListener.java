@@ -9,11 +9,9 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 import schoolbot.Schoolbot;
-import schoolbot.SchoolbotConstants;
 
 import javax.annotation.Nonnull;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 public class MainListener implements EventListener
 {
@@ -25,7 +23,7 @@ public class MainListener implements EventListener
     }
 
 
-    public synchronized void onEvent(@Nonnull GenericEvent event)
+    public void onEvent(@Nonnull GenericEvent event)
     {
         if (event instanceof GuildMessageReceivedEvent)
         {
@@ -34,13 +32,7 @@ public class MainListener implements EventListener
 
             schoolbot.getLogger().info(author.getAsTag() + " has sent: " + message);
 
-            if (!message.startsWith(SchoolbotConstants.DEFAULT_PREFIX))
-            {
-                return;
-            }
-
-            schoolbot.getCommandHandler().handle((GuildMessageReceivedEvent) event);
-
+            schoolbot.getMessageHandler().handle((GuildMessageReceivedEvent) event);
         }
 
         else if (event instanceof GuildMemberJoinEvent)

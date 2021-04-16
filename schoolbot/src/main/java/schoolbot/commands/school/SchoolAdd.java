@@ -1,29 +1,17 @@
 package schoolbot.commands.school;
 
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-
-import schoolbot.SchoolbotConstants;
-import schoolbot.handlers.ConfigHandler;
+import net.dv8tion.jda.api.events.GenericEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.objects.config.ConfigOption;
-import schoolbot.natives.util.DatabaseUtil;
-import schoolbot.natives.util.Embed;
 
-import javax.management.relation.Role;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.time.Instant;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.EventListener;
+import java.util.function.Predicate;
 
-public class    SchoolAdd extends Command
+public class SchoolAdd extends Command
 {
     private final EventWaiter waiter;
 
@@ -41,130 +29,62 @@ public class    SchoolAdd extends Command
         MessageChannel channel = event.getChannel();
         User user = event.getUser();
 
-        channel.sendMessage("Hello " + event.getMember().getNickname() + " You would like to add a school? What is this name?: ")
-                .queue(reply ->
-                {
 
-                    this.waiter.waitForEvent(MessageReceivedEvent.class,
-                            messageReceivedEvent ->
-                            {
-                                if (!Objects.equals(messageReceivedEvent.getAuthor(), event.getUser()))
-                                {
-                                    return false;
-                                }
+    }
 
-                                if (!Objects.equals(messageReceivedEvent.getChannel(), channel))
-                                {
-                                    return false;
-                                }
+    public interface State<T, S extends State<T, S>>
+    {
+        default boolean isEnd()
+        {
+            return false;
+        }
 
-                                return true;
-                            },
-                            action ->
-                            {
-                                if (!action.getMessage().getContentRaw().replaceAll("\\s+", "").chars().allMatch(Character::isAlphabetic))
-                                {
-                                    Embed.error(event, "School name cannot contain non-alphabetic characters!\n SchoolAdd has been aborted!");
-                                    return;
-                                }
-                                channel.sendMessage("Your school name will be: " + action.getMessage().getContentRaw()).queue();
+        S apply(T input);
+    }
 
-                                channel.sendMessage("Now that we have your school name, What is your email suffix (i.e @pitt.edu): ").queue(v ->
-                                {
-                                    this.waiter.waitForEvent(MessageReceivedEvent.class,
-                                            messageReceivedEvent ->
-                                            {
-                                                if (!Objects.equals(messageReceivedEvent.getAuthor(), event.getUser()))
-                                                {
-                                                    return false;
-                                                }
+    public enum SchoolAddState implements State<MessageReactionAddEvent, SchoolAddState>
+    {
+        SCHOOL_NAME, SCHOOL_EMAIL_STATE, END;
 
-                                                if (!Objects.equals(messageReceivedEvent.getChannel(), channel))
-                                                {
-                                                    return false;
-                                                }
+        @Override
+        public boolean isEnd()
+        {
+            return this == END;
+        }
 
-                                                return true;
-                                            },
-                                            action1 ->
-                                            {
-                                                if (!action1.getMessage().getContentRaw().contains("edu"))
-                                                {
-                                                    Embed.error(event, "This is not a valid email!");
-                                                    return;
-                                                }
-                                                channel.sendMessage("Your school email will be: " + action1.getMessage().getContentRaw()).queue();
+        public boolean isSchoolName()
+        {
+            return this == SCHOOL_NAME;
+        }
 
-                                                channel.sendMessage("We will now set the role for the school. Please mention the role (i.e @University of Pittsburgh). If you do not have 'none' ").queue(k ->
-                                                {
-                                                    this.waiter.waitForEvent(MessageReceivedEvent.class,
-                                                            messageReceivedEvent ->
-                                                            {
-                                                                if (!Objects.equals(messageReceivedEvent.getAuthor(), event.getUser()))
-                                                                {
-                                                                    return false;
-                                                                }
-
-                                                                if (!Objects.equals(messageReceivedEvent.getChannel(), channel))
-                                                                {
-                                                                    return false;
-                                                                }
-
-                                                                return true;
-                                                            },
-                                                            action2 ->
-                                                            {
-                                                                long fart;
-                                                                if (action2.getMessage().getContentRaw().toLowerCase().contains("none"))
-                                                                {
-                                                                    // lmao
-                                                                    event.getGuild().createRole().setName(action.getMessage().getContentRaw());
-                                                                }
-                                                                else if (action2.getMessage().getContentRaw().startsWith("<@&"))
-                                                                {
-                                                                    // lmao
-                                                                    fart = event.getMessage().getMentionedRoles().get(0).getIdLong();
-                                                                }
-                                                            });
-                                                });
+        public boolean isSchoolEmailState()
+        {
+            return this == SCHOOL_EMAIL_STATE;
+        }
 
 
-                                                Optional<Long> role = Optional.of(fart);
+        @Override
+        public SchoolAddState apply(MessageReactionAddEvent input)
+        {
+            return END;
+        }
+    }
 
-                                                String school_id = action.getMessage().getContentRaw();
-                                                String school_email_suffix = action.getMessage().getContentRaw();
-                                                long guildID = event.getGuild().getIdLong();
-                                                long role_id =
+    public class StateMachine<T extends GenericEvent, S extends State<T, S>> implements EventListener
+    {
+        private final Predicate<? super T> check;
+        private final Class<T> clazz;
+        private S state;
 
-
-                                                if (DatabaseUtil.addSchool(,))
-                                                {
-                                                    channel.sendMessage("Database updated successfully!").queue();
-                                                    channel.sendMessage(new EmbedBuilder()
-                                                            .setTitle("New School Created!")
-                                                            .addField("School name", action.getMessage().getContentRaw(), false)
-                                                            .addField("School Email", action1.getMessage().getContentRaw(), false)
-                                                            .setFooter("Created by " + user.getName(), user.getAvatarUrl())
-                                                            .setTimestamp(Instant.now())
-                                                            .setColor(SchoolbotConstants.DEFAULT_EMBED_COLOR)
-                                                            .build()).queue();
-                                                }
-                                                else
-                                                {
-                                                    channel.sendMessage("Database could not be updated, view the console").queue();
-                                                }
-
-
-                                            }
-
-
-                                    );
-                                }); //send message here?
-                            });
-                });
+        public StateMachine(Predicate<? super T> check, Class<T> clazz, S init)
+        {
+            this.check = check;
+            this.clazz = clazz;
+            this.state = init;
+        }
 
 
     }
 
-
 }
+

@@ -1,20 +1,14 @@
 package schoolbot.commands.school;
 
-import com.jagrosh.jdautilities.command.annotation.JDACommand;
-import com.jagrosh.jdautilities.commons.JDAUtilitiesInfo;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
-import com.jagrosh.jdautilities.menu.Menu;
-import com.jagrosh.jdautilities.menu.Paginator;
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.exceptions.PermissionException;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.objects.school.School;
+import schoolbot.natives.util.DatabaseUtil;
+import schoolbot.natives.util.Embed;
 
-import java.awt.*;
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class ListSchools extends Command
 {
@@ -28,17 +22,27 @@ public class ListSchools extends Command
     @Override
     public void run(CommandEvent event)
     {
-        List<School> schools = event.getSchoolbot().getDatabaseHandler().getSchools();
+        List<School> schools = DatabaseUtil.getSchools(event.getSchoolbot())
+                .stream()
+                .filter(school -> event.getGuild().getIdLong() == school.getGuildID())
+                .collect(Collectors.toList());
+
+        if (schools.isEmpty())
+        {
+            Embed.error(event, "No schools!");
+            return;
+        }
 
 
-        StringBuffer s2 = new StringBuffer("```");
-
+        StringBuilder s2 = new StringBuilder("```");
 
         for (School s : schools)
         {
-
-            s2.append(s.toString() + "\n");
+            s2.append(s.toString()).append("\n");
         }
+
+        // schools.forEach(schoolsInList -> s2.append(schools.toString()).append("========== \n"));
+
 
         s2.append("```");
 

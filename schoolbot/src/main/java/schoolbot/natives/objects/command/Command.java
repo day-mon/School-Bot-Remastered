@@ -1,23 +1,13 @@
 package schoolbot.natives.objects.command;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
 import schoolbot.handlers.CommandCooldownHandler;
 import schoolbot.natives.util.Embed;
-import schoolbot.natives.objects.misc.Emoji;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 
@@ -192,7 +182,7 @@ public abstract class Command
        {
            event.getSchoolbot().getLogger().info("{} has been executed by {} using the args {}", this.name, event.getUser().getName(), event.getArgs());
            run(event);
-       } 
+       }
     }
 
 
@@ -200,12 +190,17 @@ public abstract class Command
      * ... is like saying String[]
      */
 
-    public void addCalls(String... calls) 
+    public void addCooldown(long cooldown)
+    {
+        this.cooldown = cooldown;
+    }
+
+    public void addCalls(String... calls)
     {
         this.calls.addAll(List.of(calls));
     }
 
-    public void addPermissions(Permission... permissions) 
+    public void addPermissions(Permission... permissions)
     {
         this.commandPermissions.addAll(List.of(permissions));
     }

@@ -1,25 +1,28 @@
 package schoolbot.natives.util;
 
-import java.awt.Color;
-
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.objects.misc.Emoji;
 
-public class Embed {
+import java.awt.*;
 
-    public Embed() {};
+public class Embed
+{
 
-    public static void success(CommandEvent event, String message) 
+    public Embed()
+    {
+    }
+
+    public static void success(CommandEvent event, String message)
     {
         MessageChannel channel = event.getChannel();
 
         channel.sendMessage(new EmbedBuilder()
-                            .setColor(Color.GREEN)
-                            .setDescription(message)
-                            .build()).queue();
+                .setColor(Color.GREEN)
+                .setDescription(message)
+                .build()).queue();
     }
 
     public static void error(CommandEvent event, String message) 
@@ -42,16 +45,15 @@ public class Embed {
                             .build()).queue();
     }
 
-    public static void confirmation(CommandEvent event, String message) 
+    public static void confirmation(CommandEvent event, String message)
     {
         MessageChannel channel = event.getChannel();
 
-       channel.sendMessage(new EmbedBuilder()
-                            .setColor(Color.GRAY)
-                            .setDescription(message)
-                            .build()).queue();;
-                            
+        channel.sendMessage(new EmbedBuilder()
+                .setColor(Color.GRAY)
+                .setDescription(message)
+                .build()).queue();
 
-    
+
     }
 }
