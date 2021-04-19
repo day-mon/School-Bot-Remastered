@@ -17,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class MessageHandler
 {
-    private final String[] FILE_EXTENSIONS = {"java", "cpp", "xml", "csharp", "asm", "js", "php", "r", "py", "go"};
+    private final String[] FILE_EXTENSIONS = {"java", "cpp", "xml", "csharp", "asm", "js", "php", "r", "py", "go", "python", "ts"};
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     private final Schoolbot schoolbot;
     private final OkHttpClient client;

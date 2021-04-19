@@ -1,10 +1,5 @@
 package schoolbot.natives.objects.command;
 
-import java.awt.Color;
-import java.time.Instant;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -13,14 +8,19 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
 
-public class CommandEvent 
+import java.awt.*;
+import java.time.Instant;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+public class CommandEvent
 {
     private final GuildMessageReceivedEvent event;
     private final Schoolbot schoolbot;
     private final Command command;
     private final List<String> args;
 
-    public CommandEvent(GuildMessageReceivedEvent event, Command command, List<String> args, Schoolbot schoolbot) 
+    public CommandEvent(GuildMessageReceivedEvent event, Command command, List<String> args, Schoolbot schoolbot)
     {
         this.event = event;
         this.command = command;
@@ -103,12 +103,17 @@ public class CommandEvent
         getChannel().sendMessage(message).queue();
     }
 
+    public void sendMessage(MessageEmbed embed)
+    {
+        getChannel().sendMessage(embed).queue();
+    }
+
     public void sendMessage(EmbedBuilder embedBuilder)
     {
         getChannel().sendMessage(
-            embedBuilder.setColor(SchoolbotConstants.DEFAULT_EMBED_COLOR)
+                embedBuilder.setColor(SchoolbotConstants.DEFAULT_EMBED_COLOR)
                         .setTimestamp(Instant.now()).build())
-                        .queue();
+                .queue();
     }
 
 

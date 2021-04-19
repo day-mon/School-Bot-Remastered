@@ -1,4 +1,4 @@
-package schoolbot.commands.school;
+package schoolbot.commands.school.pitt;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import schoolbot.natives.objects.command.Command;

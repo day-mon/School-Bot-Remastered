@@ -67,4 +67,25 @@ public class DatabaseUtil
         }
     }
 
+    public static boolean removeSchool(Schoolbot schoolBot, String schoolName)
+    {
+        try (Connection con = schoolBot.getDatabaseHandler().getDbConnection())
+        {
+
+            PreparedStatement statement = con.prepareStatement(
+                    "DELETE FROM schools WHERE school_name=?"
+            );
+            statement.setString(1, schoolName);
+            statement.execute();
+            return true;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+
+    }
+
+
 }

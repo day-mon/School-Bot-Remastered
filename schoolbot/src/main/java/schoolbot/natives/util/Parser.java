@@ -34,7 +34,6 @@ public class Parser
                         quoteCount++;
                         tempString.append(splitArgs[i]);
                     }
-                    ;
                 }
                 tempString = new StringBuilder(tempString.toString().trim().replaceAll("'", ""));
                 args.add(tempString.toString());
@@ -46,7 +45,6 @@ public class Parser
                 args.add(splitArgs[i]);
             }
         }
-
       return args;
     }
 }

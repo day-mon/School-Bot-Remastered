@@ -1,4 +1,4 @@
-package schoolbot.commands.school;
+package schoolbot.commands.school.pitt;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

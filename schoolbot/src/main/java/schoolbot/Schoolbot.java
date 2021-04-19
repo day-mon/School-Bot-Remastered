@@ -1,5 +1,10 @@
 package schoolbot;
 
+import com.github.ygimenez.exception.InvalidHandlerException;
+import com.github.ygimenez.method.Pages;
+import com.github.ygimenez.model.Paginator;
+import com.github.ygimenez.model.PaginatorBuilder;
+import com.github.ygimenez.type.Emote;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -19,6 +24,7 @@ import schoolbot.listener.MainListener;
 import schoolbot.natives.objects.config.ConfigOption;
 import schoolbot.natives.objects.info.BotInfo;
 import schoolbot.natives.objects.info.SystemInfo;
+import schoolbot.natives.objects.misc.Emoji;
 
 import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
@@ -32,6 +38,7 @@ public class Schoolbot extends ListenerAdapter
 	private final LocalDateTime botStartTime;
 	private final CommandHandler commandHandler;
 	private final ConfigHandler configHandler;
+	private Paginator paginator;
 	private final EventWaiter eventWaiter;
 	private final DatabaseHandler databaseHandler;
 	private final MessageHandler messageHandler;
@@ -51,18 +58,21 @@ public class Schoolbot extends ListenerAdapter
 	}
 
 	public void build() throws LoginException, InterruptedException
-    {
-        this.jda = JDABuilder.createDefault(
-                configHandler.getString(ConfigOption.TOKEN),
-                GatewayIntent.GUILD_MEMBERS,
-                GatewayIntent.GUILD_EMOJIS,
+	{
+		this.jda = JDABuilder.createDefault
+				(
+						configHandler.getString(ConfigOption.TOKEN),
+						GatewayIntent.GUILD_MEMBERS,
+						GatewayIntent.GUILD_EMOJIS,
 
-                GatewayIntent.DIRECT_MESSAGES,
-                GatewayIntent.DIRECT_MESSAGE_REACTIONS,
+						GatewayIntent.DIRECT_MESSAGES,
+						GatewayIntent.DIRECT_MESSAGE_REACTIONS,
 
-                GatewayIntent.GUILD_MESSAGES,
-                GatewayIntent.GUILD_MESSAGE_REACTIONS,
-                GatewayIntent.GUILD_VOICE_STATES)
+						GatewayIntent.GUILD_MESSAGES,
+						GatewayIntent.GUILD_MESSAGE_REACTIONS,
+						GatewayIntent.GUILD_VOICE_STATES
+
+				)
                 .addEventListeners(
                         this,
                         new MainListener(this),
@@ -70,14 +80,14 @@ public class Schoolbot extends ListenerAdapter
                 .setActivity(Activity.playing("building..."))
                 .setStatus(OnlineStatus.DO_NOT_DISTURB)
                 .build();
-    }
+
+
+	}
 
 	@Override
 	public void onReady(@Nonnull ReadyEvent event)
 	{
 		event.getJDA().getPresence().setPresence(OnlineStatus.ONLINE, Activity.competing("Weierman's Lab Speed Run"));
-
-
 		getLogger().info("Account:           " + event.getJDA().getSelfUser());
 		getLogger().info("Java Version:      " + SystemInfo.getJavaVersion());
 		getLogger().info("JDA Version:       " + JDAInfo.VERSION);
@@ -85,6 +95,22 @@ public class Schoolbot extends ListenerAdapter
 		getLogger().info("Operating System:  " + SystemInfo.getOperatingSystem());
 		getLogger().info("Github Repo:       " + BotInfo.getGithubRepo());
 		getLogger().info("Startup Time:      " + Duration.between(getBotStartTime(), LocalDateTime.now()).toMillisPart() + "ms");
+
+		try
+		{
+			this.paginator = PaginatorBuilder.createPaginator()
+					.setEmote(Emote.NEXT, Emoji.NEXT.getUnicode())
+					.setEmote(Emote.PREVIOUS, Emoji.PREVIOUS.getUnicode())
+					.setHandler(getJda())
+					.shouldRemoveOnReact(false)
+					.build();
+
+			Pages.activate(paginator);
+		}
+		catch (InvalidHandlerException e)
+		{
+			e.getCause();
+		}
 
 
 	}
@@ -127,5 +153,10 @@ public class Schoolbot extends ListenerAdapter
 	public MessageHandler getMessageHandler()
 	{
 		return messageHandler;
+	}
+
+	public Paginator getPaginator()
+	{
+		return paginator;
 	}
 }

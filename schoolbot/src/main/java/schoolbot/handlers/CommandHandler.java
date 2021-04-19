@@ -8,7 +8,14 @@ import schoolbot.commands.admin.Clear;
 import schoolbot.commands.admin.Eval;
 import schoolbot.commands.admin.Prune;
 import schoolbot.commands.misc.*;
-import schoolbot.commands.school.*;
+import schoolbot.commands.school.ListSchools;
+import schoolbot.commands.school.Professor;
+import schoolbot.commands.school.School;
+import schoolbot.commands.school.Wolfram;
+import schoolbot.commands.school.pitt.CourseLookUp;
+import schoolbot.commands.school.pitt.FindPittStudent;
+import schoolbot.commands.school.pitt.Laundry;
+import schoolbot.commands.school.pitt.ListElectives;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.util.Embed;
@@ -49,7 +56,9 @@ public class CommandHandler
                 new ListElectives(),
                 new ListSchools(waiter),
                 new FindPittStudent(),
-                new Professor());
+                new Professor(),
+                new Laundry(),
+                new CourseLookUp());
 
         Map<String, Command> comsHashMap = new LinkedHashMap<>();
         for (Command com : comList)

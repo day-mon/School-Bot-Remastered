@@ -22,7 +22,7 @@ public class MainListener implements EventListener
         this.schoolbot = schoolbot;
     }
 
-
+    @Override
     public void onEvent(@Nonnull GenericEvent event)
     {
         if (event instanceof GuildMessageReceivedEvent)
@@ -53,7 +53,6 @@ public class MainListener implements EventListener
                     .addField("Description",
                             "Welcome " + user.getName() + " if you are here you probably have no clue what you are doing like all " + guild.getMemberCount() + " of us. If you need some help you can mention anyone indivisually or mention the role of the class in which you need help in. Mention anyone in 8 and above for roles.", false)
                     .build()).queue();
-
         }
     }
 }

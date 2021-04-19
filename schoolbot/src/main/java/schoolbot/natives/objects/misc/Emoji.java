@@ -1,13 +1,15 @@
 package schoolbot.natives.objects.misc;
 
-public enum Emoji 
+public enum Emoji
 {
     WHITE_CHECK_MARK(":white_check_mark:", "\u2705"),
     CROSS_MARK(":x:", "\u274C"),
-    RECYCLE(":recycle:", "\u267B");
-    
+    RECYCLE(":recycle:", "\u267B"),
+    NEXT(":track_next:", "\u23ED"),
+    PREVIOUS(":track_previous", "\u23EE");
 
-	private final String emote;
+
+    private final String emote;
     private final String unicode;
     private final boolean animated;
 

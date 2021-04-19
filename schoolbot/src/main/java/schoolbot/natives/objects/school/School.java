@@ -92,6 +92,7 @@ public class School implements Serializable
         return guildID;
     }
 
+
     public double getAverageGPA()
     {
         int avg = 0;
@@ -212,16 +213,22 @@ public class School implements Serializable
     }
 
 
+    public long getRoleID()
+    {
+        return roleID;
+    }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return "School Name: " + schoolName + "\n" +
                 "School email suffix: " + emailSuffix + "\n" +
                 "School Role: " + roleID;
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((emailSuffix == null) ? 0 : emailSuffix.hashCode());
