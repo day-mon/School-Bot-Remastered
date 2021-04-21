@@ -11,7 +11,7 @@ public class Wolfram extends Command
     public Wolfram()
     {
         super("fart", "fart", 1);
-        addCalls("wolf", "wolframe");
+        addCalls("wolf", "wolfram");
     }
 
     @Override

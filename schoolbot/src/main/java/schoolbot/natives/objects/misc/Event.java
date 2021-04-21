@@ -14,8 +14,7 @@ public abstract class Event {
     public Event(String [] triggers) 
     {
         this.triggers = new String[triggers.length];
-        for (int i = 0; i <  triggers.length; i++) 
-            this.triggers[i] = triggers[i];
+        System.arraycopy(triggers, 0, this.triggers, 0, triggers.length);
         this.name = this.getClass().getSimpleName();
     }
  

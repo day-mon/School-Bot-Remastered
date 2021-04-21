@@ -147,7 +147,7 @@ public abstract class Command
                     .collect(Collectors.toList());
 
             StringBuilder perms = new StringBuilder();
-            permissionsMemberHas.forEach(f -> perms.append(" `" + f + "` "));
+            permissionsMemberHas.forEach(f -> perms.append(" `").append(f).append("` "));
 
             Embed.error(event, "This command requires you to have at least this permission" + perms.toString() + "in order to execute it!");
         }

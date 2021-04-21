@@ -1,31 +1,26 @@
 package schoolbot.commands.admin;
 
-import java.time.Duration;
-import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.User;
 import schoolbot.SchoolbotConstants;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.objects.misc.Emoji;
-import schoolbot.natives.util.Embed;
+
+import java.time.Duration;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class Prune extends Command
 {
 
     public Prune()
     {
-        super("Deletes all messages associted with the bot in the last 100 messages.", "[none]", 0);
+        super("Deletes all messages associated with the bot in the last 100 messages.", "[none]", 0);
         addCalls("prune", "recycle");
-        //addPermissions(Permission.MESSAGE_MANAGE);
-        //addSelfPermissions(Permission.MESSAGE_MANAGE);
+        addPermissions(Permission.MESSAGE_MANAGE);
+        addSelfPermissions(Permission.MESSAGE_MANAGE);
     }
 
     @Override
@@ -42,8 +37,8 @@ public class Prune extends Command
                     event.getChannel().purgeMessages(messagesToDelete);
 
                     return messagesToDelete.size();
-                }).whenCompleteAsync((messagetotal, throwable) -> event.getChannel().sendMessage(
-                Emoji.RECYCLE.getAsChat() + " Sucessed purged `" + messagetotal + "` messages"
+                }).whenCompleteAsync((messageTotal, throwable) -> event.getChannel().sendMessage(
+                Emoji.RECYCLE.getAsChat() + " Successfully purged `" + messageTotal + "` messages"
         ).queue(botMessage -> botMessage.delete().queueAfter(5, TimeUnit.SECONDS)));
 
 

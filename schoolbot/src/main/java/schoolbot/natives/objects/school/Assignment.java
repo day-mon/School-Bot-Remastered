@@ -27,13 +27,13 @@ public class Assignment implements Serializable, Comparable<Assignment> {
 
     }
 
-    public Assignment(Classroom clazz, String assignmentName, Date dueDate, double pointsAmount, String assigmentType) 
+    public Assignment(Classroom clazz, String assignmentName, Date dueDate, double pointsAmount, String assignmentType)
     {
         this.clazz = clazz;
         this.assignmentName = assignmentName;
         this.pointsAmount = pointsAmount;
         this.dueDate = dueDate;
-        this.assignmentRef = assigmentType;
+        this.assignmentRef = assignmentType;
         assignedProfessor = clazz.getProfessor();
         ldt = LocalDateTime.now();
 

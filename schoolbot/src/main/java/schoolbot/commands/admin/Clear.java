@@ -3,14 +3,14 @@ package schoolbot.commands.admin;
 
 // Imports
 
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import schoolbot.SchoolbotConstants;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
@@ -18,14 +18,12 @@ import schoolbot.natives.util.Checks;
 import schoolbot.natives.util.Embed;
 
 import java.awt.*;
-import java.util.OptionalInt;
-import java.util.concurrent.TimeUnit;
-import java.time.temporal.ChronoUnit;
-import java.util.stream.Collectors;
 import java.time.OffsetDateTime;
-import java.util.Objects;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.stream.IntStream;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class Clear extends Command
 {
@@ -78,8 +76,7 @@ public class Clear extends Command
 
                     switch (reactionEvent.getReaction().getReactionEmote().getName())
                     {
-                        case "\u2705":
-                        {
+                        case "\u2705" -> {
                             prompt.getChannel().getIterableHistory()
                                     .takeAsync(100)
                                     .thenApplyAsync(channelMessages ->
@@ -98,14 +95,12 @@ public class Clear extends Command
 
                             break;
                         }
-                        case "\u274E":
-                        {
+                        case "\u274E" -> {
                             channel.sendMessage("Operation was successfully cancelled.").queue();
 
                             break;
                         }
-                        default:
-                        {
+                        default -> {
                             channel.sendMessage("You did not select one of the available options.").queue();
 
                             break;
@@ -122,14 +117,14 @@ public class Clear extends Command
         }
         else
         {
-            var numcheck = event.getArgs().get(0);
-            if (!Checks.isNumber(numcheck))
+            var numCheck = event.getArgs().get(0);
+            if (!Checks.isNumber(numCheck))
             {
                 Embed.error(event, "This is not a number! " +
                         "\nUsage: " + this.getUsageExample());
                 return;
             }
-            int messagesToRemove = Integer.parseInt(numcheck);
+            int messagesToRemove = Integer.parseInt(numCheck);
             event.getChannel().getIterableHistory()
                     .takeAsync(messagesToRemove)
                     .thenApplyAsync(channelMessages ->

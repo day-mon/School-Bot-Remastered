@@ -1,21 +1,20 @@
 package schoolbot;
 
-import java.util.Date;
-
-import javax.security.auth.login.LoginException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import schoolbot.natives.objects.config.ConfigOption;
+import javax.security.auth.login.LoginException;
+import java.util.Date;
 
 
-public class Main {
-    public static void main(String[] args) {
+public class Main
+{
+    public static void main(String[] args)
+    {
         Schoolbot bot = new Schoolbot();
         final Logger MAIN_LOGGER = LoggerFactory.getLogger(Main.class);
 
-        try 
+        try
         {
             bot.build();
             MAIN_LOGGER.info("Bot built successfully @ " + new Date());
@@ -29,5 +28,5 @@ public class Main {
             bot.getLogger().debug("Schoolbot was interrupted on start up. Please try again!");
         }
     }
-    
+
 }

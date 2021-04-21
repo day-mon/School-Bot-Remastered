@@ -22,7 +22,8 @@ import java.util.Map;
 
 public class Laundry extends Command
 {
-    public final static Map<String, String> LAUNDRY_API_CALLS = Map.ofEntries(
+    private final static String BASE_URL = "https://www.laundryview.com/api/currentRoomData?school_desc_key=4590&location=";
+    private final static Map<String, String> LAUNDRY_API_CALLS = Map.ofEntries(
             Map.entry("HICKORY", "5813396"),
             Map.entry("BRIAR", "581339005"),
             Map.entry("BUCKHORN", "5813393"),
@@ -37,8 +38,6 @@ public class Laundry extends Command
             Map.entry("LAUREL", "5813394"),
             Map.entry("CPAS", "581339013")
     );
-
-    private final static String BASE_URL = "https://www.laundryview.com/api/currentRoomData?school_desc_key=4590&location=";
 
 
     public Laundry()

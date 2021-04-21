@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
-import schoolbot.commands.AppleStateMachine;
 
 import java.io.File;
 import java.util.List;
@@ -39,7 +38,6 @@ public class MessageHandler
         if (event.getMessage().getContentRaw().startsWith("Hi Apples!"))
         {
             event.getChannel().sendMessage("Hi! Tell me your name, or say \"Stop\"!").queue();
-            event.getJDA().addEventListener(new AppleStateMachine(event.getChannel(), event.getAuthor()));
         }
 
 

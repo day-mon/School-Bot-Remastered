@@ -124,21 +124,26 @@ public class Professor implements Serializable {
         return false;
     }
 
-    public boolean removeStudent(Student student) {
-        if (studentsInClasses.containsKey(student.getRealName())) {
+    public boolean removeStudent(Student student)
+    {
+        if (studentsInClasses.containsKey(student.getRealName()))
+        {
             studentsInClasses.remove(student.getRealName());
             return true;
         }
         return false;
     }
 
-    public void addAssignment(Assignment assignemnt) {
-        assignments.putIfAbsent(assignemnt.getAssignmentRef(), assignemnt);
+    public void addAssignment(Assignment assignment)
+    {
+        assignments.putIfAbsent(assignment.getAssignmentRef(), assignment);
     }
 
-    public boolean removeAssignment(Assignment assignemnt) {
-        if (assignments.containsKey(assignemnt.getAssignmentRef())) {
-            assignments.remove(assignemnt.getAssignmentRef());
+    public boolean removeAssignment(Assignment assignment)
+    {
+        if (assignments.containsKey(assignment.getAssignmentRef()))
+        {
+            assignments.remove(assignment.getAssignmentRef());
             return true;
         }
         return false;
@@ -147,7 +152,8 @@ public class Professor implements Serializable {
     /**
      * @return String return the name
      */
-    public String getFirstName() {
+    public String getFirstName()
+    {
         return firstName;
     }
 

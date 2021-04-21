@@ -1,12 +1,9 @@
 package schoolbot.natives.objects.school;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.LinkedList;
-
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.internal.entities.GuildImpl;
+
+import java.util.HashMap;
 
 /**
  * A student: Joshigakusei's way of handling users.
@@ -82,7 +79,7 @@ public class Student
     public Student(User user, School mySch, double GPA, String realName)
     {
         this.studentUser = user;
-        this.myClasses = new HashMap<String, Classroom>();
+        this.myClasses = new HashMap<>();
         this.mySchool = mySch;
         this.GPA = GPA;
         this.realName = realName;
@@ -120,16 +117,16 @@ public class Student
         return false;
     }
 
-    public void addAssignment(Assignment assignemnt)
+    public void addAssignment(Assignment assignment)
     {
-        assignments.putIfAbsent(assignemnt, false);
+        assignments.putIfAbsent(assignment, false);
     }
 
-    public boolean removeAssignment(Assignment assignemnt)
+    public boolean removeAssignment(Assignment assignment)
     {
-        if (assignments.containsKey(assignemnt))
+        if (assignments.containsKey(assignment))
         {
-            assignments.remove(assignemnt);
+            assignments.remove(assignment);
             return true;
         }
         return false;

@@ -109,9 +109,7 @@ public class SchoolAdd extends Command
                 }
 
                 event.getChannel().sendMessage((MessageEmbed) pages.get(0).getContent()).queue(success ->
-                {
-                    Pages.paginate(success, pages);
-                });
+                        Pages.paginate(success, pages));
 
                 waiter.waitForEvent(MessageReceivedEvent.class,
 

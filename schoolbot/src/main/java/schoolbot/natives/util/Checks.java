@@ -1,8 +1,5 @@
 package schoolbot.natives.util;
 
-import net.dv8tion.jda.api.events.Event;
-import schoolbot.natives.objects.command.CommandEvent;
-
 public class Checks
 {
     public static boolean isNumber(String number)

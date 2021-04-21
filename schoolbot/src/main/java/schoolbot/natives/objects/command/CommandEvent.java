@@ -127,9 +127,7 @@ public class CommandEvent
 
     public void sendSelfDeletingMessage(String message)
     {
-        getChannel().sendMessage(message).queue(deleting -> {
-            deleting.delete().queueAfter(10, TimeUnit.SECONDS);
-        });
+        getChannel().sendMessage(message).queue(deleting -> deleting.delete().queueAfter(10, TimeUnit.SECONDS));
     }
     
 }

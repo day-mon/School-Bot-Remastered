@@ -1,6 +1,5 @@
 package schoolbot.natives.objects.info;
 
-import net.dv8tion.jda.api.JDAInfo;
 import schoolbot.SchoolbotConstants;
 
 public class BotInfo

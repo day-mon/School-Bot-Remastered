@@ -68,20 +68,17 @@ public class ProfessorAdd extends Command
 
             switch (state)
             {
-                case 0:
+                case 0 -> {
                     numCheck(content, channel);
-                    channel.sendMessage("Awesome! Thank you for that your professors first name is " + content);
+                    channel.sendMessage("Awesome! Thank you for that your professors first name is " + content).queue();
                     firstName = content;
-
                     channel.sendMessage("I will now need your professors last name: ").queue();
                     state = 1;
-                    break;
-                case 1:
+                }
+                case 1 -> {
                     numCheck(content, channel);
                     channel.sendMessage("Thank you again. Your professor last name is: " + content);
                     lastName = content;
-
-
                     if (schools.size() == 1)
                     {
                         channel.sendMessage(event.getGuild().getName() + " only has one school associated with it. I will automatically assign your professor to " + schools.get(0).getSchoolName()).queue();
@@ -92,10 +89,9 @@ public class ProfessorAdd extends Command
                     }
                     channel.sendMessage("Moving on.. I will need your professors school name: ").queue();
                     state = 2;
-                    break;
-                case 2:
+                }
+                case 2 -> {
                     boolean schoolFound = false;
-
                     for (School schools : schools)
                     {
                         if (schools.getSchoolName().equalsIgnoreCase(content))
@@ -116,8 +112,8 @@ public class ProfessorAdd extends Command
                         channel.sendMessage("School not found.. Aborting").queue();
                         event.getJDA().removeEventListener(this);
                     }
-                    break;
-                case 3:
+                }
+                case 3 -> {
                     emailPrefix = content;
                     channel.sendMessage("Thank you.. Inserting all of the info into my database!").queue();
                     if (DatabaseUtil.addProfessor(schoolbot, firstName, lastName, emailPrefix, schoolName, event.getGuild().getIdLong()))
@@ -139,6 +135,7 @@ public class ProfessorAdd extends Command
                     }
                     state = 0;
                     event.getJDA().removeEventListener(this);
+                }
             }
         }
 
