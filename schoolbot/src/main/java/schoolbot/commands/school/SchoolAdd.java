@@ -20,6 +20,7 @@ import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
+import schoolbot.natives.objects.command.CommandFlag;
 import schoolbot.natives.util.Checks;
 import schoolbot.natives.util.DatabaseUtil;
 import schoolbot.natives.util.Embed;
@@ -42,6 +43,7 @@ public class SchoolAdd extends Command
         super(parent, "Adds a school to the server", "[school name] [school email suffix] [school reference]", 1);
         this.waiter = waiter;
         addPermissions(Permission.ADMINISTRATOR);
+        addFlags(CommandFlag.DATABASE);
 
     }
 
@@ -213,10 +215,15 @@ public class SchoolAdd extends Command
         Color color = new Color(R, G, B);
         try
         {
+
             guild.createRole()
                     .setName(embed.getTitle())
                     .setColor(color)
-                    .queue(role -> DatabaseUtil.addSchool(schoolbot, embed.getTitle(), embed.getFields().get(1).getValue(), role.getIdLong(), guild.getIdLong()));
+                    .queue(role -> DatabaseUtil.addSchool(schoolbot,
+                            embed.getTitle(),
+                            embed.getFields().get(1).getValue(),
+                            role.getIdLong(),
+                            guild.getIdLong()));
         }
         catch (Exception e)
         {

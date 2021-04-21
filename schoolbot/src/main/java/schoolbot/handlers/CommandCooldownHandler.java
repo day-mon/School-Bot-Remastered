@@ -6,7 +6,7 @@ import schoolbot.natives.objects.command.Command;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class CommandCooldownHandler 
+public class CommandCooldownHandler
 {
 
     /**
@@ -15,7 +15,11 @@ public class CommandCooldownHandler
     private static final Map<CooledCommand, Long> COOLDOWN_MAP = new ConcurrentHashMap<>();
 
 
-    private CommandCooldownHandler(){};
+    private CommandCooldownHandler()
+    {
+    }
+
+    ;
 
     public static boolean isOnCooldown(Member member, Command command)
     {
@@ -23,21 +27,21 @@ public class CommandCooldownHandler
         long guildID = member.getGuild().getIdLong();
 
         for (Map.Entry<CooledCommand, Long> entry : COOLDOWN_MAP.entrySet())
-		{
-			CooledCommand cooledCommand = entry.getKey();
-			long expiry = entry.getValue();
+        {
+            CooledCommand cooledCommand = entry.getKey();
+            long expiry = entry.getValue();
 
-			if (cooledCommand.getUserID() == userID && cooledCommand.getGuildID() == guildID && cooledCommand.getCommand().equals(command))
-			{
-				if (System.currentTimeMillis() <= expiry)
-				{
-					return true;
-				}
-				COOLDOWN_MAP.remove(cooledCommand);
-				return false;
-			}
-		}
-		return false;
+            if (cooledCommand.getUserID() == userID && cooledCommand.getGuildID() == guildID && cooledCommand.getCommand().equals(command))
+            {
+                if (System.currentTimeMillis() <= expiry)
+                {
+                    return true;
+                }
+                COOLDOWN_MAP.remove(cooledCommand);
+                return false;
+            }
+        }
+        return false;
     }
 
     public static void addCooldown(Member member, Command command)
@@ -52,6 +56,24 @@ public class CommandCooldownHandler
         COOLDOWN_MAP.put(new CooledCommand(member, command), System.currentTimeMillis() + command.getCooldown());
     }
 
+    public static int getCooldownTime(Member mem, Command command)
+    {
+        long userID = mem.getIdLong();
+        long guildID = mem.getGuild().getIdLong();
+
+        for (Map.Entry<CooledCommand, Long> entry : COOLDOWN_MAP.entrySet())
+        {
+            CooledCommand cooledCommand = entry.getKey();
+            long expiry = entry.getValue();
+
+            if (cooledCommand.getUserID() == userID && cooledCommand.getGuildID() == guildID && cooledCommand.getCommand().equals(command))
+            {
+                return (int) ((int) (expiry / 1000) - (System.currentTimeMillis() / 1000));
+            }
+        }
+        return 0;
+    }
+
 
     public static class CooledCommand
     {
@@ -61,21 +83,25 @@ public class CommandCooldownHandler
 
         public CooledCommand(Member member, Command command)
         {
-             this.userID = member.getIdLong();
-             this.guildID = member.getGuild().getIdLong();
-             this.command = command;
+            this.userID = member.getIdLong();
+            this.guildID = member.getGuild().getIdLong();
+            this.command = command;
         }
 
-        public Command getCommand() {
+        public Command getCommand()
+        {
             return command;
         }
 
-        public long getGuildID() {
+        public long getGuildID()
+        {
             return guildID;
         }
 
-        public long getUserID() {
+        public long getUserID()
+        {
             return userID;
         }
+
     }
 }

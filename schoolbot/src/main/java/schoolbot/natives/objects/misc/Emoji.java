@@ -6,7 +6,8 @@ public enum Emoji
     CROSS_MARK(":x:", "\u274C"),
     RECYCLE(":recycle:", "\u267B"),
     NEXT(":track_next:", "\u23ED"),
-    PREVIOUS(":track_previous", "\u23EE");
+    PREVIOUS(":track_previous", "\u23EE"),
+    SMILEY_FACE(":slight_smile:", "\u1F642");
 
 
     private final String emote;

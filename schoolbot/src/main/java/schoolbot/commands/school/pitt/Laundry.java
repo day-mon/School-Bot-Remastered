@@ -12,6 +12,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
+import schoolbot.natives.objects.command.CommandFlag;
 import schoolbot.natives.util.Embed;
 
 import java.awt.*;
@@ -37,14 +38,14 @@ public class Laundry extends Command
             Map.entry("CPAS", "581339013")
     );
 
-    public final static String BASE_URL = "https://www.laundryview.com/api/currentRoomData?school_desc_key=4590&location=";
+    private final static String BASE_URL = "https://www.laundryview.com/api/currentRoomData?school_desc_key=4590&location=";
 
 
     public Laundry()
     {
-        super("", "", 1);
+        super("Displays all laundry machine in a given a housing name", "[housing name]", 1);
         addCalls("laundry");
-        addCooldown(5000L);
+        addFlags(CommandFlag.INTERNET);
     }
 
     /**
@@ -59,7 +60,7 @@ public class Laundry extends Command
 
         if (!LAUNDRY_API_CALLS.containsKey(potLaundryName))
         {
-            Embed.error(event, "Housing doesnt exist");//
+            Embed.error(event, "Housing doesnt exist");
             return;
         }
 
@@ -92,7 +93,6 @@ public class Laundry extends Command
                 if (typeString.toUpperCase().contains("DRY") || typeString.contains("washFL"))
                 {
                     String working = ele.getBigDecimal("percentage").compareTo(new BigDecimal("5.0")) <= 0 ? "Yes" : "No";
-                    String inUse = ele.getInt("status_toggle") > 0 ? "In use" : "Available";
 
 
                     if (ele.getInt("status_toggle") > 0)
@@ -129,9 +129,7 @@ public class Laundry extends Command
             }
 
             event.getChannel().sendMessage((MessageEmbed) pages.get(0).getContent()).queue(success ->
-            {
-                Pages.paginate(success, pages);
-            });
+                    Pages.paginate(success, pages));
 
 
         }

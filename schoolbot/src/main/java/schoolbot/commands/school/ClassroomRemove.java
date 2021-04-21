@@ -1,23 +1,20 @@
 package schoolbot.commands.school;
 
-import okhttp3.OkHttpClient;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
 
-public class AssignmentAdd extends Command
+public class ClassroomRemove extends Command
 {
-    private final OkHttpClient client;
 
-    /**
-     * @param parent
-     */
-    public AssignmentAdd(Command parent)
+    public ClassroomRemove(Command parent)
     {
-        super(parent, " ", " ", 1);
-        client = new OkHttpClient();
+        super("", "", 0);
+
     }
 
     /**
+     * What the command will do on call.
+     *
      * @param event Arguments sent to the command.
      */
     @Override

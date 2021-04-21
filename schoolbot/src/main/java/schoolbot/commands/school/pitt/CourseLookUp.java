@@ -1,9 +1,14 @@
 package schoolbot.commands.school.pitt;
 
 import okhttp3.*;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.util.Checks;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CourseLookUp extends Command
 {
@@ -64,6 +69,39 @@ public class CourseLookUp extends Command
         catch (Exception e)
         {
 
+        }
+    }
+
+    private String getSubjectJson()
+    {
+        try
+        {
+            String CLASS_SEARCH_URL = "https://psmobile.pitt.edu/app/catalog/classSearch";
+            OkHttpClient client = new OkHttpClient();
+
+
+            Document doc = Jsoup.connect(CLASS_SEARCH_URL)
+                    .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
+                    .referrer("http://www.google.com")
+                    .ignoreContentType(true)
+                    .get();
+
+
+            Pattern pat = Pattern.compile("(?=subjects\\s*:\\s).*,");
+            Matcher matcher = pat.matcher(doc.outerHtml());
+
+            String matches = "";
+            while (matcher.find())
+            {
+                matches += matcher.group();
+            }
+            matches = matches.substring(26, matches.length() - 1);
+            return matches;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
         }
     }
 }

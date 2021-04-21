@@ -1,23 +1,20 @@
 package schoolbot.commands.admin;
 
-import java.awt.Color;
-import java.util.List;
-
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineFactory;
-import javax.script.ScriptEngineManager;
-
-import net.bytebuddy.build.Plugin.Engine;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import schoolbot.handlers.CommandCooldownHandler;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
 
-public class Eval extends Command {
-    
-    
-    private static final ScriptEngine SCRIPT_ENGINE = new ScriptEngineManager().getEngineByName("groovy");
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import java.awt.*;
+import java.util.List;
+
+public class Eval extends Command
+{
+
+
+	private static final ScriptEngine SCRIPT_ENGINE = new ScriptEngineManager().getEngineByName("groovy");
 	private static final List<String> DEFAULT_IMPORTS = List.of("net.dv8tion.jda.api.entities.impl", "net.dv8tion.jda.api.managers", "net.dv8tion.jda.api.entities", "net.dv8tion.jda.api",
 			"java.io", "java.math", "java.util", "java.util.concurrent", "java.time", "java.util.stream");
 

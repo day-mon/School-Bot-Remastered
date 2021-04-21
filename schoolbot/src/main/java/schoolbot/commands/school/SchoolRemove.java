@@ -3,6 +3,7 @@ package schoolbot.commands.school;
 import net.dv8tion.jda.api.Permission;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
+import schoolbot.natives.objects.command.CommandFlag;
 import schoolbot.natives.objects.school.School;
 import schoolbot.natives.util.Checks;
 import schoolbot.natives.util.DatabaseUtil;
@@ -16,6 +17,7 @@ public class SchoolRemove extends Command
     {
         super(parent, "Removes a school given the name", "[school name]", 1);
         addPermissions(Permission.ADMINISTRATOR);
+        addFlags(CommandFlag.DATABASE);
     }
 
     @Override

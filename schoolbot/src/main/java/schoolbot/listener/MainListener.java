@@ -11,7 +11,7 @@ import net.dv8tion.jda.api.hooks.EventListener;
 import schoolbot.Schoolbot;
 
 import javax.annotation.Nonnull;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public class MainListener implements EventListener
 {
@@ -45,14 +45,15 @@ public class MainListener implements EventListener
 
             channel.sendMessage(new EmbedBuilder()
                     .setTitle("Welcome to " + guildName, "http://pittmainrejects.net")
-                    .setFooter("Joined on: " + LocalDateTime.now())
+                    .setFooter("Joined on: " + Instant.now())
                     .addField("User information",
                             "`User joined:`" + user.getName() + "\n" + "`Account creation date:` " + user.getTimeCreated(), false)
                     .addField("Sever Information",
                             "`Server count:`  " + guild.getMemberCount() + "\n" + "`Server name:`  " + guild.getName(), false)
                     .addField("Description",
-                            "Welcome " + user.getName() + " if you are here you probably have no clue what you are doing like all " + guild.getMemberCount() + " of us. If you need some help you can mention anyone indivisually or mention the role of the class in which you need help in. Mention anyone in 8 and above for roles.", false)
+                            "Welcome " + user.getName() + " if you are here you probably have no clue what you are doing like all " + guild.getMemberCount() + " of us. If you need some help you can mention anyone individually or mention the role of the class in which you need help in. Mention anyone in 8 and above for roles.", false)
                     .build()).queue();
+
         }
     }
 }

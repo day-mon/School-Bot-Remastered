@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
+import schoolbot.commands.AppleStateMachine;
 
 import java.io.File;
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class MessageHandler
 {
-    private final String[] FILE_EXTENSIONS = {"java", "cpp", "xml", "csharp", "asm", "js", "php", "r", "py", "go", "python", "ts"};
+    private final String[] FILE_EXTENSIONS = {"txt", "java", "cpp", "xml", "csharp", "asm", "js", "php", "r", "py", "go", "python", "ts"};
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     private final Schoolbot schoolbot;
     private final OkHttpClient client;
@@ -33,6 +34,13 @@ public class MessageHandler
         String messageStr = event.getMessage().getContentRaw();
         User author = event.getAuthor();
         Message message = event.getMessage();
+
+
+        if (event.getMessage().getContentRaw().startsWith("Hi Apples!"))
+        {
+            event.getChannel().sendMessage("Hi! Tell me your name, or say \"Stop\"!").queue();
+            event.getJDA().addEventListener(new AppleStateMachine(event.getChannel(), event.getAuthor()));
+        }
 
 
         if (event.getMessage().getAttachments().size() > 0)

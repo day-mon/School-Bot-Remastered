@@ -1,20 +1,14 @@
 package schoolbot.commands.misc;
 
-import java.util.List;
-import java.util.Random;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.TimeZone;
-import java.util.function.Consumer;
-
 import net.dv8tion.jda.api.EmbedBuilder;
 import schoolbot.SchoolbotConstants;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.util.Embed;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class Time extends Command
 {
@@ -22,14 +16,13 @@ public class Time extends Command
     {
         super("Displays time of any timezone", "[optional: timezone/random]", 0);
         addCalls("time", "localtime");
-    } 
-    
+    }
+
     @Override
-    public void run(CommandEvent event) 
+    public void run(CommandEvent event)
     {
         List<String> timeZones = Arrays.asList(TimeZone.getAvailableIDs());
 
-        
 
         if (event.getArgs().size() == 0)
         {

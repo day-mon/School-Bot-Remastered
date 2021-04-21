@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
+import schoolbot.natives.objects.command.CommandFlag;
 import schoolbot.natives.objects.school.School;
 import schoolbot.natives.util.DatabaseUtil;
 import schoolbot.natives.util.Embed;
@@ -24,7 +25,7 @@ public class ListSchools extends Command
     {
         super("List schools all schools in database", "[none]", 0);
         addCalls("schools", "school-list");
-        addCooldown(10000L);
+        addFlags(CommandFlag.DATABASE);
 
     }
 

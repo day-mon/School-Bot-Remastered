@@ -1,9 +1,13 @@
 package schoolbot.natives.objects.school;
 
-import java.io.Serializable;
-import java.util.HashMap;
-
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.internal.entities.GuildImpl;
+
+import java.awt.*;
+import java.io.Serializable;
+import java.time.Instant;
+import java.util.HashMap;
 
 
 public class Professor implements Serializable {
@@ -15,7 +19,6 @@ public class Professor implements Serializable {
     private HashMap<String, Classroom> professorsClasses;
     private HashMap<Student, Classroom> studentsInClasses;
     private HashMap<String, Assignment> assignments;
-
     private String email;
     private String emailPrefix;
     private transient GuildImpl guild;
@@ -25,13 +28,15 @@ public class Professor implements Serializable {
     private String officeHours;
     private School professorsSchool;
 
-    public Professor() {
+    public Professor()
+    {
         professorsClasses = new HashMap<>();
         studentsInClasses = new HashMap<>();
         assignments = new HashMap<>();
     }
 
-    public Professor(GuildImpl guild, String firstName, String lastName, String email, School professorsSchool) {
+    public Professor(GuildImpl guild, String firstName, String lastName, String email, School professorsSchool)
+    {
         this.email = email;
         this.emailPrefix = email;
         this.guild = guild;
@@ -44,27 +49,34 @@ public class Professor implements Serializable {
 
     }
 
-    public void setEmail(String email) {
+    public void setEmail(String email)
+    {
         this.email = email;
     }
 
-    public void setFirstName(String firstNameme) {
-        this.firstName = firstName;
+    public void setFirstName(String firstName)
+    {
+        this.firstName = firstName
+        ;
     }
 
-    public void setLastName(String lastName) {
+    public void setLastName(String lastName)
+    {
         this.lastName = lastName;
     }
 
-    public void setGuild(GuildImpl guild) {
+    public void setGuild(GuildImpl guild)
+    {
         this.guild = guild;
     }
 
-    public void setProfessorsClasses(HashMap<String, Classroom> professorsClasses) {
+    public void setProfessorsClasses(HashMap<String, Classroom> professorsClasses)
+    {
         this.professorsClasses = professorsClasses;
     }
 
-    public void setStudentsInClasses(HashMap<Student, Classroom> studentsInClasses) {
+    public void setStudentsInClasses(HashMap<Student, Classroom> studentsInClasses)
+    {
         this.studentsInClasses = studentsInClasses;
     }
 
@@ -140,9 +152,6 @@ public class Professor implements Serializable {
     }
 
 
-    public void setfirstName(String firstName) {
-        this.firstName = firstName;
-    }
 
     /**
      * @return int return the age
@@ -190,12 +199,25 @@ public class Professor implements Serializable {
     /**
      * @param professorsSchool the professorsSchool to set
      */
-    public void setProfessorsSchool(School professorsSchool) {
+    public void setProfessorsSchool(School professorsSchool)
+    {
         this.professorsSchool = professorsSchool;
     }
 
+    public MessageEmbed getProfessorAsEmbed()
+    {
+        return new EmbedBuilder()
+                .setTitle("Professor " + lastName)
+                .addField("Professor Name", firstName + " " + lastName, false)
+                .addField("Email prefix", emailPrefix, false)
+                .setColor(Color.blue)
+                .setTimestamp(Instant.now())
+                .build();
+    }
+
     @Override
-    public String toString() {
+    public String toString()
+    {
         return lastName + "'s Current University Employer: " + getProfessorsSchool().getSchoolName() + "\n" + lastName
                 + "'s Last Name: " + getLastName() + "\n" + lastName + "'s First Name: " + getFirstName() + "\n"
                 + lastName + "'s Email: " + getEmail() + "\n" + lastName + "'s Office Hours: " + getOfficeHours() + "\n " + "Amount of classes: " + professorsClasses.size() + "\n" +

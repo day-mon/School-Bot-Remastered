@@ -1,6 +1,7 @@
 package schoolbot.natives.objects.command;
 
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Member;
 import schoolbot.SchoolbotConstants;
 import schoolbot.handlers.CommandCooldownHandler;
 import schoolbot.natives.util.Embed;
@@ -10,47 +11,37 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
-
-public abstract class Command 
+public abstract class Command
 {
-
-
     private List<String> calls;
-
     private List<Permission> commandPermissions;
-
     private List<Permission> selfPermissions;
-
     private List<Command> children;
+    private List<CommandFlag> commandFlags;
 
     private boolean enabled;
 
     private String name;
-
     private String usage;
+    private String usageExample;
+    private String description;
+    private String syntax;
 
     private int minimalArgs;
-
-    private String usageExample;
-
-    private String description;
-
-    private String syntax;
 
     private long cooldown;
 
     private final Command parent;
 
 
-
     /**
      * Command constructor with aliases for the command.
-     * 
+     *
      * @param description command aliases
-     * @parm syntax
      * @param minimalArgs
+     * @parm syntax
      */
-    protected Command(String description, String syntax, int minimalArgs) 
+    protected Command(String description, String syntax, int minimalArgs)
     {
         this.name = this.getClass().getSimpleName();
         this.description = description;
@@ -63,10 +54,11 @@ public abstract class Command
         this.commandPermissions = new ArrayList<>();
         this.selfPermissions = new ArrayList<>();
         this.children = new ArrayList<>();
+        this.commandFlags = new ArrayList<>();
+
     }
 
     /**
-     *
      * @param parent
      * @param description
      * @param syntax
@@ -84,27 +76,26 @@ public abstract class Command
         this.calls = new ArrayList<>();
         this.commandPermissions = new ArrayList<>();
         this.selfPermissions = new ArrayList<>();
+        this.commandFlags = new ArrayList<>();
         this.children = new ArrayList<>();
     }
 
     /**
      * What the command will do on call.
-     * 
+     *
      * @param event Arguments sent to the command.
      */
     public abstract void run(CommandEvent event);
 
     /**
-     *
      * @return
      */
-    public  String getDescription() 
+    public String getDescription()
     {
         return this.description;
     }
 
     /**
-     *
      * @return
      */
     public List<Permission> getSelfPermissions()
@@ -113,10 +104,9 @@ public abstract class Command
     }
 
     /**
-     *
      * @return
      */
-    public String getUsage() 
+    public String getUsage()
     {
         return this.usage;
     }
@@ -126,12 +116,12 @@ public abstract class Command
         return SchoolbotConstants.DEFAULT_PREFIX + this.calls.get(0) + " " + this.syntax;
     }
 
-    public List<String> getCalls() 
+    public List<String> getCalls()
     {
         return this.calls;
     }
 
-    public long getCooldown() 
+    public long getCooldown()
     {
         return cooldown;
     }
@@ -141,7 +131,7 @@ public abstract class Command
         return commandPermissions;
     }
 
-    public String getSyntax() 
+    public String getSyntax()
     {
         return syntax;
     }
@@ -149,40 +139,49 @@ public abstract class Command
 
     public void process(CommandEvent event)
     {
-       if (!event.memberPermissionCheck(event.getCommand().getCommandPermissions()))
-       {
-            List<Permission> permissionsMemberHas = event.getCommand().getCommandPermissions().stream()
-                                                                                                .filter(perm -> !event.getMember().hasPermission(perm))
-                                                                                                .collect(Collectors.toList());
-            StringBuilder perms = new StringBuilder();  
+        if (!event.memberPermissionCheck(event.getCommand().getCommandPermissions()))
+        {
+            List<Permission> permissionsMemberHas = event.getCommand().getCommandPermissions()
+                    .stream()
+                    .filter(perm -> !event.getMember().hasPermission(perm))
+                    .collect(Collectors.toList());
+
+            StringBuilder perms = new StringBuilder();
             permissionsMemberHas.forEach(f -> perms.append(" `" + f + "` "));
-            Embed.error(event,  "This command requires you to have atleast this permission" + perms.toString() + "in order to execute it!");
-       }
-       else if (CommandCooldownHandler.isOnCooldown(event.getMember(), this))
-       {
-            Embed.error(event, "You are on a cooldown!");
-       }
-       else if (!event.selfPermissionCheck(event.getCommand().getSelfPermissions()))
-       {
-            Embed.error(event, "I do not have permissions to do this, Please give me");
-       }
-       else if (!isEnabled())
-       {
+
+            Embed.error(event, "This command requires you to have at least this permission" + perms.toString() + "in order to execute it!");
+        }
+        else if (CommandCooldownHandler.isOnCooldown(event.getMember(), this))
+        {
+            int cooldownTime = CommandCooldownHandler.getCooldownTime(event.getMember(), this);
+            Embed.error(event, "You are on a cooldown \nYou have [" + cooldownTime + "] ***second(s)***");
+        }
+        else if (!event.selfPermissionCheck(event.getCommand().getSelfPermissions()))
+        {
+            Embed.error(event, "I do not have permissions to do this");
+        }
+        else if (!isEnabled())
+        {
             Embed.error(event, "This command is disabled!");
-       }
-       else if (event.getArgs().size() < minimalArgs)
-       {
+        }
+        else if (event.getArgs().size() < minimalArgs)
+        {
             Embed.error(event, "This minimal amount of args for this command is " + minimalArgs);
-       }
-       else if (event.getUser().isBot())
-       {
-           Embed.error(event, "You are a bot silly goose :P");
-       }
-       else 
-       {
-           event.getSchoolbot().getLogger().info("{} has been executed by {} using the args {}", this.name, event.getUser().getName(), event.getArgs());
-           run(event);
-       }
+        }
+        else if (event.getUser().isBot())
+        {
+            Embed.error(event, "You are a bot silly goose :P");
+        }
+        else
+        {
+            event.getSchoolbot().getLogger().info("{} has been executed by {} using the args {}", this.name, event.getUser().getName(), event.getArgs());
+
+            if (hasCommandFlags(CommandFlag.INTERNET, CommandFlag.DATABASE))
+            {
+                addUserToCooldown(event.getMember());
+            }
+            run(event);
+        }
     }
 
 
@@ -193,6 +192,11 @@ public abstract class Command
     public void addCooldown(long cooldown)
     {
         this.cooldown = cooldown;
+    }
+
+    public void addUserToCooldown(Member member)
+    {
+        CommandCooldownHandler.addCooldown(member, this);
     }
 
     public void addCalls(String... calls)
@@ -206,22 +210,27 @@ public abstract class Command
     }
 
     public void addSelfPermissions(Permission... permissions)
-	{
-		this.selfPermissions.addAll(List.of(permissions));
-	}
+    {
+        this.selfPermissions.addAll(List.of(permissions));
+    }
 
-	public void addChildren(Command... children)
+    public void addChildren(Command... children)
     {
         this.children.addAll(List.of(children));
+    }
+
+    public void addFlags(CommandFlag... flags)
+    {
+        this.commandFlags.addAll(List.of(flags));
     }
 
 
     /**
      * Check whether the current command is enabled or not.
-     * 
+     *
      * @return enabled?
      */
-    public boolean isEnabled() 
+    public boolean isEnabled()
     {
         return this.enabled;
     }
@@ -231,26 +240,40 @@ public abstract class Command
         return !getChildren().isEmpty();
     }
 
+    public boolean hasCommandFlags(CommandFlag... flags)
+    {
+        for (CommandFlag flag : flags)
+        {
+            if (this.commandFlags.contains(flag))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     /**
      * Set this command to be enabled or disabled.
-     * 
+     *
      * @param enabled {@code true} for enabled or {@code false} for disabled.
      */
-    public void setEnabled(boolean enabled) 
+    public void setEnabled(boolean enabled)
     {
         this.enabled = enabled;
     }
-    
-    public void setCooldown(long cooldown) {
+
+    public void setCooldown(long cooldown)
+    {
         this.cooldown = cooldown;
     }
+
     /**
      * Function to get the name of the command
-     * 
+     *
      * @return the name of the command
      */
-    public String getName() 
+    public String getName()
     {
         return name;
     }
@@ -260,12 +283,15 @@ public abstract class Command
         return children;
     }
 
-    public Command getParent() {
+    public Command getParent()
+    {
         return parent;
     }
 
+
     @Override
-    public String toString() {
+    public String toString()
+    {
         return this.name;
     }
 

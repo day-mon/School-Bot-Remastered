@@ -12,7 +12,6 @@ public class School implements Serializable
     private static final long serialVersionUID = 7699216426153116210L;
     private String schoolName;
     private long roleID;
-    private String schoolreference;
     private String emailSuffix;
     private long guildID;
     private HashMap<String, Classroom> listOfClasses;
@@ -33,21 +32,20 @@ public class School implements Serializable
 
     }
 
-    public School(long guildID, String schoolName, String emailSuffix, String schoolreference)
+    public School(long guildID, String schoolName, String emailSuffix)
     {
         this.schoolName = schoolName;
         this.guildID = guildID;
         this.emailSuffix = emailSuffix;
-        this.schoolreference = schoolreference;
         listOfClasses = new HashMap<>();
         listOfProfessors = new HashMap<>();
         listOfStudents = new HashMap<>();
     }
 
-    public School(String schoolname, String emailSuffix, HashMap<String, Classroom> listOfClasses,
+    public School(String schoolName, String emailSuffix, HashMap<String, Classroom> listOfClasses,
                   HashMap<String, Student> listOfStudents)
     {
-        this.schoolName = schoolname;
+        this.schoolName = schoolName;
         this.emailSuffix = emailSuffix;
         this.listOfClasses = listOfClasses;
         this.listOfStudents = listOfStudents;
@@ -60,7 +58,8 @@ public class School implements Serializable
     /**
      * @return list of all classes at the university
      */
-    public HashMap<String, Classroom> getListOfClasses() {
+    public HashMap<String, Classroom> getListOfClasses()
+    {
         return listOfClasses;
     }
 
@@ -82,10 +81,6 @@ public class School implements Serializable
         return emailSuffix;
     }
 
-    public String getSchoolreference()
-    {
-        return schoolreference;
-    }
 
     public long getGuildID()
     {
@@ -108,11 +103,6 @@ public class School implements Serializable
         return avg;
     }
 
-    public void setSchoolreference(String schoolreference)
-    {
-        this.schoolreference = schoolreference;
-    }
-
 
     public void setGuildID(long guildID)
     {
@@ -128,42 +118,46 @@ public class School implements Serializable
     }
 
     /**
-     *
      * @param listOfClasses
      */
-    public void setListOfClasses(HashMap<String, Classroom> listOfClasses) {
+    public void setListOfClasses(HashMap<String, Classroom> listOfClasses)
+    {
         this.listOfClasses = listOfClasses;
     }
 
     /**
-     *
      * @param listOfStudents
      */
-    public void setListOfStudents(HashMap<String, Student> listOfStudents) {
+    public void setListOfStudents(HashMap<String, Student> listOfStudents)
+    {
         this.listOfStudents = listOfStudents;
     }
 
     /**
-     *
      * @param schoolName
      */
-    public void setSchoolName(String schoolName) {
+    public void setSchoolName(String schoolName)
+    {
         this.schoolName = schoolName;
     }
 
-    public void setEmailSuffix(String emailSuffix) {
+    public void setEmailSuffix(String emailSuffix)
+    {
         this.emailSuffix = emailSuffix;
     }
 
-    public void setListOfProfessors(HashMap<String, Professor> listOfProfessors) {
+    public void setListOfProfessors(HashMap<String, Professor> listOfProfessors)
+    {
         this.listOfProfessors = listOfProfessors;
     }
 
-    public void addStudent(Student student) {
+    public void addStudent(Student student)
+    {
         listOfStudents.putIfAbsent(student.getRealName(), student);
     }
 
-    public boolean removeStudent(Student student) {
+    public boolean removeStudent(Student student)
+    {
         if (!listOfStudents.containsKey(student.getRealName()))
             return false;
         else
@@ -172,11 +166,13 @@ public class School implements Serializable
 
     }
 
-    public void addClazz(Classroom clazz) {
+    public void addClazz(Classroom clazz)
+    {
         listOfClasses.putIfAbsent(clazz.getClassNum(), clazz);
     }
 
-    public boolean removeClazz(Classroom clazz) {
+    public boolean removeClazz(Classroom clazz)
+    {
         if (!listOfClasses.containsKey(clazz.getClassNum()))
         {
             return false;
@@ -207,11 +203,11 @@ public class School implements Serializable
 
     }
 
+
     public void setRoleID(long roleID)
     {
         this.roleID = roleID;
     }
-
 
     public long getRoleID()
     {
@@ -225,6 +221,7 @@ public class School implements Serializable
                 "School email suffix: " + emailSuffix + "\n" +
                 "School Role: " + roleID;
     }
+
 
     @Override
     public int hashCode()
@@ -240,7 +237,8 @@ public class School implements Serializable
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj)
+    {
         if (this == obj)
             return true;
         if (obj == null)
@@ -248,30 +246,40 @@ public class School implements Serializable
         if (getClass() != obj.getClass())
             return false;
         School other = (School) obj;
-        if (emailSuffix == null) {
+        if (emailSuffix == null)
+        {
             if (other.emailSuffix != null)
                 return false;
-        } else if (!emailSuffix.equals(other.emailSuffix))
+        }
+        else if (!emailSuffix.equals(other.emailSuffix))
             return false;
-        if (listOfClasses == null) {
+        if (listOfClasses == null)
+        {
             if (other.listOfClasses != null)
                 return false;
-        } else if (!listOfClasses.equals(other.listOfClasses))
+        }
+        else if (!listOfClasses.equals(other.listOfClasses))
             return false;
-        if (listOfProfessors == null) {
+        if (listOfProfessors == null)
+        {
             if (other.listOfProfessors != null)
                 return false;
-        } else if (!listOfProfessors.equals(other.listOfProfessors))
+        }
+        else if (!listOfProfessors.equals(other.listOfProfessors))
             return false;
-        if (listOfStudents == null) {
+        if (listOfStudents == null)
+        {
             if (other.listOfStudents != null)
                 return false;
-        } else if (!listOfStudents.equals(other.listOfStudents))
+        }
+        else if (!listOfStudents.equals(other.listOfStudents))
             return false;
-        if (schoolName == null) {
+        if (schoolName == null)
+        {
             if (other.schoolName != null)
                 return false;
-        } else if (!schoolName.equals(other.schoolName))
+        }
+        else if (!schoolName.equals(other.schoolName))
             return false;
         return true;
     }

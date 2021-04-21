@@ -3,6 +3,7 @@ package schoolbot.natives.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
+import schoolbot.natives.objects.school.Professor;
 import schoolbot.natives.objects.school.School;
 
 import java.sql.*;
@@ -38,11 +39,47 @@ public class DatabaseUtil
                 schools.add(school);
             }
             return schools;
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             e.printStackTrace();
         }
         return null;
     }
+
+    public static List<Professor> getProfessors(Schoolbot schoolBot, String school_name, long guild_id)
+    {
+        List<Professor> professors = new ArrayList<>();
+        Professor professor;
+        ResultSet rs;
+
+        try (Connection con = schoolBot.getDatabaseHandler().getDbConnection())
+        {
+            PreparedStatement statement = con.prepareStatement("SELECT * FROM professors WHERE guild_id=? AND school_name=?");
+            statement.setLong(1, guild_id);
+            statement.setString(2, school_name);
+            rs = statement.executeQuery();
+
+
+            while (rs.next())
+            {
+                professor = new Professor();
+                professor.setFirstName(rs.getString("first_name"));
+                professor.setLastName(rs.getString("last_name"));
+                professor.setEmailPrefix(rs.getString("email_prefix"));
+
+                professors.add(professor);
+            }
+            return professors;
+        }
+
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
     public static boolean addSchool(Schoolbot schoolBot, String school_id, String school_email_suffix, long role_id, long guild_id)
     {
@@ -66,6 +103,31 @@ public class DatabaseUtil
             return false;
         }
     }
+
+    public static boolean addProfessor(Schoolbot schoolbot, String firstName, String lastName, String emailPrefix, String schoolName, long guildID)
+    {
+        try (Connection con = schoolbot.getDatabaseHandler().getDbConnection())
+        {
+            PreparedStatement statement = con.prepareStatement(
+                    "INSERT INTO professors " +
+                            "(first_name, last_name, email_prefix, school_name, guild_id) " +
+                            "VALUES (?, ?, ?, ?, ?)"
+            );
+            statement.setString(1, firstName);
+            statement.setString(2, lastName);
+            statement.setString(3, emailPrefix);
+            statement.setString(4, schoolName);
+            statement.setLong(5, guildID);
+            statement.execute();
+            return true;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 
     public static boolean removeSchool(Schoolbot schoolBot, String schoolName)
     {
