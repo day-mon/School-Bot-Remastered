@@ -38,12 +38,13 @@ public class Schoolbot extends ListenerAdapter
 	private final LocalDateTime botStartTime;
 	private final CommandHandler commandHandler;
 	private final ConfigHandler configHandler;
-	private Paginator paginator;
 	private final EventWaiter eventWaiter;
 	private final DatabaseHandler databaseHandler;
 	private final MessageHandler messageHandler;
 	private final Logger logger;
 
+
+	private Paginator paginator;
 	private JDA jda;
 
 	public Schoolbot()
@@ -159,4 +160,5 @@ public class Schoolbot extends ListenerAdapter
 	{
 		return paginator;
 	}
+
 }

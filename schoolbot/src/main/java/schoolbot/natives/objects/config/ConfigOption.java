@@ -3,11 +3,10 @@ package schoolbot.natives.objects.config;
 public enum ConfigOption
 {
     TOKEN("token", "token"),
-
-
     DBUSER("DBUSERNAME", "username"),
     DBPASSWORD("DBPASSWORD", "password"),
-    DBHOSTNAME("DBHOSTANME", "HOSTNAME");
+    DBHOSTNAME("DBHOSTANME", "HOSTNAME"),
+    JDBCURL("JDBCURL", "URL");
 
 
     private String key;

@@ -22,6 +22,8 @@ public class ProfessorRemove extends Command
     @Override
     public void run(CommandEvent event)
     {
+        String arg0 = event.getArgs().get(0);
 
+        // TODO: Do AssignmentAdd
     }
 }

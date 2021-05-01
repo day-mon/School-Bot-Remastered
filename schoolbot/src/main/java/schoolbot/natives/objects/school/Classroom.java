@@ -1,60 +1,240 @@
 package schoolbot.natives.objects.school;
 
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.internal.entities.GuildImpl;
+import java.time.LocalDateTime;
+import java.util.Objects;
 
-import java.io.Serializable;
-import java.util.HashMap;
-
-public class Classroom implements Serializable
+public class Classroom
 {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = -6721439396011219354L;
-    private transient GuildImpl guild;
-    private String classID;
-    private String classNum;
+    private long guildID;
+    private int classNumber;
+    private int creditAmount;
+    private String description;
+    private String preReq;
+    private String instructor;
+    private String classTime;
+    private String classLocation;
+    private String classLevel;
+    private String classRoom;
+    private String classStatus;
+    private String schoolName;
+    private String inputClassStartDate;
+    private String classIdentifier;
+    private String inputClassEndDate;
+    private LocalDateTime classStartDate;
+    private LocalDateTime classEndDate;
     private String className;
-    private transient Role role = null;
-    private String textChannel;
-    private long textChannelID;
-    private String time;
-    private String subject;
-    private int credits;
-    private Professor professor;
-    private School school;
-    private HashMap<String, Student> classList;
-    private HashMap<String, Assignment> assignments;
-    private int[] intervals;
+    private int seatsTaken;
+    private int seatsOpen;
+    private int classCapacity;
+    private int schoolID;
+    private int professorID;
+    private int id;
+    private long roleID;
+    private long channelID;
+
 
     public Classroom()
     {
-
+        this.preReq = "None";
+        this.description = "N/A";
     }
 
-    public Classroom(GuildImpl guild, String className, String classID, String classNum, String time, int credits,
-                     Professor professor, School school, String textChannel, long textChannelID)
+    public Classroom(int id, String className)
     {
-        this.guild = guild;
-        this.classID = classID;
-        this.time = time;
-        this.school = school;
+        this.id = id;
         this.className = className;
-        this.professor = professor;
-        this.classNum = classNum;
-        this.textChannelID = textChannelID;
-        this.credits = credits;
-        classList = new HashMap<>();
-        assignments = new HashMap<>();
-        this.textChannel = textChannel;
-        professor.addClass(this);
     }
 
-    public String getClassID()
+
+    public Classroom(int classNumber, int creditAmount, String description, String preReq, String classTime, String classLocation, String classLevel, String classRoom, String classStatus, String schoolName, LocalDateTime classStartDate, LocalDateTime classEndDate, String className, int seatsTaken, int seatsOpen, int classCapacity)
     {
-        return this.classID;
+        this.classNumber = classNumber;
+        this.creditAmount = creditAmount;
+        this.description = description;
+        this.preReq = preReq;
+        this.classTime = classTime;
+        this.classLocation = classLocation;
+        this.classLevel = classLevel;
+        this.classRoom = classRoom;
+        this.classStatus = classStatus;
+        this.schoolName = schoolName;
+        this.classStartDate = classStartDate;
+        this.classEndDate = classEndDate;
+        this.className = className;
+        this.seatsTaken = seatsTaken;
+        this.seatsOpen = seatsOpen;
+        this.classCapacity = classCapacity;
+    }
+
+    public long getGuildID()
+    {
+        return guildID;
+    }
+
+    public void setGuildID(long guildID)
+    {
+        this.guildID = guildID;
+    }
+
+    public void setProfessorID(int professorID)
+    {
+        this.professorID = professorID;
+    }
+
+    public int getProfessorID()
+    {
+        return professorID;
+    }
+
+    public String getInstructor()
+    {
+        return instructor;
+    }
+
+    public int getClassNumber()
+    {
+        return classNumber;
+    }
+
+    public void setClassNumber(int classNumber)
+    {
+        this.classNumber = classNumber;
+    }
+
+    public int getCreditAmount()
+    {
+        return creditAmount;
+    }
+
+    public void setInstructor(String instructor)
+    {
+        this.instructor = instructor;
+    }
+
+    public void setCreditAmount(int creditAmount)
+    {
+        this.creditAmount = creditAmount;
+    }
+
+    public String getInputClassEndDate()
+    {
+        return inputClassEndDate;
+    }
+
+    public void setInputClassEndDate(String inputClassEndDate)
+    {
+        this.inputClassEndDate = inputClassEndDate;
+    }
+
+    public String getInputClassStartDate()
+    {
+        return inputClassStartDate;
+    }
+
+    public void setInputClassStartDate(String inputClassStartDate)
+    {
+        this.inputClassStartDate = inputClassStartDate;
+    }
+
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription(String description)
+    {
+        this.description = description;
+    }
+
+    public String getPreReq()
+    {
+        return preReq;
+    }
+
+    public void setPreReq(String preReq)
+    {
+        this.preReq = preReq;
+    }
+
+    public String getClassTime()
+    {
+        return classTime;
+    }
+
+    public void setClassTime(String classTime)
+    {
+        this.classTime = classTime;
+    }
+
+    public String getClassLocation()
+    {
+        return classLocation;
+    }
+
+    public void setClassLocation(String classLocation)
+    {
+        this.classLocation = classLocation;
+    }
+
+    public String getClassLevel()
+    {
+        return classLevel;
+    }
+
+    public void setClassLevel(String classLevel)
+    {
+        this.classLevel = classLevel;
+    }
+
+    public String getClassRoom()
+    {
+        return classRoom;
+    }
+
+    public void setClassRoom(String classRoom)
+    {
+        this.classRoom = classRoom;
+    }
+
+    public String getClassStatus()
+    {
+        return classStatus;
+    }
+
+    public void setClassStatus(String classStatus)
+    {
+        this.classStatus = classStatus;
+    }
+
+    public String getSchoolName()
+    {
+        return schoolName;
+    }
+
+    public void setSchoolName(String schoolName)
+    {
+        this.schoolName = schoolName;
+    }
+
+    public LocalDateTime getClassStartDate()
+    {
+        return classStartDate;
+    }
+
+    public void setClassStartDate(LocalDateTime classStartDate)
+    {
+        this.classStartDate = classStartDate;
+    }
+
+    public LocalDateTime getClassEndDate()
+    {
+        return classEndDate;
+    }
+
+    public void setClassEndDate(LocalDateTime classEndDate)
+    {
+        this.classEndDate = classEndDate;
     }
 
     public String getClassName()
@@ -62,295 +242,123 @@ public class Classroom implements Serializable
         return className;
     }
 
-    public String getSubject()
-    {
-        return subject;
-    }
-
-    public School getSchool()
-    {
-        return this.school;
-    }
-
-    public HashMap<String, Student> getClassList()
-    {
-        return classList;
-    }
-
-    public Role getRole()
-    {
-        return this.role;
-    }
-
-    public int getCredits()
-    {
-        return credits;
-    }
-
-    public GuildImpl getGuild()
-    {
-        return guild;
-    }
-
-    public int[] getIntervals()
-    {
-        return intervals;
-    }
-
-    public Professor getProfessor()
-    {
-        return this.professor;
-    }
-
-    public String getTime()
-    {
-        return this.time;
-    }
-
-    public String getTextChannel()
-    {
-        return textChannel;
-    }
-
-    public void setClassID(String classID)
-    {
-        this.classID = classID;
-    }
-
-    public void setClassList(HashMap<String, Student> classList)
-    {
-        this.classList = classList;
-    }
-
-    public void setIntervals(int[] intervals)
-    {
-        intervals = new int[intervals.length];
-        this.intervals = intervals;
-    }
-
-    public void setCredits(int credits)
-    {
-        this.credits = credits;
-    }
-
-    public void setRole(Role role)
-    {
-        this.role = role;
-    }
-
-    public void setProfessor(Professor professor)
-    {
-        this.professor = professor;
-    }
-
-    public void setTextChannel(String textChannel)
-    {
-        this.textChannel = textChannel;
-    }
-
-    public void setSchool(School school)
-    {
-        this.school = school;
-    }
-
-    public void setTime(String time)
-    {
-        this.time = time;
-    }
-
     public void setClassName(String className)
     {
         this.className = className;
     }
 
-    public void setSubject(String subject)
+    public int getSeatsTaken()
     {
-        this.subject = subject;
+        return seatsTaken;
     }
 
-    public void addStudent(Student student)
+    public void setSeatsTaken(int seatsTaken)
     {
-        classList.putIfAbsent(student.getRealName(), student);
+        this.seatsTaken = seatsTaken;
     }
 
-    public boolean removeStudent(Student student)
+    public int getSeatsOpen()
     {
-        if (classList.containsKey(student.getRealName()))
-        {
-            classList.remove(student.getRealName());
-            return true;
-        }
-        return false;
+        return seatsOpen;
     }
 
-    public void addToAllStudents(Assignment assignment)
+    public void setSeatsOpen(int seatsOpen)
     {
-        for (Student students : classList.values())
-        {
-            students.addAssignment(assignment);
-        }
+        this.seatsOpen = seatsOpen;
     }
 
-    public boolean containsStudent(Student student)
+    public int getClassCapacity()
     {
-        return classList.containsValue(student);
-
+        return classCapacity;
     }
 
-    public boolean containsAssignment(String assignment)
+    public void setClassCapacity(int classCapacity)
     {
-        return assignments.containsKey(assignment);
+        this.classCapacity = classCapacity;
     }
 
-    public void addAssignment(Assignment assignment)
+    public String getClassIdentifier()
     {
-        assignments.putIfAbsent(assignment.getAssignmentName(), assignment);
+        return classIdentifier;
     }
 
-    public boolean removeAssignment(String assignment)
+    public void setClassIdentifier(String classIdentifier)
     {
-        if (assignments.containsKey(assignment))
-        {
-            assignments.remove(assignment);
-            return true;
-        }
-        return false;
+        this.classIdentifier = classIdentifier;
     }
 
-    public long getTextChannelID()
+    public long getChannelID()
     {
-        return textChannelID;
+        return channelID;
     }
 
-    public void setTextChannelID(long textChannelID)
+    public void setChannelID(long channelID)
     {
-        this.textChannelID = textChannelID;
+        this.channelID = channelID;
     }
 
-    /**
-     * @return String return the classNum
-     */
-    public String getClassNum()
+    public long getRoleID()
     {
-        return classNum;
+        return roleID;
     }
 
-    public HashMap<String, Assignment> getAssignments()
+    public void setRoleID(long roleID)
     {
-        return this.assignments;
+        this.roleID = roleID;
     }
 
-    public void setAssignments(HashMap<String, Assignment> assignments)
+    public int getSchoolID()
     {
-        this.assignments = assignments;
+        return schoolID;
     }
 
-    /**
-     * @param classNum the classNum to set
-     */
-    public void setClassNum(String classNum)
+    public void setSchoolID(int schoolID)
     {
-        this.classNum = classNum;
+        this.schoolID = schoolID;
     }
 
     @Override
-    public boolean equals(Object obj)
+    public boolean equals(Object o)
     {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Classroom other = (Classroom) obj;
-        if (assignments == null)
-        {
-            if (other.assignments != null)
-                return false;
-        }
-        else if (!assignments.equals(other.assignments))
-            return false;
-        if (classID == null)
-        {
-            if (other.classID != null)
-                return false;
-        }
-        else if (!classID.equals(other.classID))
-            return false;
-        if (classList == null)
-        {
-            if (other.classList != null)
-                return false;
-        }
-        else if (!classList.equals(other.classList))
-            return false;
-        if (className == null)
-        {
-            if (other.className != null)
-                return false;
-        }
-        else if (!className.equals(other.className))
-            return false;
-        if (classNum == null)
-        {
-            if (other.classNum != null)
-                return false;
-        }
-        else if (!classNum.equals(other.classNum))
-            return false;
-        if (credits != other.credits)
-            return false;
-        if (guild == null)
-        {
-            if (other.guild != null)
-                return false;
-        }
-        else if (!guild.equals(other.guild))
-            return false;
-        if (professor == null)
-        {
-            if (other.professor != null)
-                return false;
-        }
-        else if (!professor.equals(other.professor))
-            return false;
-        if (school == null)
-        {
-            if (other.school != null)
-                return false;
-        }
-        else if (!school.equals(other.school))
-            return false;
-        if (subject == null)
-        {
-            if (other.subject != null)
-                return false;
-        }
-        else if (!subject.equals(other.subject))
-            return false;
-        if (time == null)
-        {
-            if (other.time != null)
-                return false;
-        }
-        else if (!time.equals(other.time))
-            return false;
-        return true;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Classroom classroom = (Classroom) o;
+        return guildID == classroom.guildID && classNumber == classroom.classNumber && creditAmount == classroom.creditAmount && seatsTaken == classroom.seatsTaken && seatsOpen == classroom.seatsOpen && classCapacity == classroom.classCapacity && Objects.equals(description, classroom.description) && Objects.equals(preReq, classroom.preReq) && Objects.equals(instructor, classroom.instructor) && Objects.equals(classTime, classroom.classTime) && Objects.equals(classLocation, classroom.classLocation) && Objects.equals(classLevel, classroom.classLevel) && Objects.equals(classRoom, classroom.classRoom) && Objects.equals(classStatus, classroom.classStatus) && Objects.equals(schoolName, classroom.schoolName) && Objects.equals(inputClassStartDate, classroom.inputClassStartDate) && Objects.equals(classIdentifier, classroom.classIdentifier) && Objects.equals(inputClassEndDate, classroom.inputClassEndDate) && Objects.equals(classStartDate, classroom.classStartDate) && Objects.equals(classEndDate, classroom.classEndDate) && Objects.equals(className, classroom.className);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(guildID, classNumber, creditAmount, description, preReq, instructor, classTime, classLocation, classLevel, classRoom, classStatus, schoolName, inputClassStartDate, classIdentifier, inputClassEndDate, classStartDate, classEndDate, className, seatsTaken, seatsOpen, classCapacity);
     }
 
     @Override
     public String toString()
     {
-        return "Class Name: " + className + "\n"
-                + "ClassID: " + classID + "\n"
-                + "Class size: " + classList.size() + "\n"
-                + "ClassNum: " + classNum + "\n"
-                + "Channel: " + textChannel + "\n"
-                + "Credits: " + credits + "\n"
-                + "Professor: " + professor.getLastName() + ", " + professor.getFirstName() + "\n"
-                + "Time: " + time + "\n"
-                + "======================";
-
+        return "Classroom{" +
+                "guildID=" + guildID +
+                ", classNumber=" + classNumber +
+                ", creditAmount=" + creditAmount +
+                ", description='" + description + '\'' +
+                ", preReq='" + preReq + '\'' +
+                ", instructor='" + instructor + '\'' +
+                ", classTime='" + classTime + '\'' +
+                ", classLocation='" + classLocation + '\'' +
+                ", classLevel='" + classLevel + '\'' +
+                ", classRoom='" + classRoom + '\'' +
+                ", classStatus='" + classStatus + '\'' +
+                ", schoolName='" + schoolName + '\'' +
+                ", inputClassStartDate='" + inputClassStartDate + '\'' +
+                ", classIdentifier='" + classIdentifier + '\'' +
+                ", inputClassEndDate='" + inputClassEndDate + '\'' +
+                ", classStartDate=" + classStartDate +
+                ", classEndDate=" + classEndDate +
+                ", className='" + className + '\'' +
+                ", seatsTaken=" + seatsTaken +
+                ", seatsOpen=" + seatsOpen +
+                ", classCapacity=" + classCapacity +
+                ", schoolID=" + schoolID +
+                ", professorID=" + professorID +
+                '}';
     }
-
 }

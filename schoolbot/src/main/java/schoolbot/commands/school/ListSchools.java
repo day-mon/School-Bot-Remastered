@@ -3,7 +3,6 @@ package schoolbot.commands.school;
 import com.github.ygimenez.method.Pages;
 import com.github.ygimenez.model.Page;
 import com.github.ygimenez.type.PageType;
-import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -21,7 +20,7 @@ import java.util.stream.Collectors;
 
 public class ListSchools extends Command
 {
-    public ListSchools(EventWaiter waiter)
+    public ListSchools()
     {
         super("List schools all schools in database", "[none]", 0);
         addCalls("schools", "school-list");

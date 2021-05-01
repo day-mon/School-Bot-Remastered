@@ -5,6 +5,7 @@ import org.jsoup.nodes.Document;
 import schoolbot.handlers.CommandCooldownHandler;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
+import schoolbot.natives.objects.command.CommandFlag;
 import schoolbot.natives.util.Checks;
 import schoolbot.natives.util.Embed;
 
@@ -13,8 +14,8 @@ public class Google extends Command
     public Google()
     {
         super("Looks up google query", "[query]", 1);
-        addCalls("g");
-        addCooldown(5000L);
+        addCalls("g", "google", "duck");
+        addFlags(CommandFlag.INTERNET);
     }
 
     @Override

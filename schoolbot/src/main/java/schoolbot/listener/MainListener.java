@@ -11,7 +11,7 @@ import net.dv8tion.jda.api.hooks.EventListener;
 import schoolbot.Schoolbot;
 
 import javax.annotation.Nonnull;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 public class MainListener implements EventListener
 {
@@ -45,7 +45,7 @@ public class MainListener implements EventListener
 
             channel.sendMessage(new EmbedBuilder()
                     .setTitle("Welcome to " + guildName, "http://pittmainrejects.net")
-                    .setFooter("Joined on: " + Instant.now())
+                    .setFooter("Joined on: " + LocalDateTime.now())
                     .addField("User information",
                             "`User joined:`" + user.getName() + "\n" + "`Account creation date:` " + user.getTimeCreated(), false)
                     .addField("Sever Information",

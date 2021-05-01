@@ -1,3 +1,4 @@
+
 package schoolbot.natives.objects.school;
 
 import java.io.Serializable;
@@ -14,6 +15,8 @@ public class School implements Serializable
     private long roleID;
     private String emailSuffix;
     private long guildID;
+    private boolean isPittSchool;
+    private int schoolID;
     private HashMap<String, Classroom> listOfClasses;
     private HashMap<String, Student> listOfStudents;
     private HashMap<String, Professor> listOfProfessors;
@@ -37,10 +40,17 @@ public class School implements Serializable
         this.schoolName = schoolName;
         this.guildID = guildID;
         this.emailSuffix = emailSuffix;
-        listOfClasses = new HashMap<>();
-        listOfProfessors = new HashMap<>();
-        listOfStudents = new HashMap<>();
+
     }
+
+    public School(String schoolName, long roleID, String emailSuffix, boolean isPittSchool)
+    {
+        this.schoolName = schoolName;
+        this.roleID = roleID;
+        this.emailSuffix = emailSuffix;
+        this.isPittSchool = isPittSchool;
+    }
+
 
     public School(String schoolName, String emailSuffix, HashMap<String, Classroom> listOfClasses,
                   HashMap<String, Student> listOfStudents)
@@ -166,22 +176,14 @@ public class School implements Serializable
 
     }
 
-    public void addClazz(Classroom clazz)
+    public boolean getIsPittSchool()
     {
-        listOfClasses.putIfAbsent(clazz.getClassNum(), clazz);
+        return isPittSchool;
     }
 
-    public boolean removeClazz(Classroom clazz)
+    public void setIsPittSchool(boolean isPittSchool)
     {
-        if (!listOfClasses.containsKey(clazz.getClassNum()))
-        {
-            return false;
-        }
-        else
-        {
-            listOfClasses.remove(clazz.getClassNum());
-        }
-        return true;
+        this.isPittSchool = isPittSchool;
     }
 
     public void addProfessor(Professor prof)
@@ -203,6 +205,21 @@ public class School implements Serializable
 
     }
 
+
+    public void setPittSchool(boolean pittSchool)
+    {
+        isPittSchool = pittSchool;
+    }
+
+    public int getSchoolID()
+    {
+        return schoolID;
+    }
+
+    public void setSchoolID(int schoolID)
+    {
+        this.schoolID = schoolID;
+    }
 
     public void setRoleID(long roleID)
     {

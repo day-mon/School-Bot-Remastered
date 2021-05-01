@@ -17,28 +17,26 @@ import java.util.concurrent.CompletableFuture;
 
 public class MessageHandler
 {
-    private final String[] FILE_EXTENSIONS = {"txt", "java", "cpp", "xml", "csharp", "asm", "js", "php", "r", "py", "go", "python", "ts"};
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-    private final Schoolbot schoolbot;
-    private final OkHttpClient client;
+      private final String[] FILE_EXTENSIONS = {
+              "txt", "java", "cpp", "xml", "csharp", "asm",
+              "js", "php", "r", "py", "go", "python", "ts", "html",
+              "css", "scss"
+      };
+      private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+      private final Schoolbot schoolbot;
+      private final OkHttpClient client;
 
-    public MessageHandler(Schoolbot schoolbot)
-    {
-        this.schoolbot = schoolbot;
-        client = new OkHttpClient();
-    }
+      public MessageHandler(Schoolbot schoolbot)
+      {
+            this.schoolbot = schoolbot;
+            client = new OkHttpClient();
+      }
 
     public void handle(GuildMessageReceivedEvent event)
     {
         String messageStr = event.getMessage().getContentRaw();
         User author = event.getAuthor();
         Message message = event.getMessage();
-
-
-        if (event.getMessage().getContentRaw().startsWith("Hi Apples!"))
-        {
-            event.getChannel().sendMessage("Hi! Tell me your name, or say \"Stop\"!").queue();
-        }
 
 
         if (event.getMessage().getAttachments().size() > 0)
@@ -51,7 +49,8 @@ public class MessageHandler
             return;
         }
 
-        schoolbot.getCommandHandler().handle(event);
+
+          schoolbot.getCommandHandler().handle(event);
 
     }
 

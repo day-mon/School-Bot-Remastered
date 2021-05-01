@@ -27,6 +27,9 @@ public class Main
         {
             bot.getLogger().debug("Schoolbot was interrupted on start up. Please try again!");
         }
+
+
     }
+
 
 }

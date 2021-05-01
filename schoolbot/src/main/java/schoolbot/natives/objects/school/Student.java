@@ -5,19 +5,12 @@ import net.dv8tion.jda.api.entities.User;
 
 import java.util.HashMap;
 
-/**
- * A student: Joshigakusei's way of handling users.
- *
- * @author Elsklivet#8867
- */
+
 @Deprecated
 public class Student
 {
-    /**
-     *
-     */
-    private static final long serialVersionUID = -7534317990933684475L;
-    /**
+
+      /**
      * School this student is attending.
      */
     private School mySchool;
@@ -92,32 +85,14 @@ public class Student
      * @param clazz Class ({@code Classroom}) to remove
      * @return
      */
-    public void addClass(Classroom clazz)
-    {
-        this.myClasses.putIfAbsent(clazz.getClassID(), clazz);
-    }
 
-    /**
-     * @param major Major to add to this student's list
-     */
 
-    /**
-     * Remove a class from this student's schedule.
-     *
-     * @param clazz Class ({@code Classroom}) to remove
-     * @return
-     */
-    public boolean removeClass(Classroom clazz)
-    {
-        if (myClasses.containsKey(clazz.getClassID()))
-        {
-            myClasses.remove(clazz.getClassID());
-            return true;
-        }
-        return false;
-    }
+      /**
+       * @param major Major to add to this student's list
+       */
 
-    public void addAssignment(Assignment assignment)
+
+      public void addAssignment(Assignment assignment)
     {
         assignments.putIfAbsent(assignment, false);
     }

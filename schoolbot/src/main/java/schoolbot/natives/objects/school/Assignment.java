@@ -1,133 +1,165 @@
 package schoolbot.natives.objects.school;
 
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.Date;
+import org.jetbrains.annotations.NotNull;
+
+import java.time.LocalDate;
+import java.util.Objects;
 
 
-public class Assignment implements Serializable, Comparable<Assignment> {
+public class Assignment implements Comparable<Assignment>
+{
+    private String name;
+    private String description;
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = -1874828658877582324L;
-    private Professor assignedProfessor;
-    private Classroom clazz;
-    private Date dueDate;
-    private LocalDateTime ldt;
-    private String assignmentName;
-    private double pointsAmount;
-    private String assignmentRef;
-    private boolean expired = false;
-    private int[] intervals;
+    private int points;
+    private int professorID;
+    private int id;
 
-    public Assignment() 
+    private LocalDate dueDate;
+
+    private AssignmentType assignmentType;
+
+
+    public Assignment()
     {
 
     }
 
-    public Assignment(Classroom clazz, String assignmentName, Date dueDate, double pointsAmount, String assignmentType)
+
+    public AssignmentType getAssignmentType()
     {
-        this.clazz = clazz;
-        this.assignmentName = assignmentName;
-        this.pointsAmount = pointsAmount;
-        this.dueDate = dueDate;
-        this.assignmentRef = assignmentType;
-        assignedProfessor = clazz.getProfessor();
-        ldt = LocalDateTime.now();
-
+        return assignmentType;
     }
 
-
-
-    public Professor getAssignedProfessor() {
-        return assignedProfessor;
+    public void setAssignmentType(AssignmentType assignmentType)
+    {
+        this.assignmentType = assignmentType;
     }
 
-    public String getAssignmentName() {
-        return assignmentName;
-    }
-
-    public String getAssignmentRef() {
-        return assignmentRef;
-    }
-
-    public Classroom getClazz() {
-        return clazz;
-    }
-
-    public Date getDueDate() {
+    public LocalDate getDueDate()
+    {
         return dueDate;
     }
 
-    public double getPointsAmount() {
-        return pointsAmount;
-    }
-
-    public LocalDateTime getLdt() {
-        return ldt;
-    }
-
-    public boolean isExpired() {
-        return expired;
-    }
-
-    public void setExpired(boolean e) {
-        expired = e;
-    }
-
-
-    public void setAssignedProfessor(Professor assignedProfessor) {
-        this.assignedProfessor = assignedProfessor;
-    }
-
-    public void setAssignmentName(String assignmentName) {
-        this.assignmentName = assignmentName;
-    }
-
-
-    public void setIntervals(int[] intervals) {
-        intervals = new int[intervals.length];
-        this.intervals = intervals;
-    }
-
-    public void setClazz(Classroom clazz) {
-        this.clazz = clazz;
-    }
-
-    public void setAssignmentRef(String assignmentRef) {
-        this.assignmentRef = assignmentRef;
-    }
-
-    public void setDueDate(Date dueDate) {
+    public void setDueDate(LocalDate dueDate)
+    {
         this.dueDate = dueDate;
     }
 
-    public void setPointsAmount(double pointsAmount) {
-        this.pointsAmount = pointsAmount;
+    public int getPoints()
+    {
+        return points;
     }
 
-    @Override
-    public String toString() 
+    public void setPoints(int points)
     {
-        return  "Assignment Name: " + assignmentName + "\n" +
-                "Assignment Point Amount: " + pointsAmount + "\n" +
-                "Due Date: " + dueDate + "\n";
+        this.points = points;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public int getProfessorID()
+    {
+        return professorID;
+    }
+
+    public void setProfessorID(int professorID)
+    {
+        this.professorID = professorID;
+    }
+
+    public int getId()
+    {
+        return id;
+    }
+
+    public void setId(int id)
+    {
+        this.id = id;
+    }
+
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription(String description)
+    {
+        this.description = description;
     }
 
 
-    @Override
-	public int compareTo(Assignment o) 
+    public int compareTo(@NotNull Assignment o)
     {
-		if (this.dueDate == o.dueDate) {
-            return 0;
-            } else if (this.dueDate.before(o.dueDate)) {
-                return -1;
-            }
+        if (this.dueDate == dueDate)
+        {
             return 1;
         }
-        
+        else if (this.dueDate.isBefore(o.dueDate))
+        {
+            return -1;
+        }
+        return -1;
     }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Assignment that = (Assignment) o;
+        return points == that.points && professorID == that.professorID && id == that.id && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(dueDate, that.dueDate) && assignmentType == that.assignmentType;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(name, description, points, professorID, id, dueDate, assignmentType);
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Assignment {" +
+                "name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", points=" + points +
+                ", professorID=" + professorID +
+                ", id=" + id +
+                ", dueDate=" + dueDate +
+                ", assignmentType=" + assignmentType +
+                '}';
+    }
+}
+
+enum AssignmentType
+{
+    HOMEWORK("Homework"),
+    QUIZ("Quiz"),
+    EXAM("Exam"),
+    EXTRA_CREDIT("Exam Credit");
+
+    String assignmentType;
+
+    AssignmentType(String assignmentType)
+    {
+        this.assignmentType = assignmentType;
+    }
+
+    public String getAssignmentType()
+    {
+        return assignmentType;
+    }
+}
+
     
 

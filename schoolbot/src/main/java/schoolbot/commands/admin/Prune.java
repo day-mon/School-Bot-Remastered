@@ -30,13 +30,15 @@ public class Prune extends Command
                 .takeAsync(100)
                 .thenApplyAsync(messages ->
                 {
-                    List<Message> messagesToDelete = messages.stream()
-                            .filter(msg -> msg.getContentRaw().startsWith(SchoolbotConstants.DEFAULT_PREFIX) || msg.getAuthor().getId().equals(SchoolbotConstants.GENIUS_ID_STRING))
-                            .filter(msg -> Duration.between(msg.getTimeCreated(), event.getMessage().getTimeCreated()).toHours() <= 24)
-                            .collect(Collectors.toList());
-                    event.getChannel().purgeMessages(messagesToDelete);
+                      List<Message> messagesToDelete = messages
+                              .stream()
+                              .filter(msg -> msg.getContentRaw().startsWith(SchoolbotConstants.DEFAULT_PREFIX) || msg.getAuthor().getId().equals(SchoolbotConstants.GENIUS_ID_STRING))
+                              .filter(msg -> Duration.between(msg.getTimeCreated(), event.getMessage().getTimeCreated()).toHours() <= 24)
+                              .collect(Collectors.toList());
 
-                    return messagesToDelete.size();
+                      event.getChannel().purgeMessages(messagesToDelete);
+
+                      return messagesToDelete.size();
                 }).whenCompleteAsync((messageTotal, throwable) -> event.getChannel().sendMessage(
                 Emoji.RECYCLE.getAsChat() + " Successfully purged `" + messageTotal + "` messages"
         ).queue(botMessage -> botMessage.delete().queueAfter(5, TimeUnit.SECONDS)));

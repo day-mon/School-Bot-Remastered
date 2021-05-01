@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import schoolbot.Schoolbot;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
+import schoolbot.natives.objects.command.CommandFlag;
 import schoolbot.natives.objects.misc.Emoji;
 import schoolbot.natives.objects.school.School;
 import schoolbot.natives.util.DatabaseUtil;
@@ -21,6 +22,8 @@ public class ProfessorAdd extends Command
     public ProfessorAdd(Command parent)
     {
         super(parent, "Adds a professor to the server list", "[school name] [professor name] [professor email]", 0);
+        addFlags(CommandFlag.DATABASE);
+
     }
 
     @Override
@@ -48,6 +51,8 @@ public class ProfessorAdd extends Command
         String lastName;
         String emailPrefix;
         String schoolName;
+        int schoolID = 0;
+
 
         public ProfessorStateMachine(Schoolbot schoolbot, MessageChannel channel, User author, List<School> schools)
         {
@@ -104,6 +109,7 @@ public class ProfessorAdd extends Command
                     {
                         channel.sendMessage("Thank you " + event.getAuthor().getAsMention() + " " + Emoji.SMILEY_FACE.getAsChat() + " your professors school was found!").queue();
                         schoolName = schools.get(0).getSchoolName();
+                        schoolID = schools.get(0).getSchoolID();
                         channel.sendMessage("Lastly, enter his email prefix: ").queue();
                         state = 3;
                     }
@@ -116,17 +122,17 @@ public class ProfessorAdd extends Command
                 case 3 -> {
                     emailPrefix = content;
                     channel.sendMessage("Thank you.. Inserting all of the info into my database!").queue();
-                    if (DatabaseUtil.addProfessor(schoolbot, firstName, lastName, emailPrefix, schoolName, event.getGuild().getIdLong()))
+                    if (DatabaseUtil.addProfessor(schoolbot, firstName, lastName, emailPrefix, schoolID, event.getGuild().getIdLong()))
                     {
                         channel.sendMessage(new EmbedBuilder()
                                 .setTitle("Professor Added")
                                 .addField("Professor Name", firstName + " " + lastName, false)
                                 .addField("School Name", schoolName, false)
                                 .addField("Email prefix", emailPrefix, false)
-
                                 .setColor(Color.GREEN)
                                 .setTimestamp(Instant.now())
-                                .build()).queue();
+                                .build())
+                                .queue();
                     }
                     else
                     {

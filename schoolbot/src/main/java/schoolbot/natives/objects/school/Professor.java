@@ -2,12 +2,11 @@ package schoolbot.natives.objects.school;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.internal.entities.GuildImpl;
 
 import java.awt.*;
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.HashMap;
+import java.util.List;
 
 
 public class Professor implements Serializable {
@@ -16,48 +15,59 @@ public class Professor implements Serializable {
      *
      */
     private static final long serialVersionUID = 3024391926657713863L;
-    private HashMap<String, Classroom> professorsClasses;
-    private HashMap<Student, Classroom> studentsInClasses;
-    private HashMap<String, Assignment> assignments;
+    private List<Classroom> listOfClasses;
     private String email;
     private String emailPrefix;
-    private transient GuildImpl guild;
+    // Redundant.. will fix..
     private String firstName;
     private String lastName;
+    private String fullName;
     private int age;
+    private int schoolID;
+    private int id;
+    private int classCount;
+
     private String officeHours;
     private School professorsSchool;
 
     public Professor()
     {
-        professorsClasses = new HashMap<>();
-        studentsInClasses = new HashMap<>();
-        assignments = new HashMap<>();
+        classCount = 1;
     }
 
-    public Professor(GuildImpl guild, String firstName, String lastName, String email, School professorsSchool)
+    public Professor(String firstName, String lastName, String emailPrefix)
     {
-        this.email = email;
-        this.emailPrefix = email;
-        this.guild = guild;
-        this.firstName = firstName;
+        this.fullName = firstName;
         this.lastName = lastName;
-        this.professorsSchool = professorsSchool;
-        professorsClasses = new HashMap<>();
-        studentsInClasses = new HashMap<>();
-        assignments = new HashMap<>();
-
+        this.emailPrefix = emailPrefix;
+        this.fullName = firstName + " " + lastName;
+        classCount = 1;
     }
+
 
     public void setEmail(String email)
     {
         this.email = email;
     }
 
+    public void setClassCount(int classCount)
+    {
+        this.classCount = classCount;
+    }
+
     public void setFirstName(String firstName)
     {
-        this.firstName = firstName
-        ;
+        this.firstName = firstName;
+    }
+
+    public int getId()
+    {
+        return id;
+    }
+
+    public void setId(int id)
+    {
+        this.id = id;
     }
 
     public void setLastName(String lastName)
@@ -65,20 +75,18 @@ public class Professor implements Serializable {
         this.lastName = lastName;
     }
 
-    public void setGuild(GuildImpl guild)
+
+    public void setSchoolID(int schoolID)
     {
-        this.guild = guild;
+        this.schoolID = schoolID;
     }
 
-    public void setProfessorsClasses(HashMap<String, Classroom> professorsClasses)
+    public int getSchoolID()
     {
-        this.professorsClasses = professorsClasses;
+        return schoolID;
     }
 
-    public void setStudentsInClasses(HashMap<Student, Classroom> studentsInClasses)
-    {
-        this.studentsInClasses = studentsInClasses;
-    }
+
 
     public String getEmailPrefix() {
         return email;
@@ -96,58 +104,12 @@ public class Professor implements Serializable {
         return lastName;
     }
 
-    public GuildImpl getGuild() {
-        return guild;
-    }
 
-    public HashMap<String, Classroom> getProfessorsClasses() {
-        return professorsClasses;
-    }
-
-    public HashMap<Student, Classroom> getStudentsInClasses() {
-        return studentsInClasses;
-    }
-
-    public void addClass(Classroom clazz) {
-        professorsClasses.putIfAbsent(clazz.getClassNum(), clazz);
-    }
-
-    public void addStudent(Student student, Classroom clazz) {
-        studentsInClasses.putIfAbsent(student, clazz);
-    }
-
-    public boolean removeClass(Classroom clazz) {
-        if (professorsClasses.containsKey(clazz.getClassID())) {
-            professorsClasses.remove(clazz.getClassID());
-            return true;
-        }
-        return false;
-    }
-
-    public boolean removeStudent(Student student)
+    public void setFullName(String fullName)
     {
-        if (studentsInClasses.containsKey(student.getRealName()))
-        {
-            studentsInClasses.remove(student.getRealName());
-            return true;
-        }
-        return false;
+        this.fullName = fullName;
     }
 
-    public void addAssignment(Assignment assignment)
-    {
-        assignments.putIfAbsent(assignment.getAssignmentRef(), assignment);
-    }
-
-    public boolean removeAssignment(Assignment assignment)
-    {
-        if (assignments.containsKey(assignment.getAssignmentRef()))
-        {
-            assignments.remove(assignment.getAssignmentRef());
-            return true;
-        }
-        return false;
-    }
 
     /**
      * @return String return the name
@@ -194,12 +156,16 @@ public class Professor implements Serializable {
     /**
      * @return School return the professorsSchool
      */
-    public School getProfessorsSchool() {
+    public School getProfessorsSchool()
+    {
         return professorsSchool;
     }
 
-    public HashMap<String, Assignment> getAssignments() {
-        return assignments;
+
+    public int increaseClassCount()
+    {
+        return this.classCount += 1;
+
     }
 
     /**
@@ -214,20 +180,12 @@ public class Professor implements Serializable {
     {
         return new EmbedBuilder()
                 .setTitle("Professor " + lastName)
-                .addField("Professor Name", firstName + " " + lastName, false)
-                .addField("Email prefix", emailPrefix, false)
+                .addField("Professor Name", fullName, false)
+                .addField("Email prefix", emailPrefix + " \n ***(These are assumed unless set otherwise)*** ", false)
+                .addField("Classes Taught", "" + classCount, false)
                 .setColor(Color.blue)
                 .setTimestamp(Instant.now())
                 .build();
-    }
-
-    @Override
-    public String toString()
-    {
-        return lastName + "'s Current University Employer: " + getProfessorsSchool().getSchoolName() + "\n" + lastName
-                + "'s Last Name: " + getLastName() + "\n" + lastName + "'s First Name: " + getFirstName() + "\n"
-                + lastName + "'s Email: " + getEmail() + "\n" + lastName + "'s Office Hours: " + getOfficeHours() + "\n " + "Amount of classes: " + professorsClasses.size() + "\n" +
-                "-------------------------------------------------------------\n";
     }
 
 }

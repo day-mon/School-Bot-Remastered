@@ -13,7 +13,7 @@ public class Hello extends Command
 
     public Hello(EventWaiter waiter)
     {
-        super("s", "s", 0);
+        super("", "s", 0);
         this.waiter = waiter;
         addCalls("hello");
     }
