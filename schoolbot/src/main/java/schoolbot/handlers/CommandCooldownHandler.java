@@ -15,12 +15,6 @@ public class CommandCooldownHandler
     private static final Map<CooledCommand, Long> COOLDOWN_MAP = new ConcurrentHashMap<>();
 
 
-    private CommandCooldownHandler()
-    {
-    }
-
-    ;
-
     public static boolean isOnCooldown(Member member, Command command)
     {
         long userID = member.getIdLong();

@@ -4,6 +4,7 @@ package schoolbot.natives.objects.school;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
+import java.time.OffsetTime;
 import java.util.Objects;
 
 
@@ -17,6 +18,7 @@ public class Assignment implements Comparable<Assignment>
     private int id;
 
     private LocalDate dueDate;
+    private OffsetTime offsetTime;
 
     private AssignmentType assignmentType;
 
@@ -97,6 +99,15 @@ public class Assignment implements Comparable<Assignment>
         this.description = description;
     }
 
+    public OffsetTime getOffsetTime()
+    {
+        return offsetTime;
+    }
+
+    public void setOffsetTime(OffsetTime offsetTime)
+    {
+        this.offsetTime = offsetTime;
+    }
 
     public int compareTo(@NotNull Assignment o)
     {
@@ -139,27 +150,29 @@ public class Assignment implements Comparable<Assignment>
                 ", assignmentType=" + assignmentType +
                 '}';
     }
+
+    public enum AssignmentType
+    {
+        HOMEWORK("Homework"),
+        QUIZ("Quiz"),
+        EXAM("Exam"),
+        EXTRA_CREDIT("Exam Credit");
+
+        String assignmentType;
+
+        AssignmentType(String assignmentType)
+        {
+            this.assignmentType = assignmentType;
+        }
+
+        public String getAssignmentType()
+        {
+            return assignmentType;
+        }
+    }
 }
 
-enum AssignmentType
-{
-    HOMEWORK("Homework"),
-    QUIZ("Quiz"),
-    EXAM("Exam"),
-    EXTRA_CREDIT("Exam Credit");
 
-    String assignmentType;
-
-    AssignmentType(String assignmentType)
-    {
-        this.assignmentType = assignmentType;
-    }
-
-    public String getAssignmentType()
-    {
-        return assignmentType;
-    }
-}
 
     
 

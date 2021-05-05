@@ -8,7 +8,7 @@ public class SchoolEdit extends Command
 {
     public SchoolEdit(Command parent)
     {
-        super(parent, "Edits a school given the name", "[school name] [attribute to edit] [edit]", 0);
+        super(parent, "Edits a school", "[none]", 0);
         addPermissions(Permission.ADMINISTRATOR);
     }
 

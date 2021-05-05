@@ -69,6 +69,7 @@ public class CommandHandler
                         }
                         Command command = (Command) instance;
 
+
                         commandMap.put(command.getName(), command);
 
                         for (String aliases : command.getCalls())
@@ -103,7 +104,6 @@ public class CommandHandler
                   return;
             }
 
-
             String alias = filteredArgs.get(0).toLowerCase();
             Command com = commands.get(alias);
 
@@ -113,18 +113,17 @@ public class CommandHandler
             }
 
 
-            /**
-             * 2000dec
-             */
-            // Removing command call
             filteredArgs.remove(0);
             CommandEvent commandEvent = new CommandEvent(event, com, filteredArgs, schoolbot);
 
-            if (!com.hasChildren())
+
+            // If someone sends a parent command or doesnt have any children
+            if (!com.hasChildren() || filteredArgs.isEmpty())
             {
                   com.process(commandEvent);
                   return;
             }
+
             com.getChildren()
                     .stream()
                     .filter(child -> child.getName().split(child.getParent().getName())[1].equalsIgnoreCase(filteredArgs.get(0)))
@@ -133,8 +132,6 @@ public class CommandHandler
                             child -> child.process(new CommandEvent(event, child, filteredArgs.subList(1, filteredArgs.size()), schoolbot)),
                             () -> com.process(commandEvent)
                     );
-
-
       }
 
 

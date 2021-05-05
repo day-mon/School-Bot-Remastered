@@ -12,6 +12,7 @@ public class AssignmentRemove extends Command
     public AssignmentRemove(Command parent)
     {
         super(parent, " ", " ", 1);
+
     }
 
 

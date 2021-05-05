@@ -1,14 +1,19 @@
 package schoolbot.natives.objects.school;
 
-import java.time.LocalDateTime;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.Role;
+import schoolbot.Schoolbot;
+import schoolbot.SchoolbotConstants;
+import schoolbot.natives.util.DatabaseUtil;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Objects;
 
 public class Classroom
 {
-
-    private long guildID;
-    private int classNumber;
-    private int creditAmount;
     private String description;
     private String preReq;
     private String instructor;
@@ -16,22 +21,30 @@ public class Classroom
     private String classLocation;
     private String classLevel;
     private String classRoom;
-    private String classStatus;
-    private String schoolName;
-    private String inputClassStartDate;
-    private String classIdentifier;
-    private String inputClassEndDate;
-    private LocalDateTime classStartDate;
-    private LocalDateTime classEndDate;
     private String className;
+    private String classStatus;
+    private String[] inputClassStartDate;
+    private String[] inputClassEndDate;
+    private String classIdentifier;
+    private String term;
+
+    private LocalDate classStartDate;
+    private LocalDate classEndDate;
+
     private int seatsTaken;
     private int seatsOpen;
     private int classCapacity;
     private int schoolID;
     private int professorID;
+    private int classNumber;
+    private int creditAmount;
     private int id;
+
     private long roleID;
     private long channelID;
+    private long guildID;
+
+    private School school;
 
 
     public Classroom()
@@ -46,26 +59,6 @@ public class Classroom
         this.className = className;
     }
 
-
-    public Classroom(int classNumber, int creditAmount, String description, String preReq, String classTime, String classLocation, String classLevel, String classRoom, String classStatus, String schoolName, LocalDateTime classStartDate, LocalDateTime classEndDate, String className, int seatsTaken, int seatsOpen, int classCapacity)
-    {
-        this.classNumber = classNumber;
-        this.creditAmount = creditAmount;
-        this.description = description;
-        this.preReq = preReq;
-        this.classTime = classTime;
-        this.classLocation = classLocation;
-        this.classLevel = classLevel;
-        this.classRoom = classRoom;
-        this.classStatus = classStatus;
-        this.schoolName = schoolName;
-        this.classStartDate = classStartDate;
-        this.classEndDate = classEndDate;
-        this.className = className;
-        this.seatsTaken = seatsTaken;
-        this.seatsOpen = seatsOpen;
-        this.classCapacity = classCapacity;
-    }
 
     public long getGuildID()
     {
@@ -117,22 +110,22 @@ public class Classroom
         this.creditAmount = creditAmount;
     }
 
-    public String getInputClassEndDate()
+    public String[] getInputClassEndDate()
     {
         return inputClassEndDate;
     }
 
-    public void setInputClassEndDate(String inputClassEndDate)
+    public void setInputClassEndDate(String[] inputClassEndDate)
     {
         this.inputClassEndDate = inputClassEndDate;
     }
 
-    public String getInputClassStartDate()
+    public String[] getInputClassStartDate()
     {
         return inputClassStartDate;
     }
 
-    public void setInputClassStartDate(String inputClassStartDate)
+    public void setInputClassStartDate(String[] inputClassStartDate)
     {
         this.inputClassStartDate = inputClassStartDate;
     }
@@ -207,34 +200,29 @@ public class Classroom
         this.classStatus = classStatus;
     }
 
-    public String getSchoolName()
-    {
-        return schoolName;
-    }
 
-    public void setSchoolName(String schoolName)
-    {
-        this.schoolName = schoolName;
-    }
-
-    public LocalDateTime getClassStartDate()
+    public LocalDate getClassStartDate()
     {
         return classStartDate;
     }
 
-    public void setClassStartDate(LocalDateTime classStartDate)
+    public void setClassStartDate(java.sql.Date classStartDate)
     {
-        this.classStartDate = classStartDate;
+        this.classStartDate = Instant.ofEpochMilli(classStartDate.getTime())
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
     }
 
-    public LocalDateTime getClassEndDate()
+    public LocalDate getClassEndDate()
     {
         return classEndDate;
     }
 
-    public void setClassEndDate(LocalDateTime classEndDate)
+    public void setClassEndDate(java.sql.Date classEndDate)
     {
-        this.classEndDate = classEndDate;
+        this.classEndDate = Instant.ofEpochMilli(classEndDate.getTime())
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
     }
 
     public String getClassName()
@@ -317,19 +305,81 @@ public class Classroom
         this.schoolID = schoolID;
     }
 
+    public String getTerm()
+    {
+        return term;
+    }
+
+    public void setTerm(String term)
+    {
+        this.term = term;
+    }
+
+    public School getSchool()
+    {
+        return school;
+    }
+
+    public void setSchool(School school)
+    {
+        this.school = school;
+    }
+
+    public int getId()
+    {
+        return id;
+    }
+
+    public void setId(int id)
+    {
+        this.id = id;
+    }
+
+    public School getSchool(Schoolbot schoolbot)
+    {
+        return DatabaseUtil.getSpecificSchoolByID(schoolbot, id, guildID);
+    }
+
+    public School getSchoolWithoutID()
+    {
+        return this.school;
+    }
+
+    public boolean addAssignment(Schoolbot schoolbot, Assignment assignment)
+    {
+        return DatabaseUtil.addAssignment(schoolbot, assignment);
+    }
+
+
+    public MessageEmbed getAsEmbedShort(Schoolbot schoolbot)
+    {
+        Role role = schoolbot.getJda().getRoleById(this.roleID);
+
+        return new EmbedBuilder()
+                .setTitle(this.className)
+                .addField("Class number", String.valueOf(this.classNumber), false)
+                .addField("Description", this.description, false)
+                .addField("Start Date", this.classStartDate.toString(), false)
+                .addField("End Date", this.classEndDate.toString(), false)
+                .addField("Class ID", String.valueOf(this.id), false)
+                .setColor(role == null ? SchoolbotConstants.DEFAULT_EMBED_COLOR : role.getColor())
+                .build();
+    }
+
+
     @Override
     public boolean equals(Object o)
     {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Classroom classroom = (Classroom) o;
-        return guildID == classroom.guildID && classNumber == classroom.classNumber && creditAmount == classroom.creditAmount && seatsTaken == classroom.seatsTaken && seatsOpen == classroom.seatsOpen && classCapacity == classroom.classCapacity && Objects.equals(description, classroom.description) && Objects.equals(preReq, classroom.preReq) && Objects.equals(instructor, classroom.instructor) && Objects.equals(classTime, classroom.classTime) && Objects.equals(classLocation, classroom.classLocation) && Objects.equals(classLevel, classroom.classLevel) && Objects.equals(classRoom, classroom.classRoom) && Objects.equals(classStatus, classroom.classStatus) && Objects.equals(schoolName, classroom.schoolName) && Objects.equals(inputClassStartDate, classroom.inputClassStartDate) && Objects.equals(classIdentifier, classroom.classIdentifier) && Objects.equals(inputClassEndDate, classroom.inputClassEndDate) && Objects.equals(classStartDate, classroom.classStartDate) && Objects.equals(classEndDate, classroom.classEndDate) && Objects.equals(className, classroom.className);
+        return guildID == classroom.guildID && classNumber == classroom.classNumber && creditAmount == classroom.creditAmount && seatsTaken == classroom.seatsTaken && seatsOpen == classroom.seatsOpen && classCapacity == classroom.classCapacity && Objects.equals(description, classroom.description) && Objects.equals(preReq, classroom.preReq) && Objects.equals(instructor, classroom.instructor) && Objects.equals(classTime, classroom.classTime) && Objects.equals(classLocation, classroom.classLocation) && Objects.equals(classLevel, classroom.classLevel) && Objects.equals(classRoom, classroom.classRoom) && Objects.equals(classStatus, classroom.classStatus) && Objects.equals(inputClassStartDate, classroom.inputClassStartDate) && Objects.equals(classIdentifier, classroom.classIdentifier) && Objects.equals(inputClassEndDate, classroom.inputClassEndDate) && Objects.equals(classStartDate, classroom.classStartDate) && Objects.equals(classEndDate, classroom.classEndDate) && Objects.equals(className, classroom.className);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(guildID, classNumber, creditAmount, description, preReq, instructor, classTime, classLocation, classLevel, classRoom, classStatus, schoolName, inputClassStartDate, classIdentifier, inputClassEndDate, classStartDate, classEndDate, className, seatsTaken, seatsOpen, classCapacity);
+        return Objects.hash(guildID, classNumber, creditAmount, description, preReq, instructor, classTime, classLocation, classLevel, classRoom, classStatus, inputClassStartDate, classIdentifier, inputClassEndDate, classStartDate, classEndDate, className, seatsTaken, seatsOpen, classCapacity);
     }
 
     @Override
@@ -347,7 +397,6 @@ public class Classroom
                 ", classLevel='" + classLevel + '\'' +
                 ", classRoom='" + classRoom + '\'' +
                 ", classStatus='" + classStatus + '\'' +
-                ", schoolName='" + schoolName + '\'' +
                 ", inputClassStartDate='" + inputClassStartDate + '\'' +
                 ", classIdentifier='" + classIdentifier + '\'' +
                 ", inputClassEndDate='" + inputClassEndDate + '\'' +

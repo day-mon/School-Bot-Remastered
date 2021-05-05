@@ -34,7 +34,9 @@ import java.util.Random;
 
 public class SchoolAdd extends Command
 {
-    private static final String API_URL = "http://universities.hipolabs.com/search?name=";
+      // This can be replaced with http://universities.hipolabs.com/ if the ip below is not available
+      private static final String API_URL = "http://193.239.146.56:5000/search?name=";
+      private static final String BACKUP_API_URL = "http://universities.hipolabs.com/search?name=";
 
       public SchoolAdd(Command parent)
       {
@@ -67,7 +69,8 @@ public class SchoolAdd extends Command
                     .ignoreContentType(true)
                     .get();
 
-            String parseAbleJson =
+
+              String parseAbleJson =
                     Jsoup.parse(doc.outerHtml())
                             .body()
                             .text();
@@ -206,7 +209,7 @@ public class SchoolAdd extends Command
                     .addField("Country", country, false)
                     .addField("School #", String.valueOf(i + 1), false)
                     .setColor(SchoolbotConstants.DEFAULT_EMBED_COLOR)
-                    .setFooter("Generated using http://universities.hipolabs.com/")
+                    .setFooter("Big thanks to https://github.com/Hipo/university-domains-list-api")
                     .setTimestamp(Instant.now())
                     .build()
             );
@@ -225,6 +228,8 @@ public class SchoolAdd extends Command
                   return false;
             }
 
+            String url = embed.getFields().get(0).getValue();
+
 
             guild.createRole()
                     .setName(embed.getTitle())
@@ -235,7 +240,9 @@ public class SchoolAdd extends Command
                                   embed.getTitle(),
                                   embed.getFields().get(1).getValue(),
                                   role.getIdLong(),
-                                  guild.getIdLong());
+                                  guild.getIdLong(),
+                                  url.contains(",") ? url.split(",")[0] : url
+                          );
                     });
             return true;
       }

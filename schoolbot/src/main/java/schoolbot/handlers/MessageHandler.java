@@ -118,7 +118,7 @@ public class MessageHandler
             Response response = client.newCall(request).execute();
             if (!response.isSuccessful())
             {
-                LOGGER.error("Request not successful. Check pastecord.com");
+                LOGGER.error("Request not successful. Refer to pastecord or check your connection to it");
             }
             else
             {
@@ -127,7 +127,7 @@ public class MessageHandler
         }
         catch (Exception e)
         {
-            LOGGER.error("Error occurred: {}", e.getCause(), e);
+            LOGGER.error("Error occurred in MessageHandler", e);
         }
         return url;
     }

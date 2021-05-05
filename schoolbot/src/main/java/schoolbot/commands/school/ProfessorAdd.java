@@ -29,7 +29,7 @@ public class ProfessorAdd extends Command
     @Override
     public void run(CommandEvent event)
     {
-        List<School> schools = DatabaseUtil.getSchools(event.getSchoolbot());
+        List<School> schools = DatabaseUtil.getSchools(event.getSchoolbot(), event.getGuild().getIdLong());
 
         if (schools.isEmpty())
         {

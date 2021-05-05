@@ -56,8 +56,8 @@ public class ListProfessors extends Command
         {
             pages.add(new Page(PageType.EMBED, p.getProfessorAsEmbed()));
         }
-        event.getChannel().sendMessage((MessageEmbed) pages.get(0).getContent()).queue(success ->
-                Pages.paginate(success, pages));
+        event.getChannel().sendMessage((MessageEmbed) pages.get(0).getContent())
+                .queue(success -> Pages.paginate(success, pages));
 
     }
 }
