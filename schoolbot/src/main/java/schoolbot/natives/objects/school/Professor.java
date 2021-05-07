@@ -27,12 +27,13 @@ public class Professor implements Serializable {
     private int id;
     private int classCount;
 
+
     private String officeHours;
     private School professorsSchool;
 
     public Professor()
     {
-        classCount = 1;
+        classCount = 0;
     }
 
     public Professor(String firstName, String lastName, String emailPrefix)
@@ -41,7 +42,28 @@ public class Professor implements Serializable {
         this.lastName = lastName;
         this.emailPrefix = emailPrefix;
         this.fullName = firstName + " " + lastName;
-        classCount = 1;
+        classCount = 0;
+    }
+
+    public Professor(String firstName, String lastName, String emailPrefix, int id, School school)
+    {
+        this.fullName = firstName;
+        this.lastName = lastName;
+        this.emailPrefix = emailPrefix;
+        this.fullName = firstName + " " + lastName;
+        this.professorsSchool = school;
+        this.id = id;
+        classCount = 0;
+
+    }
+
+    public Professor(String firstName, String lastName, School school)
+    {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.fullName = firstName + " " + lastName;
+        this.lastName = lastName.toLowerCase();
+        this.professorsSchool = school;
     }
 
 
@@ -89,21 +111,24 @@ public class Professor implements Serializable {
 
 
     public String getEmailPrefix() {
-        return email;
+        return emailPrefix;
     }
 
-    public String getEmail() {
+    public String getEmail()
+    {
         return email + professorsSchool.getEmailSuffix();
     }
 
-    public String getfirstName() {
-        return firstName;
-    }
 
-    public String getLastName() {
+    public String getLastName()
+    {
         return lastName;
     }
 
+    public String getFullName()
+    {
+        return fullName;
+    }
 
     public void setFullName(String fullName)
     {
@@ -168,6 +193,11 @@ public class Professor implements Serializable {
 
     }
 
+    public void addClass(Classroom classroom)
+    {
+        listOfClasses.add(classroom);
+    }
+
     /**
      * @param professorsSchool the professorsSchool to set
      */
@@ -176,7 +206,7 @@ public class Professor implements Serializable {
         this.professorsSchool = professorsSchool;
     }
 
-    public MessageEmbed getProfessorAsEmbed()
+    public MessageEmbed getAsEmbed()
     {
         return new EmbedBuilder()
                 .setTitle("Professor " + lastName)
@@ -187,5 +217,17 @@ public class Professor implements Serializable {
                 .setTimestamp(Instant.now())
                 .build();
     }
+
+    public EmbedBuilder getAsEmbedBuilder()
+    {
+        return new EmbedBuilder()
+                .setTitle("Professor " + lastName)
+                .addField("Professor Name", fullName, false)
+                .addField("Email prefix", emailPrefix + " \n **(These are assumed unless set otherwise)** ", false)
+                .addField("Classes Taught", "" + classCount, false)
+                .setColor(Color.blue)
+                .setTimestamp(Instant.now());
+    }
+
 
 }

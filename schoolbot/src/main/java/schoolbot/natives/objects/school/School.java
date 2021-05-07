@@ -5,18 +5,20 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
+import schoolbot.natives.objects.command.CommandEvent;
+import schoolbot.natives.objects.misc.Emoji;
 import schoolbot.natives.util.DatabaseUtil;
 import schoolbot.natives.util.Embed;
 
 import java.awt.*;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 public class School implements Serializable
@@ -28,22 +30,38 @@ public class School implements Serializable
     private String emailSuffix;
     private long guildID;
     private long roleID;
-    private int schoolID;
+    private int id;
     private boolean isPittSchool;
+    private List<Classroom> classroomList;
+    private List<Professor> professorList;
 
 
     public School()
     {
         this.roleID = 0L;
         this.schoolName = "N/A";
+        this.classroomList = new ArrayList<>();
+        this.professorList = new ArrayList<>();
     }
+
+    public School(String name, String suffix, long roleID, long guildID, String url)
+    {
+        this.schoolName = name;
+        this.emailSuffix = suffix;
+        this.roleID = roleID;
+        this.guildID = guildID;
+        this.URL = url;
+        this.isPittSchool = name.contains("University of Pittsburgh");
+
+    }
+
 
     public School(String schoolName)
     {
         this.schoolName = schoolName;
         this.roleID = 0L;
-
-
+        this.classroomList = new ArrayList<>();
+        this.professorList = new ArrayList<>();
     }
 
     public School(long guildID, String schoolName, String emailSuffix)
@@ -52,27 +70,35 @@ public class School implements Serializable
         this.guildID = guildID;
         this.emailSuffix = emailSuffix;
         this.roleID = 0L;
+        this.classroomList = new ArrayList<>();
+        this.professorList = new ArrayList<>();
     }
 
-    public School(String schoolName, long roleID, String emailSuffix, boolean isPittSchool)
-    {
-        this.schoolName = schoolName;
-        this.roleID = roleID;
-        this.emailSuffix = emailSuffix;
-        this.isPittSchool = isPittSchool;
-        this.roleID = 0L;
-    }
 
     public School(int id, String name, long roleID, boolean isPittSchool, String email_suffix, String url)
     {
-        this.schoolID = id;
+        this.id = id;
         this.schoolName = name;
         this.roleID = roleID;
         this.isPittSchool = isPittSchool;
         this.emailSuffix = email_suffix;
         this.URL = url;
+        this.classroomList = new ArrayList<>();
+        this.professorList = new ArrayList<>();
     }
 
+    public School(int id, String name, long roleID, boolean isPittSchool, long guildID, String emailSuffix, String url)
+    {
+        this.id = id;
+        this.schoolName = name;
+        this.roleID = roleID;
+        this.isPittSchool = isPittSchool;
+        this.guildID = guildID;
+        this.emailSuffix = emailSuffix;
+        this.URL = url;
+        this.professorList = new ArrayList<>();
+        this.classroomList = new ArrayList<>();
+    }
 
     /**
      * @return school name
@@ -80,6 +106,23 @@ public class School implements Serializable
     public String getSchoolName()
     {
         return schoolName;
+    }
+
+    public void addClass(Classroom classroom)
+    {
+        classroomList.add(classroom);
+    }
+
+    public void addProfessor(Professor professor)
+    {
+        professorList.add(professor);
+        professor.setProfessorsSchool(this);
+    }
+
+    public void removeProfessor(Professor professor)
+    {
+        professorList.remove(professor);
+        professor.setProfessorsSchool(null);
     }
 
 
@@ -100,6 +143,26 @@ public class School implements Serializable
         this.guildID = guildID;
     }
 
+
+    public List<Professor> getProfessorList()
+    {
+        return professorList;
+    }
+
+    public List<Classroom> getClassroomList()
+    {
+        return classroomList;
+    }
+
+    public int getClassesSize()
+    {
+        return classroomList.size();
+    }
+
+    public String getURL()
+    {
+        return URL;
+    }
 
     /**
      * @param schoolName
@@ -129,12 +192,28 @@ public class School implements Serializable
         Role role = schoolbot.getJda().getRoleById(this.roleID);
 
         return new EmbedBuilder()
-                .setTitle(this.schoolName, URL)
+                .setTitle(Emoji.BOOKS.getAsChat() + " " + this.schoolName + " " + Emoji.BOOKS.getAsChat(), URL)
                 .addField("Role", role.getAsMention(), false)
                 .addField("Email Suffix", this.emailSuffix, false)
-                .addField("School ID", String.valueOf(this.schoolID), false)
+                .addField("Amount of Classes", String.valueOf(this.classroomList.size()), false)
+                .addField("Amount of Professors", String.valueOf(this.professorList.size()), false)
                 .setColor(role == null ? SchoolbotConstants.DEFAULT_EMBED_COLOR : role.getColor())
+                .setTimestamp(Instant.now())
                 .build();
+    }
+
+    public EmbedBuilder getAsEmbedBuilder(Schoolbot schoolbot)
+    {
+        Role role = schoolbot.getJda().getRoleById(this.roleID);
+
+        return new EmbedBuilder()
+                .setTitle(Emoji.BOOKS.getAsChat() + " " + this.schoolName + " " + Emoji.BOOKS.getAsChat(), URL)
+                .addField("Role", role.getAsMention(), false)
+                .addField("Email Suffix", this.emailSuffix, false)
+                .addField("Amount of Classes", String.valueOf(this.classroomList.size()), false)
+                .addField("Amount of Professors", String.valueOf(this.professorList.size()), false)
+                .setColor(role == null ? SchoolbotConstants.DEFAULT_EMBED_COLOR : role.getColor())
+                .setTimestamp(Instant.now());
     }
 
     public void setURL(String URL)
@@ -142,14 +221,16 @@ public class School implements Serializable
         this.URL = URL;
     }
 
-    public boolean addClass(GuildMessageReceivedEvent event, Schoolbot schoolbot, String apiURL, Classroom schoolClass)
+    public boolean addPittClass(CommandEvent event, Classroom schoolClass)
     {
         MessageChannel channel = event.getChannel();
         Document document = null;
 
+        System.out.println(schoolClass.getURL());
+
         try
         {
-            document = Jsoup.connect(apiURL).get();
+            document = Jsoup.connect(schoolClass.getURL()).get();
         }
         catch (Exception e)
         {
@@ -167,16 +248,17 @@ public class School implements Serializable
         String className = document.getElementsByClass("primary-head").get(0).text();
 
         // Check if class already exist just in case...
-        List<Classroom> classroomList = DatabaseUtil.getClassByClassName(schoolbot, className, guildID);
+        boolean duplicateClass = schoolClass.getSchool().getClassroomList()
+                .stream()
+                .anyMatch(classroom ->
+                        className.equalsIgnoreCase(schoolClass.getClassName())
+                                && classroom.getTerm().equalsIgnoreCase(schoolClass.getTerm()));
 
-        if (!classroomList.isEmpty())
+
+        if (duplicateClass)
         {
-            Classroom classroom = classroomList.get(0);
-            if (classroom.getClassName().equalsIgnoreCase(schoolName))
-            {
-                event.getChannel().sendMessageFormat("%s already exist in my database!").queue();
-                return false;
-            }
+            Embed.error(event, "This class already exist for ** %s **", schoolClass.getSchoolWithoutID().getSchoolName());
+            return false;
         }
 
         // All Elements on left side of class page
@@ -197,9 +279,9 @@ public class School implements Serializable
         // Setting classname and identifier
         schoolClass.setClassIdentifier(subjectAndClassNameAndNum);
         schoolClass.setClassName(className);
-        schoolClass.setClassNumber(Integer.parseInt(event.getMessage().getContentRaw()));
 
-        for (int left = 2, right = 3; right <= elementsRight.size() - 1; left++, right++)
+
+        for (int left = 1, right = 2; right <= elementsRight.size() - 1; left++, right++)
         {
 
             // Gotta check if the current tag w e are on is a div because if its not we are not on something we wanna scrape.
@@ -216,10 +298,15 @@ public class School implements Serializable
 
             switch (textLeft)
             {
+                case "Class Number" -> {
+                    schoolClass.setClassNumber(Integer.parseInt(textRight));
+                    break;
+                }
                 case "Career" -> {
                     schoolClass.setClassLevel(textRight);
                     break;
                 }
+
                 case "Dates" -> {
                     String[] dates = textRight.split("-");
                     String[] start = dates[0].trim().split("/");
@@ -246,7 +333,7 @@ public class School implements Serializable
                     break;
                 }
                 case "Instructor(s)" -> {
-                    List<Professor> professorList = DatabaseUtil.getProfessors(schoolbot, schoolClass.getSchoolID(), guildID);
+                    List<Professor> professorList = event.getSchoolsProfessors(schoolName);
                     boolean found = false;
                     Professor professorFound = null;
                     if (!professorList.isEmpty())
@@ -257,10 +344,12 @@ public class School implements Serializable
                             if (firstAndLast.equalsIgnoreCase(textRight))
                             {
                                 // Could change the found flag to just if professorFound == null
+                                // Clean this up later
                                 found = true;
                                 schoolClass.setSchoolID(professor.getSchoolID());
                                 schoolClass.setProfessorID(professor.getId());
                                 schoolClass.setInstructor(textRight);
+                                schoolClass.setProfessor(professor);
                                 break;
                             }
                         }
@@ -276,16 +365,14 @@ public class School implements Serializable
                         String lastName = (length < 2) ? "Unknown" : textRight.split("\\s+")[1];
 
 
-                        if (DatabaseUtil.addProfessor(schoolbot, firstName, lastName, lastName, schoolClass.getSchoolID(), guildID))
-                        {
-                            schoolClass.setProfessorID(DatabaseUtil.getProfessorsID(schoolbot, firstName + " " + lastName));
-                            schoolClass.setSchoolID(schoolClass.getSchoolID());
-                            schoolClass.setInstructor(textRight);
-                        }
-                        else
-                        {
-                            schoolbot.getLogger().error("ERROR HAS OCCURRED.... COULD NOT ADD PROFESSOR TO DATABASE!!");
-                        }
+                        Professor prof = new Professor(
+                                firstName,
+                                lastName,
+                                schoolClass.getSchool()
+                        );
+                        event.addProfessor(event, prof);
+                        schoolClass.setProfessor(prof);
+
                     }
                     break;
                 }
@@ -311,12 +398,12 @@ public class School implements Serializable
                     String classesCampus = textRight.split("\\s+")[0];
                     if (!campus.toLowerCase().contains(classesCampus.toLowerCase()))
                     {
-                        DatabaseUtil.removeProfessor(schoolbot, schoolClass.getProfessorID());
+                        event.removeProfessor(event, schoolClass.getProfessor());
 
                         Embed.error(event, """
                                 You said you goto the ** %s ** campus this class takes place on the ** %s ** campus 
                                 Professor %s has been removed 
-                                """, campus, classesCampus, schoolClass.getInstructor());
+                                """, campus, classesCampus, schoolClass.getProfessor().getFullName());
                         return false;
                     }
                     break;
@@ -336,7 +423,9 @@ public class School implements Serializable
             }
         }
 
-        if (DatabaseUtil.addClassPitt(schoolbot, schoolClass, guildID))
+        this.classroomList.add(schoolClass);
+        this.professorList.add(schoolClass.getProfessor());
+        if (DatabaseUtil.addClassPitt(event.getSchoolbot(), schoolClass, guildID))
         {
             channel.sendMessage("Class created!").queue();
             channel.sendMessage(new EmbedBuilder()
@@ -345,7 +434,7 @@ public class School implements Serializable
                     .addField("Credit(s)", String.valueOf(schoolClass.getCreditAmount()), true)
                     .addField("Course Description", schoolClass.getDescription(), false)
                     .addField("Perquisite(s)", schoolClass.getPreReq(), false)
-                    .addField("Instructor", schoolClass.getInstructor(), true)
+                    .addField("Instructor", schoolClass.getProfessor().getFullName(), true)
                     .addField("Meeting time", schoolClass.getClassTime(), true)
                     .addField("Campus", schoolClass.getClassLocation(), true)
                     .addField("Room", schoolClass.getClassRoom(), false)
@@ -356,6 +445,7 @@ public class School implements Serializable
                     .setTimestamp(Instant.now())
                     .build())
                     .queue();
+
             return true;
         }
         else
@@ -363,6 +453,7 @@ public class School implements Serializable
             Embed.error(event, """
                     Database failed to add ** %s **
                     """, schoolClass.getClassName());
+            event.removeProfessor(event, schoolClass.getProfessor());
             return false;
         }
     }
@@ -375,12 +466,12 @@ public class School implements Serializable
 
     public int getSchoolID()
     {
-        return schoolID;
+        return id;
     }
 
     public void setSchoolID(int schoolID)
     {
-        this.schoolID = schoolID;
+        this.id = schoolID;
     }
 
     public void setRoleID(long roleID)

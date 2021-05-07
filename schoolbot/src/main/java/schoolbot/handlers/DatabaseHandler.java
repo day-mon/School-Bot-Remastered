@@ -58,8 +58,6 @@ public class DatabaseHandler
                   LOGGER.error("Could not close database", e);
             }
       }
-
-
 }
 
 

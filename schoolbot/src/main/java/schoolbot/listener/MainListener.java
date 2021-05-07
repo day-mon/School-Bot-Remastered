@@ -27,8 +27,10 @@ public class MainListener implements EventListener
     {
         if (event instanceof GuildMessageReceivedEvent)
         {
-            String message = ((GuildMessageReceivedEvent) event).getMessage().getContentRaw();
-            User author = ((GuildMessageReceivedEvent) event).getAuthor();
+            GuildMessageReceivedEvent eve = (GuildMessageReceivedEvent) event;
+
+            String message = eve.getMessage().getContentRaw();
+            User author = eve.getAuthor();
 
             schoolbot.getLogger().info(author.getAsTag() + " has sent: " + message);
 
@@ -37,21 +39,21 @@ public class MainListener implements EventListener
 
         else if (event instanceof GuildMemberJoinEvent)
         {
-            TextChannel channel = ((GuildMemberJoinEvent) event).getGuild().getDefaultChannel();
-            Guild guild = ((GuildMemberJoinEvent) event).getGuild();
-            String guildName = ((GuildMemberJoinEvent) event).getGuild().getName();
-            User user = ((GuildMemberJoinEvent) event).getUser();
+
+            GuildMemberJoinEvent eve = (GuildMemberJoinEvent) event;
+
+            TextChannel channel = eve.getGuild().getSystemChannel() == null ? eve.getGuild().getDefaultChannel() : eve.getGuild().getSystemChannel();
+            Guild guild = eve.getGuild();
+            String guildName = eve.getGuild().getName();
+            User user = eve.getUser();
 
 
             channel.sendMessage(new EmbedBuilder()
                     .setTitle("Welcome to " + guildName, "http://pittmainrejects.net")
                     .setFooter("Joined on: " + LocalDateTime.now())
-                    .addField("User information",
-                            "`User joined:`" + user.getName() + "\n" + "`Account creation date:` " + user.getTimeCreated(), false)
-                    .addField("Sever Information",
-                            "`Server count:`  " + guild.getMemberCount() + "\n" + "`Server name:`  " + guild.getName(), false)
-                    .addField("Description",
-                            "Welcome " + user.getName() + " if you are here you probably have no clue what you are doing like all " + guild.getMemberCount() + " of us. If you need some help you can mention anyone individually or mention the role of the class in which you need help in. Mention anyone in 8 and above for roles.", false)
+                    .addField("User information", "`User joined:`" + user.getName() + "\n" + "`Account creation date:` " + user.getTimeCreated(), false)
+                    .addField("Sever Information", "`Server count:`  " + guild.getMemberCount() + "\n" + "`Server name:`  " + guild.getName(), false)
+                    .addField("Description", "Welcome " + user.getName() + " if you are here you probably have no clue what you are doing like all " + guild.getMemberCount() + " of us. If you need some help you can mention anyone individually or mention the role of the class in which you need help in. Mention anyone in 8 and above for roles.", false)
                     .build()).queue();
         }
         /**

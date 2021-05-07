@@ -1,9 +1,9 @@
 package schoolbot.commands.school;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +15,6 @@ import schoolbot.natives.objects.command.CommandFlag;
 import schoolbot.natives.objects.misc.Emoji;
 import schoolbot.natives.objects.school.Classroom;
 import schoolbot.natives.objects.school.School;
-import schoolbot.natives.util.DatabaseUtil;
 import schoolbot.natives.util.Embed;
 
 import java.time.LocalDateTime;
@@ -28,33 +27,33 @@ public class ClassroomAdd extends Command
       public ClassroomAdd(Command parent)
       {
             super(parent, "", "", 0);
+            addSelfPermissions(Permission.ADMINISTRATOR);
             addFlags(CommandFlag.DATABASE);
-
-
       }
 
       @Override
       public void run(CommandEvent event)
       {
             event.sendMessage("Do you attend a University of Pittsburgh Campus ? ");
-            event.getJDA().addEventListener(new ClassAddStateMachine(event.getSchoolbot(), event.getChannel(), event.getUser()));
+            event.getJDA().addEventListener(new ClassAddStateMachine(event));
       }
 
       public static class ClassAddStateMachine extends ListenerAdapter
       {
             private final long channelID, authorID;
             private int state = 1;
-            private List<School> schools;
+            private List<School> cachedSchools;
+            private CommandEvent commandEvent;
             private Schoolbot schoolbot;
             private String CLASS_SEARCH_URL = "https://psmobile.pitt.edu/app/catalog/classsection/UPITT/";
-            Classroom schoolClass;
-            String schoolName;
+            private Classroom schoolClass;
 
-            public ClassAddStateMachine(Schoolbot schoolbot, MessageChannel channel, User author)
+            public ClassAddStateMachine(CommandEvent event)
             {
-                  this.channelID = channel.getIdLong();
-                  this.authorID = author.getIdLong();
-                  this.schoolbot = schoolbot;
+                  this.channelID = event.getChannel().getIdLong();
+                  this.authorID = event.getUser().getIdLong();
+                  this.schoolbot = event.getSchoolbot();
+                  this.commandEvent = event;
 
 
             }
@@ -69,7 +68,7 @@ public class ClassroomAdd extends Command
                   Guild guild = event.getGuild();
                   MessageChannel channel = event.getChannel();
                   String message = event.getMessage().getContentRaw();
-                  this.schools = DatabaseUtil.getSchools(schoolbot, guild.getIdLong());
+                  this.cachedSchools = commandEvent.getGuildSchools();
                   JDA jda = event.getJDA();
 
                   if (message.equalsIgnoreCase("stop"))
@@ -87,7 +86,7 @@ public class ClassroomAdd extends Command
                         case 1 -> {
                               schoolClass = new Classroom();
                               schoolClass.setGuildID(guild.getIdLong());
-                              if (schools == null || schools.isEmpty())
+                              if (cachedSchools == null || cachedSchools.isEmpty())
                               {
                                     Embed.error(event, "There are no schools for the server ");
                                     return;
@@ -117,7 +116,7 @@ public class ClassroomAdd extends Command
                               state = 2;
                         }
                         case 2 -> {
-                              for (School schoolInDb : schools)
+                              for (School schoolInDb : cachedSchools)
                               {
                                     String potSchoolName = schoolInDb.getSchoolName();
                                     if (potSchoolName.contains("University of Pittsburgh"))
@@ -173,28 +172,13 @@ public class ClassroomAdd extends Command
                         case 4 -> {
                               CLASS_SEARCH_URL += message;
 
-                              // Check if there is a class number in this term.
-
-                              if (DatabaseUtil.checkClassInTerm(schoolbot, Integer.parseInt(message), schoolClass.getTerm(), guild.getIdLong(), schoolClass.getSchoolID()))
-                              {
-                                    Embed.error(event, "This class already exist for ** %s **", schoolClass.getSchoolWithoutID().getSchoolName());
-                                    jda.removeEventListener(this);
-                                    return;
-                              }
 
                               School school = schoolClass.getSchool();
+                              schoolClass.setURL(CLASS_SEARCH_URL);
 
-                              if (school.addClass(event, schoolbot, CLASS_SEARCH_URL, schoolClass))
-                              {
-                                    jda.removeEventListener(this);
-                                    //state = 5;
-                                    return;
-                              }
-                              else
-                              {
-                                    jda.removeEventListener(this);
-                                    return;
-                              }
+                              commandEvent.addPittClass(commandEvent, schoolClass);
+                              jda.removeEventListener(this);
+
 
                         }
                         /*

@@ -1,17 +1,11 @@
 package schoolbot.commands.school;
 
-import com.github.ygimenez.method.Pages;
-import com.github.ygimenez.model.Page;
-import com.github.ygimenez.type.PageType;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.objects.command.CommandFlag;
 import schoolbot.natives.objects.school.School;
-import schoolbot.natives.util.DatabaseUtil;
 import schoolbot.natives.util.Embed;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ListSchools extends Command
@@ -27,23 +21,20 @@ public class ListSchools extends Command
     @Override
     public void run(CommandEvent event)
     {
-        List<School> schools = DatabaseUtil.getSchools(event.getSchoolbot(), event.getGuild().getIdLong());
+        List<School> schools = event.getGuildSchools();
 
         if (schools.isEmpty())
         {
             Embed.error(event, "No schools!");
             return;
         }
-
-        ArrayList<Page> pages = new ArrayList<>();
-
-        for (School s : schools)
+        // No need for a paginator call if theres only one school tbh..
+        else if (schools.size() == 1)
         {
-            pages.add(new Page(PageType.EMBED, s.getAsEmbed(event.getSchoolbot())));
+            event.sendMessage(schools.get(1).getAsEmbed(event.getSchoolbot()));
         }
 
-        event.getChannel().sendMessage((MessageEmbed) pages.get(0).getContent()).queue(success ->
-                Pages.paginate(success, pages));
+        event.getSchoolsAsPaginator();
 
 
     }

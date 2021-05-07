@@ -39,6 +39,16 @@ public class Embed
                     .build()).queue();
       }
 
+      public static void success(CommandEvent event, String message, Object... args)
+      {
+            MessageChannel channel = event.getChannel();
+
+            channel.sendMessage(new EmbedBuilder()
+                    .setColor(Color.GREEN)
+                    .setDescription(Emoji.WHITE_CHECK_MARK.getAsChat() + " " + String.format(message, args))
+                    .build()).queue();
+      }
+
       public static void error(CommandEvent event, String message)
       {
 

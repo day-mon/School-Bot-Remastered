@@ -16,22 +16,17 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import schoolbot.handlers.CommandHandler;
-import schoolbot.handlers.ConfigHandler;
-import schoolbot.handlers.DatabaseHandler;
-import schoolbot.handlers.MessageHandler;
+import schoolbot.handlers.*;
 import schoolbot.listener.MainListener;
 import schoolbot.natives.objects.config.ConfigOption;
 import schoolbot.natives.objects.info.BotInfo;
 import schoolbot.natives.objects.info.SystemInfo;
 import schoolbot.natives.objects.misc.Emoji;
-import schoolbot.natives.objects.misc.GuildWrapper;
 
 import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 public class Schoolbot extends ListenerAdapter
@@ -44,9 +39,10 @@ public class Schoolbot extends ListenerAdapter
       private final EventWaiter eventWaiter;
       private final DatabaseHandler databaseHandler;
       private final MessageHandler messageHandler;
+      private final WrapperHandler wrapperHandler;
       private final Logger logger;
 
-      private ConcurrentHashMap<Long, GuildWrapper> guildWrappers;
+
       private Paginator paginator;
       private JDA jda;
 
@@ -56,9 +52,9 @@ public class Schoolbot extends ListenerAdapter
             this.messageHandler = new MessageHandler(this);
             this.eventWaiter = new EventWaiter();
             this.configHandler = new ConfigHandler(this);
+            this.wrapperHandler = new WrapperHandler(this);
             this.commandHandler = new CommandHandler(this, eventWaiter);
             this.databaseHandler = new DatabaseHandler(this);
-            this.guildWrappers = new ConcurrentHashMap<>();
             this.botStartTime = LocalDateTime.now();
       }
 
@@ -101,6 +97,7 @@ public class Schoolbot extends ListenerAdapter
             getLogger().info("Github Repo:       " + BotInfo.getGithubRepo());
             getLogger().info("Startup Time:      " + Duration.between(getBotStartTime(), LocalDateTime.now()).toMillisPart() + "ms");
 
+
             try
             {
                   this.paginator = PaginatorBuilder.createPaginator()
@@ -119,6 +116,7 @@ public class Schoolbot extends ListenerAdapter
                   getLogger().error("Paginator Error... Exiting because half of the bot uses paginator", e);
                   System.exit(1);
             }
+
 
       }
 
@@ -167,4 +165,8 @@ public class Schoolbot extends ListenerAdapter
             return paginator;
       }
 
+      public WrapperHandler getWrapperHandler()
+      {
+            return wrapperHandler;
+      }
 }

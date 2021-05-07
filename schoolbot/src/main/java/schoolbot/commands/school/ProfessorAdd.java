@@ -1,20 +1,22 @@
 package schoolbot.commands.school;
 
-import net.dv8tion.jda.api.EmbedBuilder;
+import com.github.ygimenez.method.Pages;
+import com.github.ygimenez.model.Page;
+import com.github.ygimenez.type.PageType;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import schoolbot.Schoolbot;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.objects.command.CommandFlag;
-import schoolbot.natives.objects.misc.Emoji;
+import schoolbot.natives.objects.school.Professor;
 import schoolbot.natives.objects.school.School;
-import schoolbot.natives.util.DatabaseUtil;
+import schoolbot.natives.util.Checks;
+import schoolbot.natives.util.Embed;
 
-import java.awt.*;
-import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProfessorAdd extends Command
@@ -29,7 +31,7 @@ public class ProfessorAdd extends Command
     @Override
     public void run(CommandEvent event)
     {
-        List<School> schools = DatabaseUtil.getSchools(event.getSchoolbot(), event.getGuild().getIdLong());
+        List<School> schools = event.getGuildSchools();
 
         if (schools.isEmpty())
         {
@@ -37,7 +39,7 @@ public class ProfessorAdd extends Command
             return;
         }
         event.sendMessage("To start.. Whats your professors first name:  ");
-        event.getJDA().addEventListener(new ProfessorStateMachine(event.getSchoolbot(), event.getChannel(), event.getUser(), schools));
+        event.getJDA().addEventListener(new ProfessorStateMachine(event, schools));
     }
 
 
@@ -45,21 +47,21 @@ public class ProfessorAdd extends Command
     {
         private final long channelId, authorId;
         private List<School> schools;
-        private static int state = 0;
+        private int state = 0;
         private Schoolbot schoolbot;
-        String firstName;
-        String lastName;
-        String emailPrefix;
-        String schoolName;
+        private Professor professor;
+        private CommandEvent commandEvent;
         int schoolID = 0;
 
 
-        public ProfessorStateMachine(Schoolbot schoolbot, MessageChannel channel, User author, List<School> schools)
+        public ProfessorStateMachine(CommandEvent event, List<School> schools)
         {
             this.schools = schools;
-            this.channelId = channel.getIdLong();
-            this.authorId = author.getIdLong();
-            this.schoolbot = schoolbot;
+            this.channelId = event.getChannel().getIdLong();
+            this.authorId = event.getUser().getIdLong();
+            this.schoolbot = event.getSchoolbot();
+            this.commandEvent = event;
+            professor = new Professor();
         }
 
         public void onGuildMessageReceived(GuildMessageReceivedEvent event)
@@ -75,72 +77,66 @@ public class ProfessorAdd extends Command
             {
                 case 0 -> {
                     numCheck(content, channel);
-                    channel.sendMessage("Awesome! Thank you for that your professors first name is " + content).queue();
-                    firstName = content;
+                    channel.sendMessageFormat("Awesome! Thank you for that your professors first name is ** %s **", content).queue();
+                    professor.setFirstName(content);
                     channel.sendMessage("I will now need your professors last name: ").queue();
                     state = 1;
                 }
                 case 1 -> {
                     numCheck(content, channel);
-                    channel.sendMessage("Thank you again. Your professor last name is: " + content);
-                    lastName = content;
+                    channel.sendMessageFormat("Thank you again. Your professor last name is ** %s **", content).queue();
+                    professor.setLastName(content);
+                    professor.setFullName(professor.getFirstName() + " " + professor.getLastName());
                     if (schools.size() == 1)
                     {
-                        channel.sendMessage(event.getGuild().getName() + " only has one school associated with it. I will automatically assign your professor to " + schools.get(0).getSchoolName()).queue();
-                        schoolName = schools.get(0).getSchoolName();
+                        channel.sendMessageFormat("** %s ** only has one school associated with it. I will automatically assign your professor to  ** %s **", event.getGuild().getName(), schools.get(0).getSchoolName()).queue();
+                        professor.setProfessorsSchool(schools.get(0));
                         channel.sendMessage("Lastly, enter his email prefix: ").queue();
                         state = 3;
                         break;
                     }
-                    channel.sendMessage("Moving on.. I will need your professors school name: ").queue();
+                    channel.sendMessage("Moving on.. I will need you professors school.. Here is a list of all this servers schools! ").queue();
+                    List<Page> pages = paginate(schoolbot, commandEvent.getGuildSchools());
+
+                    channel.sendMessage((MessageEmbed) pages.get(0).getContent()).queue(
+                            success -> Pages.paginate(success, pages)
+                    );
                     state = 2;
                 }
                 case 2 -> {
-                    boolean schoolFound = false;
-                    for (School schools : schools)
+                    channel.sendMessage("Please choose a page number from the page list above..").queue();
+                    if (!Checks.isNumber(content))
                     {
-                        if (schools.getSchoolName().equalsIgnoreCase(content))
-                        {
-                            schoolFound = true;
-                            break;
-                        }
-                    }
-                    if (schoolFound)
-                    {
-                        channel.sendMessage("Thank you " + event.getAuthor().getAsMention() + " " + Emoji.SMILEY_FACE.getAsChat() + " your professors school was found!").queue();
-                        schoolName = schools.get(0).getSchoolName();
-                        schoolID = schools.get(0).getSchoolID();
-                        channel.sendMessage("Lastly, enter his email prefix: ").queue();
-                        state = 3;
-                    }
-                    else
-                    {
-                        channel.sendMessage("School not found.. Aborting").queue();
-                        event.getJDA().removeEventListener(this);
-                    }
-                }
-                case 3 -> {
-                    emailPrefix = content;
-                    channel.sendMessage("Thank you.. Inserting all of the info into my database!").queue();
-                    if (DatabaseUtil.addProfessor(schoolbot, firstName, lastName, emailPrefix, schoolID, event.getGuild().getIdLong()))
-                    {
-                        channel.sendMessage(new EmbedBuilder()
-                                .setTitle("Professor Added")
-                                .addField("Professor Name", firstName + " " + lastName, false)
-                                .addField("School Name", schoolName, false)
-                                .addField("Email prefix", emailPrefix, false)
-                                .setColor(Color.GREEN)
-                                .setTimestamp(Instant.now())
-                                .build())
-                                .queue();
-                    }
-                    else
-                    {
-                        channel.sendMessage("Could not add professor to my database.. contact bot owner").queue();
+                        channel.sendMessage("You must give me a number!").queue();
+                        return;
 
                     }
-                    state = 0;
+
+                    if (!between(schools.size()))
+                    {
+                        Embed.error(event, "** %s ** is not a valid number please choose a number between %d - %d ", content, 1, schools.size());
+                        return;
+                    }
+
+                    int index = Integer.parseInt(content) - 1;
+
+                    professor.setProfessorsSchool(schools.get(index));
+                    channel.sendMessage("""
+                            Thank you for that! I will now need your professors email suffix
+                            For Ex: **litman**@cs.pitt.edu
+                            """).queue();
+                    state = 3;
+
+                }
+                case 3 -> {
+                    professor.setEmailPrefix(content);
+                    channel.sendMessage("Thank you.. Inserting all of the info into my database and Adding professor.").queue();
+
+                    commandEvent.addProfessor(commandEvent, professor);
+                    channel.sendMessage(professor.getAsEmbed()).queue();
+
                     event.getJDA().removeEventListener(this);
+                    return;
                 }
             }
         }
@@ -152,6 +148,31 @@ public class ProfessorAdd extends Command
                 channel.sendMessage("Professors fields cannot contain numbers!").queue();
             }
         }
+
+        //TODO: Speed running right now will clean this to just check the School List size
+        private boolean between(int maxValueInclusive)
+        {
+            int schoolListSize = schools.size();
+            return (schoolListSize >= 1 && schoolListSize <= maxValueInclusive);
+        }
+
+        private List<Page> paginate(Schoolbot schoolbot, List<School> list)
+        {
+            List<Page> pages = new ArrayList<>();
+            int i = 1;
+
+            for (School school : list)
+            {
+                pages.add(new Page(PageType.EMBED,
+                        school.getAsEmbedBuilder(schoolbot)
+                                .setFooter("Page " + i++ + "/" + list.size())
+                                .build()
+                ));
+            }
+
+            return pages;
+        }
+
 
     }
 }

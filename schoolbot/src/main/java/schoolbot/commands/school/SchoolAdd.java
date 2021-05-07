@@ -23,7 +23,6 @@ import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.objects.command.CommandFlag;
 import schoolbot.natives.objects.school.School;
 import schoolbot.natives.util.Checks;
-import schoolbot.natives.util.DatabaseUtil;
 import schoolbot.natives.util.Embed;
 
 import java.time.Instant;
@@ -51,23 +50,25 @@ public class SchoolAdd extends Command
     public void run(CommandEvent event)
     {
 
-        MessageChannel channel = event.getChannel();
-        User user = event.getUser();
-        String firstArg = event.getArgs().get(0);
+          MessageChannel channel = event.getChannel();
+          User user = event.getUser();
+          String firstArg = event.getArgs().get(0);
+          Guild guild = event.getGuild();
+          Schoolbot schoolbot = event.getSchoolbot();
 
-        if (Checks.isNumber(firstArg))
-        {
-            Embed.error(event, "Your school name cannot contain numbers!");
-            return;
-        }
+          if (Checks.isNumber(firstArg))
+          {
+                Embed.error(event, "Your school name cannot contain numbers!");
+                return;
+          }
 
-        try
-        {
-            Document doc = Jsoup.connect(API_URL + firstArg)
-                    .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
-                    .referrer("http://www.google.com")
-                    .ignoreContentType(true)
-                    .get();
+          try
+          {
+                Document doc = Jsoup.connect(BACKUP_API_URL + firstArg)
+                        .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
+                        .referrer("http://www.google.com")
+                        .ignoreContentType(true)
+                        .get();
 
 
               String parseAbleJson =
@@ -92,10 +93,16 @@ public class SchoolAdd extends Command
             }
             else if (schools.size() == 1)
             {
-                MessageEmbed embed = schools.get(1);
-                addToDbAndCreateRole(event.getGuild(), embed, event.getSchoolbot());
-                event.sendMessage("School Created");
-                event.sendMessage(embed);
+                  MessageEmbed embed = schools.get(1);
+                  if (addToDbAndCreateRole(embed, schoolbot, event))
+                  {
+                        event.sendMessage("School Created");
+                        event.sendMessage(embed);
+                  }
+                  else
+                  {
+                        Embed.error(event, " ** %s ** already exist", firstArg);
+                  }
             }
             else
             {
@@ -108,7 +115,7 @@ public class SchoolAdd extends Command
                   event.getChannel().sendMessage((MessageEmbed) pages.get(0).getContent()).queue(success ->
                           Pages.paginate(success, pages));
 
-                  event.getJDA().addEventListener(new SchoolStateMachine(event.getSchoolbot(), event.getChannel(), event.getUser(), schools));
+                  event.getJDA().addEventListener(new SchoolStateMachine(event.getSchoolbot(), event.getChannel(), event.getUser(), schools, event));
             }
         }
         catch (Exception e)
@@ -123,12 +130,14 @@ public class SchoolAdd extends Command
             private final long channelID, authorID;
             private final Map<Integer, MessageEmbed> schools;
             private final Schoolbot schoolbot;
+            private final CommandEvent cmdEvent;
 
             private int state = 0;
 
 
-            public SchoolStateMachine(Schoolbot schoolbot, MessageChannel channel, User author, Map<Integer, MessageEmbed> schools)
+            public SchoolStateMachine(Schoolbot schoolbot, MessageChannel channel, User author, Map<Integer, MessageEmbed> schools, CommandEvent cmdEvent)
             {
+                  this.cmdEvent = cmdEvent;
                   this.authorID = author.getIdLong();
                   this.channelID = channel.getIdLong();
                   this.schools = schools;
@@ -145,9 +154,18 @@ public class SchoolAdd extends Command
 
                   int schoolChoice = Integer.parseInt(event.getMessage().getContentRaw());
                   MessageEmbed embed = schools.get(schoolChoice);
+                  CommandEvent commandEvent = cmdEvent;
+                  Guild guild = event.getGuild();
+
+                  if (event.getMessage().getContentRaw().equalsIgnoreCase("stop"))
+                  {
+                        event.getChannel().sendMessage("Okay aborting..").queue();
+                        event.getJDA().removeEventListener(this);
+                        return;
+                  }
 
 
-                  if (addToDbAndCreateRole(event.getGuild(), embed, schoolbot))
+                  if (addToDbAndCreateRole(embed, schoolbot, commandEvent))
                   {
                         event.getChannel().sendMessage("School Created").queue();
                         event.getChannel().sendMessage(embed).queue();
@@ -218,31 +236,29 @@ public class SchoolAdd extends Command
         return em;
     }
 
-      private static boolean addToDbAndCreateRole(Guild guild, MessageEmbed embed, Schoolbot schoolbot)
+      private static boolean addToDbAndCreateRole(MessageEmbed embed, Schoolbot schoolbot, CommandEvent event)
       {
             String schoolName = embed.getTitle();
-            School school = DatabaseUtil.getSpecificSchoolBySchoolName(schoolbot, schoolName, guild.getIdLong());
 
-            if (school != null)
-            {
-                  return false;
-            }
+            if (event.schoolExist(schoolName)) return false;
 
             String url = embed.getFields().get(0).getValue();
+            String suffix = embed.getFields().get(1).getValue();
+            Guild guild = event.getGuild();
 
 
             guild.createRole()
-                    .setName(embed.getTitle())
+                    .setName(schoolName)
                     .setColor(new Random().nextInt(0xFFFFFF))
                     .queue(role ->
                     {
-                          DatabaseUtil.addSchool(schoolbot,
-                                  embed.getTitle(),
-                                  embed.getFields().get(1).getValue(),
+                          event.addSchool(event, new School(
+                                  schoolName,
+                                  suffix,
                                   role.getIdLong(),
                                   guild.getIdLong(),
                                   url.contains(",") ? url.split(",")[0] : url
-                          );
+                          ));
                     });
             return true;
       }

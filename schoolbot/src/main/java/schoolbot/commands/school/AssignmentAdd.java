@@ -56,7 +56,7 @@ public class AssignmentAdd extends Command
       @Override
       public void run(CommandEvent event)
       {
-            List<School> schools = DatabaseUtil.getSchools(event.getSchoolbot(), event.getGuild().getIdLong());
+            Map<String, School> schools = DatabaseUtil.getSchools(event.getSchoolbot(), event.getGuild().getIdLong());
 
             Map<Integer, School> validIDs = new HashMap<>();
             Classroom classroom = null;
@@ -87,7 +87,7 @@ public class AssignmentAdd extends Command
                   event.sendMessage("Please choose the School ID of the school you want to add the assignment to ");
                   ArrayList<Page> pages = new ArrayList<>();
 
-                  for (School school : schools)
+                  for (School school : schools.values())
                   {
                         validIDs.put(school.getSchoolID(), school);
                         pages.add(new Page(PageType.EMBED, school.getAsEmbed(event.getSchoolbot())));

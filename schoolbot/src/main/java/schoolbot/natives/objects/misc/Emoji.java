@@ -9,7 +9,8 @@ public enum Emoji
       TRACK_PREVIOUS(":track_previous", "\u23EE"),
       SMILEY_FACE(":slight_smile:", "\u1F642"),
       ARROW_LEFT(":arrow_left", "\u2B05"),
-      ARROW_RIGHT("arrow_right", "\u27A1");
+      ARROW_RIGHT("arrow_right", "\u27A1"),
+      BOOKS(":books: ", "\u1F4DA");
 
 
       private final String emote;

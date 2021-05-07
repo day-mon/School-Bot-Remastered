@@ -1,26 +1,27 @@
 package schoolbot.natives.objects.misc;
 
+import schoolbot.Schoolbot;
+import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.objects.school.Classroom;
 import schoolbot.natives.objects.school.Professor;
 import schoolbot.natives.objects.school.School;
+import schoolbot.natives.util.DatabaseUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class GuildWrapper
 {
       private long guildID;
-      private List<School> schoolList;
-      private List<Classroom> classrooms;
-      private List<Professor> professors;
+      private Map<String, School> schoolList;
 
 
-      public GuildWrapper(long guildID)
+      public GuildWrapper(long guildID, Map<String, School> schoolList)
       {
             this.guildID = guildID;
-            this.classrooms = new ArrayList<>();
-            this.schoolList = new ArrayList<>();
-            this.professors = new ArrayList<>();
+            this.schoolList = schoolList;
       }
 
 
@@ -31,27 +32,50 @@ public class GuildWrapper
        */
 
 
-      public void addSchool(School school)
+      public boolean addSchool(Schoolbot schoolbot, School school)
       {
-            schoolList.add(school);
+            String lowerCaseSchoolName = school.getSchoolName().toLowerCase();
 
-            // Add to database here..
+            if (schoolList.containsKey(lowerCaseSchoolName)) return false;
+            schoolList.put(lowerCaseSchoolName, school);
+            DatabaseUtil.addSchool(schoolbot, school);
+            return true;
+      }
+
+      public School getSchool(String schoolName)
+      {
+            return schoolList.get(schoolName.toLowerCase());
+      }
+
+      public void removeSchool(Schoolbot schoolbot, School school)
+      {
+            schoolList.remove(school.getSchoolName().toLowerCase());
+            if (schoolbot.getJda().getRoleById(school.getRoleID()) != null)
+            {
+                  schoolbot.getJda().getRoleById(school.getRoleID()).delete().queue();
+            }
+            DatabaseUtil.removeSchool(schoolbot, school.getSchoolName());
+      }
+
+
+      public void addPittClass(CommandEvent event, Classroom classroom)
+      {
+            School school = classroom.getSchool();
+
+            school.addPittClass(event, classroom);
 
       }
 
-      public void addClass(Classroom classroom)
+      public void addProfessor(Schoolbot schoolbot, Professor professor)
       {
-            classrooms.add(classroom);
-            // You'd probably want a add professor here as well.
-
-            // Add to database here..
+            professor.getProfessorsSchool().addProfessor(professor);
+            DatabaseUtil.addProfessor(schoolbot, professor);
       }
 
-      public void addProfessor(Professor professor)
+      public void removeProfessor(Schoolbot schoolbot, Professor professor)
       {
-            professors.add(professor);
-
-            // add to database here
+            professor.getProfessorsSchool().removeProfessor(professor);
+            DatabaseUtil.removeProfessor(schoolbot, professor);
       }
 
 
@@ -60,38 +84,24 @@ public class GuildWrapper
             return guildID;
       }
 
-      public void setGuildID(long guildID)
+      public boolean containsSchool(String schoolName)
       {
-            this.guildID = guildID;
+            return schoolList.containsKey(schoolName.toLowerCase());
       }
+
+
+      public List<Professor> getProfessorList(String schoolName)
+      {
+            String lowerCaseSchoolName = schoolName.toLowerCase();
+
+            if (!schoolList.containsKey(lowerCaseSchoolName)) return Collections.emptyList();
+
+            return schoolList.get(lowerCaseSchoolName).getProfessorList();
+      }
+
 
       public List<School> getSchoolList()
       {
-            return schoolList;
-      }
-
-      public void setSchoolList(List<School> schoolList)
-      {
-            this.schoolList = schoolList;
-      }
-
-      public List<Classroom> getClassrooms()
-      {
-            return classrooms;
-      }
-
-      public void setClassrooms(List<Classroom> classrooms)
-      {
-            this.classrooms = classrooms;
-      }
-
-      public List<Professor> getProfessors()
-      {
-            return professors;
-      }
-
-      public void setProfessors(List<Professor> professors)
-      {
-            this.professors = professors;
+            return new ArrayList<School>(schoolList.values());
       }
 }

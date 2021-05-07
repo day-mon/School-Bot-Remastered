@@ -7,9 +7,11 @@ import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
 import schoolbot.natives.util.DatabaseUtil;
 
+import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Objects;
 
 public class Classroom
@@ -27,6 +29,7 @@ public class Classroom
     private String[] inputClassEndDate;
     private String classIdentifier;
     private String term;
+    private String URL;
 
     private LocalDate classStartDate;
     private LocalDate classEndDate;
@@ -45,6 +48,9 @@ public class Classroom
     private long guildID;
 
     private School school;
+    private Professor professor;
+
+    private List<Assignment> assignments;
 
 
     public Classroom()
@@ -57,6 +63,33 @@ public class Classroom
     {
         this.id = id;
         this.className = className;
+    }
+
+
+    public Classroom(String description, String classTime, String classLocation, String classLevel, String classRoom, String className, String classIdentifier, String term, Date classStartDate, Date classEndDate, int schoolID, int professorID, int classNumber, int id, long roleID, long channelID, long guildID, School school)
+    {
+        this.description = description;
+        this.classTime = classTime;
+        this.classLocation = classLocation;
+        this.classLevel = classLevel;
+        this.classRoom = classRoom;
+        this.className = className;
+        this.classIdentifier = classIdentifier;
+        this.term = term;
+        this.classStartDate = Instant.ofEpochMilli(classStartDate.getTime())
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+        this.classEndDate = Instant.ofEpochMilli(classEndDate.getTime())
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+        this.schoolID = schoolID;
+        this.professorID = professorID;
+        this.classNumber = classNumber;
+        this.id = id;
+        this.roleID = roleID;
+        this.channelID = channelID;
+        this.guildID = guildID;
+        this.school = school;
     }
 
 
@@ -350,6 +383,30 @@ public class Classroom
         return DatabaseUtil.addAssignment(schoolbot, assignment);
     }
 
+    public List<Assignment> getAssignments()
+    {
+        return assignments;
+    }
+
+    public void setProfessor(Professor professor)
+    {
+        this.professor = professor;
+    }
+
+    public Professor getProfessor()
+    {
+        return professor;
+    }
+
+    public String getURL()
+    {
+        return URL;
+    }
+
+    public void setURL(String URL)
+    {
+        this.URL = URL;
+    }
 
     public MessageEmbed getAsEmbedShort(Schoolbot schoolbot)
     {

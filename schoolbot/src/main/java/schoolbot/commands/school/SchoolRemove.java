@@ -6,7 +6,6 @@ import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.objects.command.CommandFlag;
 import schoolbot.natives.objects.school.School;
 import schoolbot.natives.util.Checks;
-import schoolbot.natives.util.DatabaseUtil;
 import schoolbot.natives.util.Embed;
 
 public class SchoolRemove extends Command
@@ -29,38 +28,24 @@ public class SchoolRemove extends Command
             return;
         }
 
-        int schoolID = DatabaseUtil.getSchoolID(event.getSchoolbot(), arg0);
-
-        if (schoolID == -1)
+        if (!event.schoolExist(arg0))
         {
             Embed.error(event, " ** %s ** does not exist!", arg0);
             return;
         }
 
-        boolean hasClasses = DatabaseUtil.getClassesBySchoolID(event.getSchoolbot(), schoolID);
+        School school = event.getSchool(event, arg0);
 
-        if (hasClasses)
+        if (school.getClassroomList().size() > 0 || school.getProfessorList().size() > 0)
         {
-            Embed.error(event, "** %s ** could not be deleted because it has classes assigned to it", arg0);
+            Embed.error(event, "** %s ** could not be deleted because it has classes or professors assigned to it", arg0);
             return;
         }
 
-        School schoolToRemove = DatabaseUtil.getSpecificSchoolByID(event.getSchoolbot(), schoolID, event.getGuild().getIdLong());
 
-        if (DatabaseUtil.removeSchool(event.getSchoolbot(), arg0))
-        {
+        event.removeSchool(event, school);
 
-            if (event.getJDA().getRoleById(schoolToRemove.getRoleID()) != null)
-            {
-                event.getJDA().getRoleById(schoolToRemove.getRoleID()).delete().queue();
-            }
-            Embed.confirmation(event, "School successfully deleted!");
-        }
-        else
-        {
-            Embed.error(event, "School could not be removed!");
-        }
-
+        Embed.success(event, "** %s ** successfully deleted", school.getSchoolName());
 
     }
 }
