@@ -133,7 +133,7 @@ public class ProfessorAdd extends Command
                     channel.sendMessage("Thank you.. Inserting all of the info into my database and Adding professor.").queue();
 
                     commandEvent.addProfessor(commandEvent, professor);
-                    channel.sendMessage(professor.getAsEmbed()).queue();
+                    channel.sendMessage(professor.getAsEmbed(commandEvent.getSchoolbot())).queue();
 
                     event.getJDA().removeEventListener(this);
                     return;

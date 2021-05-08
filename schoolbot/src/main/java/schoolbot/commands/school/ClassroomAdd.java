@@ -8,7 +8,6 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
-import schoolbot.Schoolbot;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.objects.command.CommandFlag;
@@ -34,6 +33,12 @@ public class ClassroomAdd extends Command
       @Override
       public void run(CommandEvent event)
       {
+            if (event.getGuildSchools().size() == 0)
+            {
+                  Embed.error(event, "This server has no schools");
+                  return;
+            }
+
             event.sendMessage("Do you attend a University of Pittsburgh Campus ? ");
             event.getJDA().addEventListener(new ClassAddStateMachine(event));
       }
@@ -42,9 +47,7 @@ public class ClassroomAdd extends Command
       {
             private final long channelID, authorID;
             private int state = 1;
-            private List<School> cachedSchools;
-            private CommandEvent commandEvent;
-            private Schoolbot schoolbot;
+            private final CommandEvent commandEvent;
             private String CLASS_SEARCH_URL = "https://psmobile.pitt.edu/app/catalog/classsection/UPITT/";
             private Classroom schoolClass;
 
@@ -52,7 +55,6 @@ public class ClassroomAdd extends Command
             {
                   this.channelID = event.getChannel().getIdLong();
                   this.authorID = event.getUser().getIdLong();
-                  this.schoolbot = event.getSchoolbot();
                   this.commandEvent = event;
 
 
@@ -68,7 +70,7 @@ public class ClassroomAdd extends Command
                   Guild guild = event.getGuild();
                   MessageChannel channel = event.getChannel();
                   String message = event.getMessage().getContentRaw();
-                  this.cachedSchools = commandEvent.getGuildSchools();
+                  List<School> cachedSchools = commandEvent.getGuildSchools();
                   JDA jda = event.getJDA();
 
                   if (message.equalsIgnoreCase("stop"))
@@ -86,11 +88,6 @@ public class ClassroomAdd extends Command
                         case 1 -> {
                               schoolClass = new Classroom();
                               schoolClass.setGuildID(guild.getIdLong());
-                              if (cachedSchools == null || cachedSchools.isEmpty())
-                              {
-                                    Embed.error(event, "There are no schools for the server ");
-                                    return;
-                              }
                               if (message.equalsIgnoreCase("Yes") || message.equalsIgnoreCase("y"))
                               {
                                     boolean isDown = false;
@@ -172,87 +169,14 @@ public class ClassroomAdd extends Command
                         case 4 -> {
                               CLASS_SEARCH_URL += message;
 
-
                               School school = schoolClass.getSchool();
                               schoolClass.setURL(CLASS_SEARCH_URL);
 
                               commandEvent.addPittClass(commandEvent, schoolClass);
-                              jda.removeEventListener(this);
 
 
                         }
-                        /*
-
-                        case 5 -> {
-                              channel.sendMessage(new EmbedBuilder()
-                                      .setColor(new Random().nextInt(0xFFFFF))
-                                      .setTitle("One last thing...")
-                                      .setDescription("You have 4 Options.. Pick a number 1-4 below")
-                                      .addField("Option (1)", "Create a role and a TextChannel", false)
-                                      .addField("Option (2)", "Create a role with not TextChannel", true)
-                                      .addField("Option (3)", "Create a TextChannel no role", false)
-                                      .addField("Option (4)", "Create no role ", true)
-                                      .build());
-
-                              if (Checks.allMatchesNumber(message))
-                              {
-                                    int number = Integer.parseInt(message);
-
-                                    if (number <= 1 || number >= 4)
-                                    {
-                                          Embed.error(event, "%s is not a valid entry... try again!", message);
-                                          return;
-                                    }
-
-                                    switch (number)
-                                    {
-                                          case 1 -> {
-
-                                                // I dont know why this is here it just for extra safety.
-                                                if (!DatabaseUtil.testConnection(schoolbot))
-                                                {
-                                                      Embed.error(event, "Sorry the database is not working at the moment..");
-                                                }
-
-                                                guild.createRole()
-                                                        .setName(schoolClass.getClassName())
-                                                        .setColor(new Random().nextInt(0xFFFFFF))
-                                                        .queue(role ->
-                                                        {
-                                                              event.getGuild().createTextChannel
-                                                                      (schoolClass.getClassName())
-                                                                      .queue(textChannel ->
-                                                                      {
-                                                                            schoolClass.setChannelID(textChannel.getIdLong());
-
-
-
-
-
-                                                                      });
-                                                        });
-
-                                          }
-                                          case 2 -> {
-
-                                          }
-                                          case 3 -> {
-
-                                          }
-                                          case 4 -> {
-
-                                          }
-                                    }
-
-                              }
-                        }
-
-                        case 6 -> {
-
-                        }
-*/
                   }
-
             }
       }
 

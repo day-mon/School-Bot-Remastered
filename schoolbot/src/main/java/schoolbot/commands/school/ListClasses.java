@@ -1,16 +1,9 @@
 package schoolbot.commands.school;
 
-import com.github.ygimenez.method.Pages;
-import com.github.ygimenez.model.Page;
-import com.github.ygimenez.type.PageType;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.objects.school.Classroom;
 import schoolbot.natives.objects.school.School;
 import schoolbot.natives.util.Embed;
-
-import java.util.ArrayList;
 
 public class ListClasses extends Command
 {
@@ -45,14 +38,7 @@ public class ListClasses extends Command
                   return;
             }
 
-            ArrayList<Page> pages = new ArrayList<>();
+            event.getAsPaginator(school.getClassroomList());
 
-            for (Classroom classroom : school.getClassroomList())
-            {
-                  pages.add(new Page(PageType.EMBED, classroom.getAsEmbedShort(event.getSchoolbot())));
-            }
-
-            event.getChannel().sendMessage((MessageEmbed) pages.get(0).getContent())
-                    .queue(success -> Pages.paginate(success, pages));
       }
 }

@@ -2,6 +2,7 @@ package schoolbot.natives.objects.misc;
 
 import schoolbot.Schoolbot;
 import schoolbot.natives.objects.command.CommandEvent;
+import schoolbot.natives.objects.school.Assignment;
 import schoolbot.natives.objects.school.Classroom;
 import schoolbot.natives.objects.school.Professor;
 import schoolbot.natives.objects.school.School;
@@ -97,6 +98,14 @@ public class GuildWrapper
             if (!schoolList.containsKey(lowerCaseSchoolName)) return Collections.emptyList();
 
             return schoolList.get(lowerCaseSchoolName).getProfessorList();
+      }
+
+      public void addAssignment(Schoolbot schoolbot, Assignment assignment)
+      {
+
+            String lowerCaseSchoolName = assignment.getName().toLowerCase();
+
+            assignment.getClassroom().addAssignment(schoolbot, assignment);
       }
 
 

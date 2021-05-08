@@ -29,6 +29,11 @@ public class Checks
             return potentialEmail.matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.(?:[A-Z]{2}|com|org|edu|net|)$\n");
       }
 
+      public static boolean between(int i, int minValueInclusive, int maxValueInclusive)
+      {
+            return (i >= minValueInclusive && i <= maxValueInclusive);
+      }
+
       public static boolean isValidAssignmentDate(String potDate, Classroom classroom)
       {
             if (!potDate.contains("/")) return false;

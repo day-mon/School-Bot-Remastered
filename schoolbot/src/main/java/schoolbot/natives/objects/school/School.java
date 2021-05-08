@@ -12,16 +12,16 @@ import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
 import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.objects.misc.Emoji;
+import schoolbot.natives.objects.misc.Paginatable;
 import schoolbot.natives.util.DatabaseUtil;
 import schoolbot.natives.util.Embed;
 
-import java.awt.*;
-import java.io.Serializable;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
-public class School implements Serializable
+public class School implements Paginatable
 {
 
 
@@ -52,6 +52,8 @@ public class School implements Serializable
         this.guildID = guildID;
         this.URL = url;
         this.isPittSchool = name.contains("University of Pittsburgh");
+        this.classroomList = new ArrayList<>();
+        this.professorList = new ArrayList<>();
 
     }
 
@@ -423,6 +425,24 @@ public class School implements Serializable
             }
         }
 
+
+        // TODO: Check if a role and/or channel exist already and if it does just use those.
+
+        // I believe there is a chance that the sets wont happen fast enough...
+        event.getGuild().createRole()
+                .setName(schoolClass.getClassName().toLowerCase())
+                .setColor(new Random().nextInt(0xFFFFFF))
+                .queue(role ->
+                {
+                    event.getGuild().createTextChannel
+                            (schoolClass.getClassName())
+                            .queue(textChannel ->
+                            {
+                                schoolClass.setChannelID(textChannel.getIdLong());
+                                schoolClass.setRoleID(role.getIdLong());
+                            });
+                });
+
         this.classroomList.add(schoolClass);
         this.professorList.add(schoolClass.getProfessor());
         if (DatabaseUtil.addClassPitt(event.getSchoolbot(), schoolClass, guildID))
@@ -430,18 +450,16 @@ public class School implements Serializable
             channel.sendMessage("Class created!").queue();
             channel.sendMessage(new EmbedBuilder()
                     .setTitle(schoolClass.getClassName() + " | (" + schoolClass.getClassIdentifier() + ") ")
-                    .addField("Career", schoolClass.getClassLevel(), false)
-                    .addField("Credit(s)", String.valueOf(schoolClass.getCreditAmount()), true)
-                    .addField("Course Description", schoolClass.getDescription(), false)
+                    .addField("Credit(s)", String.valueOf(schoolClass.getCreditAmount()), false)
                     .addField("Perquisite(s)", schoolClass.getPreReq(), false)
-                    .addField("Instructor", schoolClass.getProfessor().getFullName(), true)
-                    .addField("Meeting time", schoolClass.getClassTime(), true)
-                    .addField("Campus", schoolClass.getClassLocation(), true)
+                    .addField("Instructor", schoolClass.getProfessor().getFullName(), false)
                     .addField("Room", schoolClass.getClassRoom(), false)
-                    .addField("Status", schoolClass.getClassStatus(), false)
-                    .addField("Seats", String.valueOf(schoolClass.getSeatsTaken()) + "/" + String.valueOf(schoolClass.getSeatsOpen()), true)
-                    .addField("Class Capacity", String.valueOf(schoolClass.getClassCapacity()), true)
-                    .setColor(schoolClass.getClassStatus().equals("Open") ? Color.GREEN : Color.RED)
+                    .addField("Meeting time", schoolClass.getClassTime(), false)
+                    .addField("Course Description", schoolClass.getDescription(), true)
+                    .addBlankField(false)
+                    .addField("Role", event.getJDA().getRoleById(schoolClass.getRoleID()).getAsMention(), true)
+                    .addField("Text Channel", event.getJDA().getTextChannelById(schoolClass.getChannelID()).getAsMention(), true)
+                    .setColor(event.getJDA().getRoleById(schoolClass.getRoleID()).getColor())
                     .setTimestamp(Instant.now())
                     .build())
                     .queue();

@@ -2,6 +2,8 @@ package schoolbot.natives.objects.school;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.Role;
+import schoolbot.Schoolbot;
 
 import java.awt.*;
 import java.io.Serializable;
@@ -47,11 +49,13 @@ public class Professor implements Serializable {
 
     public Professor(String firstName, String lastName, String emailPrefix, int id, School school)
     {
-        this.fullName = firstName;
+        this.firstName = firstName;
         this.lastName = lastName;
         this.emailPrefix = emailPrefix;
         this.fullName = firstName + " " + lastName;
         this.professorsSchool = school;
+        this.email = emailPrefix + school.getEmailSuffix();
+        this.officeHours = "N/A";
         this.id = id;
         classCount = 0;
 
@@ -62,7 +66,7 @@ public class Professor implements Serializable {
         this.firstName = firstName;
         this.lastName = lastName;
         this.fullName = firstName + " " + lastName;
-        this.lastName = lastName.toLowerCase();
+        this.emailPrefix = lastName.toLowerCase();
         this.professorsSchool = school;
     }
 
@@ -206,26 +210,34 @@ public class Professor implements Serializable {
         this.professorsSchool = professorsSchool;
     }
 
-    public MessageEmbed getAsEmbed()
+    public MessageEmbed getAsEmbed(Schoolbot schoolbot)
     {
+        Role role = schoolbot.getJda().getRoleById(this.professorsSchool.getRoleID());
+
         return new EmbedBuilder()
                 .setTitle("Professor " + lastName)
                 .addField("Professor Name", fullName, false)
-                .addField("Email prefix", emailPrefix + " \n ***(These are assumed unless set otherwise)*** ", false)
-                .addField("Classes Taught", "" + classCount, false)
-                .setColor(Color.blue)
+                .addField("Email", email + " \n ***(These are assumed unless set otherwise)*** ", false)
+                .addField("Office Hours", this.officeHours, false)
+                .addField("Classes Taught", String.valueOf(classCount), false)
+                .addField("Professor ID", String.valueOf(this.id), false)
+                .setColor(role == null ? Color.BLUE : role.getColor())
                 .setTimestamp(Instant.now())
                 .build();
     }
 
-    public EmbedBuilder getAsEmbedBuilder()
+    public EmbedBuilder getAsEmbedBuilder(Schoolbot schoolbot)
     {
+
+        Role role = schoolbot.getJda().getRoleById(this.professorsSchool.getRoleID());
         return new EmbedBuilder()
                 .setTitle("Professor " + lastName)
                 .addField("Professor Name", fullName, false)
-                .addField("Email prefix", emailPrefix + " \n **(These are assumed unless set otherwise)** ", false)
-                .addField("Classes Taught", "" + classCount, false)
-                .setColor(Color.blue)
+                .addField("Email", email + " \n ***(These are assumed unless set otherwise)*** ", false)
+                .addField("Office Hours", this.officeHours, false)
+                .addField("Classes Taught", String.valueOf(classCount), false)
+                .addField("Professor ID", String.valueOf(this.id), false)
+                .setColor(role == null ? Color.BLUE : role.getColor())
                 .setTimestamp(Instant.now());
     }
 

@@ -8,10 +8,12 @@ import schoolbot.natives.objects.school.Classroom;
 import schoolbot.natives.objects.school.Professor;
 import schoolbot.natives.objects.school.School;
 
-import java.sql.Date;
 import java.sql.*;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DatabaseUtil
 {
@@ -22,40 +24,7 @@ public class DatabaseUtil
        *
        * @return true if connection is alive..
        */
-      public static boolean testConnection(Schoolbot schoolbot)
-      {
-            try
-            {
-                  Connection connection = schoolbot.getDatabaseHandler().getDbConnection();
-                  connection.close();
-                  return true;
-            }
-            catch (Exception e)
-            {
-                  LOGGER.error("Cannot connect to database", e);
-                  return false;
-            }
-      }
 
-
-      public static boolean getClassesBySchoolID(Schoolbot schoolbot, int id)
-      {
-            ResultSet resultSet = null;
-
-            try (Connection con = schoolbot.getDatabaseHandler().getDbConnection())
-            {
-                  PreparedStatement preparedStatement = con.prepareStatement("SELECT class.school_id FROM class WHERE class.school_id=?");
-                  preparedStatement.setInt(1, id);
-                  resultSet = preparedStatement.executeQuery();
-                  return resultSet.next();
-
-            }
-            catch (Exception e)
-            {
-                  LOGGER.error("Database error", e);
-                  return false;
-            }
-      }
 
       public static boolean addAssignment(Schoolbot schoolbot, Assignment assignment)
       {
@@ -65,16 +34,16 @@ public class DatabaseUtil
             {
                   PreparedStatement preparedStatement = con.prepareStatement("""
                           INSERT INTO public.assignments(
-                          name, due_date, type, professor_id, points_possible, description, time_due)
+                          name, due_date, type, professor_id, points_possible, description, class_id)
                           VALUES (?, ?, ?, ?, ?, ?, ?)
                           """);
                   preparedStatement.setString(1, assignment.getName());
-                  preparedStatement.setDate(2, Date.valueOf(assignment.getDueDate()));
+                  preparedStatement.setTimestamp(2, Timestamp.valueOf(assignment.getDueDate().toLocalDateTime()));
                   preparedStatement.setString(3, assignment.getAssignmentType().getAssignmentType());
                   preparedStatement.setInt(4, assignment.getProfessorID());
                   preparedStatement.setInt(5, assignment.getPoints());
                   preparedStatement.setString(6, assignment.getDescription());
-                  preparedStatement.setTime(7, Time.valueOf(assignment.getOffsetTime().toLocalTime()));
+                  preparedStatement.setInt(7, assignment.getClassroom().getId());
                   preparedStatement.execute();
                   con.close();
                   return true;
@@ -84,33 +53,6 @@ public class DatabaseUtil
             {
                   LOGGER.error("Database error", e);
                   return false;
-            }
-      }
-
-
-      public static List<Classroom> getSchoolByID(Schoolbot schoolbot, String className, long guild_id)
-      {
-            List<Classroom> classroomList = new ArrayList<>();
-            ResultSet resultSet = null;
-
-            try (Connection con = schoolbot.getDatabaseHandler().getDbConnection())
-            {
-                  PreparedStatement statement = con.prepareStatement("SELECT * FROM class WHERE name=? AND guild_id=?");
-                  resultSet = statement.executeQuery();
-
-                  while (resultSet.next())
-                  {
-                        classroomList.add(new Classroom(
-                                resultSet.getInt("id"),
-                                resultSet.getString("name")
-                        ));
-                  }
-                  return classroomList;
-            }
-            catch (Exception e)
-            {
-                  LOGGER.error("Database error", e);
-                  return Collections.emptyList();
             }
       }
 
@@ -144,105 +86,6 @@ public class DatabaseUtil
                   return null;
             }
       }
-
-      public static boolean checkClassInTerm(Schoolbot schoolbot, int classNumber, String term, long guild_id, int school_id)
-      {
-            ResultSet resultSet = null;
-
-            try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
-            {
-                  PreparedStatement statement = connection.prepareStatement("SELECT class.name, class.term FROM class WHERE term=? AND number=? AND guild_id=? AND school_id=?");
-                  statement.setString(1, term);
-                  statement.setInt(2, classNumber);
-                  statement.setLong(3, guild_id);
-                  statement.setInt(4, school_id);
-                  resultSet = statement.executeQuery();
-
-                  return resultSet.next();
-            }
-            catch (Exception e)
-            {
-                  LOGGER.error("Database Error", e);
-                  return false;
-            }
-      }
-
-      public static School getSpecificSchoolByID(Schoolbot schoolbot, int id, long guild_id)
-      {
-            School school = null;
-            ResultSet rs;
-
-            try (Connection con = schoolbot.getDatabaseHandler().getDbConnection())
-            {
-                  PreparedStatement statement = con.prepareStatement("SELECT * FROM schools WHERE guild_id=? AND id=?");
-                  statement.setLong(1, guild_id);
-                  statement.setInt(2, id);
-                  rs = statement.executeQuery();
-
-                  while (rs.next())
-                  {
-                        school = new School();
-                        school.setSchoolName(rs.getString("name"));
-                        school.setRoleID(rs.getLong("role_id"));
-                        school.setEmailSuffix(rs.getString("email_suffix"));
-                        school.setGuildID(rs.getLong("guild_id"));
-                        school.setIsPittSchool(rs.getBoolean("is_pitt_campus"));
-                  }
-                  return school;
-            }
-            catch (Exception e)
-            {
-                  LOGGER.error("Database error", e);
-                  return school;
-            }
-      }
-
-      public static List<Professor> getProfessorsWithClassInformation(Schoolbot schoolbot, long guildId, int schoolID)
-      {
-            HashMap<String, Professor> professorHashMap = new HashMap<>();
-            ResultSet resultSet = null;
-            Professor professor = null;
-            try (Connection con = schoolbot.getDatabaseHandler().getDbConnection())
-            {
-                  PreparedStatement statement = con.prepareStatement("""
-                             SELECT professors.first_name, professors.last_name, class.name, professors.email_prefix
-                             from CLASS  
-                             INNER JOIN professors on professors.id=class.instructor_id
-                             WHERE class.guild_id=?
-                             AND class.school_id=?                                                  
-                          """);
-                  statement.setLong(1, guildId);
-                  statement.setInt(2, schoolID);
-                  resultSet = statement.executeQuery();
-
-                  while (resultSet.next())
-                  {
-                        String emailPrefix = resultSet.getString("email_prefix");
-                        String firstName = resultSet.getString("first_name");
-                        String lastName = resultSet.getString("last_name");
-                        String firstAndLast = firstName + " " + lastName;
-
-                        if (professorHashMap.containsKey(firstAndLast))
-                        {
-                              professorHashMap.get(firstAndLast).increaseClassCount();
-                        }
-                        else
-                        {
-                              professorHashMap.put(firstAndLast, new Professor(firstName, lastName, emailPrefix));
-                        }
-                  }
-
-                  return new ArrayList<>(professorHashMap.values());
-
-
-            }
-            catch (Exception exception)
-            {
-                  LOGGER.error("Database error", exception);
-                  return Collections.emptyList();
-            }
-      }
-
 
       public static Map<String, School> getSchools(Schoolbot schoolBot, long guild_id)
       {
@@ -293,25 +136,55 @@ public class DatabaseUtil
 
                         while (rs3.next())
                         {
-                              school.addClass(new Classroom(
-                                      rs3.getString("description"),
-                                      rs3.getString("meet_time"),
-                                      rs3.getString("location"),
-                                      rs3.getString("level"),
-                                      rs3.getString("room"),
-                                      rs3.getString("name"),
-                                      rs3.getString("identifier"),
-                                      rs3.getString("term"),
-                                      rs3.getDate("start_date"),
-                                      rs3.getDate("end_date"),
-                                      rs3.getInt("school_id"),
-                                      rs3.getInt("instructor_id"),
-                                      rs3.getInt("number"),
-                                      rs3.getInt("id"),
-                                      rs3.getLong("role_id"),
-                                      rs3.getLong("channel_id"),
-                                      rs3.getLong("guild_id"),
-                                      school));
+                              Classroom classroom;
+                              int professorID = rs3.getInt("instructor_id");
+                              school.addClass(
+                                      classroom = new Classroom(
+                                              rs3.getString("description"),
+                                              rs3.getString("meet_time"),
+                                              rs3.getString("location"),
+                                              rs3.getString("level"),
+                                              rs3.getString("room"),
+                                              rs3.getString("name"),
+                                              rs3.getString("identifier"),
+                                              rs3.getString("term"),
+                                              rs3.getDate("start_date"),
+                                              rs3.getDate("end_date"),
+                                              rs3.getInt("school_id"),
+                                              rs3.getInt("instructor_id"),
+                                              rs3.getInt("number"),
+                                              rs3.getInt("id"),
+                                              rs3.getLong("role_id"),
+                                              rs3.getLong("channel_id"),
+                                              rs3.getLong("guild_id"),
+                                              school,
+                                              school.getProfessorList()
+                                                      .stream()
+                                                      .filter(professor -> professor.getId() == professorID)
+                                                      .limit(1)
+                                                      .collect(Collectors.toList())
+                                                      .get(0)
+                                      ));
+
+                              ResultSet rs4 = null;
+                              PreparedStatement preparedStatement4 = connection.prepareStatement("SELECT * FROM assignments WHERE class_id=?");
+                              preparedStatement4.setInt(1, classroom.getId());
+                              rs4 = preparedStatement4.executeQuery();
+
+                              while (rs4.next())
+                              {
+                                    classroom.addAssignment(
+                                            new Assignment(
+                                                    rs4.getString("name"),
+                                                    rs4.getString("description"),
+                                                    rs4.getInt("points_possible"),
+                                                    rs4.getInt("professor_id"),
+                                                    rs4.getInt("id"),
+                                                    rs4.getString("type"),
+                                                    rs4.getTimestamp("due_date"),
+                                                    classroom
+                                            ));
+                              }
                         }
 
 
@@ -401,42 +274,6 @@ public class DatabaseUtil
       }
 
 
-      public static List<Professor> getProfessors(Schoolbot schoolBot, int school_id, long guild_id)
-      {
-            List<Professor> professors = new ArrayList<>();
-            Professor professor;
-            ResultSet rs;
-
-            try (Connection con = schoolBot.getDatabaseHandler().getDbConnection())
-            {
-                  PreparedStatement statement = con.prepareStatement("SELECT * FROM professors WHERE school_id=?");
-                  statement.setInt(1, school_id);
-                  rs = statement.executeQuery();
-
-
-                  while (rs.next())
-                  {
-                        professor = new Professor();
-                        professor.setFirstName(rs.getString("first_name"));
-                        professor.setLastName(rs.getString("last_name"));
-                        professor.setEmailPrefix(rs.getString("email_prefix"));
-                        professor.setId(rs.getInt("id"));
-                        professor.setSchoolID(rs.getInt("school_id"));
-
-                        professors.add(professor);
-                  }
-                  return professors;
-            }
-
-            catch (Exception e)
-            {
-                  LOGGER.error("Database error", e);
-                  return Collections.emptyList();
-
-            }
-      }
-
-
       public static boolean addClassPitt(Schoolbot schoolbot, Classroom clazz, long guild_id)
       {
             try (Connection con = schoolbot.getDatabaseHandler().getDbConnection())
@@ -448,7 +285,6 @@ public class DatabaseUtil
                   int sYear = Integer.parseInt(clazz.getInputClassStartDate()[2]);
                   int sMonth = Integer.parseInt(clazz.getInputClassStartDate()[0]);
                   int sDay = Integer.parseInt(clazz.getInputClassStartDate()[1]);
-
 
 
                   int eYear = Integer.parseInt(clazz.getInputClassEndDate()[2]);
@@ -470,7 +306,7 @@ public class DatabaseUtil
                   statement.setString(13, clazz.getDescription());
                   statement.setString(14, clazz.getPreReq());
                   statement.setString(15, clazz.getClassLevel());
-                  statement.setInt(16, clazz.getSchoolID());
+                  statement.setInt(16, DatabaseUtil.getSchoolID(schoolbot, clazz.getSchool().getSchoolName()));
                   statement.setString(17, clazz.getClassIdentifier());
                   statement.setLong(18, guild_id);
                   statement.setString(19, clazz.getTerm());
@@ -484,104 +320,6 @@ public class DatabaseUtil
             }
       }
 
-      public static List<Classroom> getClassesWithinSchool(Schoolbot schoolBot, long guildID, int schoolID)
-      {
-            List<Classroom> classes = new ArrayList<>();
-            Classroom clazz;
-            ResultSet rs;
-
-            try (Connection con = schoolBot.getDatabaseHandler().getDbConnection())
-            {
-                  PreparedStatement statement = con.prepareStatement("SELECT * FROM class WHERE guild_id=? AND school_id=?");
-                  statement.setLong(1, guildID);
-                  statement.setInt(2, schoolID);
-                  rs = statement.executeQuery();
-
-
-                  while (rs.next())
-                  {
-                        clazz = new Classroom();
-
-                        clazz.setClassName(rs.getString("name"));
-                        clazz.setSchoolID(rs.getInt("school_id"));
-                        clazz.setClassEndDate(rs.getDate("end_date"));
-                        clazz.setClassStartDate(rs.getDate("start_date"));
-                        clazz.setDescription(rs.getString("description"));
-                        clazz.setClassNumber(rs.getInt("number"));
-                        clazz.setId(rs.getInt("id"));
-                        clazz.setProfessorID(rs.getInt("instructor_id"));
-                        classes.add(clazz);
-                  }
-                  return classes;
-
-            }
-            catch (Exception e)
-            {
-                  LOGGER.error("Database error", e);
-                  return classes;
-            }
-      }
-
-      public static List<Classroom> getClasses(Schoolbot schoolBot, long guildID)
-      {
-            List<Classroom> classes = new ArrayList<>();
-            Classroom clazz;
-            ResultSet rs;
-
-            try (Connection con = schoolBot.getDatabaseHandler().getDbConnection())
-            {
-                  PreparedStatement statement = con.prepareStatement("SELECT * FROM class WHERE guild_id=?");
-                  statement.setLong(1, guildID);
-                  rs = statement.executeQuery();
-
-
-                  while (rs.next())
-                  {
-                        clazz = new Classroom();
-
-                        clazz.setClassName(rs.getString("name"));
-                        classes.add(clazz);
-                  }
-                  return classes;
-
-            }
-            catch (Exception e)
-            {
-                  LOGGER.error("Database error", e);
-                  return classes;
-            }
-      }
-
-
-      public static List<Classroom> getClassByClassName(Schoolbot schoolBot, String schoolName, long guildID)
-      {
-            List<Classroom> classes = new ArrayList<>();
-            Classroom clazz;
-            ResultSet rs;
-
-            try (Connection con = schoolBot.getDatabaseHandler().getDbConnection())
-            {
-                  PreparedStatement statement = con.prepareStatement("SELECT * FROM class WHERE guild_id=? AND name=?");
-                  statement.setLong(1, guildID);
-                  statement.setString(2, schoolName);
-                  rs = statement.executeQuery();
-
-
-                  while (rs.next())
-                  {
-                        clazz = new Classroom();
-                        clazz.setClassName(rs.getString("name"));
-                        classes.add(clazz);
-                  }
-                  return classes;
-
-            }
-            catch (Exception e)
-            {
-                  LOGGER.error("Database error", e);
-                  return classes;
-            }
-      }
 
       public static boolean addSchool(Schoolbot schoolBot, School school)
       {
@@ -659,7 +397,7 @@ public class DatabaseUtil
       }
 
 
-      public static boolean removeSchool(Schoolbot schoolBot, String schoolName)
+      public static void removeSchool(Schoolbot schoolBot, String schoolName)
       {
             try (Connection con = schoolBot.getDatabaseHandler().getDbConnection())
             {
@@ -669,12 +407,10 @@ public class DatabaseUtil
                   );
                   statement.setString(1, schoolName);
                   statement.execute();
-                  return true;
             }
             catch (Exception e)
             {
                   LOGGER.error("Database error", e);
-                  return false;
             }
       }
 
@@ -684,7 +420,7 @@ public class DatabaseUtil
             try (Connection con = schoolBot.getDatabaseHandler().getDbConnection())
             {
                   PreparedStatement statement = con.prepareStatement(
-                          "DELETE FROM professors WHERE id?"
+                          "DELETE FROM professors WHERE id=?"
                   );
                   statement.setInt(1, id);
                   statement.execute();

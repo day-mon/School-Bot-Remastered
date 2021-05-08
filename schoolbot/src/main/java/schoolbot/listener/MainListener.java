@@ -56,6 +56,7 @@ public class MainListener implements EventListener
                     .addField("Description", "Welcome " + user.getName() + " if you are here you probably have no clue what you are doing like all " + guild.getMemberCount() + " of us. If you need some help you can mention anyone individually or mention the role of the class in which you need help in. Mention anyone in 8 and above for roles.", false)
                     .build()).queue();
         }
+
         /**
          * Check Everytime a role is created and check to see if it matches any of the school names or class names.
          */

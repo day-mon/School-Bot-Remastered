@@ -8,6 +8,7 @@ import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.objects.command.CommandFlag;
 import schoolbot.natives.objects.school.Professor;
 import schoolbot.natives.objects.school.School;
+import schoolbot.natives.util.Checks;
 import schoolbot.natives.util.Embed;
 
 import java.util.List;
@@ -38,7 +39,7 @@ public class ListProfessors extends Command
             }
 
 
-            event.getSchoolsAsPaginator();
+            event.getAsPaginator(schools);
             Embed.information(event, "Please choose a page number from the Paginator");
             event.getJDA().addEventListener(new ListProfessorStateMachine(event, schools));
 
@@ -66,7 +67,7 @@ public class ListProfessors extends Command
                   if (event.getChannel().getIdLong() != channelID) return;
                   if (!event.getMessage().getContentRaw().chars().allMatch(Character::isDigit)) return;
                   // Could put error messages between here...
-                  if (!between(Integer.parseInt(event.getMessage().getContentRaw()), 1, schools.size())) return;
+                  if (!Checks.between(Integer.parseInt(event.getMessage().getContentRaw()), 1, schools.size())) return;
                   // Could put error messages between here...
 
                   String content = event.getMessage().getContentRaw();
@@ -83,7 +84,7 @@ public class ListProfessors extends Command
                   }
                   else if (professorList.size() == 1)
                   {
-                        event.getChannel().sendMessage(professorList.get(0).getAsEmbed()).queue();
+                        event.getChannel().sendMessage(professorList.get(0).getAsEmbed(commandEvent.getSchoolbot())).queue();
                         event.getJDA().removeEventListener(this);
                         return;
                   }
@@ -92,11 +93,6 @@ public class ListProfessors extends Command
                   event.getJDA().removeEventListener(this);
 
 
-            }
-
-            private static boolean between(int i, int minValueInclusive, int maxValueInclusive)
-            {
-                  return (i >= minValueInclusive && i <= maxValueInclusive);
             }
       }
 

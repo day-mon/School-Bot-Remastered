@@ -88,7 +88,7 @@ public class Schoolbot extends ListenerAdapter
       @Override
       public void onReady(@Nonnull ReadyEvent event)
       {
-            getJda().getPresence().setPresence(OnlineStatus.ONLINE, Activity.competing("Weierman's Lab Speed Run"));
+            getJda().getPresence().setPresence(OnlineStatus.ONLINE, Activity.streaming("Mindlessly Programming", "https://www.youtube.com/watch?v=Lju6h-C37hE"));
             getLogger().info("Account:           " + event.getJDA().getSelfUser());
             getLogger().info("Java Version:      " + SystemInfo.getJavaVersion());
             getLogger().info("JDA Version:       " + JDAInfo.VERSION);

@@ -34,8 +34,6 @@ public class ListSchools extends Command
             event.sendMessage(schools.get(1).getAsEmbed(event.getSchoolbot()));
         }
 
-        event.getSchoolsAsPaginator();
-
-
+        event.getAsPaginatorWithPageNumbers(schools);
     }
 }

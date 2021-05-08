@@ -5,6 +5,7 @@ import com.github.ygimenez.type.PageType;
 import schoolbot.Schoolbot;
 import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.objects.misc.GuildWrapper;
+import schoolbot.natives.objects.school.Assignment;
 import schoolbot.natives.objects.school.Classroom;
 import schoolbot.natives.objects.school.Professor;
 import schoolbot.natives.objects.school.School;
@@ -66,6 +67,15 @@ public class WrapperHandler
             guildWrappers.get(guildID).addPittClass(event, classroom);
       }
 
+      public void addAssignment(CommandEvent event, Assignment assignment)
+      {
+            long guildID = event.getGuild().getIdLong();
+
+            guildCheck(guildID);
+
+            guildWrappers.get(guildID).addAssignment(schoolbot, assignment);
+      }
+
       public School getSchool(CommandEvent event, String schoolName)
       {
             long guildID = event.getGuild().getIdLong();
@@ -99,35 +109,17 @@ public class WrapperHandler
       }
 
 
-      public List<Page> getSchoolsAsPaginator(CommandEvent event)
-      {
-            long guildID = event.getGuild().getIdLong();
-            guildCheck(guildID);
-
-            List<Page> pages = new ArrayList<>();
-            List<School> schools = getSchools(event);
-            int i = 1;
-
-            for (School school : schools)
-            {
-                  pages.add(new Page
-                          (PageType.EMBED,
-                                  school.getAsEmbedBuilder(schoolbot)
-                                          .setFooter("Page " + i++ + "/" + schools.size())
-                                          .build()
-                          ));
-            }
-            return pages;
-
-      }
 
       public List<Page> getProfessorsAsPaginator(CommandEvent event, School school)
       {
+            Schoolbot schoolbot = event.getSchoolbot();
+
             long guildID = event.getGuild().getIdLong();
             guildCheck(guildID);
 
             List<Page> pages = new ArrayList<>();
             List<Professor> professorList = getProfessors(event, school.getSchoolName().toLowerCase());
+
 
             int i = 1;
 
@@ -135,7 +127,7 @@ public class WrapperHandler
             {
                   pages.add(new Page
                           (PageType.EMBED,
-                                  professor.getAsEmbedBuilder()
+                                  professor.getAsEmbedBuilder(schoolbot)
                                           .setFooter("Page " + i++ + "/" + professorList.size())
                                           .build()
                           ));

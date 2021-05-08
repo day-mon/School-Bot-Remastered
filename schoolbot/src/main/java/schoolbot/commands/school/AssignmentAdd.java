@@ -1,11 +1,11 @@
 package schoolbot.commands.school;
 
-import com.github.ygimenez.method.Pages;
-import com.github.ygimenez.model.Page;
-import com.github.ygimenez.type.PageType;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -18,18 +18,14 @@ import schoolbot.natives.objects.school.Assignment;
 import schoolbot.natives.objects.school.Classroom;
 import schoolbot.natives.objects.school.School;
 import schoolbot.natives.util.Checks;
-import schoolbot.natives.util.DatabaseUtil;
 import schoolbot.natives.util.Embed;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.OffsetTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class AssignmentAdd extends Command
@@ -56,11 +52,15 @@ public class AssignmentAdd extends Command
       @Override
       public void run(CommandEvent event)
       {
-            Map<String, School> schools = DatabaseUtil.getSchools(event.getSchoolbot(), event.getGuild().getIdLong());
+            List<School> schools = event.getGuildSchools()
+                    .stream()
+                    .filter(school -> school.getClassesSize() > 0)
+                    .collect(Collectors.toList());
 
-            Map<Integer, School> validIDs = new HashMap<>();
             Classroom classroom = null;
             int stateToGoto = 1;
+
+            Embed.information(event, "Schools with classes assigned to it will be listed..");
 
             if (!event.getMember().hasPermission(Permission.ADMINISTRATOR))
             {
@@ -85,20 +85,11 @@ public class AssignmentAdd extends Command
             else
             {
                   event.sendMessage("Please choose the School ID of the school you want to add the assignment to ");
-                  ArrayList<Page> pages = new ArrayList<>();
-
-                  for (School school : schools.values())
-                  {
-                        validIDs.put(school.getSchoolID(), school);
-                        pages.add(new Page(PageType.EMBED, school.getAsEmbed(event.getSchoolbot())));
-                  }
-
-                  event.getChannel().sendMessage((MessageEmbed) pages.get(0).getContent())
-                          .queue(success -> Pages.paginate(success, pages));
+                  event.getAsPaginatorWithPageNumbers(schools);
             }
 
 
-            event.getJDA().addEventListener(new AssignmentAddStateMachine(event.getSchoolbot(), event.getChannel(), event.getUser(), validIDs, classroom, stateToGoto));
+            event.getJDA().addEventListener(new AssignmentAddStateMachine(event, schools, classroom, stateToGoto));
 
 
       }
@@ -107,27 +98,23 @@ public class AssignmentAdd extends Command
       {
             private final long channelID, authorID;
             private int state;
+            private CommandEvent commandEvent;
             private Schoolbot schoolbot;
             private Assignment assignment;
             private Classroom classroom;
-
-            private List<School> schoolList;
             private List<Classroom> classroomList;
+            private List<School> schools;
+            private LocalDate date;
 
-            private Map<Integer, School> validSchoolIDs;
-            private Map<Integer, Classroom> validClassIDs;
 
-
-            public AssignmentAddStateMachine(Schoolbot schoolbot, MessageChannel channel, User author, Map<Integer, School> validIDs, Classroom classroom, int state)
+            public AssignmentAddStateMachine(CommandEvent event, List<School> schools, Classroom classroom, int state)
             {
-                  this.channelID = channel.getIdLong();
-                  this.authorID = author.getIdLong();
-                  this.schoolbot = schoolbot;
-                  this.schoolList = new ArrayList<>();
-                  this.classroomList = new ArrayList<>();
-                  this.validSchoolIDs = validIDs;
+                  this.channelID = event.getChannel().getIdLong();
+                  this.authorID = event.getUser().getIdLong();
+                  this.schoolbot = event.getSchoolbot();
+                  this.commandEvent = event;
+                  this.schools = schools;
                   this.classroom = classroom == null ? new Classroom() : classroom;
-                  this.validClassIDs = new HashMap<>();
                   this.assignment = new Assignment();
                   this.state = state;
             }
@@ -163,17 +150,17 @@ public class AssignmentAdd extends Command
                                     return;
                               }
 
-                              int schoolID = Integer.parseInt(content);
+                              int pageNumber = Integer.parseInt(content);
 
-                              if (!validSchoolIDs.containsKey(schoolID))
+                              if (!Checks.between(pageNumber, 1, schools.size()))
                               {
                                     Embed.error(event, "** %s ** was not one of the school ids...", content);
                                     return;
                               }
 
-                              classroom.setSchoolID(schoolID);
-                              classroom.setSchool(validSchoolIDs.get(schoolID));
+                              classroom.setSchool(schools.get(pageNumber - 1));
                               Embed.success(event, "** %s ** successfully selected", classroom.getSchool().getSchoolName());
+                              channel.sendMessage("Would you like to continue?").queue();
                               state = 2;
                               return;
                         }
@@ -188,14 +175,8 @@ public class AssignmentAdd extends Command
 
                               if (user.hasPermission(Permission.ADMINISTRATOR))
                               {
-                                    classroomList = DatabaseUtil.getClassesWithinSchool(schoolbot, guild.getIdLong(), classroom.getSchool().getSchoolID());
-                                    ArrayList<Page> pages = new ArrayList<>();
 
-                                    for (Classroom classroom : classroomList)
-                                    {
-                                          validClassIDs.put(classroom.getId(), classroom);
-                                          pages.add(new Page(PageType.EMBED, classroom.getAsEmbedShort(schoolbot)));
-                                    }
+                                    classroomList = commandEvent.getSchool(commandEvent, classroom.getSchool().getSchoolName()).getClassroomList();
 
                                     if (classroomList.isEmpty())
                                     {
@@ -215,9 +196,9 @@ public class AssignmentAdd extends Command
                                     }
                                     else
                                     {
-                                          channel.sendMessage("Please choose a class id from the following").queue();
-                                          channel.sendMessage((MessageEmbed) pages.get(0).getContent())
-                                                  .queue(success -> Pages.paginate(success, pages));
+                                          channel.sendMessage("Choose a page number corresponding with the school").queue();
+                                          commandEvent.getAsPaginatorWithPageNumbers(classroomList);
+
                                           state = 3;
                                           return;
                                     }
@@ -228,11 +209,11 @@ public class AssignmentAdd extends Command
                                     List<Long> roleIDs = user.getRoles().stream()
                                             .map(Role::getIdLong)
                                             .collect(Collectors.toList());
-                                    List<Classroom> classes = new ArrayList<>();
+                                    List<Classroom> classes = commandEvent.getSchool(commandEvent, classroom.getSchool().getSchoolName()).getClassroomList();
 
 
                                     // This is actually horrifically slow and not really scalable could use a hashmap or store these before hand .
-                                    for (Classroom classroom : DatabaseUtil.getClassesWithinSchool(schoolbot, event.getGuild().getIdLong(), classroom.getSchoolID()))
+                                    for (Classroom classroom : classes)
                                     {
                                           if (roleIDs.contains(classroom.getRoleID()))
                                           {
@@ -259,19 +240,8 @@ public class AssignmentAdd extends Command
                                     }
                                     else
                                     {
-                                          channel.sendMessage("You have more than one class associated with you.. Please give me the class id").queue();
-                                          ArrayList<Page> pages = new ArrayList<>();
-
-                                          for (Classroom classroom : classes)
-                                          {
-                                                validClassIDs.put(classroom.getId(), classroom);
-                                                pages.add(new Page(PageType.EMBED, classroom.getAsEmbedShort(schoolbot)));
-
-                                          }
-
-
-                                          channel.sendMessage((MessageEmbed) pages.get(0).getContent())
-                                                  .queue(success -> Pages.paginate(success, pages));
+                                          channel.sendMessage("You have more than one class associated with you.. Please give me the page number").queue();
+                                          commandEvent.getAsPaginatorWithPageNumbers(classroomList);
                                           state = 3;
                                           return;
                                     }
@@ -286,15 +256,15 @@ public class AssignmentAdd extends Command
                                     return;
                               }
 
-                              int classID = Integer.parseInt(content);
+                              int index = Integer.parseInt(content) - 1;
 
-                              if (!validClassIDs.containsKey(classID))
+                              if (!Checks.between(index + 1, 1, classroomList.size()))
                               {
                                     Embed.error(event, "** %s ** was not one of the class ids...", content);
                                     event.getJDA().removeEventListener(this);
                                     return;
                               }
-                              this.classroom = validClassIDs.get(classID);
+                              this.classroom = classroomList.get(index);
                               Embed.success(event, "** %s ** has successfully been selected", this.classroom.getClassName());
                               channel.sendMessageFormat("""
                                       Now that we have all that sorted the fun stuff can start %s
@@ -389,8 +359,10 @@ public class AssignmentAdd extends Command
                                     Embed.error(event, "** %s ** is not a valid date.. Please try again", content);
                                     return;
                               }
-                              assignment.setDueDate(LocalDate.parse(content, DateTimeFormatter.ofPattern("M/d/yyyy")));
-                              Embed.success(event, "** %s ** successfully set as this assignments due date", assignment.getDueDate().toString());
+
+                              date = LocalDate.parse(content, DateTimeFormatter.ofPattern("M/d/yyyy"));
+
+                              Embed.success(event, "** %s ** successfully set as this assignments due date", date.toString());
                               channel.sendMessage("""
                                       Lastly I will need the time in which your assignment is due
                                       Please use the following format: `HH:mm AM/PM`
@@ -408,31 +380,36 @@ public class AssignmentAdd extends Command
 
                               String[] time = content.split(":");
 
+
                               if (content.toLowerCase().contains("am"))
                               {
                                     int hour = Integer.parseInt(time[0]);
                                     int minute = Integer.parseInt(time[1].replaceAll("am", ""));
 
-                                    assignment.setOffsetTime(OffsetTime.of(LocalTime.of(hour, minute), ZoneOffset.MIN));
+                                    assignment.setDueDate(OffsetDateTime.of(date, LocalTime.of(hour, minute), ZoneOffset.UTC));
+
                               }
                               else
                               {
                                     int hour = Integer.parseInt(time[0]);
                                     int minute = Integer.parseInt(time[1].replaceAll("pm", ""));
 
-                                    assignment.setOffsetTime(OffsetTime.of(LocalTime.of(12 + hour, minute), ZoneOffset.MIN));
+                                    if (hour == 12)
+                                    {
+                                          Embed.error(event, "That doesnt make sense.... Please input a valid date");
+                                          return;
+                                    }
+
+                                    assignment.setDueDate(OffsetDateTime.of(date, LocalTime.of((12 + hour), minute), ZoneOffset.UTC));
                               }
 
-                              if (classroom.addAssignment(schoolbot, assignment))
-                              {
-                                    Embed.success(event, "** %s ** has successfully been added to ** %s **", assignment.getName(), classroom.getClassName());
-                              }
-                              else
-                              {
-                                    Embed.error(event, "Could not add assignment.. try again!");
-                                    jda.removeEventListener(this);
-                                    return;
-                              }
+                              assignment.setClassroom(classroom);
+
+                              commandEvent.addAssignment(commandEvent, assignment);
+
+                              Embed.success(event, "** %s ** has successfully been added to ** %s **", assignment.getName(), classroom.getClassName());
+                              event.getJDA().removeEventListener(this);
+
                         }
 
 

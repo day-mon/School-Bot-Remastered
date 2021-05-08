@@ -5,16 +5,18 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
+import schoolbot.natives.objects.misc.Paginatable;
 import schoolbot.natives.util.DatabaseUtil;
 
 import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class Classroom
+public class Classroom implements Paginatable
 {
     private String description;
     private String preReq;
@@ -57,16 +59,19 @@ public class Classroom
     {
         this.preReq = "None";
         this.description = "N/A";
+        assignments = new ArrayList<>();
+
     }
 
     public Classroom(int id, String className)
     {
         this.id = id;
         this.className = className;
+        assignments = new ArrayList<>();
     }
 
 
-    public Classroom(String description, String classTime, String classLocation, String classLevel, String classRoom, String className, String classIdentifier, String term, Date classStartDate, Date classEndDate, int schoolID, int professorID, int classNumber, int id, long roleID, long channelID, long guildID, School school)
+    public Classroom(String description, String classTime, String classLocation, String classLevel, String classRoom, String className, String classIdentifier, String term, Date classStartDate, Date classEndDate, int schoolID, int professorID, int classNumber, int id, long roleID, long channelID, long guildID, School school, Professor professor)
     {
         this.description = description;
         this.classTime = classTime;
@@ -90,6 +95,9 @@ public class Classroom
         this.channelID = channelID;
         this.guildID = guildID;
         this.school = school;
+        this.professor = professor;
+        assignments = new ArrayList<>();
+
     }
 
 
@@ -368,11 +376,6 @@ public class Classroom
         this.id = id;
     }
 
-    public School getSchool(Schoolbot schoolbot)
-    {
-        return DatabaseUtil.getSpecificSchoolByID(schoolbot, id, guildID);
-    }
-
     public School getSchoolWithoutID()
     {
         return this.school;
@@ -380,7 +383,13 @@ public class Classroom
 
     public boolean addAssignment(Schoolbot schoolbot, Assignment assignment)
     {
+        assignments.add(assignment);
         return DatabaseUtil.addAssignment(schoolbot, assignment);
+    }
+
+    public void addAssignment(Assignment assignment)
+    {
+        assignments.add(assignment);
     }
 
     public List<Assignment> getAssignments()
@@ -408,7 +417,15 @@ public class Classroom
         this.URL = URL;
     }
 
-    public MessageEmbed getAsEmbedShort(Schoolbot schoolbot)
+    public MessageEmbed getAsEmbed(Schoolbot schoolbot)
+    {
+        Role role = schoolbot.getJda().getRoleById(this.roleID);
+
+        return getAsEmbedBuilder(schoolbot)
+                .build();
+    }
+
+    public EmbedBuilder getAsEmbedBuilder(Schoolbot schoolbot)
     {
         Role role = schoolbot.getJda().getRoleById(this.roleID);
 
@@ -419,8 +436,8 @@ public class Classroom
                 .addField("Start Date", this.classStartDate.toString(), false)
                 .addField("End Date", this.classEndDate.toString(), false)
                 .addField("Class ID", String.valueOf(this.id), false)
-                .setColor(role == null ? SchoolbotConstants.DEFAULT_EMBED_COLOR : role.getColor())
-                .build();
+                .addField("Professor", this.professor.getFullName(), false)
+                .setColor(role == null ? SchoolbotConstants.DEFAULT_EMBED_COLOR : role.getColor());
     }
 
 

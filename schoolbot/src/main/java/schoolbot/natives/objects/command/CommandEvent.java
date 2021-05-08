@@ -2,6 +2,7 @@ package schoolbot.natives.objects.command;
 
 import com.github.ygimenez.method.Pages;
 import com.github.ygimenez.model.Page;
+import com.github.ygimenez.type.PageType;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -9,12 +10,15 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
+import schoolbot.natives.objects.misc.Paginatable;
+import schoolbot.natives.objects.school.Assignment;
 import schoolbot.natives.objects.school.Classroom;
 import schoolbot.natives.objects.school.Professor;
 import schoolbot.natives.objects.school.School;
 
 import java.awt.*;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -135,9 +139,14 @@ public class CommandEvent
                     .queue();
       }
 
-      public void getSchoolsAsPaginator()
+      public <T extends Paginatable> void getAsPaginator(List<T> list)
       {
-            List<Page> pages = schoolbot.getWrapperHandler().getSchoolsAsPaginator(this);
+            List<Page> pages = new ArrayList<>();
+
+            for (T obj : list)
+            {
+                  pages.add(new Page(PageType.EMBED, obj.getAsEmbed(schoolbot)));
+            }
 
             getChannel().sendMessage(
                     (MessageEmbed)
@@ -146,6 +155,28 @@ public class CommandEvent
                     Pages.paginate(success, pages)
             );
       }
+
+      public <T extends Paginatable> void getAsPaginatorWithPageNumbers(List<T> list)
+      {
+            List<Page> pages = new ArrayList<>();
+            int i = 1;
+            for (T obj : list)
+            {
+
+                  pages.add(new Page(PageType.EMBED, obj.getAsEmbedBuilder(schoolbot)
+                          .setFooter("Page " + i++ + "/" + list.size())
+                          .build()
+                  ));
+            }
+
+            getChannel().sendMessage(
+                    (MessageEmbed)
+                            pages.get(0).getContent()
+            ).queue(success ->
+                    Pages.paginate(success, pages)
+            );
+      }
+
 
       public void getProfessorsAsPaginator(School school)
       {
@@ -209,4 +240,10 @@ public class CommandEvent
       {
             schoolbot.getWrapperHandler().addProfessor(event, professor);
       }
+
+      public void addAssignment(CommandEvent event, Assignment assignment)
+      {
+            schoolbot.getWrapperHandler().addAssignment(event, assignment);
+      }
+
 }
