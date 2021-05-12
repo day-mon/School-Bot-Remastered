@@ -1,7 +1,10 @@
 package schoolbot.commands.school;
 
+import org.jetbrains.annotations.NotNull;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
+
+import java.util.List;
 
 public class ClassroomEdit extends Command
 {
@@ -11,15 +14,9 @@ public class ClassroomEdit extends Command
         super("", "", 0);
     }
 
-    /**
-     * What the command will do on call.
-     *
-     * @param event Arguments sent to the command.
-     */
     @Override
-    public void run(CommandEvent event)
+    public void run(@NotNull CommandEvent event, @NotNull List<String> args)
     {
 
     }
-
 }

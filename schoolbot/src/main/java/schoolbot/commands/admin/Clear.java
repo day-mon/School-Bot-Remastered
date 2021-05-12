@@ -3,7 +3,6 @@ package schoolbot.commands.admin;
 
 // Imports
 
-import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
@@ -11,6 +10,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
+import org.jetbrains.annotations.NotNull;
 import schoolbot.SchoolbotConstants;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
@@ -27,24 +27,23 @@ import java.util.stream.Collectors;
 
 public class Clear extends Command
 {
-    private final EventWaiter waiter;
 
-    public Clear(EventWaiter waiter)
+    public Clear()
     {
         super("Clears messages in the text channel that the command was executed in", "[optional: number]", 0);
         addCalls("purge", "clean", "clear");
         addPermissions(Permission.ADMINISTRATOR);
         addSelfPermissions(Permission.MESSAGE_MANAGE);
         addChildren(
-                new ClearUser(this, waiter)
+                new ClearUser(this)
         );
-        this.waiter = waiter;
-
     }
 
-    public void run(CommandEvent event)
+
+    @Override
+    public void run(@NotNull CommandEvent event, @NotNull List<String> args)
     {
-        if (event.getArgs().isEmpty())
+        if (args.isEmpty())
         {
             MessageChannel channel = event.getChannel();
             Message message = event.getMessage();
@@ -54,14 +53,14 @@ public class Clear extends Command
 
             if (!message.isFromGuild())
             {
-                author.openPrivateChannel().flatMap(privateChannel -> privateChannel.sendMessage(
-                        "This command must be used in a guild."
-                )).queue();
+                author.openPrivateChannel()
+                        .flatMap(privateChannel -> privateChannel.sendMessage(
+                                "This command must be used in a guild."
+                        )).queue();
 
                 return;
             }
 
-            // The warning here is annoying, suppress if you must; I don't even think it's possible for Member to return null here.
 
             channel.sendMessage(
                     "You are about to delete 100 messages, click the checkmark to continue, click the X to cancel."
@@ -70,8 +69,8 @@ public class Clear extends Command
                 prompt.addReaction("\u2705").queue(); // Checkmark.
                 prompt.addReaction("\u274E").queue(); // X-Mark.
 
-                this.waiter.waitForEvent(MessageReactionAddEvent.class, reactionEvent -> reactionEvent.getMessageIdLong() == prompt.getIdLong()
-                        && Objects.equals(reactionEvent.getUser(), author) || Objects.equals(reactionEvent.getUser().getId(), SchoolbotConstants.GENIUS_OWNER_ID), reactionEvent ->
+                event.getSchoolbot().getEventWaiter().waitForEvent(MessageReactionAddEvent.class, reactionEvent -> reactionEvent.getMessageIdLong() == prompt.getIdLong()
+                                                                                                                   && Objects.equals(reactionEvent.getUser(), author) || Objects.equals(reactionEvent.getUser().getId(), SchoolbotConstants.GENIUS_OWNER_ID), reactionEvent ->
                 {
 
                     switch (reactionEvent.getReaction().getReactionEmote().getName())
@@ -92,12 +91,10 @@ public class Clear extends Command
                                     }).whenCompleteAsync((messagesTotal, throwable) -> channel.sendMessage(
                                     "Successfully purged `" + messagesTotal + "` messages."
                             ).queue(botMessage -> botMessage.delete().queueAfter(5, TimeUnit.SECONDS)));
-
                             break;
                         }
                         case "\u274E" -> {
                             channel.sendMessage("Operation was successfully cancelled.").queue();
-
                             break;
                         }
                         default -> {
@@ -117,7 +114,7 @@ public class Clear extends Command
         }
         else
         {
-            var numCheck = event.getArgs().get(0);
+            var numCheck = args.get(0);
             if (!Checks.isNumber(numCheck))
             {
                 Embed.error(event, "This is not a number! " +

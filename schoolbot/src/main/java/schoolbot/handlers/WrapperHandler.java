@@ -2,6 +2,8 @@ package schoolbot.handlers;
 
 import com.github.ygimenez.model.Page;
 import com.github.ygimenez.type.PageType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
 import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.objects.misc.GuildWrapper;
@@ -17,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class WrapperHandler
 {
+      private Logger LOGGER = LoggerFactory.getLogger(this.getClass());
       private ConcurrentHashMap<Long, GuildWrapper> guildWrappers;
       private Schoolbot schoolbot;
 
@@ -31,7 +34,7 @@ public class WrapperHandler
             long guildID = event.getGuild().getIdLong();
 
             guildCheck(guildID);
-            guildWrappers.get(guildID).addSchool(schoolbot, school);
+            guildWrappers.get(guildID).addSchool(event, school);
             return true;
       }
 
@@ -42,6 +45,15 @@ public class WrapperHandler
             guildCheck(guildID);
             return guildWrappers.get(guildID).getSchoolList();
       }
+
+      public List<Classroom> getGuildsClasses(CommandEvent event)
+      {
+            long guildID = event.getGuild().getIdLong();
+
+            guildCheck(guildID);
+            return guildWrappers.get(guildID).getAllClasses(event);
+      }
+
 
       public boolean schoolCheck(CommandEvent event, String schoolName)
       {
@@ -92,12 +104,12 @@ public class WrapperHandler
             guildWrappers.get(guildID).removeSchool(schoolbot, school);
       }
 
-      public void addProfessor(CommandEvent event, Professor professor)
+      public boolean addProfessor(CommandEvent event, Professor professor)
       {
             long guildID = event.getGuild().getIdLong();
             guildCheck(guildID);
 
-            guildWrappers.get(guildID).addProfessor(schoolbot, professor);
+            return guildWrappers.get(guildID).addProfessor(schoolbot, professor);
       }
 
       public void removeProfessor(CommandEvent event, Professor professor)

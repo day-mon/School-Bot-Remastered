@@ -1,6 +1,7 @@
 package schoolbot.commands.misc;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import org.jetbrains.annotations.NotNull;
 import schoolbot.SchoolbotConstants;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
@@ -19,50 +20,50 @@ public class Time extends Command
     }
 
     @Override
-    public void run(CommandEvent event)
+    public void run(@NotNull CommandEvent event, @NotNull List<String> args)
     {
         List<String> timeZones = Arrays.asList(TimeZone.getAvailableIDs());
 
 
-        if (event.getArgs().size() == 0)
+        if (args.size() == 0)
         {
             event.sendMessage(new EmbedBuilder()
-                        .setDescription(new SimpleDateFormat().format(new Date()))
-                        .setColor(SchoolbotConstants.DEFAULT_EMBED_COLOR));
+                    .setDescription(new SimpleDateFormat().format(new Date()))
+                    .setColor(SchoolbotConstants.DEFAULT_EMBED_COLOR));
         }
-        else 
+        else
         {
-            if (event.getArgs().get(0).equalsIgnoreCase("random")) 
+            if (args.get(0).equalsIgnoreCase("random"))
             {
-                int randomTimeZoneIndex = new Random().nextInt(timeZones.size());       
+                int randomTimeZoneIndex = new Random().nextInt(timeZones.size());
                 String timeZone = timeZones.get(randomTimeZoneIndex);
 
-                DateFormat df = new SimpleDateFormat(); //This is outdated 
+                DateFormat df = new SimpleDateFormat(); //This is outdated
 
                 df.setTimeZone(TimeZone.getTimeZone(timeZone));
                 event.sendMessage(new EmbedBuilder()
-                                    .setDescription("TimeZone name: " + df.getTimeZone().getDisplayName() 
-                                                    + "\nTimeZone time: " + df.format(new Date())
-                                                    + "\nTimeZone ID: " + df.getTimeZone().getID()));
+                        .setDescription("TimeZone name: " + df.getTimeZone().getDisplayName()
+                                        + "\nTimeZone time: " + df.format(new Date())
+                                        + "\nTimeZone ID: " + df.getTimeZone().getID()));
             }
             else
-            { 
-                String timeZoneCheck = event.getArgs().size() <= 3 ? event.getArgs().get(0).toUpperCase() : event.getArgs().get(0);
+            {
+                String timeZoneCheck = args.size() <= 3 ? args.get(0).toUpperCase() : args.get(0);
                 if (!timeZones.contains(timeZoneCheck)) //This is good practice
                 {
                     Embed.error(event, "That is not a valid timezone!");
                     return;
                 }
 
-                DateFormat df = new SimpleDateFormat(); //This is outdated 
+                DateFormat df = new SimpleDateFormat(); //This is outdated
 
                 df.setTimeZone(TimeZone.getTimeZone(timeZoneCheck));
                 event.sendMessage(new EmbedBuilder()
-                                    .setDescription("TimeZone name: " + df.getTimeZone().getDisplayName() 
-                                                    + "\nTimeZone time: " + df.format(new Date())
-                                                    + "\nTimeZone ID: " + df.getTimeZone().getID()));
+                        .setDescription("TimeZone name: " + df.getTimeZone().getDisplayName()
+                                        + "\nTimeZone time: " + df.format(new Date())
+                                        + "\nTimeZone ID: " + df.getTimeZone().getID()));
             }
         }
-      
+
     }
 }

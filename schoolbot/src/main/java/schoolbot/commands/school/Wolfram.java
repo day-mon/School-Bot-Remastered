@@ -1,5 +1,6 @@
 package schoolbot.commands.school;
 
+import org.jetbrains.annotations.NotNull;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
 
@@ -15,12 +16,8 @@ public class Wolfram extends Command
     }
 
     @Override
-    public void run(CommandEvent event)
+    public void run(@NotNull CommandEvent event, @NotNull List<String> args)
     {
-        List<String> args = event.getArgs();
-
-        // Big oof. Will fix later
-
         String finalSend = args.get(0).replaceAll("%", "%25").replaceAll("\\+", "%2B").replaceAll("\\s", "+")
                 .replaceAll("\\$", "%20").replaceAll("&", "%26").replaceAll("\\^", "%5E").replaceAll("`", "%60")
                 .replaceAll("/", "%2F").replaceAll("'", "%27").replaceAll("\\{", "%7B").replaceAll("}", "%7D")
@@ -30,6 +27,6 @@ public class Wolfram extends Command
                 .replaceAll("~", "%7E").replaceAll("@", "%40");
 
         event.sendMessage("https://www.wolframalpha.com/input/?i=" + finalSend);
+
     }
-    
 }

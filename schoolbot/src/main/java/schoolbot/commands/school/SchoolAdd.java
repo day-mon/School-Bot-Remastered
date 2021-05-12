@@ -26,10 +26,7 @@ import schoolbot.natives.util.Checks;
 import schoolbot.natives.util.Embed;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class SchoolAdd extends Command
 {
@@ -47,12 +44,11 @@ public class SchoolAdd extends Command
 
 
       @Override
-      public void run(CommandEvent event)
+      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
-
             MessageChannel channel = event.getChannel();
             User user = event.getUser();
-            String firstArg = event.getArgs().get(0);
+            String firstArg = args.get(0);
             Guild guild = event.getGuild();
             Schoolbot schoolbot = event.getSchoolbot();
 
@@ -61,14 +57,20 @@ public class SchoolAdd extends Command
                   Embed.error(event, "Your school name cannot contain numbers!");
                   return;
             }
-
+            Document doc = null;
             try
             {
-                  Document doc = Jsoup.connect(BACKUP_API_URL + firstArg)
+                  doc = Jsoup.connect(BACKUP_API_URL + firstArg)
                           .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
                           .referrer("http://www.google.com")
                           .ignoreContentType(true)
                           .get();
+            }
+            catch (Exception e)
+            {
+                  channel.sendMessage("Cannot connect to API... exiting..").queue();
+                  return;
+            }
 
 
                   String parseAbleJson =
@@ -120,15 +122,10 @@ public class SchoolAdd extends Command
                         event.getJDA().addEventListener(new SchoolStateMachine(event.getSchoolbot(), event.getChannel(), event.getUser(), schools, event));
                   }
             }
-            catch (Exception e)
-            {
-                  e.printStackTrace();
-            }
-      }
 
 
       public static class SchoolStateMachine extends ListenerAdapter
-      {
+      { // start
             private final long channelID, authorID;
             private final Map<Integer, MessageEmbed> schools;
             private final Schoolbot schoolbot;
@@ -152,7 +149,7 @@ public class SchoolAdd extends Command
                   if (event.getAuthor().getIdLong() != authorID) return;
                   if (event.getChannel().getIdLong() != channelID) return;
                   if (!event.getMessage().getContentRaw().chars().allMatch(Character::isDigit)) return;
-                  if (!between(Integer.parseInt(event.getMessage().getContentRaw()), 1, schools.size())) return;
+                  if (!Checks.between(Integer.parseInt(event.getMessage().getContentRaw()), 1, schools.size())) return;
 
                   int schoolChoice = Integer.parseInt(event.getMessage().getContentRaw());
                   MessageEmbed embed = schools.get(schoolChoice);
@@ -179,7 +176,7 @@ public class SchoolAdd extends Command
 
                   event.getJDA().removeEventListener(this);
             }
-      }
+      } // end
 
 
       private Map<Integer, MessageEmbed> evalSchools(JSONArray jsonArray)
@@ -264,13 +261,5 @@ public class SchoolAdd extends Command
                     });
             return true;
       }
-
-
-      private static boolean between(int i, int minValueInclusive, int maxValueInclusive)
-      {
-            return (i >= minValueInclusive && i <= maxValueInclusive);
-      }
-
-
 }
 

@@ -112,6 +112,12 @@ public class CommandEvent
             getChannel().sendMessage(message).queue();
       }
 
+      public void sendMessageFormat(String message, Object... args)
+      {
+            getChannel().sendMessageFormat(message, args).queue();
+      }
+
+
       public void sendMessage(MessageEmbed embed)
       {
             getChannel().sendMessage(embed).queue();
@@ -162,18 +168,18 @@ public class CommandEvent
             int i = 1;
             for (T obj : list)
             {
-
                   pages.add(new Page(PageType.EMBED, obj.getAsEmbedBuilder(schoolbot)
                           .setFooter("Page " + i++ + "/" + list.size())
                           .build()
                   ));
             }
 
-            getChannel().sendMessage(
-                    (MessageEmbed)
-                            pages.get(0).getContent()
-            ).queue(success ->
-                    Pages.paginate(success, pages)
+
+            getChannel().sendMessage((MessageEmbed) pages.get(0).getContent()).queue(
+                    success ->
+                    {
+                          Pages.paginate(success, pages);
+                    }
             );
       }
 
@@ -206,6 +212,7 @@ public class CommandEvent
             return schoolbot.getWrapperHandler().getProfessors(this, schoolName);
       }
 
+
       public boolean schoolExist(String schoolName)
       {
             return schoolbot.getWrapperHandler().schoolCheck(this, schoolName);
@@ -236,14 +243,25 @@ public class CommandEvent
             schoolbot.getWrapperHandler().removeProfessor(event, professor);
       }
 
-      public void addProfessor(CommandEvent event, Professor professor)
+      public boolean addProfessor(CommandEvent event, Professor professor)
       {
-            schoolbot.getWrapperHandler().addProfessor(event, professor);
+            return schoolbot.getWrapperHandler().addProfessor(event, professor);
       }
 
       public void addAssignment(CommandEvent event, Assignment assignment)
       {
             schoolbot.getWrapperHandler().addAssignment(event, assignment);
       }
+
+      public List<Classroom> getGuildClasses()
+      {
+            return schoolbot.getWrapperHandler().getGuildsClasses(this);
+      }
+
+      public boolean isDeveloper()
+      {
+            return event.getAuthor().getIdLong() == SchoolbotConstants.GENIUS_OWNER_ID;
+      }
+
 
 }

@@ -51,7 +51,7 @@ public class DatabaseHandler
             try
             {
                   dbConnection.close();
-                  LOGGER.info("Closed database");
+                  LOGGER.info("Successfully closed database connection");
             }
             catch (Exception e)
             {

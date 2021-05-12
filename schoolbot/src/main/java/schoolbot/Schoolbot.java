@@ -31,8 +31,6 @@ import java.time.LocalDateTime;
 
 public class Schoolbot extends ListenerAdapter
 {
-
-
       private final LocalDateTime botStartTime;
       private final CommandHandler commandHandler;
       private final ConfigHandler configHandler;
@@ -40,7 +38,7 @@ public class Schoolbot extends ListenerAdapter
       private final DatabaseHandler databaseHandler;
       private final MessageHandler messageHandler;
       private final WrapperHandler wrapperHandler;
-      private final Logger logger;
+      private final Logger LOGGER;
 
 
       private Paginator paginator;
@@ -48,12 +46,12 @@ public class Schoolbot extends ListenerAdapter
 
       public Schoolbot()
       {
-            this.logger = LoggerFactory.getLogger(Schoolbot.class);
+            this.LOGGER = LoggerFactory.getLogger(Schoolbot.class);
             this.messageHandler = new MessageHandler(this);
             this.eventWaiter = new EventWaiter();
             this.configHandler = new ConfigHandler(this);
             this.wrapperHandler = new WrapperHandler(this);
-            this.commandHandler = new CommandHandler(this, eventWaiter);
+            this.commandHandler = new CommandHandler(this);
             this.databaseHandler = new DatabaseHandler(this);
             this.botStartTime = LocalDateTime.now();
       }
@@ -89,13 +87,14 @@ public class Schoolbot extends ListenerAdapter
       public void onReady(@Nonnull ReadyEvent event)
       {
             getJda().getPresence().setPresence(OnlineStatus.ONLINE, Activity.streaming("Mindlessly Programming", "https://www.youtube.com/watch?v=Lju6h-C37hE"));
+
             getLogger().info("Account:           " + event.getJDA().getSelfUser());
             getLogger().info("Java Version:      " + SystemInfo.getJavaVersion());
             getLogger().info("JDA Version:       " + JDAInfo.VERSION);
             getLogger().info("Schoolbot Version: " + BotInfo.getSchoolbotVersion());
             getLogger().info("Operating System:  " + SystemInfo.getOperatingSystem());
             getLogger().info("Github Repo:       " + BotInfo.getGithubRepo());
-            getLogger().info("Startup Time:      " + Duration.between(getBotStartTime(), LocalDateTime.now()).toMillisPart() + "ms");
+            getLogger().info("Startup Time:      " + Duration.between(getBotStartTime(), LocalDateTime.now()).getSeconds() + " seconds");
 
 
             try
@@ -116,9 +115,8 @@ public class Schoolbot extends ListenerAdapter
                   getLogger().error("Paginator Error... Exiting because half of the bot uses paginator", e);
                   System.exit(1);
             }
-
-
       }
+
 
       public CommandHandler getCommandHandler()
       {
@@ -137,7 +135,7 @@ public class Schoolbot extends ListenerAdapter
 
       public Logger getLogger()
       {
-            return logger;
+            return LOGGER;
       }
 
       public ConfigHandler getConfigHandler()

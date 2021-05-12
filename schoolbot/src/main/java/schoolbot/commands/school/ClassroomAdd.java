@@ -11,14 +11,15 @@ import org.jsoup.Jsoup;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.objects.command.CommandFlag;
-import schoolbot.natives.objects.misc.Emoji;
 import schoolbot.natives.objects.school.Classroom;
 import schoolbot.natives.objects.school.School;
+import schoolbot.natives.util.Checks;
 import schoolbot.natives.util.Embed;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 public class ClassroomAdd extends Command
@@ -30,8 +31,9 @@ public class ClassroomAdd extends Command
             addFlags(CommandFlag.DATABASE);
       }
 
+
       @Override
-      public void run(CommandEvent event)
+      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
             if (event.getGuildSchools().size() == 0)
             {
@@ -71,6 +73,10 @@ public class ClassroomAdd extends Command
                   MessageChannel channel = event.getChannel();
                   String message = event.getMessage().getContentRaw();
                   List<School> cachedSchools = commandEvent.getGuildSchools();
+                  List<School> pittSchools = commandEvent.getGuildSchools()
+                          .stream()
+                          .filter(School::getIsPittSchool)
+                          .collect(Collectors.toList());
                   JDA jda = event.getJDA();
 
                   if (message.equalsIgnoreCase("stop"))
@@ -90,7 +96,7 @@ public class ClassroomAdd extends Command
                               schoolClass.setGuildID(guild.getIdLong());
                               if (message.equalsIgnoreCase("Yes") || message.equalsIgnoreCase("y"))
                               {
-                                    boolean isDown = false;
+                                    boolean isDown;
                                     try
                                     {
                                           isDown = Jsoup.connect("https://psmobile.pitt.edu/app/catalog/classSearch").get().text().contains("PeopleSoft Monthly Maintenance in Progress");
@@ -109,53 +115,50 @@ public class ClassroomAdd extends Command
                                           return;
                                     }
                               }
-                              channel.sendMessage("What campus do you attend. (Main, Johnstown, Titusville, or Bradford): ").queue();
+
+                              commandEvent.getAsPaginatorWithPageNumbers(pittSchools);
+                              commandEvent.sendMessage("Please pick the campus based off the page numbers :)");
                               state = 2;
                         }
                         case 2 -> {
-                              for (School schoolInDb : cachedSchools)
+                              if (!Checks.isNumber(message))
                               {
-                                    String potSchoolName = schoolInDb.getSchoolName();
-                                    if (potSchoolName.contains("University of Pittsburgh"))
-                                    {
-                                          if (message.equalsIgnoreCase("main"))
-                                          {
-                                                if (potSchoolName.equalsIgnoreCase("University of Pittsburgh"))
-                                                {
-                                                      channel.sendMessageFormat("Coolio.. This server has %s as a school. We can now continue.", potSchoolName).queue();
-                                                      channel.sendMessageFormat("Pog sauce %s I will now need your term\n Here are some valid entries: `Fall 2020, Summer 2019, Spring 2021`", Emoji.SMILEY_FACE.getAsChat()).queue();
-                                                      schoolClass.setSchoolID(schoolInDb.getSchoolID());
-                                                      schoolClass.setSchool(schoolInDb);
-                                                      state = 3;
-                                                      return;
-                                                }
-                                          }
-                                          else if (potSchoolName.toLowerCase().contains(message.toLowerCase()))
-                                          {
-                                                channel.sendMessageFormat("Coolio.. This server has %s as a school. We can now continue.", potSchoolName).queue();
-                                                channel.sendMessageFormat("Pog sauce %s I will now need your term\n Here are some valid entries: `Fall 2020, Summer 2019, Spring 2021`", Emoji.SMILEY_FACE.getAsChat()).queue();
-                                                schoolClass.setSchoolID(schoolInDb.getSchoolID());
-                                                schoolClass.setSchool(schoolInDb);
-
-                                                state = 3;
-                                                return;
-                                          }
-                                    }
+                                    Embed.error(commandEvent, "%s is not a number", message);
+                                    return;
                               }
-                              Embed.error(event, "School could not be found. Please use the [school add] command to add the school to this server");
-                              state = 1;
-                              jda.removeEventListener(this);
-                              return;
+
+
+                              int number = Integer.parseInt(message);
+
+                              if (!Checks.between(number, 1, pittSchools.size()))
+                              {
+                                    Embed.error(event, "%d is not in between 1 and %d", number, pittSchools.size());
+                                    return;
+                              }
+                              schoolClass.setSchool(pittSchools.get(number - 1));
+                              Embed.success(event, "Successfully set school to %s", schoolClass.getSchool().getSchoolName());
+                              channel.sendMessage("""
+                                      I will now need your term. I only understand pitt term like
+                                      ```
+                                      Fall 2021
+                                      Spring 2020
+                                      Summer 2019
+                                                                    
+                                      Format: <Season> <Year number>
+                                      ```
+                                      """).queue();
+                              state = 3;
                         }
                         case 3 -> {
                               int term = termValidator(message);
                               if (term == -1)
                               {
-                                    Embed.error(event, "Not a valid term. Aborting..\n" +
-                                            "Reason for Aborting\n" +
-                                            "1. **Term is either to old or too far ahead in the future**\n" +
-                                            "2. **You mistyped the term**\n" +
-                                            "3. **You did not input a valid season**");
+                                    Embed.error(event, """
+                                            Not a valid term. Aborting..
+                                            Reason for Aborting
+                                            1. **Term is either to old or too far ahead in the future**
+                                            2. **You mistyped the term**
+                                            3. **You did not input a valid season**""");
                                     jda.removeEventListener(this);
                                     state = 1;
                                     break;
@@ -164,15 +167,14 @@ public class ClassroomAdd extends Command
                               CLASS_SEARCH_URL += term + "/";
                               channel.sendMessage("What is your class #\n Hint: This can normally be found on your syllabus, psmobile or peoplesoft, or in the link of your class ").queue();
                               state = 4;
-                              return;
                         }
                         case 4 -> {
                               CLASS_SEARCH_URL += message;
 
                               School school = schoolClass.getSchool();
                               schoolClass.setURL(CLASS_SEARCH_URL);
-
                               commandEvent.addPittClass(commandEvent, schoolClass);
+                              event.getJDA().removeEventListener(this);
 
 
                         }
@@ -192,7 +194,7 @@ public class ClassroomAdd extends Command
 
             if (yearString.length() != 4) return -1;
             if (!season.chars().allMatch(Character::isLetter)) return -1;
-            if (!yearString.chars().anyMatch(Character::isDigit)) return -1;
+            if (yearString.chars().noneMatch(Character::isDigit)) return -1;
 
             // Computer Generated
             int curYear = LocalDateTime.now().getYear();
@@ -209,8 +211,7 @@ public class ClassroomAdd extends Command
             if (userTrailingYear == trailingYear || userTrailingYear == trailingYear + 1) ;
             else return -1;
 
-            int term = (((userMillennium * 100) + userTrailingYear) * 10) + map.get(season);
-            return term;
+            return (((userMillennium * 100) + userTrailingYear) * 10) + map.get(season);
       }
 
       private static String termFixed(String term)

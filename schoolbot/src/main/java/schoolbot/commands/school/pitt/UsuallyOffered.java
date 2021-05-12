@@ -1,13 +1,16 @@
 package schoolbot.commands.school.pitt;
 
+import org.jetbrains.annotations.NotNull;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
+
+import java.util.List;
 
 public class UsuallyOffered extends Command
 {
       public UsuallyOffered()
       {
-            super("", "", 0);
+            super("", "", 1);
       }
 
       /**
@@ -19,10 +22,10 @@ public class UsuallyOffered extends Command
        *
        * @param event Arguments sent to the command.
        */
+
       @Override
-      public void run(CommandEvent event)
+      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
 
       }
-
 }

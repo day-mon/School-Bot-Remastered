@@ -29,10 +29,9 @@ public class CommandHandler
       private final Map<String, Command> commands;
       private EventWaiter waiter;
 
-      public CommandHandler(Schoolbot schoolbot, EventWaiter waiter)
+      public CommandHandler(Schoolbot schoolbot)
       {
             this.schoolbot = schoolbot;
-            this.waiter = waiter;
             this.commands = initCommands();
 
       }
@@ -105,6 +104,12 @@ public class CommandHandler
             }
 
             String alias = filteredArgs.get(0).toLowerCase();
+
+            if (alias.isBlank() || alias.startsWith(SchoolbotConstants.DEFAULT_PREFIX))
+            {
+                  return;
+            }
+
             Command com = commands.get(alias);
 
             if (com == null)
@@ -114,6 +119,7 @@ public class CommandHandler
 
 
             filteredArgs.remove(0);
+
             CommandEvent commandEvent = new CommandEvent(event, com, filteredArgs, schoolbot);
 
 

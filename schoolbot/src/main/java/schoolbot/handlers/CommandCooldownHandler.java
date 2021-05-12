@@ -1,6 +1,8 @@
 package schoolbot.handlers;
 
 import net.dv8tion.jda.api.entities.Member;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import schoolbot.natives.objects.command.Command;
 
 import java.util.Map;
@@ -8,6 +10,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CommandCooldownHandler
 {
+
+    private Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
+    public CommandCooldownHandler()
+    {
+
+    }
+
 
     /**
      * Used for thread safety.

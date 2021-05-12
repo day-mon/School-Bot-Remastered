@@ -1,5 +1,6 @@
 package schoolbot.commands.misc;
 
+import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import schoolbot.handlers.CommandCooldownHandler;
@@ -8,6 +9,8 @@ import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.objects.command.CommandFlag;
 import schoolbot.natives.util.Checks;
 import schoolbot.natives.util.Embed;
+
+import java.util.List;
 
 public class Google extends Command
 {
@@ -18,14 +21,15 @@ public class Google extends Command
         addFlags(CommandFlag.INTERNET);
     }
 
+
     @Override
-    public void run(CommandEvent event)
+    public void run(@NotNull CommandEvent event, @NotNull List<String> args)
     {
         String baseUrl = "https://duckduckgo.com/?q=";
-        String replacedStuff = event.getArgs().get(0).replaceAll("\\s", "+");
+        String replacedStuff = args.get(0).replaceAll("\\s", "+");
         baseUrl += replacedStuff;
 
-        if (event.getArgs().size() == 1)
+        if (args.size() == 1)
         {
             try
             {
@@ -42,17 +46,17 @@ public class Google extends Command
             }
             catch (Exception e)
             {
-                event.sendMessage("No results found for `" + event.getArgs().get(0) + "`");
+                event.sendMessage("No results found for `" + args.get(0) + "`");
             }
         }
         else
         {
-            if (!Checks.isNumber(event.getArgs().get(1)))
+            if (!Checks.isNumber(args.get(1)))
             {
                 Embed.error(event, "Not a number");
                 return;
             }
-            int num = Integer.parseInt(event.getArgs().get(1));
+            int num = Integer.parseInt(args.get(1));
             try
             {
                 Document doc = Jsoup.connect(baseUrl)
@@ -68,7 +72,7 @@ public class Google extends Command
             }
             catch (Exception e)
             {
-                event.sendMessage("No results found for `" + event.getArgs().get(0) + "` for search result `#" + num + "`");
+                event.sendMessage("No results found for `" + args.get(0) + "` for search result `#" + num + "`");
             }
         }
     }

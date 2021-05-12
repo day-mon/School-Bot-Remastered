@@ -1,16 +1,23 @@
 package schoolbot.natives.objects.school;
 
 
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.Role;
 import org.jetbrains.annotations.NotNull;
+import schoolbot.Schoolbot;
+import schoolbot.SchoolbotConstants;
+import schoolbot.natives.objects.misc.Paginatable;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Objects;
 
 
-public class Assignment implements Comparable<Assignment>
+public class Assignment implements Comparable<Assignment>, Paginatable
 {
       private String name;
       private String description;
@@ -168,14 +175,37 @@ public class Assignment implements Comparable<Assignment>
       public String toString()
       {
             return "Assignment {" +
-                    "name='" + name + '\'' +
-                    ", description='" + description + '\'' +
-                    ", points=" + points +
-                    ", professorID=" + professorID +
-                    ", id=" + id +
-                    ", dueDate=" + dueDate +
-                    ", assignmentType=" + assignmentType +
-                    '}';
+                   "name='" + name + '\'' +
+                   ", description='" + description + '\'' +
+                   ", points=" + points +
+                   ", professorID=" + professorID +
+                   ", id=" + id +
+                   ", dueDate=" + dueDate +
+                   ", assignmentType=" + assignmentType +
+                   '}';
+      }
+
+      @Override
+      public MessageEmbed getAsEmbed(Schoolbot schoolbot)
+      {
+            return getAsEmbedBuilder(schoolbot)
+                    .build();
+      }
+
+      @Override
+      public EmbedBuilder getAsEmbedBuilder(Schoolbot schoolbot)
+      {
+            Role role = schoolbot.getJda().getRoleById(this.classroom.getRoleID());
+            return new EmbedBuilder()
+                    .setTitle(this.name)
+                    .addField("Description", this.description, false)
+                    .addField("Type", assignmentType.getAssignmentType(), false)
+                    .addField("Points", String.valueOf(this.points), false)
+                    .addField("Class", classroom.getClassName(), false)
+                    .addField("Professor", this.classroom.getProfessor().getFullName(), false)
+                    .setColor(role == null ? SchoolbotConstants.DEFAULT_EMBED_COLOR : role.getColor())
+                    .setTimestamp(Instant.now());
+
       }
 
       public enum AssignmentType

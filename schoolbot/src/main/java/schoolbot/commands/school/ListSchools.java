@@ -1,5 +1,6 @@
 package schoolbot.commands.school;
 
+import org.jetbrains.annotations.NotNull;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.objects.command.CommandFlag;
@@ -18,22 +19,24 @@ public class ListSchools extends Command
 
     }
 
+
     @Override
-    public void run(CommandEvent event)
+    public void run(@NotNull CommandEvent event, @NotNull List<String> args)
     {
         List<School> schools = event.getGuildSchools();
 
         if (schools.isEmpty())
         {
             Embed.error(event, "No schools!");
-            return;
         }
         // No need for a paginator call if theres only one school tbh..
         else if (schools.size() == 1)
         {
-            event.sendMessage(schools.get(1).getAsEmbed(event.getSchoolbot()));
+            event.sendMessage(schools.get(0).getAsEmbed(event.getSchoolbot()));
         }
-
-        event.getAsPaginatorWithPageNumbers(schools);
+        else
+        {
+            event.getAsPaginatorWithPageNumbers(schools);
+        }
     }
 }

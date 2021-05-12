@@ -1,8 +1,11 @@
 package schoolbot.commands.school.pitt;
 
+import org.jetbrains.annotations.NotNull;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.objects.command.CommandFlag;
+
+import java.util.List;
 
 public class Calender extends Command
 {
@@ -15,13 +18,9 @@ public class Calender extends Command
 
     }
 
-    /**
-     * What the command will do on call.
-     *
-     * @param event Arguments sent to the command.
-     */
+
     @Override
-    public void run(CommandEvent event)
+    public void run(@NotNull CommandEvent event, @NotNull List<String> args)
     {
 
     }

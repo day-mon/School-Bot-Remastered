@@ -1,9 +1,12 @@
 package schoolbot.commands.school;
 
+import org.jetbrains.annotations.NotNull;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.objects.school.School;
 import schoolbot.natives.util.Embed;
+
+import java.util.List;
 
 public class ListClasses extends Command
 {
@@ -14,15 +17,10 @@ public class ListClasses extends Command
       }
 
 
-      /**
-       * What the command will do on call.
-       *
-       * @param event Arguments sent to the command.
-       */
       @Override
-      public void run(CommandEvent event)
+      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
-            String firstArg = event.getArgs().get(0);
+            String firstArg = args.get(0);
 
             if (!event.schoolExist(firstArg))
             {
@@ -39,6 +37,5 @@ public class ListClasses extends Command
             }
 
             event.getAsPaginator(school.getClassroomList());
-
       }
 }

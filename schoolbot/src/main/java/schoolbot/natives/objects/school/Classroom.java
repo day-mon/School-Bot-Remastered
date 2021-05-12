@@ -13,8 +13,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class Classroom implements Paginatable
 {
@@ -26,7 +26,6 @@ public class Classroom implements Paginatable
     private String classLevel;
     private String classRoom;
     private String className;
-    private String classStatus;
     private String[] inputClassStartDate;
     private String[] inputClassEndDate;
     private String classIdentifier;
@@ -36,11 +35,6 @@ public class Classroom implements Paginatable
     private LocalDate classStartDate;
     private LocalDate classEndDate;
 
-    private int seatsTaken;
-    private int seatsOpen;
-    private int classCapacity;
-    private int schoolID;
-    private int professorID;
     private int classNumber;
     private int creditAmount;
     private int id;
@@ -57,6 +51,8 @@ public class Classroom implements Paginatable
 
     public Classroom()
     {
+        this.channelID = 0;
+        this.roleID = 0;
         this.preReq = "None";
         this.description = "N/A";
         assignments = new ArrayList<>();
@@ -65,6 +61,8 @@ public class Classroom implements Paginatable
 
     public Classroom(int id, String className)
     {
+        this.channelID = 0;
+        this.roleID = 0;
         this.id = id;
         this.className = className;
         assignments = new ArrayList<>();
@@ -87,8 +85,6 @@ public class Classroom implements Paginatable
         this.classEndDate = Instant.ofEpochMilli(classEndDate.getTime())
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
-        this.schoolID = schoolID;
-        this.professorID = professorID;
         this.classNumber = classNumber;
         this.id = id;
         this.roleID = roleID;
@@ -111,14 +107,10 @@ public class Classroom implements Paginatable
         this.guildID = guildID;
     }
 
-    public void setProfessorID(int professorID)
-    {
-        this.professorID = professorID;
-    }
 
     public int getProfessorID()
     {
-        return professorID;
+        return this.professor.getID();
     }
 
     public String getInstructor()
@@ -231,17 +223,6 @@ public class Classroom implements Paginatable
         this.classRoom = classRoom;
     }
 
-    public String getClassStatus()
-    {
-        return classStatus;
-    }
-
-    public void setClassStatus(String classStatus)
-    {
-        this.classStatus = classStatus;
-    }
-
-
     public LocalDate getClassStartDate()
     {
         return classStartDate;
@@ -276,36 +257,6 @@ public class Classroom implements Paginatable
         this.className = className;
     }
 
-    public int getSeatsTaken()
-    {
-        return seatsTaken;
-    }
-
-    public void setSeatsTaken(int seatsTaken)
-    {
-        this.seatsTaken = seatsTaken;
-    }
-
-    public int getSeatsOpen()
-    {
-        return seatsOpen;
-    }
-
-    public void setSeatsOpen(int seatsOpen)
-    {
-        this.seatsOpen = seatsOpen;
-    }
-
-    public int getClassCapacity()
-    {
-        return classCapacity;
-    }
-
-    public void setClassCapacity(int classCapacity)
-    {
-        this.classCapacity = classCapacity;
-    }
-
     public String getClassIdentifier()
     {
         return classIdentifier;
@@ -338,12 +289,7 @@ public class Classroom implements Paginatable
 
     public int getSchoolID()
     {
-        return schoolID;
-    }
-
-    public void setSchoolID(int schoolID)
-    {
-        this.schoolID = schoolID;
+        return getSchool().getID();
     }
 
     public String getTerm()
@@ -384,7 +330,14 @@ public class Classroom implements Paginatable
     public boolean addAssignment(Schoolbot schoolbot, Assignment assignment)
     {
         assignments.add(assignment);
-        return DatabaseUtil.addAssignment(schoolbot, assignment);
+        int assignmentID = DatabaseUtil.addAssignment(schoolbot, assignment);
+
+        if (assignmentID == -1)
+        {
+            assignments.remove(assignment);
+            return false;
+        }
+        return true;
     }
 
     public void addAssignment(Assignment assignment)
@@ -430,58 +383,15 @@ public class Classroom implements Paginatable
         Role role = schoolbot.getJda().getRoleById(this.roleID);
 
         return new EmbedBuilder()
-                .setTitle(this.className)
+                .setTitle(this.className + " | (" + this.classIdentifier + ")")
                 .addField("Class number", String.valueOf(this.classNumber), false)
+                .addField("Meeting time", this.getClassTime(), false)
                 .addField("Description", this.description, false)
-                .addField("Start Date", this.classStartDate.toString(), false)
-                .addField("End Date", this.classEndDate.toString(), false)
+                .addField("Start Date", this.classStartDate == null ? Arrays.toString(this.inputClassStartDate) : this.classStartDate.toString(), false)
+                .addField("End Date", this.classEndDate == null ? Arrays.toString(this.inputClassEndDate) : this.classEndDate.toString(), false)
                 .addField("Class ID", String.valueOf(this.id), false)
                 .addField("Professor", this.professor.getFullName(), false)
                 .setColor(role == null ? SchoolbotConstants.DEFAULT_EMBED_COLOR : role.getColor());
     }
 
-
-    @Override
-    public boolean equals(Object o)
-    {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Classroom classroom = (Classroom) o;
-        return guildID == classroom.guildID && classNumber == classroom.classNumber && creditAmount == classroom.creditAmount && seatsTaken == classroom.seatsTaken && seatsOpen == classroom.seatsOpen && classCapacity == classroom.classCapacity && Objects.equals(description, classroom.description) && Objects.equals(preReq, classroom.preReq) && Objects.equals(instructor, classroom.instructor) && Objects.equals(classTime, classroom.classTime) && Objects.equals(classLocation, classroom.classLocation) && Objects.equals(classLevel, classroom.classLevel) && Objects.equals(classRoom, classroom.classRoom) && Objects.equals(classStatus, classroom.classStatus) && Objects.equals(inputClassStartDate, classroom.inputClassStartDate) && Objects.equals(classIdentifier, classroom.classIdentifier) && Objects.equals(inputClassEndDate, classroom.inputClassEndDate) && Objects.equals(classStartDate, classroom.classStartDate) && Objects.equals(classEndDate, classroom.classEndDate) && Objects.equals(className, classroom.className);
-    }
-
-    @Override
-    public int hashCode()
-    {
-        return Objects.hash(guildID, classNumber, creditAmount, description, preReq, instructor, classTime, classLocation, classLevel, classRoom, classStatus, inputClassStartDate, classIdentifier, inputClassEndDate, classStartDate, classEndDate, className, seatsTaken, seatsOpen, classCapacity);
-    }
-
-    @Override
-    public String toString()
-    {
-        return "Classroom{" +
-                "guildID=" + guildID +
-                ", classNumber=" + classNumber +
-                ", creditAmount=" + creditAmount +
-                ", description='" + description + '\'' +
-                ", preReq='" + preReq + '\'' +
-                ", instructor='" + instructor + '\'' +
-                ", classTime='" + classTime + '\'' +
-                ", classLocation='" + classLocation + '\'' +
-                ", classLevel='" + classLevel + '\'' +
-                ", classRoom='" + classRoom + '\'' +
-                ", classStatus='" + classStatus + '\'' +
-                ", inputClassStartDate='" + inputClassStartDate + '\'' +
-                ", classIdentifier='" + classIdentifier + '\'' +
-                ", inputClassEndDate='" + inputClassEndDate + '\'' +
-                ", classStartDate=" + classStartDate +
-                ", classEndDate=" + classEndDate +
-                ", className='" + className + '\'' +
-                ", seatsTaken=" + seatsTaken +
-                ", seatsOpen=" + seatsOpen +
-                ", classCapacity=" + classCapacity +
-                ", schoolID=" + schoolID +
-                ", professorID=" + professorID +
-                '}';
-    }
 }

@@ -23,13 +23,10 @@ public class ProfessorRemove extends Command
       }
 
 
-      /**
-       * @param event Arguments sent to the command.
-       */
       @Override
-      public void run(CommandEvent event)
+      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
-            String arg0 = event.getArgs().get(0);
+            String arg0 = args.get(0);
             Member member = event.getMember();
             MessageChannel channel = event.getChannel();
             List<School> schoolList = event.getGuildSchools();
@@ -39,7 +36,6 @@ public class ProfessorRemove extends Command
                   Embed.error(event, "[ ** %s ** ] has no schools", event.getGuild().getName());
                   return;
             }
-
 
       }
 

@@ -1,5 +1,6 @@
 package schoolbot.natives.objects.misc;
 
+import org.jetbrains.annotations.NotNull;
 import schoolbot.Schoolbot;
 import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.objects.school.Assignment;
@@ -19,12 +20,11 @@ public class GuildWrapper
       private Map<String, School> schoolList;
 
 
-      public GuildWrapper(long guildID, Map<String, School> schoolList)
+      public GuildWrapper(@NotNull long guildID, @NotNull Map<String, School> schoolList)
       {
             this.guildID = guildID;
             this.schoolList = schoolList;
       }
-
 
       /*
             This is meant to serve kinda as a cache..
@@ -32,14 +32,17 @@ public class GuildWrapper
             Things like ListSchools, ListProfessor, ListAssignments, and ListClasses should not have database calls.. Not really needed and slow
        */
 
-
-      public boolean addSchool(Schoolbot schoolbot, School school)
+      public boolean addSchool(CommandEvent event, School school)
       {
             String lowerCaseSchoolName = school.getSchoolName().toLowerCase();
-
             if (schoolList.containsKey(lowerCaseSchoolName)) return false;
+
+            int id = DatabaseUtil.addSchool(event, school);
+            if (id == -1) return false;
+
+            school.setSchoolID(id);
             schoolList.put(lowerCaseSchoolName, school);
-            DatabaseUtil.addSchool(schoolbot, school);
+
             return true;
       }
 
@@ -67,16 +70,30 @@ public class GuildWrapper
 
       }
 
-      public void addProfessor(Schoolbot schoolbot, Professor professor)
+      public boolean addProfessor(Schoolbot schoolbot, Professor professor)
       {
+
+
+            int id = DatabaseUtil.addProfessor(schoolbot, professor);
+
+            if (id == -1)
+            {
+                  return false;
+            }
+            professor.setId(id);
             professor.getProfessorsSchool().addProfessor(professor);
-            DatabaseUtil.addProfessor(schoolbot, professor);
+            return true;
       }
 
       public void removeProfessor(Schoolbot schoolbot, Professor professor)
       {
             professor.getProfessorsSchool().removeProfessor(professor);
             DatabaseUtil.removeProfessor(schoolbot, professor);
+      }
+
+      public List<Classroom> getAllClasses(CommandEvent event)
+      {
+            return DatabaseUtil.getAllGuildClasses(event.getSchoolbot(), event.getGuild().getIdLong());
       }
 
 

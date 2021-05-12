@@ -1,7 +1,10 @@
 package schoolbot.commands.misc;
 
+import org.jetbrains.annotations.NotNull;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
+
+import java.util.List;
 
 public class Ask extends Command
 {
@@ -12,8 +15,9 @@ public class Ask extends Command
     }
 
     @Override
-    public void run(CommandEvent event) 
+    public void run(@NotNull CommandEvent event, @NotNull List<String> args)
     {
-        event.sendMessage("Refer to: https://dontasktoask.com/");      
-    }   
+        event.sendMessage("Refer to: https://dontasktoask.com/");
+
+    }
 }

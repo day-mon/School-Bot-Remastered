@@ -1,8 +1,11 @@
 package schoolbot.commands.school;
 
+import org.jetbrains.annotations.NotNull;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.util.Embed;
+
+import java.util.List;
 
 public class Assignment extends Command
 {
@@ -17,8 +20,9 @@ public class Assignment extends Command
         );
     }
 
+
     @Override
-    public void run(CommandEvent event)
+    public void run(@NotNull CommandEvent event, @NotNull List<String> args)
     {
         Embed.information(event, """
                 I believe you called this command on accident.. That's okay let me help you!

@@ -1,8 +1,11 @@
 package schoolbot.commands.school;
 
 import net.dv8tion.jda.api.Permission;
+import org.jetbrains.annotations.NotNull;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
+
+import java.util.List;
 
 public class ProfessorEdit extends Command
 {
@@ -13,8 +16,8 @@ public class ProfessorEdit extends Command
     }
 
     @Override
-    public void run(CommandEvent event)
+    public void run(@NotNull CommandEvent event, @NotNull List<String> args)
     {
-        event.sendMessage("professor edit works");
+
     }
 }

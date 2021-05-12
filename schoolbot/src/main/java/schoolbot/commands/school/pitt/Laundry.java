@@ -6,6 +6,7 @@ import com.github.ygimenez.type.PageType;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -18,6 +19,7 @@ import schoolbot.natives.util.Embed;
 import java.awt.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class Laundry extends Command
@@ -47,15 +49,11 @@ public class Laundry extends Command
         addFlags(CommandFlag.INTERNET);
     }
 
-    /**
-     * What the command will do on call.
-     *
-     * @param event Arguments sent to the command.
-     */
+
     @Override
-    public void run(CommandEvent event)
+    public void run(@NotNull CommandEvent event, @NotNull List<String> args)
     {
-        String potLaundryName = event.getArgs().get(0).toUpperCase();
+        String potLaundryName = args.get(0).toUpperCase();
 
         if (!LAUNDRY_API_CALLS.containsKey(potLaundryName))
         {
@@ -65,13 +63,20 @@ public class Laundry extends Command
 
         String laundryURL = BASE_URL + LAUNDRY_API_CALLS.get(potLaundryName);
 
+        Document doc = null;
         try
         {
-            Document doc = Jsoup.connect(laundryURL)
+            doc = Jsoup.connect(laundryURL)
                     .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
                     .referrer("http://www.google.com")
                     .ignoreContentType(true)
                     .get();
+        }
+        catch (Exception e)
+        {
+            event.sendMessage("Cannot connect to laundry api... exiting");
+            return;
+        }
 
             String parseAbleJson =
                     Jsoup.parse(doc.outerHtml())
@@ -132,11 +137,5 @@ public class Laundry extends Command
 
 
         }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-
-    }
 }
+

@@ -43,14 +43,14 @@ public class AssignmentAdd extends Command
 
       /**
        * @param event Arguments sent to the command.
-       */
-      // TODO: Start this command by 05/02/2021
-      /*
-            Potential Issues;
-                  - A user could have multiple school roles.
+       *              <p>
+       *              TODO: Start this command by 05/02/2021
+       *              <p>
+       *              Potential Issues;
+       *              - A user could have multiple school roles.
        */
       @Override
-      public void run(CommandEvent event)
+      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
             List<School> schools = event.getGuildSchools()
                     .stream()
@@ -91,19 +91,18 @@ public class AssignmentAdd extends Command
 
             event.getJDA().addEventListener(new AssignmentAddStateMachine(event, schools, classroom, stateToGoto));
 
-
       }
 
       public static class AssignmentAddStateMachine extends ListenerAdapter
       {
             private final long channelID, authorID;
             private int state;
-            private CommandEvent commandEvent;
+            private final CommandEvent commandEvent;
             private Schoolbot schoolbot;
-            private Assignment assignment;
+            private final Assignment assignment;
             private Classroom classroom;
             private List<Classroom> classroomList;
-            private List<School> schools;
+            private final List<School> schools;
             private LocalDate date;
 
 
@@ -162,7 +161,6 @@ public class AssignmentAdd extends Command
                               Embed.success(event, "** %s ** successfully selected", classroom.getSchool().getSchoolName());
                               channel.sendMessage("Would you like to continue?").queue();
                               state = 2;
-                              return;
                         }
 
                         case 2 -> {
@@ -175,7 +173,6 @@ public class AssignmentAdd extends Command
 
                               if (user.hasPermission(Permission.ADMINISTRATOR))
                               {
-
                                     classroomList = commandEvent.getSchool(commandEvent, classroom.getSchool().getSchoolName()).getClassroomList();
 
                                     if (classroomList.isEmpty())
@@ -191,8 +188,8 @@ public class AssignmentAdd extends Command
                                                   Im going to start by asking for your assignment name
                                                   """, Emoji.SMILEY_FACE.getAsChat()
                                           ).queue();
+                                          assignment.setClassroom(classroomList.get(0));
                                           state = 4;
-                                          return;
                                     }
                                     else
                                     {
@@ -200,7 +197,6 @@ public class AssignmentAdd extends Command
                                           commandEvent.getAsPaginatorWithPageNumbers(classroomList);
 
                                           state = 3;
-                                          return;
                                     }
                               }
                               // first check all users roles...
@@ -225,7 +221,6 @@ public class AssignmentAdd extends Command
                                     {
                                           Embed.error(event, "You do not have any roles associated with any classes");
                                           jda.removeEventListener(this);
-                                          return;
                                     }
                                     else if (classes.size() == 1)
                                     {
@@ -235,18 +230,15 @@ public class AssignmentAdd extends Command
                                                   Im going to start by asking for your assignment name
                                                   """, Emoji.SMILEY_FACE.getAsChat()
                                           ).queue();
+                                          assignment.setClassroom(classroomList.get(0));
                                           state = 4;
-                                          return;
                                     }
                                     else
                                     {
                                           channel.sendMessage("You have more than one class associated with you.. Please give me the page number").queue();
                                           commandEvent.getAsPaginatorWithPageNumbers(classroomList);
                                           state = 3;
-                                          return;
                                     }
-
-
                               }
                         }
                         case 3 -> {
@@ -264,7 +256,7 @@ public class AssignmentAdd extends Command
                                     event.getJDA().removeEventListener(this);
                                     return;
                               }
-                              this.classroom = classroomList.get(index);
+                              assignment.setClassroom(classroomList.get(index));
                               Embed.success(event, "** %s ** has successfully been selected", this.classroom.getClassName());
                               channel.sendMessageFormat("""
                                       Now that we have all that sorted the fun stuff can start %s
@@ -272,17 +264,15 @@ public class AssignmentAdd extends Command
                                       """, Emoji.SMILEY_FACE.getAsChat()
                               ).queue();
                               state = 4;
-                              return;
                         }
 
                         case 4 -> {
-                              assignment.setProfessorID(classroom.getProfessorID());
+                              assignment.setProfessorID(assignment.getClassroom().getProfessorID());
                               assignment.setName(content);
 
                               Embed.success(event, "** %s ** has successfully been added as Assignment name..", assignment.getName());
                               channel.sendMessageFormat("Please give me a small description about the assignment. You can change it later so if you wanna speed through this its fine %s", Emoji.SMILEY_FACE.getAsChat()).queue();
                               state = 5;
-                              return;
                         }
 
                         case 5 -> {
@@ -290,7 +280,6 @@ public class AssignmentAdd extends Command
                               Embed.success(event, "Description has successfully been added as Assignment name..");
                               channel.sendMessage("Okay got it im going to need the point amount for the assignment.. If you don't know just put 'idk' or 0").queue();
                               state = 6;
-                              return;
                         }
 
                         case 6 -> {
@@ -316,7 +305,6 @@ public class AssignmentAdd extends Command
                                       ```
                                       """).queue();
                               state = 7;
-                              return;
                         }
 
                         case 7 -> {
@@ -350,7 +338,6 @@ public class AssignmentAdd extends Command
                                       An Example: `2/9/2004`
                                       """).queue();
                               state = 8;
-                              return;
                         }
 
                         case 8 -> {
@@ -403,11 +390,9 @@ public class AssignmentAdd extends Command
                                     assignment.setDueDate(OffsetDateTime.of(date, LocalTime.of((12 + hour), minute), ZoneOffset.UTC));
                               }
 
-                              assignment.setClassroom(classroom);
-
                               commandEvent.addAssignment(commandEvent, assignment);
 
-                              Embed.success(event, "** %s ** has successfully been added to ** %s **", assignment.getName(), classroom.getClassName());
+                              Embed.success(event, "** %s ** has successfully been added to ** %s **", assignment.getName(), assignment.getClassroom().getClassName());
                               event.getJDA().removeEventListener(this);
 
                         }

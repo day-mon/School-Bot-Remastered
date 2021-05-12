@@ -3,6 +3,7 @@ package schoolbot.natives.objects.school;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
+import org.jetbrains.annotations.NotNull;
 import schoolbot.Schoolbot;
 
 import java.awt.*;
@@ -47,17 +48,17 @@ public class Professor implements Serializable {
         classCount = 0;
     }
 
-    public Professor(String firstName, String lastName, String emailPrefix, int id, School school)
-    {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.emailPrefix = emailPrefix;
-        this.fullName = firstName + " " + lastName;
-        this.professorsSchool = school;
-        this.email = emailPrefix + school.getEmailSuffix();
-        this.officeHours = "N/A";
-        this.id = id;
-        classCount = 0;
+      public Professor(@NotNull String firstName, @NotNull String lastName, @NotNull String emailPrefix, @NotNull int id, @NotNull School school)
+      {
+            this.firstName = firstName;
+            this.lastName = lastName;
+            this.emailPrefix = emailPrefix;
+            this.fullName = firstName + " " + lastName;
+            this.professorsSchool = school;
+            this.email = emailPrefix + school.getEmailSuffix();
+            this.officeHours = "N/A";
+            this.id = id;
+            classCount = 0;
 
     }
 
@@ -86,10 +87,10 @@ public class Professor implements Serializable {
         this.firstName = firstName;
     }
 
-    public int getId()
-    {
-        return id;
-    }
+      public int getID()
+      {
+            return id;
+      }
 
     public void setId(int id)
     {
@@ -109,7 +110,7 @@ public class Professor implements Serializable {
 
     public int getSchoolID()
     {
-        return schoolID;
+          return getProfessorsSchool().getID();
     }
 
 

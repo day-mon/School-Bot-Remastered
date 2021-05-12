@@ -27,14 +27,16 @@ public class MainListener implements EventListener
     {
         if (event instanceof GuildMessageReceivedEvent)
         {
-            GuildMessageReceivedEvent eve = (GuildMessageReceivedEvent) event;
+              GuildMessageReceivedEvent eve = (GuildMessageReceivedEvent) event;
 
-            String message = eve.getMessage().getContentRaw();
-            User author = eve.getAuthor();
+              String message = eve.getMessage().getContentRaw();
+              User author = eve.getAuthor();
 
-            schoolbot.getLogger().info(author.getAsTag() + " has sent: " + message);
+              schoolbot.getLogger().info("[{}] -> {} ({}) has sent the message: {} ", eve.getGuild().getName(), author.getAsTag(), author.getId(), message);
 
-            schoolbot.getMessageHandler().handle((GuildMessageReceivedEvent) event);
+
+              schoolbot.getMessageHandler().handle((GuildMessageReceivedEvent) event);
+
         }
 
         else if (event instanceof GuildMemberJoinEvent)

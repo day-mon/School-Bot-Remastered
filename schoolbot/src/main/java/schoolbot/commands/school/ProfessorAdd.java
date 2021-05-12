@@ -1,12 +1,11 @@
 package schoolbot.commands.school;
 
-import com.github.ygimenez.method.Pages;
 import com.github.ygimenez.model.Page;
 import com.github.ygimenez.type.PageType;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.jetbrains.annotations.NotNull;
 import schoolbot.Schoolbot;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
@@ -25,11 +24,11 @@ public class ProfessorAdd extends Command
     {
         super(parent, "Adds a professor to the server list", "[school name] [professor name] [professor email]", 0);
         addFlags(CommandFlag.DATABASE);
-
     }
 
+
     @Override
-    public void run(CommandEvent event)
+    public void run(@NotNull CommandEvent event, @NotNull List<String> args)
     {
         List<School> schools = event.getGuildSchools();
 
@@ -46,7 +45,7 @@ public class ProfessorAdd extends Command
     public static class ProfessorStateMachine extends ListenerAdapter
     {
         private final long channelId, authorId;
-        private List<School> schools;
+        private final List<School> schools;
         private int state = 0;
         private Schoolbot schoolbot;
         private Professor professor;
@@ -96,18 +95,15 @@ public class ProfessorAdd extends Command
                         break;
                     }
                     channel.sendMessage("Moving on.. I will need you professors school.. Here is a list of all this servers schools! ").queue();
-                    List<Page> pages = paginate(schoolbot, commandEvent.getGuildSchools());
+                    commandEvent.getAsPaginatorWithPageNumbers(commandEvent.getGuildSchools());
 
-                    channel.sendMessage((MessageEmbed) pages.get(0).getContent()).queue(
-                            success -> Pages.paginate(success, pages)
-                    );
                     state = 2;
                 }
                 case 2 -> {
                     channel.sendMessage("Please choose a page number from the page list above..").queue();
                     if (!Checks.isNumber(content))
                     {
-                        channel.sendMessage("You must give me a number!").queue();
+                        Embed.error(commandEvent, "You must give me a number!");
                         return;
 
                     }
@@ -132,11 +128,14 @@ public class ProfessorAdd extends Command
                     professor.setEmailPrefix(content);
                     channel.sendMessage("Thank you.. Inserting all of the info into my database and Adding professor.").queue();
 
-                    commandEvent.addProfessor(commandEvent, professor);
+                    if (!commandEvent.addProfessor(commandEvent, professor))
+                    {
+                        Embed.error(event, "Could not add Professor %s", professor.getLastName());
+                        return;
+                    }
                     channel.sendMessage(professor.getAsEmbed(commandEvent.getSchoolbot())).queue();
 
                     event.getJDA().removeEventListener(this);
-                    return;
                 }
             }
         }

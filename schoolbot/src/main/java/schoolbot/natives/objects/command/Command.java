@@ -1,13 +1,16 @@
 package schoolbot.natives.objects.command;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
+import org.jetbrains.annotations.NotNull;
 import schoolbot.SchoolbotConstants;
 import schoolbot.handlers.CommandCooldownHandler;
 import schoolbot.natives.util.Embed;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 
 public abstract class Command
@@ -79,12 +82,8 @@ public abstract class Command
             this.children = new ArrayList<>();
       }
 
-      /**
-       * What the command will do on call.
-       *
-       * @param event Arguments sent to the command.
-       */
-      public abstract void run(CommandEvent event);
+
+      public abstract void run(@NotNull CommandEvent event, @NotNull List<String> args);
 
       /**
        * @return
@@ -137,7 +136,11 @@ public abstract class Command
 
       public void process(CommandEvent event)
       {
-            if (!event.memberPermissionCheck(event.getCommand().getCommandPermissions()))
+            if (event.isDeveloper())
+            {
+                  run(event, event.getArgs());
+            }
+            else if (!event.memberPermissionCheck(event.getCommand().getCommandPermissions()))
             {
                   Embed.sendInvalidMemberPermissions(event);
             }
@@ -169,7 +172,7 @@ public abstract class Command
                   {
                         addUserToCooldown(event.getMember());
                   }
-                  run(event);
+                  run(event, event.getArgs());
             }
       }
 
@@ -209,6 +212,22 @@ public abstract class Command
             this.commandFlags.addAll(List.of(flags));
       }
 
+      public int getMinimalArgs()
+      {
+            return minimalArgs;
+      }
+
+      public EmbedBuilder getAsHelpEmbed()
+      {
+            return new EmbedBuilder()
+                    .setTitle("Help for **" + this.name + "**")
+                    .addField("Description", this.description, true)
+                    .addField("Syntax", this.syntax, true)
+                    .addField("Usage Example", this.usageExample, true)
+                    .addField("Aliases", String.valueOf(this.calls), true)
+                    .setColor(new Random().nextInt(0xFFFFF));
+
+      }
 
       /**
        * Check whether the current command is enabled or not.

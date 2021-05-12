@@ -24,14 +24,14 @@ public class SchoolRemove extends Command
             addFlags(CommandFlag.DATABASE);
       }
 
-      @Override
-      public void run(CommandEvent event)
-      {
 
+      @Override
+      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
+      {
             List<School> schools = event.getGuildSchools()
                     .stream()
-                    .filter(school -> school.getClassesSize() == 0
-                            && school.getProfessorList().size() == 0)
+                    .filter(school -> school.getClassroomList().size() == 0)
+                    .filter(school -> school.getProfessorList().size() == 0)
                     .collect(Collectors.toList());
 
 
@@ -44,15 +44,14 @@ public class SchoolRemove extends Command
             {
                   event.sendMessage(schools.get(0).getAsEmbed(event.getSchoolbot()));
                   event.sendMessage("This is the only school available to delete would you like to delete it?");
-                  event.getJDA().addEventListener(new SchoolRemoveStateMachine(event, schools));
+                  event.getJDA().addEventListener(new SchoolRemoveStateMachine(event, schools, 2));
                   return;
             }
 
 
             event.sendMessage("Please tell me the school you want to remove by telling me the page number!");
             event.getAsPaginatorWithPageNumbers(schools);
-            event.getJDA().addEventListener(new SchoolRemoveStateMachine(event, schools));
-
+            event.getJDA().addEventListener(new SchoolRemoveStateMachine(event, schools, 1));
       }
 
       public static class SchoolRemoveStateMachine extends ListenerAdapter
@@ -63,11 +62,12 @@ public class SchoolRemove extends Command
             private CommandEvent commandEvent;
             private School schoolRemoving;
 
-            public SchoolRemoveStateMachine(CommandEvent event, List<School> schools)
+            public SchoolRemoveStateMachine(CommandEvent event, List<School> school, int stateToSwitch)
             {
                   this.authorId = event.getUser().getIdLong();
                   this.channelId = event.getChannel().getIdLong();
-                  this.schools = schools;
+                  this.schools = school;
+                  this.state = stateToSwitch;
                   this.commandEvent = event;
             }
 
@@ -108,8 +108,8 @@ public class SchoolRemove extends Command
                         case 2 -> {
                               if (content.equalsIgnoreCase("yes") || content.equalsIgnoreCase("y"))
                               {
-                                    commandEvent.removeSchool(commandEvent, schoolRemoving);
-                                    Embed.success(event, "Removed [** %s **] successfully", schoolRemoving.getSchoolName());
+                                    commandEvent.removeSchool(commandEvent, schools.get(0));
+                                    Embed.success(event, "Removed [** %s **] successfully", schools.get(0).getSchoolName());
                                     event.getJDA().removeEventListener(this);
                               }
                               else if (content.equalsIgnoreCase("no") || content.equalsIgnoreCase("n") || content.equalsIgnoreCase("nah"))
@@ -123,8 +123,6 @@ public class SchoolRemove extends Command
                               }
                         }
                   }
-
-
             }
       }
 }

@@ -23,7 +23,7 @@ public class ListProfessors extends Command
       }
 
       @Override
-      public void run(CommandEvent event)
+      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
             List<School> schools = event.getGuildSchools();
 
@@ -42,7 +42,6 @@ public class ListProfessors extends Command
             event.getAsPaginator(schools);
             Embed.information(event, "Please choose a page number from the Paginator");
             event.getJDA().addEventListener(new ListProfessorStateMachine(event, schools));
-
       }
 
       public static class ListProfessorStateMachine extends ListenerAdapter
