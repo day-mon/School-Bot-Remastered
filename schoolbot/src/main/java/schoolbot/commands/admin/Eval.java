@@ -22,7 +22,7 @@ public class Eval extends Command
       public Eval()
       {
             super("Evaluates Java code.", "[code]", 1);
-            // addPermissions(Permission.ADMINISTRATOR);
+            addPermissions(Permission.ADMINISTRATOR);
             addCalls("eval", "evaluate", "code");
       }
 
