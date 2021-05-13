@@ -54,9 +54,10 @@ public class DatabaseUtil
       }
 
 
-      public static Map<String, School> getSchools(Schoolbot schoolBot, long guild_id)
+      public static Data getSchools(Schoolbot schoolBot, long guild_id)
       {
             Map<String, School> schools = new HashMap<>();
+            List<Classroom> classrooms = new ArrayList<>();
             School school;
             ResultSet rs;
             try (Connection connection = schoolBot.getDatabaseHandler().getDbConnection())
@@ -133,6 +134,8 @@ public class DatabaseUtil
                                                       .get(0)
                                       ));
 
+                              classrooms.add(classroom);
+
                               ResultSet rs4 = null;
                               PreparedStatement preparedStatement4 = connection.prepareStatement("SELECT * FROM assignments WHERE class_id=?");
                               preparedStatement4.setInt(1, classroom.getId());
@@ -155,12 +158,12 @@ public class DatabaseUtil
                         }
                         schools.put(school.getSchoolName().toLowerCase(), school);
                   }
-                  return schools;
+                  return new Data(schools, classrooms, guild_id);
             }
             catch (SQLException e)
             {
                   LOGGER.error("Database error", e);
-                  return Collections.emptyMap();
+                  return new Data();
             }
 
       }
@@ -286,49 +289,7 @@ public class DatabaseUtil
       }
 
 
-      public static List<Classroom> getAllGuildClasses(Schoolbot schoolbot, long key)
-      {
-            List<Classroom> classroomList = new ArrayList<>();
-            ResultSet resultSet;
 
-            try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
-            {
-                  PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM class WHERE guild_id = ?");
-                  preparedStatement.setLong(1, key);
-                  resultSet = preparedStatement.executeQuery();
-
-                  while (resultSet.next())
-                  {
-                        classroomList.add(new Classroom(
-                                resultSet.getString("description"),
-                                resultSet.getString("meet_time"),
-                                resultSet.getString("location"),
-                                resultSet.getString("level"),
-                                resultSet.getString("room"),
-                                resultSet.getString("name"),
-                                resultSet.getString("identifier"),
-                                resultSet.getString("term"),
-                                resultSet.getDate("start_date"),
-                                resultSet.getDate("end_date"),
-                                resultSet.getInt("school_id"),
-                                resultSet.getInt("instructor_id"),
-                                resultSet.getInt("number"),
-                                resultSet.getInt("id"),
-                                resultSet.getLong("role_id"),
-                                resultSet.getLong("channel_id"),
-                                resultSet.getLong("guild_id"),
-                                null,
-                                null));
-                  }
-            }
-            catch (Exception e)
-            {
-                  LOGGER.error("Database error", e);
-                  return classroomList;
-            }
-
-            return classroomList;
-      }
 
       public static void updateSchool(CommandEvent event, School.SchoolUpdates schoolUpdates, String updateItem, School school)
       {
@@ -341,7 +302,7 @@ public class DatabaseUtil
                   statement.setString(1, updateItem);
                   statement.setInt(2, school.getID());
 
-
+                  // TODO: Edit class command n stuff
             }
             catch (Exception e)
             {
@@ -384,4 +345,43 @@ public class DatabaseUtil
                   LOGGER.error("Database error", e);
             }
       }
+
+
+      public static class Data
+      {
+            private Map<String, School> schoolMap;
+            private List<Classroom> classrooms;
+            private long guildID;
+
+            public Data()
+            {
+                  this.guildID = 0L;
+                  this.schoolMap = Collections.emptyMap();
+                  this.classrooms = Collections.emptyList();
+            }
+
+            public Data(Map<String, School> schoolMap, List<Classroom> classrooms, long guildID)
+            {
+                  this.schoolMap = schoolMap;
+                  this.classrooms = classrooms;
+                  this.guildID = guildID;
+            }
+
+
+            public List<Classroom> getClassrooms()
+            {
+                  return classrooms;
+            }
+
+            public long getGuildID()
+            {
+                  return guildID;
+            }
+
+            public Map<String, School> getSchoolMap()
+            {
+                  return schoolMap;
+            }
+      }
+
 }

@@ -136,7 +136,11 @@ public abstract class Command
 
       public void process(CommandEvent event)
       {
-            if (event.isDeveloper())
+            if (event.getArgs().size() < minimalArgs)
+            {
+                  Embed.error(event, "This minimal amount of args for this command is " + minimalArgs);
+            }
+            else if (event.isDeveloper())
             {
                   run(event, event.getArgs());
             }
@@ -156,10 +160,7 @@ public abstract class Command
             {
                   Embed.error(event, "This command is disabled!");
             }
-            else if (event.getArgs().size() < minimalArgs)
-            {
-                  Embed.error(event, "This minimal amount of args for this command is " + minimalArgs);
-            }
+
             else if (event.getUser().isBot())
             {
                   Embed.error(event, "You are a bot silly goose :P");

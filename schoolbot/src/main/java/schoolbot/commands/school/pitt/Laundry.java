@@ -4,7 +4,6 @@ import com.github.ygimenez.method.Pages;
 import com.github.ygimenez.model.Page;
 import com.github.ygimenez.type.PageType;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
@@ -124,11 +123,9 @@ public class Laundry extends Command
 
 
             ArrayList<Page> pages = new ArrayList<>();
-            MessageBuilder mb = new MessageBuilder();
 
             for (MessageEmbed em : embeds)
             {
-                mb.clear();
                 pages.add(new Page(PageType.EMBED, em));
             }
 

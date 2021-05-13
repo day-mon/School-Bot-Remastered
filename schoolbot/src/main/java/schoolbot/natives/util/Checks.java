@@ -1,13 +1,16 @@
 package schoolbot.natives.util;
 
-import net.dv8tion.jda.api.entities.Member;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import schoolbot.Schoolbot;
+import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.objects.school.Classroom;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 public class Checks
@@ -69,9 +72,34 @@ public class Checks
                     .replaceAll(time.contains("am") ? "am" : "pm", ""));
       }
 
-      public static List<Long> checkRoles(Member member)
+      public static Classroom messageSentFromClassChannel(CommandEvent event)
       {
+            Schoolbot schoolbot = event.getSchoolbot();
+            List<Classroom> classroomList = event.getGuildClasses();
+
+            List<Long> classChannels = classroomList
+                    .stream()
+                    .map(Classroom::getChannelID)
+                    .collect(Collectors.toList());
+
+            long textChanel = event.getTextChannel().getIdLong();
+
+
+            if (classChannels.contains(textChanel))
+            {
+                  // Get class room
+                  Optional<Classroom> potentialClassroom = classroomList
+                          .stream()
+                          .filter(clazzroom -> clazzroom.getChannelID() == textChanel)
+                          .findFirst();
+
+                  // No need to do isPresent check
+                  Classroom classroom = potentialClassroom.get();
+                  return classroom;
+            }
+
             return null;
+
       }
 
 }

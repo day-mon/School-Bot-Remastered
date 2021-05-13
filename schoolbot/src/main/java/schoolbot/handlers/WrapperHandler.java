@@ -153,7 +153,6 @@ public class WrapperHandler
 
             guildWrappers.put(guildID,
                     new GuildWrapper(
-                            guildID,
                             DatabaseUtil.getSchools(schoolbot, guildID)
                     ));
       }

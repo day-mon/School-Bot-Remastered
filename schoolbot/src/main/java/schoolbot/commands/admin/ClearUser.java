@@ -38,6 +38,7 @@ public class ClearUser extends Command
             Message message = event.getMessage();
             MessageChannel channel = event.getChannel();
 
+            message.delete().queue();
 
             switch (argCount)
             {
@@ -59,7 +60,6 @@ public class ClearUser extends Command
                                               .filter(deleteAbleMessages -> deleteAbleMessages.getTimeCreated().isAfter(OffsetDateTime.now().minus(24, ChronoUnit.HOURS)))
                                               .limit(26)
                                               .collect(Collectors.toList());
-                                      channelMessages.remove(0);
                                       channel.purgeMessages(channelMessages);
                                       return channelMessages.size();
                                 })
@@ -112,7 +112,6 @@ public class ClearUser extends Command
                                               .filter(deleteAbleMessages -> deleteAbleMessages.getTimeCreated().isAfter(OffsetDateTime.now().minus(24, ChronoUnit.HOURS)))
                                               .limit(messagesToRemove + 1)
                                               .collect(Collectors.toList());
-                                      channelMessages.remove(0);
                                       channel.purgeMessages(channelMessages);
                                       return channelMessages.size();
                                 }).whenCompleteAsync((channelMessageSize, throwable) ->

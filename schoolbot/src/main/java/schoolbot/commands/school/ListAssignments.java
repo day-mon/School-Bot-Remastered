@@ -12,11 +12,11 @@ import schoolbot.natives.objects.command.CommandEvent;
 import schoolbot.natives.objects.school.Assignment;
 import schoolbot.natives.objects.school.Classroom;
 import schoolbot.natives.objects.school.School;
+import schoolbot.natives.util.Checks;
 import schoolbot.natives.util.Embed;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ListAssignments extends Command
@@ -43,39 +43,10 @@ public class ListAssignments extends Command
                   {
                         List<Classroom> classroomList = event.getGuildClasses();
 
-                        // Gets all roles (longs)
 
-                        List<Long> classChannels = classroomList
-                                .stream()
-                                .map(Classroom::getChannelID)
-                                .collect(Collectors.toList());
+                        Classroom classroom = Checks.messageSentFromClassChannel(event);
 
-                        if (classChannels.contains(textChanel))
-                        {
-                              // Get class room
-                              Optional<Classroom> potentialClassroom = classroomList
-                                      .stream()
-                                      .filter(clazzroom -> clazzroom.getChannelID() == textChanel)
-                                      .findFirst();
-
-                              // No need to do isPresent check
-                              Classroom classroom = potentialClassroom.get();
-                              List<Assignment> assignments = classroom.getAssignments();
-
-                              if (assignments.isEmpty())
-                              {
-                                    Embed.error(event, "This class has no assignments!");
-                              }
-                              else if (assignments.size() == 1)
-                              {
-                                    event.sendMessage(assignments.get(0).getAsEmbed(event.getSchoolbot()));
-                              }
-                              else
-                              {
-                                    event.getAsPaginatorWithPageNumbers(assignments);
-                              }
-                        }
-                        else
+                        if (classroom == null)
                         {
                               // We are going to search the users roles because they didn't send the message from a textchannel that contains a class
                               List<Long> classRoles = classroomList
@@ -97,9 +68,26 @@ public class ListAssignments extends Command
                                       .collect(Collectors.toList());
 
                               event.getAsPaginatorWithPageNumbers(classrooms);
-
-
                         }
+                        else
+                        {
+                              List<Assignment> assignments = classroom.getAssignments();
+
+                              if (assignments.isEmpty())
+                              {
+                                    Embed.error(event, "This class has no assignments!");
+                              }
+                              else if (assignments.size() == 1)
+                              {
+                                    event.sendMessage(assignments.get(0).getAsEmbed(event.getSchoolbot()));
+                              }
+                              else
+                              {
+                                    event.getAsPaginatorWithPageNumbers(assignments);
+                              }
+                        }
+
+
                   }
                   else
                   {

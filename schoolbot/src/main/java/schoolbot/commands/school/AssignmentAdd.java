@@ -9,10 +9,8 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import schoolbot.Schoolbot;
 import schoolbot.natives.objects.command.Command;
 import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.objects.command.CommandFlag;
 import schoolbot.natives.objects.misc.Emoji;
 import schoolbot.natives.objects.school.Assignment;
 import schoolbot.natives.objects.school.Classroom;
@@ -25,80 +23,113 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class AssignmentAdd extends Command
 {
-
-      /**
-       * @param parent
-       */
       public AssignmentAdd(Command parent)
       {
             super(parent, " ", " ", 0);
-            addFlags(CommandFlag.DATABASE);
-
       }
 
-      /**
-       * @param event Arguments sent to the command.
-       *              <p>
-       *              TODO: Start this command by 05/02/2021
-       *              <p>
-       *              Potential Issues;
-       *              - A user could have multiple school roles.
-       */
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
+            Member member = event.getMember();
+            MessageChannel channel = event.getChannel();
             List<School> schools = event.getGuildSchools()
                     .stream()
                     .filter(school -> school.getClassesSize() > 0)
                     .collect(Collectors.toList());
-
             Classroom classroom = null;
             int stateToGoto = 1;
 
-            Embed.information(event, "Schools with classes assigned to it will be listed..");
 
-            if (!event.getMember().hasPermission(Permission.ADMINISTRATOR))
+            if (!member.hasPermission(Permission.ADMINISTRATOR))
             {
-                  event.sendMessage("To add an assignment you can either start with your **class number** or the **class name** ");
+
+                  classroom = Checks.messageSentFromClassChannel(event);
+
+                  if (classroom != null)
+                  {
+                        event.sendMessage("""
+                                ** %s ** has been selected because it you sent it from this channel
+                                Please give me the name of the assignment!
+                                """, classroom.getClassName());
+                        stateToGoto = 4;
+                  }
+                  else
+                  {
+                        List<Long> classRoles = event.getGuildClasses()
+                                .stream()
+                                .map(Classroom::getRoleID)
+                                .collect(Collectors.toList());
+
+                        List<Long> validRoles = event.getMember()
+                                .getRoles()
+                                .stream()
+                                .map(Role::getIdLong)
+                                .filter(validRolez -> Collections.frequency(classRoles, validRolez) > 1)
+                                .collect(Collectors.toList());
+
+                        List<Classroom> classrooms = event.getGuildClasses()
+                                .stream()
+                                .filter(classes -> Collections.frequency(validRoles, classes.getRoleID()) > 1)
+                                .filter(classes -> classes.getAssignments().size() > 0)
+                                .collect(Collectors.toList());
+
+                        if (classrooms.isEmpty())
+                        {
+                              Embed.error(event, "You do not have any roles that indicate you attend any classes");
+                              return;
+                        }
+                        else if (classrooms.size() == 1)
+                        {
+                              classroom = classrooms.get(0);
+                        }
+                        else
+                        {
+                              event.getAsPaginatorWithPageNumbers(classrooms);
+                              event.sendMessage("Please choose the page number of the class you want to add an assignment to");
+                        }
+
+                  }
             }
 
-
-            if (schools.isEmpty())
-            {
-                  Embed.error(event, "This server does not have any school associated with it!");
-                  event.getJDA().removeEventListener(this);
-                  return;
-            }
-            else if (schools.size() == 1)
-            {
-                  classroom = new Classroom();
-                  classroom.setSchool(schools.get(0));
-                  event.getChannel().sendMessageFormat("** %s ** has been selected because there is only one school in this server", classroom.getSchool().getSchoolName()).queue();
-                  event.getChannel().sendMessage("Would you like to continue?").queue();
-                  stateToGoto = 2;
-            }
             else
             {
-                  event.sendMessage("Please choose the School ID of the school you want to add the assignment to ");
-                  event.getAsPaginatorWithPageNumbers(schools);
+                  if (schools.isEmpty())
+                  {
+                        Embed.error(event, "This server does not have any school associated with it!");
+                        event.getJDA().removeEventListener(this);
+                        return;
+                  }
+                  else if (schools.size() == 1)
+                  {
+                        classroom = new Classroom();
+                        classroom.setSchool(schools.get(0));
+                        event.getChannel().sendMessageFormat("** %s ** has been selected because there is only one school in this server", classroom.getSchool().getSchoolName()).queue();
+                        event.getChannel().sendMessage("Would you like to continue?").queue();
+                        stateToGoto = 2;
+                  }
+                  else
+                  {
+                        event.sendMessage("Please choose the School ID of the school you want to add the assignment to ");
+                        event.getAsPaginatorWithPageNumbers(schools);
+                  }
             }
-
-
             event.getJDA().addEventListener(new AssignmentAddStateMachine(event, schools, classroom, stateToGoto));
 
       }
+
 
       public static class AssignmentAddStateMachine extends ListenerAdapter
       {
             private final long channelID, authorID;
             private int state;
             private final CommandEvent commandEvent;
-            private Schoolbot schoolbot;
             private final Assignment assignment;
             private Classroom classroom;
             private List<Classroom> classroomList;
@@ -110,7 +141,6 @@ public class AssignmentAdd extends Command
             {
                   this.channelID = event.getChannel().getIdLong();
                   this.authorID = event.getUser().getIdLong();
-                  this.schoolbot = event.getSchoolbot();
                   this.commandEvent = event;
                   this.schools = schools;
                   this.classroom = classroom == null ? new Classroom() : classroom;
@@ -121,39 +151,39 @@ public class AssignmentAdd extends Command
             @Override
             public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event)
             {
-                  if (event.getAuthor().isBot()) return;
-                  if (event.getChannel().getIdLong() != channelID) return;
                   if (event.getAuthor().getIdLong() != authorID) return;
+                  if (event.getChannel().getIdLong() != channelID) return;
 
-                  JDA jda = event.getJDA();
                   MessageChannel channel = event.getChannel();
-                  String content = event.getMessage().getContentRaw();
-                  Member user = event.getMember();
+                  String message = event.getMessage().getContentRaw();
+                  JDA jda = event.getJDA();
                   Guild guild = event.getGuild();
 
-                  if (content.equalsIgnoreCase("stop"))
+
+                  if (message.equalsIgnoreCase("stop"))
                   {
-                        channel.sendMessage("Okay aborting..").queue();
+                        channel.sendMessage("Aborting...").queue();
                         jda.removeEventListener(this);
                         return;
                   }
 
-
                   switch (state)
                   {
-
                         case 1 -> {
-                              if (!Checks.isNumber(content))
+                              if (!Checks.isNumber(message))
                               {
-                                    Embed.error(event, "** %s ** is not a valid entry", content);
+                                    Embed.error(event, """
+                                            ** %s ** is not a number
+                                            Please Enter a number
+                                            """, message);
                                     return;
                               }
 
-                              int pageNumber = Integer.parseInt(content);
+                              int pageNumber = Integer.parseInt(message);
 
                               if (!Checks.between(pageNumber, 1, schools.size()))
                               {
-                                    Embed.error(event, "** %s ** was not one of the school ids...", content);
+                                    Embed.error(event, "** %s ** was not one of the school ids...", message);
                                     return;
                               }
 
@@ -163,112 +193,65 @@ public class AssignmentAdd extends Command
                               state = 2;
                         }
 
+
                         case 2 -> {
-                              if (!content.toLowerCase().contains("yes"))
+                              if (!message.toLowerCase().contains("yes"))
                               {
                                     channel.sendMessage("Okay goodbye").queue();
                                     jda.removeEventListener(this);
                                     return;
                               }
 
-                              if (user.hasPermission(Permission.ADMINISTRATOR))
+                              classroomList = commandEvent.getSchool(commandEvent, classroom.getSchool().getSchoolName()).getClassroomList();
+
+                              if (classroomList.isEmpty())
                               {
-                                    classroomList = commandEvent.getSchool(commandEvent, classroom.getSchool().getSchoolName()).getClassroomList();
-
-                                    if (classroomList.isEmpty())
-                                    {
-                                          Embed.error(event, "** %s ** does not have any classes associated with it", guild.getName());
-                                          jda.removeEventListener(this);
-                                    }
-                                    else if (classroomList.size() == 1)
-                                    {
-                                          Embed.success(event, "** %s ** has been selected automatically because you only have one class associated with you!", classroomList.get(0).getClassName());
-                                          channel.sendMessageFormat("""
-                                                  Now that we have all that sorted the fun stuff can start %s
-                                                  Im going to start by asking for your assignment name
-                                                  """, Emoji.SMILEY_FACE.getAsChat()
-                                          ).queue();
-                                          assignment.setClassroom(classroomList.get(0));
-                                          state = 4;
-                                    }
-                                    else
-                                    {
-                                          channel.sendMessage("Choose a page number corresponding with the school").queue();
-                                          commandEvent.getAsPaginatorWithPageNumbers(classroomList);
-
-                                          state = 3;
-                                    }
+                                    Embed.error(event, "** %s ** does not have any classes associated with it", guild.getName());
+                                    jda.removeEventListener(this);
                               }
-                              // first check all users roles...
-                              else
+                              else if (classroomList.size() == 1)
                               {
-                                    List<Long> roleIDs = user.getRoles().stream()
-                                            .map(Role::getIdLong)
-                                            .collect(Collectors.toList());
-                                    List<Classroom> classes = commandEvent.getSchool(commandEvent, classroom.getSchool().getSchoolName()).getClassroomList();
-
-
-                                    // This is actually horrifically slow and not really scalable could use a hashmap or store these before hand .
-                                    for (Classroom classroom : classes)
-                                    {
-                                          if (roleIDs.contains(classroom.getRoleID()))
-                                          {
-                                                classes.add(classroom);
-                                          }
-                                    }
-
-                                    if (classes.isEmpty())
-                                    {
-                                          Embed.error(event, "You do not have any roles associated with any classes");
-                                          jda.removeEventListener(this);
-                                    }
-                                    else if (classes.size() == 1)
-                                    {
-                                          Embed.success(event, "** %s ** has been selected automatically because you only have one class associated with you!", classes.get(0).getClassName());
-                                          channel.sendMessageFormat("""
-                                                  Now that we have all that sorted the fun stuff can start %s
-                                                  Im going to start by asking for your assignment name
-                                                  """, Emoji.SMILEY_FACE.getAsChat()
-                                          ).queue();
-                                          assignment.setClassroom(classroomList.get(0));
-                                          state = 4;
-                                    }
-                                    else
-                                    {
-                                          channel.sendMessage("You have more than one class associated with you.. Please give me the page number").queue();
-                                          commandEvent.getAsPaginatorWithPageNumbers(classroomList);
-                                          state = 3;
-                                    }
+                                    Embed.success(event, "** %s ** has been selected automatically because you only have one class associated with you!", classroomList.get(0).getClassName());
+                                    channel.sendMessageFormat("""
+                                            Now that we have all that sorted the fun stuff can start %s
+                                            Im going to start by asking for your assignment name
+                                            """, Emoji.SMILEY_FACE.getAsChat()
+                                    ).queue();
+                                    this.classroom = classroomList.get(0);
+                                    state = 4;
                               }
                         }
+
                         case 3 -> {
-                              if (!Checks.isNumber(content))
+                              if (!Checks.isNumber(message))
                               {
-                                    Embed.error(event, "** %s ** is not a valid entry", content);
+                                    Embed.error(event, "** %s ** is not a valid entry", message);
                                     return;
                               }
 
-                              int index = Integer.parseInt(content) - 1;
+                              int index = Integer.parseInt(message) - 1;
 
                               if (!Checks.between(index + 1, 1, classroomList.size()))
                               {
-                                    Embed.error(event, "** %s ** was not one of the class ids...", content);
+                                    Embed.error(event, "** %s ** was not one of the class ids...", message);
                                     event.getJDA().removeEventListener(this);
                                     return;
                               }
-                              assignment.setClassroom(classroomList.get(index));
+                              this.classroom = classroomList.get(index);
                               Embed.success(event, "** %s ** has successfully been selected", this.classroom.getClassName());
                               channel.sendMessageFormat("""
-                                      Now that we have all that sorted the fun stuff can start %s
-                                      Im going to start by asking for your assignment name
-                                      """, Emoji.SMILEY_FACE.getAsChat()
-                              ).queue();
+                                              Now that we have all that sorted the fun stuff can start %s
+                                              Im going to start by asking for your assignment name
+                                              """,
+                                      Emoji.SMILEY_FACE.getAsChat()).queue();
                               state = 4;
                         }
 
                         case 4 -> {
-                              assignment.setProfessorID(assignment.getClassroom().getProfessorID());
-                              assignment.setName(content);
+                              assignment.setProfessorID(this.classroom.getProfessorID());
+                              assignment.setClassroom(this.classroom);
+                              // ??? what am i doing..
+                              assignment.setName(message);
 
                               Embed.success(event, "** %s ** has successfully been added as Assignment name..", assignment.getName());
                               channel.sendMessageFormat("Please give me a small description about the assignment. You can change it later so if you wanna speed through this its fine %s", Emoji.SMILEY_FACE.getAsChat()).queue();
@@ -276,21 +259,21 @@ public class AssignmentAdd extends Command
                         }
 
                         case 5 -> {
-                              assignment.setDescription(content);
+                              assignment.setDescription(message);
                               Embed.success(event, "Description has successfully been added as Assignment name..");
                               channel.sendMessage("Okay got it im going to need the point amount for the assignment.. If you don't know just put 'idk' or 0").queue();
                               state = 6;
                         }
 
                         case 6 -> {
-                              if (!Checks.isNumber(content) || content.toLowerCase().contains("idk"))
+                              if (!Checks.isNumber(message) || message.toLowerCase().contains("idk"))
                               {
-                                    Embed.error(event, "** %s ** is not a number.. try again!", content);
+                                    Embed.error(event, "** %s ** is not a number.. try again!", message);
                                     state = 6;
                                     return;
                               }
 
-                              int points = content.toLowerCase().contains("idk") ? 0 : Integer.parseInt(content);
+                              int points = message.toLowerCase().contains("idk") ? 0 : Integer.parseInt(message);
 
                               assignment.setPoints(points);
                               Embed.success(event, "** %d ** has been set as ** %s ** point amount", points, assignment.getName());
@@ -308,7 +291,7 @@ public class AssignmentAdd extends Command
                         }
 
                         case 7 -> {
-                              String message = content.toLowerCase();
+                              String content = message.toLowerCase();
 
                               if (message.contains("exam") || message.contains("1"))
                               {
@@ -328,7 +311,7 @@ public class AssignmentAdd extends Command
                               }
                               else
                               {
-                                    Embed.error(event, "** %s ** is not a valid entry", content);
+                                    Embed.error(event, "** %s ** is not a valid entry", message);
                                     return;
                               }
                               Embed.success(event, "** %s ** has been set as your assignment type", assignment.getAssignmentType().getAssignmentType());
@@ -341,13 +324,13 @@ public class AssignmentAdd extends Command
                         }
 
                         case 8 -> {
-                              if (!Checks.isValidAssignmentDate(content, classroom))
+                              if (!Checks.isValidAssignmentDate(message, classroom))
                               {
-                                    Embed.error(event, "** %s ** is not a valid date.. Please try again", content);
+                                    Embed.error(event, "** %s ** is not a valid date.. Please try again", message);
                                     return;
                               }
 
-                              date = LocalDate.parse(content, DateTimeFormatter.ofPattern("M/d/yyyy"));
+                              date = LocalDate.parse(message, DateTimeFormatter.ofPattern("M/d/yyyy"));
 
                               Embed.success(event, "** %s ** successfully set as this assignments due date", date.toString());
                               channel.sendMessage("""
@@ -359,16 +342,16 @@ public class AssignmentAdd extends Command
                         }
 
                         case 9 -> {
-                              if (!Checks.checkValidTime(content))
+                              if (!Checks.checkValidTime(message))
                               {
-                                    Embed.error(event, "** %s ** is not a valid time... try again!", content);
+                                    Embed.error(event, "** %s ** is not a valid time... try again!", message);
                                     return;
                               }
 
-                              String[] time = content.split(":");
+                              String[] time = message.split(":");
 
 
-                              if (content.toLowerCase().contains("am"))
+                              if (message.toLowerCase().contains("am"))
                               {
                                     int hour = Integer.parseInt(time[0]);
                                     int minute = Integer.parseInt(time[1].replaceAll("am", ""));
@@ -396,12 +379,8 @@ public class AssignmentAdd extends Command
                               event.getJDA().removeEventListener(this);
 
                         }
-
-
                   }
-
             }
       }
+
 }
-
-

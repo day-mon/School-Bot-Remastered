@@ -18,12 +18,15 @@ public class GuildWrapper
 {
       private long guildID;
       private Map<String, School> schoolList;
+      // This is a really bad and I will fix it later;
+      private List<Classroom> classrooms;
 
 
-      public GuildWrapper(@NotNull long guildID, @NotNull Map<String, School> schoolList)
+      public GuildWrapper(@NotNull DatabaseUtil.Data data)
       {
-            this.guildID = guildID;
-            this.schoolList = schoolList;
+            this.guildID = data.getGuildID();
+            this.schoolList = data.getSchoolMap();
+            this.classrooms = data.getClassrooms();
       }
 
       /*
@@ -67,6 +70,7 @@ public class GuildWrapper
             School school = classroom.getSchool();
 
             school.addPittClass(event, classroom);
+            classrooms.add(classroom);
 
       }
 
@@ -93,7 +97,7 @@ public class GuildWrapper
 
       public List<Classroom> getAllClasses(CommandEvent event)
       {
-            return DatabaseUtil.getAllGuildClasses(event.getSchoolbot(), event.getGuild().getIdLong());
+            return classrooms;
       }
 
 

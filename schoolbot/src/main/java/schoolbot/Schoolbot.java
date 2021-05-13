@@ -94,7 +94,7 @@ public class Schoolbot extends ListenerAdapter
             getLogger().info("Schoolbot Version: " + BotInfo.getSchoolbotVersion());
             getLogger().info("Operating System:  " + SystemInfo.getOperatingSystem());
             getLogger().info("Github Repo:       " + BotInfo.getGithubRepo());
-            getLogger().info("Startup Time:      " + Duration.between(getBotStartTime(), LocalDateTime.now()).getSeconds() + " seconds");
+            getLogger().info("Startup Time:      " + Duration.between(getBotStartTime(), LocalDateTime.now()).toMillisPart() + " ms");
 
 
             try

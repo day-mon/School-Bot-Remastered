@@ -1,6 +1,7 @@
 package schoolbot.commands.admin;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.handlers.CommandCooldownHandler;
 import schoolbot.natives.objects.command.Command;
