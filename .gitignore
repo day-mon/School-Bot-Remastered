@@ -11,3 +11,4 @@ target/
 src/.classpath
 src/.factorypath
 config
+.project
