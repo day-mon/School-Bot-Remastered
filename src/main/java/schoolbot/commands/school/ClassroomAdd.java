@@ -8,13 +8,13 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
-import schoolbot.natives.objects.command.Command;
-import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.objects.command.CommandFlag;
-import schoolbot.natives.objects.school.Classroom;
-import schoolbot.natives.objects.school.School;
-import schoolbot.natives.util.Checks;
-import schoolbot.natives.util.Embed;
+import schoolbot.objects.command.Command;
+import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.command.CommandFlag;
+import schoolbot.objects.school.Classroom;
+import schoolbot.objects.school.School;
+import schoolbot.util.Checks;
+import schoolbot.util.Embed;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,8 +26,9 @@ public class ClassroomAdd extends Command
 {
       public ClassroomAdd(Command parent)
       {
-            super(parent, "", "", 0);
-            addSelfPermissions(Permission.ADMINISTRATOR);
+            super(parent, "Adds a class given a target school", "[none]", 0);
+            addUsageExample("N/A");
+            addSelfPermissions(Permission.MANAGE_ROLES);
             addFlags(CommandFlag.DATABASE);
       }
 
@@ -90,7 +91,7 @@ public class ClassroomAdd extends Command
                         return;
                   }
 
-                  // TODO: Put in support for other schools other than pitt classes, also update database so the fields that are in union wth pitt class are NotNull
+                  // TODO: Put in support for other schools other than pitt classes
 
 
                   switch (state)

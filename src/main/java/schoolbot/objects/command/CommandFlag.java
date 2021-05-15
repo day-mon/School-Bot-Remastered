@@ -1,4 +1,4 @@
-package schoolbot.natives.objects.command;
+package schoolbot.objects.command;
 
 public enum CommandFlag
 {

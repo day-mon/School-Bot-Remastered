@@ -1,17 +1,18 @@
-package schoolbot.natives.util;
+package schoolbot.util;
 
 import net.dv8tion.jda.api.entities.Role;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
-import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.objects.school.Classroom;
+import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.school.Classroom;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
@@ -31,7 +32,9 @@ public class Checks
 
       public static boolean isValidEmail(String potentialEmail)
       {
-            return potentialEmail.matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.(?:[A-Z]{2}|com|org|edu|net|)$\n");
+            Pattern pattern = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.(?:[A-Z]{2}|com|org|edu|net|)$\n");
+            Matcher matcher = pattern.matcher(potentialEmail);
+            return matcher.matches();
       }
 
       public static boolean between(int i, int minValueInclusive, int maxValueInclusive)
@@ -50,12 +53,8 @@ public class Checks
 
                   ld = LocalDate.parse(potDate, DateTimeFormatter.ofPattern("M/d/yyyy"));
                   LOGGER.info(ld.toString());
-                  if (ld.isBefore(LocalDate.now()))
-                  {
-                        return false;
-                  }
+                  return !ld.isBefore(LocalDate.now());
                   // return ld.isAfter(classroom.getClassStartDate()) && ld.isBefore(classroom.getClassEndDate()); commented out because other things arent implemented yet
-                  return true;
             }
             catch (Exception e)
             {
@@ -90,13 +89,13 @@ public class Checks
             if (classChannels.contains(textChanel))
             {
                   // Get class room
-                  Optional<Classroom> potentialClassroom = classroomList
+                  Classroom classroom = classroomList
                           .stream()
                           .filter(clazzroom -> clazzroom.getChannelID() == textChanel)
-                          .findFirst();
+                          .findFirst()
+                          .orElseThrow(() -> new IllegalStateException("Class does not exist"));
 
-                  // No need to do isPresent check
-                  Classroom classroom = potentialClassroom.get();
+
                   return classroom;
             }
 

@@ -5,13 +5,13 @@ import com.github.ygimenez.type.PageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
-import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.objects.misc.GuildWrapper;
-import schoolbot.natives.objects.school.Assignment;
-import schoolbot.natives.objects.school.Classroom;
-import schoolbot.natives.objects.school.Professor;
-import schoolbot.natives.objects.school.School;
-import schoolbot.natives.util.DatabaseUtil;
+import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.guild.GuildWrapper;
+import schoolbot.objects.school.Assignment;
+import schoolbot.objects.school.Classroom;
+import schoolbot.objects.school.Professor;
+import schoolbot.objects.school.School;
+import schoolbot.util.DatabaseUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,14 +19,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class WrapperHandler
 {
-      private Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-      private ConcurrentHashMap<Long, GuildWrapper> guildWrappers;
-      private Schoolbot schoolbot;
+      private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+      private final ConcurrentHashMap<Long, GuildWrapper> guildWrappers;
+      private final Schoolbot schoolbot;
 
       public WrapperHandler(Schoolbot schoolbot)
       {
             this.guildWrappers = new ConcurrentHashMap<>();
             this.schoolbot = schoolbot;
+
       }
 
       public boolean addSchool(CommandEvent event, School school)
@@ -126,8 +127,6 @@ public class WrapperHandler
             guildCheck(guildID);
 
             guildWrappers.get(guildID).removeClassroom(event, classroom);
-
-
       }
 
 
@@ -158,13 +157,10 @@ public class WrapperHandler
 
       private void guildCheck(long guildID)
       {
-            if (guildWrappers.containsKey(guildID)) return;
 
-            guildWrappers.put(guildID,
-                    new GuildWrapper(
-                            DatabaseUtil.getSchools(schoolbot, guildID)
-                    ));
+            guildWrappers.computeIfAbsent(
+                    guildID,
+                    (x) -> new GuildWrapper(DatabaseUtil.getSchools(schoolbot, x))
+            );
       }
-
-
 }

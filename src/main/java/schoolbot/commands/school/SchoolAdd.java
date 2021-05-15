@@ -18,12 +18,12 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
-import schoolbot.natives.objects.command.Command;
-import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.objects.command.CommandFlag;
-import schoolbot.natives.objects.school.School;
-import schoolbot.natives.util.Checks;
-import schoolbot.natives.util.Embed;
+import schoolbot.objects.command.Command;
+import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.command.CommandFlag;
+import schoolbot.objects.school.School;
+import schoolbot.util.Checks;
+import schoolbot.util.Embed;
 
 import java.time.Instant;
 import java.util.*;
@@ -38,6 +38,7 @@ public class SchoolAdd extends Command
       {
             super(parent, "Adds a school to the server", "[school name] [school email suffix] [school reference]", 1);
             addPermissions(Permission.ADMINISTRATOR);
+            addSelfPermissions(Permission.MANAGE_ROLES);
             addFlags(CommandFlag.DATABASE);
 
       }
@@ -131,7 +132,7 @@ public class SchoolAdd extends Command
             private final Schoolbot schoolbot;
             private final CommandEvent cmdEvent;
 
-            private int state = 0;
+            private final int state = 0;
 
 
             public SchoolStateMachine(Schoolbot schoolbot, MessageChannel channel, User author, Map<Integer, MessageEmbed> schools, CommandEvent cmdEvent)

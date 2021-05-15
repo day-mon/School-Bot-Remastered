@@ -1,18 +1,21 @@
-package schoolbot.natives.util;
+package schoolbot.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
-import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.objects.school.Assignment;
-import schoolbot.natives.objects.school.Classroom;
-import schoolbot.natives.objects.school.Professor;
-import schoolbot.natives.objects.school.School;
+import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.school.Assignment;
+import schoolbot.objects.school.Classroom;
+import schoolbot.objects.school.Professor;
+import schoolbot.objects.school.School;
 
-import java.sql.Date;
 import java.sql.*;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class DatabaseUtil
@@ -56,109 +59,26 @@ public class DatabaseUtil
 
       public static Data getSchools(Schoolbot schoolBot, long guild_id)
       {
-            Map<String, School> schools = new HashMap<>();
+            Map<String, School> schools = new ConcurrentHashMap<>();
             List<Classroom> classrooms = new ArrayList<>();
-            School school;
-            ResultSet rs;
 
             try (Connection connection = schoolBot.getDatabaseHandler().getDbConnection())
             {
-                  PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM schools WHERE guild_id=?");
-                  preparedStatement.setLong(1, guild_id);
-                  rs = preparedStatement.executeQuery();
+                  List<School> schoolList = getSchools(connection, guild_id);
 
-                  while (rs.next())
+                  for (School sh : schoolList)
                   {
-                        school = new School();
-                        school.setSchoolName(rs.getString("name"));
-                        school.setRoleID(rs.getLong("role_id"));
-                        school.setEmailSuffix(rs.getString("email_suffix"));
-                        school.setGuildID(rs.getLong("guild_id"));
-                        school.setIsPittSchool(rs.getBoolean("is_pitt_campus"));
-                        school.setSchoolID(rs.getInt("id"));
-                        school.setURL(rs.getString("url"));
+                        getProfessors(connection, sh);
+                        List<Classroom> classroomList = getClasses(connection, sh);
 
-
-                        ResultSet rs2 = null;
-                        PreparedStatement preparedStatement1 = connection.prepareStatement("SELECT * FROM professors WHERE school_id=?");
-                        preparedStatement1.setInt(1, school.getID());
-                        rs2 = preparedStatement1.executeQuery();
-
-
-                        while (rs2.next())
+                        for (Classroom classroom : classroomList)
                         {
-                              school.addProfessor(new Professor(
-                                      rs2.getString("first_name"),
-                                      rs2.getString("last_name"),
-                                      rs2.getString("email_prefix"),
-                                      rs2.getInt("id"),
-                                      school
-
-                              ));
+                              getAssignments(connection, classroom);
                         }
-
-
-                        ResultSet rs3 = null;
-                        PreparedStatement preparedStatement2 = connection.prepareStatement("SELECT * FROM classes WHERE school_id=?");
-                        preparedStatement2.setInt(1, school.getID());
-                        rs3 = preparedStatement2.executeQuery();
-
-                        while (rs3.next())
-                        {
-                              Classroom classroom;
-                              int professorID = rs3.getInt("professor_id");
-                              school.addClass(
-                                      classroom = new Classroom(
-                                              rs3.getString("description"),
-                                              rs3.getString("time"),
-                                              rs3.getString("location"),
-                                              rs3.getString("level"),
-                                              rs3.getString("room"),
-                                              rs3.getString("name"),
-                                              rs3.getString("identifier"),
-                                              rs3.getString("term"),
-                                              rs3.getDate("start_date"),
-                                              rs3.getDate("end_date"),
-                                              rs3.getInt("school_id"),
-                                              rs3.getInt("professor_id"),
-                                              rs3.getInt("number"),
-                                              rs3.getInt("id"),
-                                              rs3.getLong("role_id"),
-                                              rs3.getLong("channel_id"),
-                                              rs3.getLong("guild_id"),
-                                              school,
-                                              school.getProfessorList()
-                                                      .stream()
-                                                      .filter(professor -> professor.getID() == professorID)
-                                                      .limit(1)
-                                                      .collect(Collectors.toList())
-                                                      .get(0)
-                                      ));
-
-                              classrooms.add(classroom);
-
-                              ResultSet rs4 = null;
-                              PreparedStatement preparedStatement4 = connection.prepareStatement("SELECT * FROM assignments WHERE class_id=?");
-                              preparedStatement4.setInt(1, classroom.getId());
-                              rs4 = preparedStatement4.executeQuery();
-
-                              while (rs4.next())
-                              {
-                                    classroom.addAssignment(
-                                            new Assignment(
-                                                    rs4.getString("name"),
-                                                    rs4.getString("description"),
-                                                    rs4.getInt("points_possible"),
-                                                    rs4.getInt("professor_id"),
-                                                    rs4.getInt("id"),
-                                                    rs4.getString("type"),
-                                                    rs4.getTimestamp("due_date"),
-                                                    classroom
-                                            ));
-                              }
-                        }
-                        schools.put(school.getSchoolName().toLowerCase(), school);
+                        classrooms.addAll(classroomList);
+                        schools.put(sh.getSchoolName().toLowerCase(), sh);
                   }
+
                   return new Data(schools, classrooms, guild_id);
             }
             catch (SQLException e)
@@ -166,7 +86,6 @@ public class DatabaseUtil
                   LOGGER.error("Database error", e);
                   return new Data();
             }
-
       }
 
 
@@ -290,27 +209,6 @@ public class DatabaseUtil
       }
 
 
-      public static void updateSchool(CommandEvent event, School.SchoolUpdates schoolUpdates, String updateItem, School school)
-      {
-            Schoolbot schoolbot = event.getSchoolbot();
-
-
-            try (Connection con = schoolbot.getDatabaseHandler().getDbConnection())
-            {
-                  PreparedStatement statement = con.prepareStatement(schoolUpdates.getUpdateQuery());
-                  statement.setString(1, updateItem);
-                  statement.setInt(2, school.getID());
-
-                  // TODO: Edit class command n stuff
-            }
-            catch (Exception e)
-            {
-                  LOGGER.error("Database error", e);
-
-            }
-      }
-
-
       public static void removeSchool(Schoolbot schoolBot, String schoolName)
       {
             try (Connection con = schoolBot.getDatabaseHandler().getDbConnection())
@@ -349,7 +247,6 @@ public class DatabaseUtil
       {
             int id = classroom.getId();
             Schoolbot schoolbot = event.getSchoolbot();
-            ;
             try (Connection con = schoolbot.getDatabaseHandler().getDbConnection())
             {
                   PreparedStatement statement = con.prepareStatement(
@@ -365,12 +262,124 @@ public class DatabaseUtil
 
       }
 
+      private static List<School> getSchools(Connection connection, long guildID) throws SQLException
+      {
+            PreparedStatement ps = connection.prepareStatement("SELECT * FROM schools WHERE guild_id=?");
+            ps.setLong(1, guildID);
+            ResultSet rs = ps.executeQuery();
+
+            List<School> out = new ArrayList<>();
+
+            while (rs.next())
+            {
+                  School school = new School();
+                  school.setSchoolName(rs.getString("name"));
+                  school.setRoleID(rs.getLong("role_id"));
+                  school.setEmailSuffix(rs.getString("email_suffix"));
+                  school.setGuildID(rs.getLong("guild_id"));
+                  school.setIsPittSchool(rs.getBoolean("is_pitt_campus"));
+                  school.setSchoolID(rs.getInt("id"));
+                  school.setURL(rs.getString("url"));
+                  out.add(school);
+            }
+            return out;
+      }
+
+      private static List<Classroom> getClasses(Connection conn, School school) throws SQLException
+      {
+            PreparedStatement ps = conn.prepareStatement("SELECT * FROM classes WHERE school_id=?");
+            ps.setInt(1, school.getID());
+            ResultSet rs3 = ps.executeQuery();
+            List<Classroom> out = new ArrayList<>();
+
+            while (rs3.next())
+            {
+                  Classroom classroom;
+                  int professorID = rs3.getInt("professor_id");
+                  school.addClass(
+                          classroom = new Classroom(
+                                  rs3.getString("description"), //You can refactor the rs3
+                                  rs3.getString("time"),
+                                  rs3.getString("location"),
+                                  rs3.getString("level"),
+                                  rs3.getString("room"),
+                                  rs3.getString("name"),
+                                  rs3.getString("identifier"),
+                                  rs3.getString("term"),
+                                  rs3.getDate("start_date"),
+                                  rs3.getDate("end_date"),
+                                  rs3.getInt("school_id"),
+                                  rs3.getInt("professor_id"),
+                                  rs3.getInt("number"),
+                                  rs3.getInt("id"),
+                                  rs3.getLong("role_id"),
+                                  rs3.getLong("channel_id"),
+                                  rs3.getLong("guild_id"),
+                                  school,
+                                  school.getProfessorList()
+                                          .stream()
+                                          .filter(professor -> professor.getID() == professorID)
+                                          .limit(1)
+                                          .collect(Collectors.toList())
+                                          .get(0)
+                          )
+                  );
+                  out.add(classroom);
+            }
+            return out;
+      }
+
+      private static void getProfessors(Connection connection, School school) throws SQLException
+      {
+            ResultSet rs2 = null;
+
+            PreparedStatement preparedStatement1 = connection.prepareStatement("SELECT * FROM professors WHERE school_id=?");
+            preparedStatement1.setInt(1, school.getID());
+            rs2 = preparedStatement1.executeQuery();
+
+
+            while (rs2.next())
+            {
+                  school.addProfessor(new Professor(
+                          rs2.getString("first_name"),
+                          rs2.getString("last_name"),
+                          rs2.getString("email_prefix"),
+                          rs2.getInt("id"),
+                          school
+
+                  ));
+            }
+      }
+
+      private static void getAssignments(Connection connection, Classroom classroom) throws SQLException
+      {
+            ResultSet rs4 = null;
+            PreparedStatement preparedStatement4 = connection.prepareStatement("SELECT * FROM assignments WHERE class_id=?");
+            preparedStatement4.setInt(1, classroom.getId());
+            rs4 = preparedStatement4.executeQuery();
+
+            while (rs4.next())
+            {
+                  classroom.addAssignment(
+                          new Assignment(
+                                  rs4.getString("name"),
+                                  rs4.getString("description"),
+                                  rs4.getInt("points_possible"),
+                                  rs4.getInt("professor_id"),
+                                  rs4.getInt("id"),
+                                  rs4.getString("type"),
+                                  rs4.getTimestamp("due_date"),
+                                  classroom
+                          ));
+            }
+      }
+
 
       public static class Data
       {
-            private Map<String, School> schoolMap;
-            private List<Classroom> classrooms;
-            private long guildID;
+            private final Map<String, School> schoolMap;
+            private final List<Classroom> classrooms;
+            private final long guildID;
 
             public Data()
             {
@@ -385,7 +394,6 @@ public class DatabaseUtil
                   this.classrooms = classrooms;
                   this.guildID = guildID;
             }
-
 
             public List<Classroom> getClassrooms()
             {

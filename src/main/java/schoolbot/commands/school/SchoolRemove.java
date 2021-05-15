@@ -5,12 +5,12 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import schoolbot.natives.objects.command.Command;
-import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.objects.command.CommandFlag;
-import schoolbot.natives.objects.school.School;
-import schoolbot.natives.util.Checks;
-import schoolbot.natives.util.Embed;
+import schoolbot.objects.command.Command;
+import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.command.CommandFlag;
+import schoolbot.objects.school.School;
+import schoolbot.util.Checks;
+import schoolbot.util.Embed;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,6 +21,7 @@ public class SchoolRemove extends Command
       {
             super(parent, "Removes a school given the name", "[school name]", 0);
             addPermissions(Permission.ADMINISTRATOR);
+            addSelfPermissions(Permission.MANAGE_ROLES);
             addFlags(CommandFlag.DATABASE);
       }
 
@@ -59,7 +60,7 @@ public class SchoolRemove extends Command
             private final long channelId, authorId;
             private final List<School> schools;
             private int state = 1;
-            private CommandEvent commandEvent;
+            private final CommandEvent commandEvent;
             private School schoolRemoving;
 
             public SchoolRemoveStateMachine(CommandEvent event, List<School> school, int stateToSwitch)

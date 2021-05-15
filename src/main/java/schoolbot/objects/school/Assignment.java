@@ -1,4 +1,4 @@
-package schoolbot.natives.objects.school;
+package schoolbot.objects.school;
 
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.entities.Role;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
-import schoolbot.natives.objects.misc.Paginatable;
+import schoolbot.objects.misc.Paginatable;
 
 import java.sql.Timestamp;
 import java.time.Instant;

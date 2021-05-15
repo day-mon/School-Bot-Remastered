@@ -1,4 +1,4 @@
-package schoolbot.natives.objects.school;
+package schoolbot.objects.school;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -6,8 +6,8 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
-import schoolbot.natives.objects.misc.Paginatable;
-import schoolbot.natives.util.DatabaseUtil;
+import schoolbot.objects.misc.Paginatable;
+import schoolbot.util.DatabaseUtil;
 
 import java.sql.Date;
 import java.time.Instant;
@@ -47,7 +47,7 @@ public class Classroom implements Paginatable
       private School school;
       private Professor professor;
 
-      private List<Assignment> assignments;
+      private final List<Assignment> assignments;
 
 
       public Classroom()

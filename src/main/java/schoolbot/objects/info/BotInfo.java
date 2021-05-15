@@ -1,4 +1,4 @@
-package schoolbot.natives.objects.info;
+package schoolbot.objects.info;
 
 import schoolbot.SchoolbotConstants;
 
@@ -7,8 +7,6 @@ public class BotInfo
       public BotInfo()
       {
       }
-
-      ;
 
       public static String getGithubRepo()
       {

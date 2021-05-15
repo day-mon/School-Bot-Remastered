@@ -1,15 +1,15 @@
-package schoolbot.natives.objects.misc;
+package schoolbot.objects.guild;
 
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
-import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.objects.school.Assignment;
-import schoolbot.natives.objects.school.Classroom;
-import schoolbot.natives.objects.school.Professor;
-import schoolbot.natives.objects.school.School;
-import schoolbot.natives.util.DatabaseUtil;
+import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.school.Assignment;
+import schoolbot.objects.school.Classroom;
+import schoolbot.objects.school.Professor;
+import schoolbot.objects.school.School;
+import schoolbot.util.DatabaseUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,10 +18,10 @@ import java.util.Map;
 
 public class GuildWrapper
 {
-      private long guildID;
-      private Map<String, School> schoolList;
+      private final long guildID;
+      private final Map<String, School> schoolList;
       // This is a really bad and I will fix it later;
-      private List<Classroom> classrooms;
+      private final List<Classroom> classrooms;
       private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
 
@@ -29,7 +29,7 @@ public class GuildWrapper
       {
             this.guildID = data.getGuildID();
             this.schoolList = data.getSchoolMap();
-            this.classrooms = data.getClassrooms();
+            this.classrooms = Collections.synchronizedList(data.getClassrooms());
       }
 
       /*
@@ -62,7 +62,17 @@ public class GuildWrapper
             schoolList.remove(school.getSchoolName().toLowerCase());
             if (schoolbot.getJda().getRoleById(school.getRoleID()) != null)
             {
-                  schoolbot.getJda().getRoleById(school.getRoleID()).delete().queue();
+                  schoolbot.getJda().getRoleById(school.getRoleID()).delete().queue(
+                          success ->
+                          {
+                                LOGGER.info("Successfully deleted role for {}", school.getSchoolName());
+                          },
+
+                          failure ->
+                          {
+                                LOGGER.warn("Could not delete role for {} ", school.getSchoolName(), failure);
+                          }
+                  );
             }
             DatabaseUtil.removeSchool(schoolbot, school.getSchoolName());
       }

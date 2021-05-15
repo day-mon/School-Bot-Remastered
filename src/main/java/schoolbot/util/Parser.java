@@ -1,4 +1,4 @@
-package schoolbot.natives.util;
+package schoolbot.util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ public class Parser
 
             for (int i = 0; i < splitArgs.length; i++)
             {
-                  if (splitArgs[i].contains("\""))
+                  if (splitArgs[i].contains("\"") || splitArgs[i].contains("”"))
                   {
                         quoteCount++;
                         int temp = i;
@@ -29,7 +29,7 @@ public class Parser
                               tempString.append(splitArgs[i]).append(" ");
                               if (i + 1 != splitArgs.length) i++;
                               else break;
-                              if (i != temp && splitArgs[i].contains("\""))
+                              if (i != temp && splitArgs[i].contains("\"") || splitArgs[i].contains("”"))
                               {
                                     quoteCount++;
                                     tempString.append(splitArgs[i]);

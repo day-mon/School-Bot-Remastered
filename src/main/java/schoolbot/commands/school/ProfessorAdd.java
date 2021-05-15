@@ -7,13 +7,13 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.Schoolbot;
-import schoolbot.natives.objects.command.Command;
-import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.objects.command.CommandFlag;
-import schoolbot.natives.objects.school.Professor;
-import schoolbot.natives.objects.school.School;
-import schoolbot.natives.util.Checks;
-import schoolbot.natives.util.Embed;
+import schoolbot.objects.command.Command;
+import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.command.CommandFlag;
+import schoolbot.objects.school.Professor;
+import schoolbot.objects.school.School;
+import schoolbot.util.Checks;
+import schoolbot.util.Embed;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,9 +47,9 @@ public class ProfessorAdd extends Command
             private final long channelId, authorId;
             private final List<School> schools;
             private int state = 0;
-            private Schoolbot schoolbot;
-            private Professor professor;
-            private CommandEvent commandEvent;
+            private final Schoolbot schoolbot;
+            private final Professor professor;
+            private final CommandEvent commandEvent;
             int schoolID = 0;
 
 

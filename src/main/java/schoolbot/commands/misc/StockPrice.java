@@ -2,10 +2,10 @@ package schoolbot.commands.misc;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import org.jetbrains.annotations.NotNull;
-import schoolbot.natives.objects.command.Command;
-import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.util.Checks;
-import schoolbot.natives.util.Embed;
+import schoolbot.objects.command.Command;
+import schoolbot.objects.command.CommandEvent;
+import schoolbot.util.Checks;
+import schoolbot.util.Embed;
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
 

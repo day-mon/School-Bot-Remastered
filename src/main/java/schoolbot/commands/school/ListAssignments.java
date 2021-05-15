@@ -7,13 +7,13 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import schoolbot.natives.objects.command.Command;
-import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.objects.school.Assignment;
-import schoolbot.natives.objects.school.Classroom;
-import schoolbot.natives.objects.school.School;
-import schoolbot.natives.util.Checks;
-import schoolbot.natives.util.Embed;
+import schoolbot.objects.command.Command;
+import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.school.Assignment;
+import schoolbot.objects.school.Classroom;
+import schoolbot.objects.school.School;
+import schoolbot.util.Checks;
+import schoolbot.util.Embed;
 
 import java.util.Collections;
 import java.util.List;
@@ -130,7 +130,7 @@ public class ListAssignments extends Command
       {
             private final long channelID, authorID;
             private final List<School> schools;
-            private int state;
+            private final int state;
 
 
             public ListAssignmentsStateMachine(CommandEvent event, List<School> school, int stateToSwitchTo)

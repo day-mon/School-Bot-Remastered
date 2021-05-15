@@ -1,4 +1,4 @@
-package schoolbot.natives.objects.command;
+package schoolbot.objects.command;
 
 import com.github.ygimenez.method.Pages;
 import com.github.ygimenez.model.Page;
@@ -8,13 +8,15 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
-import schoolbot.natives.objects.misc.Paginatable;
-import schoolbot.natives.objects.school.Assignment;
-import schoolbot.natives.objects.school.Classroom;
-import schoolbot.natives.objects.school.Professor;
-import schoolbot.natives.objects.school.School;
+import schoolbot.objects.misc.Paginatable;
+import schoolbot.objects.school.Assignment;
+import schoolbot.objects.school.Classroom;
+import schoolbot.objects.school.Professor;
+import schoolbot.objects.school.School;
 
 import java.awt.*;
 import java.time.Instant;
@@ -24,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 public class CommandEvent
 {
+      Logger LOGGER = LoggerFactory.getLogger(this.getClass());
       private final GuildMessageReceivedEvent event;
       private final Schoolbot schoolbot;
       private final Command command;
@@ -164,6 +167,13 @@ public class CommandEvent
 
       public <T extends Paginatable> void getAsPaginatorWithPageNumbers(List<T> list)
       {
+            // This is just in case I call a list with pages when theres only one page...
+            if (list.size() == 1)
+            {
+                  getAsPaginator(list);
+                  return;
+            }
+
             List<Page> pages = new ArrayList<>();
             int i = 1;
             for (T obj : list)

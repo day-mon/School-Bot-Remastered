@@ -1,4 +1,4 @@
-package schoolbot.natives.objects.school;
+package schoolbot.objects.school;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;

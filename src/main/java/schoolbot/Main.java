@@ -21,11 +21,11 @@ public class Main
             }
             catch (LoginException e)
             {
-                  bot.getLogger().error("Token is invalid");
+                  MAIN_LOGGER.error("Token is invalid");
             }
             catch (InterruptedException e)
             {
-                  bot.getLogger().debug("Schoolbot was interrupted on start up. Please try again!");
+                  MAIN_LOGGER.debug("Schoolbot was interrupted on start up. Please try again!");
             }
       }
 }

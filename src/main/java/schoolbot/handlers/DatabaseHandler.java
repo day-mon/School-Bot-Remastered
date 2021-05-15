@@ -3,7 +3,7 @@ package schoolbot.handlers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
-import schoolbot.natives.objects.config.ConfigOption;
+import schoolbot.objects.config.ConfigOption;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,7 +13,7 @@ public class DatabaseHandler
       private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
       private Connection dbConnection;
       private final ConfigHandler configHandler;
-      private Schoolbot schoolbot;
+      private final Schoolbot schoolbot;
 
       public DatabaseHandler(Schoolbot schoolbot)
       {

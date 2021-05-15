@@ -4,11 +4,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import schoolbot.handlers.CommandCooldownHandler;
-import schoolbot.natives.objects.command.Command;
-import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.objects.command.CommandFlag;
-import schoolbot.natives.util.Checks;
-import schoolbot.natives.util.Embed;
+import schoolbot.objects.command.Command;
+import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.command.CommandFlag;
+import schoolbot.util.Checks;
+import schoolbot.util.Embed;
 
 import java.util.List;
 
@@ -16,9 +16,10 @@ public class Google extends Command
 {
       public Google()
       {
-            super("Looks up google query", "[query]", 1);
+            super("Looks up google query", "[query] <index number>", 1);
             addCalls("g", "google", "duck");
             addFlags(CommandFlag.INTERNET);
+            addUsageExample("g \"How do trains go so fast\"");
       }
 
 

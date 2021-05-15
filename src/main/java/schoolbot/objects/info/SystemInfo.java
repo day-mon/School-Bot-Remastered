@@ -1,4 +1,4 @@
-package schoolbot.natives.objects.info;
+package schoolbot.objects.info;
 
 public class SystemInfo
 {

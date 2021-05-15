@@ -1,6 +1,5 @@
 package schoolbot.handlers;
 
-import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
@@ -9,25 +8,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
-import schoolbot.natives.objects.command.Command;
-import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.util.Parser;
+import schoolbot.objects.command.Command;
+import schoolbot.objects.command.CommandEvent;
+import schoolbot.util.Embed;
+import schoolbot.util.Parser;
 
 import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class CommandHandler
 {
       private final String COMMANDS_PACKAGE = "schoolbot.commands";
-      private final ClassGraph classGraph = new ClassGraph().acceptPackages(COMMANDS_PACKAGE);
       private final Logger CMD_HANDLER_LOGGER = LoggerFactory.getLogger(this.getClass());
 
+      private final ClassGraph classGraph = new ClassGraph().acceptPackages(COMMANDS_PACKAGE);
+      private final ExecutorService executor = Executors.newSingleThreadExecutor();
       private final Schoolbot schoolbot;
       private final Map<String, Command> commands;
-      private EventWaiter waiter;
 
       public CommandHandler(Schoolbot schoolbot)
       {
@@ -35,6 +37,7 @@ public class CommandHandler
             this.commands = initCommands();
 
       }
+
 
       public Map<String, Command> initCommands()
       {
@@ -119,7 +122,19 @@ public class CommandHandler
                   return;
             }
 
+
             Command com = commands.get(alias);
+
+
+            if (message.contains("”"))
+            {
+                  Embed.error(event,
+                          """
+                                                  We notice you are using the `”` character which means you are on an iPhone..
+                                                    In order to use the correct quotes hold down on those quotes and find the straight ones
+                                  """);
+                  return;
+            }
 
             if (com == null)
             {
@@ -135,7 +150,7 @@ public class CommandHandler
             // If someone sends a parent command or doesnt have any children
             if (!com.hasChildren() || filteredArgs.isEmpty())
             {
-                  com.process(commandEvent);
+                  executor.execute(() -> com.process(commandEvent));
                   return;
             }
 
@@ -144,11 +159,10 @@ public class CommandHandler
                     .filter(child -> child.getName().split(child.getParent().getName())[1].equalsIgnoreCase(filteredArgs.get(0)))
                     .findFirst()
                     .ifPresentOrElse(
-                            child -> child.process(new CommandEvent(event, child, filteredArgs.subList(1, filteredArgs.size()), schoolbot)),
-                            () -> com.process(commandEvent)
+                            child -> executor.execute(() -> child.process(new CommandEvent(event, child, filteredArgs.subList(1, filteredArgs.size()), schoolbot))),
+                            () -> executor.execute(() -> com.process(commandEvent))
                     );
       }
-
 
       public Map<String, Command> getCommands()
       {

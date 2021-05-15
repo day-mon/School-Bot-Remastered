@@ -6,10 +6,10 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import schoolbot.natives.objects.command.Command;
-import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.objects.school.School;
-import schoolbot.natives.util.Embed;
+import schoolbot.objects.command.Command;
+import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.school.School;
+import schoolbot.util.Embed;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,7 +21,7 @@ public class ProfessorRemove extends Command
        */
       public ProfessorRemove(Command parent)
       {
-            super(parent, "", "", 1);
+            super(parent, "Removes a professor from the guild", "[none]", 1);
             addPermissions(Permission.ADMINISTRATOR);
       }
 
@@ -58,8 +58,8 @@ public class ProfessorRemove extends Command
 
       public static class ProfessorRemoveStateMachine extends ListenerAdapter
       {
-            private CommandEvent commandEvent;
-            private List<School> school;
+            private final CommandEvent commandEvent;
+            private final List<School> school;
 
             public ProfessorRemoveStateMachine(CommandEvent commandEvent, List<School> school)
             {

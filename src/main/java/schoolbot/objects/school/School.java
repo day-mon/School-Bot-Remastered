@@ -1,5 +1,5 @@
 
-package schoolbot.natives.objects.school;
+package schoolbot.objects.school;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -12,11 +12,11 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
-import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.objects.misc.Emoji;
-import schoolbot.natives.objects.misc.Paginatable;
-import schoolbot.natives.util.DatabaseUtil;
-import schoolbot.natives.util.Embed;
+import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.misc.Emoji;
+import schoolbot.objects.misc.Paginatable;
+import schoolbot.util.DatabaseUtil;
+import schoolbot.util.Embed;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -34,8 +34,8 @@ public class School implements Paginatable
       private long roleID;
       private int id;
       private boolean isPittSchool;
-      private List<Classroom> classroomList;
-      private List<Professor> professorList;
+      private final List<Classroom> classroomList;
+      private final List<Professor> professorList;
 
 
       public School()

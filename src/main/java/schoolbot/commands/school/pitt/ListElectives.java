@@ -2,8 +2,8 @@ package schoolbot.commands.school.pitt;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import org.jetbrains.annotations.NotNull;
-import schoolbot.natives.objects.command.Command;
-import schoolbot.natives.objects.command.CommandEvent;
+import schoolbot.objects.command.Command;
+import schoolbot.objects.command.CommandEvent;
 
 import javax.swing.plaf.ColorUIResource;
 import java.util.List;

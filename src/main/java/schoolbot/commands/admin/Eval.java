@@ -4,8 +4,8 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.handlers.CommandCooldownHandler;
-import schoolbot.natives.objects.command.Command;
-import schoolbot.natives.objects.command.CommandEvent;
+import schoolbot.objects.command.Command;
+import schoolbot.objects.command.CommandEvent;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;

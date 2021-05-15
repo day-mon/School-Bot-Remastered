@@ -18,10 +18,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.handlers.*;
 import schoolbot.listener.MainListener;
-import schoolbot.natives.objects.config.ConfigOption;
-import schoolbot.natives.objects.info.BotInfo;
-import schoolbot.natives.objects.info.SystemInfo;
-import schoolbot.natives.objects.misc.Emoji;
+import schoolbot.objects.config.ConfigOption;
+import schoolbot.objects.info.BotInfo;
+import schoolbot.objects.info.SystemInfo;
+import schoolbot.objects.misc.Emoji;
 
 import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
@@ -86,8 +86,7 @@ public class Schoolbot extends ListenerAdapter
       @Override
       public void onReady(@Nonnull ReadyEvent event)
       {
-            getJda().getPresence().setPresence(OnlineStatus.ONLINE, Activity.streaming("Mindlessly Programming", "https://www.youtube.com/watch?v=Lju6h-C37hE"));
-
+            getJda().getPresence().setPresence(OnlineStatus.ONLINE, Activity.streaming("Prefix: " + SchoolbotConstants.DEFAULT_PREFIX, "https://www.youtube.com/watch?v=Lju6h-C37hE"));
             getLogger().info("Account:           " + event.getJDA().getSelfUser());
             getLogger().info("Java Version:      " + SystemInfo.getJavaVersion());
             getLogger().info("JDA Version:       " + JDAInfo.VERSION);

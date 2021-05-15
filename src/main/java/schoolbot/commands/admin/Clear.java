@@ -12,10 +12,10 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.SchoolbotConstants;
-import schoolbot.natives.objects.command.Command;
-import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.util.Checks;
-import schoolbot.natives.util.Embed;
+import schoolbot.objects.command.Command;
+import schoolbot.objects.command.CommandEvent;
+import schoolbot.util.Checks;
+import schoolbot.util.Embed;
 
 import java.awt.*;
 import java.time.OffsetDateTime;
@@ -30,10 +30,11 @@ public class Clear extends Command
 
       public Clear()
       {
-            super("Clears messages in the text channel that the command was executed in", "[optional: number]", 0);
+            super("Clears messages in the text channel that the command was executed in if a number is not specified it will delete the last 25 messages", "<number>", 0);
             addCalls("purge", "clean", "clear");
             addPermissions(Permission.ADMINISTRATOR);
             addSelfPermissions(Permission.MESSAGE_MANAGE);
+            addUsageExample("clear");
             addChildren(
                     new ClearUser(this)
             );

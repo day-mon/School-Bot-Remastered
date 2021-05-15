@@ -1,35 +1,38 @@
-package schoolbot.natives.objects.command;
+package schoolbot.objects.command;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import schoolbot.SchoolbotConstants;
 import schoolbot.handlers.CommandCooldownHandler;
-import schoolbot.natives.util.Embed;
+import schoolbot.util.Embed;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 
 public abstract class Command
 {
-      private List<String> calls;
-      private List<Permission> commandPermissions;
-      private List<Permission> selfPermissions;
-      private List<Command> children;
-      private List<CommandFlag> commandFlags;
+      private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
+      private final List<String> calls;
+      private final List<Permission> commandPermissions;
+      private final List<Permission> selfPermissions;
+      private final List<Command> children;
+      private final List<CommandFlag> commandFlags;
 
       private boolean enabled;
 
-      private String name;
-      private String usage;
+      private final String name;
       private String usageExample;
-      private String description;
-      private String syntax;
+      private final String description;
+      private final String syntax;
 
-      private int minimalArgs;
+      private final int minimalArgs;
 
       private long cooldown;
 
@@ -57,7 +60,7 @@ public abstract class Command
             this.selfPermissions = new ArrayList<>();
             this.children = new ArrayList<>();
             this.commandFlags = new ArrayList<>();
-
+            this.usageExample = "N/A";
       }
 
       /**
@@ -80,6 +83,8 @@ public abstract class Command
             this.selfPermissions = new ArrayList<>();
             this.commandFlags = new ArrayList<>();
             this.children = new ArrayList<>();
+            this.usageExample = "N/A";
+
       }
 
 
@@ -101,18 +106,8 @@ public abstract class Command
             return selfPermissions;
       }
 
-      /**
-       * @return
-       */
-      public String getUsage()
-      {
-            return this.usage;
-      }
 
-      public String getUsageExample()
-      {
-            return SchoolbotConstants.DEFAULT_PREFIX + this.calls.get(0) + " " + this.syntax;
-      }
+
 
       public List<String> getCalls()
       {
@@ -140,8 +135,13 @@ public abstract class Command
             {
                   Embed.error(event, "This minimal amount of args for this command is " + minimalArgs);
             }
+            else if (!event.selfPermissionCheck(event.getCommand().getSelfPermissions()))
+            {
+                  Embed.error(event, "I do not have permissions to do this");
+            }
             else if (event.isDeveloper())
             {
+                  LOGGER.info("{} executed using args {} by {}", name, event.getArgs(), event.getUser().getName());
                   run(event, event.getArgs());
             }
             else if (!event.memberPermissionCheck(event.getCommand().getCommandPermissions()))
@@ -152,10 +152,7 @@ public abstract class Command
             {
                   Embed.sendInvalidMemberPermissions(event);
             }
-            else if (!event.selfPermissionCheck(event.getCommand().getSelfPermissions()))
-            {
-                  Embed.error(event, "I do not have permissions to do this");
-            }
+
             else if (!isEnabled())
             {
                   Embed.error(event, "This command is disabled!");
@@ -167,12 +164,13 @@ public abstract class Command
             }
             else
             {
-                  event.getSchoolbot().getLogger().info("{} has been executed by {} using the args {}", this.name, event.getUser().getName(), event.getArgs());
 
                   if (hasCommandFlags(CommandFlag.INTERNET, CommandFlag.DATABASE))
                   {
                         addUserToCooldown(event.getMember());
                   }
+
+                  LOGGER.info("{} executed using args {} by {}", name, event.getArgs(), event.getUser().getAsMention());
                   run(event, event.getArgs());
             }
       }
@@ -213,22 +211,35 @@ public abstract class Command
             this.commandFlags.addAll(List.of(flags));
       }
 
+      public void addUsageExample(String usage)
+      {
+            this.usageExample = usage;
+      }
+
       public int getMinimalArgs()
       {
             return minimalArgs;
+      }
+
+      public String getUsageExample()
+      {
+            return usageExample;
       }
 
       public EmbedBuilder getAsHelpEmbed()
       {
             return new EmbedBuilder()
                     .setTitle("Help for **" + this.name + "**")
-                    .addField("Description", this.description, true)
-                    .addField("Syntax", this.syntax, true)
-                    .addField("Usage Example", this.usageExample, true)
-                    .addField("Aliases", String.valueOf(this.calls), true)
-                    .setColor(new Random().nextInt(0xFFFFF));
-
+                    .addField("Description", "`" + this.description + "`", false)
+                    .addField("Syntax", "`" + this.syntax + "`", false)
+                    .addField("Usage Example",
+                            this.usageExample.equalsIgnoreCase("N/A") ?
+                                    "`" + this.usageExample + "`" : "`" + SchoolbotConstants.DEFAULT_PREFIX + this.usageExample + "`", false)
+                    .addField("Aliases", String.valueOf(this.calls), false)
+                    .setColor(Color.BLACK)
+                    .setFooter("[] = Required | <> = Optional");
       }
+
 
       /**
        * Check whether the current command is enabled or not.

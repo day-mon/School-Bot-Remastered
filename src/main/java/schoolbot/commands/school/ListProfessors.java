@@ -3,15 +3,16 @@ package schoolbot.commands.school;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import schoolbot.natives.objects.command.Command;
-import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.objects.command.CommandFlag;
-import schoolbot.natives.objects.school.Professor;
-import schoolbot.natives.objects.school.School;
-import schoolbot.natives.util.Checks;
-import schoolbot.natives.util.Embed;
+import schoolbot.objects.command.Command;
+import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.command.CommandFlag;
+import schoolbot.objects.school.Professor;
+import schoolbot.objects.school.School;
+import schoolbot.util.Checks;
+import schoolbot.util.Embed;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ListProfessors extends Command
 {
@@ -25,7 +26,10 @@ public class ListProfessors extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
-            List<School> schools = event.getGuildSchools();
+            List<School> schools = event.getGuildSchools()
+                    .stream()
+                    .filter(school -> school.getProfessorList().size() > 0)
+                    .collect(Collectors.toList());
 
             if (schools.isEmpty())
             {
@@ -34,12 +38,14 @@ public class ListProfessors extends Command
             }
             else if (schools.size() == 1)
             {
-                  event.getProfessorsAsPaginator(schools.get(0));
+                  School school = schools.get(0);
+                  Embed.information(event, "Showing professors from %s because they are the only school with professors in this server", school.getSchoolName());
+                  event.getProfessorsAsPaginator(school);
                   return;
             }
 
 
-            event.getAsPaginator(schools);
+            event.getAsPaginatorWithPageNumbers(schools);
             Embed.information(event, "Please choose a page number from the Paginator");
             event.getJDA().addEventListener(new ListProfessorStateMachine(event, schools));
       }
@@ -47,8 +53,8 @@ public class ListProfessors extends Command
       public static class ListProfessorStateMachine extends ListenerAdapter
       {
             private final long channelID, authorID;
-            private List<School> schools;
-            private CommandEvent commandEvent;
+            private final List<School> schools;
+            private final CommandEvent commandEvent;
 
             public ListProfessorStateMachine(CommandEvent event, List<School> schools)
             {

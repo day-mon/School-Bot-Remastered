@@ -1,12 +1,12 @@
-package schoolbot.natives.util;
+package schoolbot.util;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import schoolbot.handlers.CommandCooldownHandler;
-import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.objects.misc.Emoji;
+import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.misc.Emoji;
 
 import java.awt.*;
 import java.util.List;
@@ -97,7 +97,7 @@ public class Embed
             StringBuilder perms = new StringBuilder();
             permissionsMemberHas.forEach(f -> perms.append(" `").append(f).append("` "));
 
-            event.sendMessage("This command requires you to have at least this permission" + perms.toString() + "in order to execute it!");
+            event.sendMessage("This command requires you to have at least this permission" + perms + "in order to execute it!");
       }
 
       public static void sendIsOnCooldown(CommandEvent event)
@@ -111,6 +111,14 @@ public class Embed
             event.sendMessage(new EmbedBuilder()
                     .setTitle("Important Information")
                     .setDescription(message)
+            );
+      }
+
+      public static void information(CommandEvent event, String message, Object... args)
+      {
+            event.sendMessage(new EmbedBuilder()
+                    .setTitle("Important Information")
+                    .setDescription(String.format(message, args))
             );
       }
 

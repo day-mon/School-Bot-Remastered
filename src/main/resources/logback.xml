@@ -2,7 +2,9 @@
 <configuration>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{yyyy-MM-dd} | %d{HH:mm:ss.SSS} | [%thread] | [%p] | [%logger{0}] :: %m%n</pattern>
+            <pattern>%d{yyyy-MM-dd} @ %d{HH:mm:ss} | %white([%thread]) | [ %highlight(%-5level)] | [%logger{0}] %red(->)
+                %m%n
+            </pattern>
 
         </encoder>
     </appender>

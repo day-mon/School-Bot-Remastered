@@ -4,11 +4,11 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import org.jetbrains.annotations.NotNull;
-import schoolbot.natives.objects.command.Command;
-import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.objects.school.Classroom;
-import schoolbot.natives.objects.school.School;
-import schoolbot.natives.util.Checks;
+import schoolbot.objects.command.Command;
+import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.school.Classroom;
+import schoolbot.objects.school.School;
+import schoolbot.util.Checks;
 
 import java.util.List;
 import java.util.stream.Collectors;

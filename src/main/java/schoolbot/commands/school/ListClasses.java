@@ -1,10 +1,10 @@
 package schoolbot.commands.school;
 
 import org.jetbrains.annotations.NotNull;
-import schoolbot.natives.objects.command.Command;
-import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.objects.school.School;
-import schoolbot.natives.util.Embed;
+import schoolbot.objects.command.Command;
+import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.school.School;
+import schoolbot.util.Embed;
 
 import java.util.List;
 
@@ -30,7 +30,7 @@ public class ListClasses extends Command
 
             School school = event.getSchool(event, firstArg);
 
-            if (school.getClassesSize() < 0)
+            if (school.getClassroomList().isEmpty())
             {
                   Embed.error(event, "** %s ** has no classes", school.getSchoolName());
                   return;

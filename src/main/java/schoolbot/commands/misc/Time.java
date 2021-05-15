@@ -3,9 +3,9 @@ package schoolbot.commands.misc;
 import net.dv8tion.jda.api.EmbedBuilder;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.SchoolbotConstants;
-import schoolbot.natives.objects.command.Command;
-import schoolbot.natives.objects.command.CommandEvent;
-import schoolbot.natives.util.Embed;
+import schoolbot.objects.command.Command;
+import schoolbot.objects.command.CommandEvent;
+import schoolbot.util.Embed;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -15,7 +15,7 @@ public class Time extends Command
 {
       public Time()
       {
-            super("Displays time of any timezone", "[optional: timezone/random]", 0);
+            super("Displays time of any timezone", "<timezone/random>", 0);
             addCalls("time", "localtime");
       }
 

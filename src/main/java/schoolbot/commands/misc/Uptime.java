@@ -3,8 +3,8 @@ package schoolbot.commands.misc;
 import net.dv8tion.jda.api.EmbedBuilder;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.SchoolbotConstants;
-import schoolbot.natives.objects.command.Command;
-import schoolbot.natives.objects.command.CommandEvent;
+import schoolbot.objects.command.Command;
+import schoolbot.objects.command.CommandEvent;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

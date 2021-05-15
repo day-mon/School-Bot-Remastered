@@ -1,7 +1,7 @@
 package schoolbot.handlers;
 
 import schoolbot.Schoolbot;
-import schoolbot.natives.objects.config.ConfigOption;
+import schoolbot.objects.config.ConfigOption;
 
 import java.io.BufferedReader;
 import java.io.File;
