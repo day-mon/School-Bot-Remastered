@@ -269,6 +269,12 @@ public class CommandEvent
             schoolbot.getWrapperHandler().addAssignment(event, assignment);
       }
 
+      public void removeAssignment(CommandEvent event, Assignment assignment)
+      {
+            schoolbot.getWrapperHandler().removeAssignment(event, assignment);
+      }
+
+
       public List<Classroom> getGuildClasses()
       {
             return schoolbot.getWrapperHandler().getGuildsClasses(this);

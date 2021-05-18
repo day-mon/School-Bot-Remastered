@@ -89,6 +89,15 @@ public class WrapperHandler
             guildWrappers.get(guildID).addAssignment(schoolbot, assignment);
       }
 
+      public void removeAssignment(CommandEvent event, Assignment assignment)
+      {
+            long guildID = event.getGuild().getIdLong();
+
+            guildCheck(guildID);
+
+            guildWrappers.get(guildID).removeAssignment(schoolbot, assignment);
+      }
+
       public School getSchool(CommandEvent event, String schoolName)
       {
             long guildID = event.getGuild().getIdLong();

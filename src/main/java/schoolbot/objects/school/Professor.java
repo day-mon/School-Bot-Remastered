@@ -5,15 +5,15 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.Schoolbot;
+import schoolbot.objects.misc.Paginatable;
 
 import java.awt.*;
-import java.io.Serializable;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class Professor implements Serializable
+public class Professor implements Paginatable
 {
 
       /**
@@ -30,7 +30,6 @@ public class Professor implements Serializable
       private int age;
       private int schoolID;
       private int id;
-      private int classCount;
 
 
       private String officeHours;
@@ -38,7 +37,7 @@ public class Professor implements Serializable
 
       public Professor()
       {
-            classCount = 0;
+
       }
 
       public Professor(String firstName, String lastName, String emailPrefix)
@@ -47,7 +46,6 @@ public class Professor implements Serializable
             this.lastName = lastName;
             this.emailPrefix = emailPrefix;
             this.fullName = firstName + " " + lastName;
-            classCount = 0;
             listOfClasses = new ArrayList<>();
       }
 
@@ -61,7 +59,6 @@ public class Professor implements Serializable
             this.email = emailPrefix + school.getEmailSuffix();
             this.officeHours = "N/A";
             this.id = id;
-            classCount = 0;
             listOfClasses = new ArrayList<>();
 
 
@@ -82,11 +79,6 @@ public class Professor implements Serializable
       public void setEmail(String email)
       {
             this.email = email;
-      }
-
-      public void setClassCount(int classCount)
-      {
-            this.classCount = classCount;
       }
 
       public void setFirstName(String firstName)
@@ -203,10 +195,9 @@ public class Professor implements Serializable
       }
 
 
-      public int increaseClassCount()
+      public List<Classroom> getListOfClasses()
       {
-            return this.classCount += 1;
-
+            return listOfClasses;
       }
 
       public void addClass(Classroom classroom)
@@ -236,7 +227,7 @@ public class Professor implements Serializable
                     .addField("Professor Name", fullName, false)
                     .addField("Email", email + " \n ***(These are assumed unless set otherwise)*** ", false)
                     .addField("Office Hours", this.officeHours, false)
-                    .addField("Classes Taught", String.valueOf(classCount), false)
+                    .addField("Classes Taught", String.valueOf(listOfClasses.size()), false)
                     .addField("Professor ID", String.valueOf(this.id), false)
                     .setColor(role == null ? Color.BLUE : role.getColor())
                     .setTimestamp(Instant.now())
@@ -252,7 +243,7 @@ public class Professor implements Serializable
                     .addField("Professor Name", fullName, false)
                     .addField("Email", email + " \n ***(These are assumed unless set otherwise)*** ", false)
                     .addField("Office Hours", this.officeHours, false)
-                    .addField("Classes Taught", String.valueOf(classCount), false)
+                    .addField("Classes Taught", String.valueOf(listOfClasses.size()), false)
                     .addField("Professor ID", String.valueOf(this.id), false)
                     .setColor(role == null ? Color.BLUE : role.getColor())
                     .setTimestamp(Instant.now());

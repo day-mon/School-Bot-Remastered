@@ -15,7 +15,8 @@ public class StockPrice extends Command
 {
       public StockPrice(Command parent)
       {
-            super(parent, "", "", 1);
+            super(parent, "Gives the price of a given security", "[security]", 1);
+            addUsageExample("stock price BTC-USD");
       }
 
 

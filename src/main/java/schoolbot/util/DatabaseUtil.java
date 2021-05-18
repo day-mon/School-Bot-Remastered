@@ -11,6 +11,7 @@ import schoolbot.objects.school.School;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -53,6 +54,47 @@ public class DatabaseUtil
             {
                   LOGGER.error("Database error", e);
                   return -1;
+            }
+      }
+
+      public static void addAssignmentReminder(Schoolbot schoolBot, Assignment assignment, List<Integer> intervals)
+      {
+            try (Connection connection = schoolBot.getDatabaseHandler().getDbConnection())
+            {
+                  PreparedStatement preparedStatement = connection.prepareStatement(
+                          """
+                                  INSERT INTO assignments_reminders
+                                  (assignment_id, remind_time) VALUES (?, ?)
+                                  """);
+
+                  for (int interval : intervals)
+                  {
+                        LocalDateTime ldt = assignment.getDueDate().toLocalDateTime().minusMinutes(interval);
+                        if (ldt.isAfter(LocalDateTime.now()))
+                        {
+
+                              preparedStatement.setInt(1, assignment.getId());
+                              preparedStatement.setTimestamp(2, Timestamp.valueOf(ldt));
+                              preparedStatement.execute();
+                        }
+                  }
+            }
+            catch (Exception e)
+            {
+                  e.printStackTrace();
+            }
+      }
+
+      public static void removeAssignment(Schoolbot schoolBot, Assignment assignment)
+      {
+            try (Connection connection = schoolBot.getDatabaseHandler().getDbConnection())
+            {
+                  removeAllReminders(connection, assignment);
+                  removeAssignment(connection, assignment);
+            }
+            catch (Exception e)
+            {
+                  e.printStackTrace();
             }
       }
 
@@ -284,6 +326,101 @@ public class DatabaseUtil
             }
             return out;
       }
+
+      private static void removeAssignment(Connection connection, Assignment assignment) throws SQLException
+      {
+            PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM assignments WHERE id=?");
+            preparedStatement.setInt(1, assignment.getId());
+            preparedStatement.execute();
+      }
+
+      // Could have an interface
+      private static void removeAllReminders(Connection connection, Assignment assignment) throws SQLException
+      {
+            PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM assignments_reminders WHERE assignment_id=?");
+            preparedStatement.setInt(1, assignment.getId());
+            preparedStatement.execute();
+      }
+
+      private static void removeReminder(Connection connection, int id) throws SQLException
+      {
+            PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM assignments_reminders WHERE id=?");
+            preparedStatement.setInt(1, id);
+            preparedStatement.execute();
+      }
+
+      public static List<Assignment> checkRemindTimes(Schoolbot schoolbot)
+      {
+            List<Assignment> assignments = new ArrayList<>();
+            try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
+            {
+                  PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM assignments_reminders WHERE remind_time < now()");
+                  ResultSet resultSet = preparedStatement.executeQuery();
+
+                  while (resultSet.next())
+                  {
+                        int assignment_id = resultSet.getInt("assignment_id");
+                        int id = resultSet.getInt("id");
+                        assignments.add(getAssignmentFromID(connection, assignment_id));
+                        removeReminder(connection, id);
+                  }
+
+                  return assignments;
+
+
+            }
+            catch (Exception e)
+            {
+                  LOGGER.error("Database error", e);
+                  return Collections.emptyList();
+            }
+      }
+
+      private static Assignment getAssignmentFromID(Connection connection, int assignmentID) throws SQLException
+      {
+            Assignment assignment = null;
+            ResultSet resultSet = null;
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM assignments WHERE id=?");
+            preparedStatement.setInt(1, assignmentID);
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next())
+            {
+                  assignment = new Assignment(
+                          resultSet.getString("name"),
+                          resultSet.getString("description"),
+                          resultSet.getInt("points_possible"),
+                          resultSet.getInt("professor_id"),
+                          resultSet.getInt("id"),
+                          resultSet.getString("type"),
+                          resultSet.getTimestamp("due_date"),
+                          getClassFromID(connection, resultSet.getInt("class_id"))
+                  );
+            }
+
+            return assignment;
+      }
+
+      private static Classroom getClassFromID(Connection connection, int id) throws SQLException
+      {
+            Classroom classroom = null;
+            PreparedStatement ps = connection.prepareStatement("SELECT * FROM classes WHERE id=?");
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+
+
+            while (rs.next())
+            {
+                  classroom = new Classroom(
+                          rs.getLong("channel_id"),
+                          rs.getLong("role_id"),
+                          rs.getString("name")
+                  );
+            }
+            return classroom;
+
+      }
+
 
       private static List<Classroom> getClasses(Connection conn, School school) throws SQLException
       {

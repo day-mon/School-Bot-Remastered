@@ -34,7 +34,6 @@ public class Eval extends Command
             Object out;
             String status = "Success";
 
-
             SCRIPT_ENGINE.put("e", event);
             SCRIPT_ENGINE.put("message", event.getMessage());
             SCRIPT_ENGINE.put("channel", event.getChannel());
@@ -42,7 +41,6 @@ public class Eval extends Command
             SCRIPT_ENGINE.put("jda", event.getJDA());
             SCRIPT_ENGINE.put("author", event.getUser());
             SCRIPT_ENGINE.put("guild", event.getGuild());
-
 
             StringBuilder imports = new StringBuilder();
             DEFAULT_IMPORTS.forEach(imp -> imports.append("import ").append(imp).append(".*; "));

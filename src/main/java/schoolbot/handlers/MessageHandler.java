@@ -78,7 +78,7 @@ public class MessageHandler
                   {
                         event.getChannel().sendMessage("Uploading to pastecord....").queue(futureMessage ->
                         {
-                              final String uniqueIdentifier = UUID.randomUUID().toString() + author.getId();
+                              final String uniqueIdentifier = UUID.randomUUID() + author.getId();
                               CompletableFuture<File> future = attachment.downloadToFile()
                                       .whenCompleteAsync((file, throwable) ->
                                       {

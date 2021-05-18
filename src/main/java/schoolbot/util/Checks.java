@@ -52,8 +52,7 @@ public class Checks
             {
 
                   ld = LocalDate.parse(potDate, DateTimeFormatter.ofPattern("M/d/yyyy"));
-                  LOGGER.info(ld.toString());
-                  return !ld.isBefore(LocalDate.now());
+                  return ld.isAfter(LocalDate.now()) || ld.isEqual(LocalDate.now());
                   // return ld.isAfter(classroom.getClassStartDate()) && ld.isBefore(classroom.getClassEndDate()); commented out because other things arent implemented yet
             }
             catch (Exception e)

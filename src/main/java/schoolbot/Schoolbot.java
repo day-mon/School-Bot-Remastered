@@ -38,6 +38,7 @@ public class Schoolbot extends ListenerAdapter
       private final DatabaseHandler databaseHandler;
       private final MessageHandler messageHandler;
       private final WrapperHandler wrapperHandler;
+      private final ReminderHandler reminderHandler;
       private final Logger LOGGER;
 
 
@@ -53,6 +54,7 @@ public class Schoolbot extends ListenerAdapter
             this.wrapperHandler = new WrapperHandler(this);
             this.commandHandler = new CommandHandler(this);
             this.databaseHandler = new DatabaseHandler(this);
+            this.reminderHandler = new ReminderHandler(this);
             this.botStartTime = LocalDateTime.now();
       }
 
@@ -165,5 +167,10 @@ public class Schoolbot extends ListenerAdapter
       public WrapperHandler getWrapperHandler()
       {
             return wrapperHandler;
+      }
+
+      public ReminderHandler getReminderHandler()
+      {
+            return reminderHandler;
       }
 }

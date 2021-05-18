@@ -47,7 +47,7 @@ public class Classroom implements Paginatable
       private School school;
       private Professor professor;
 
-      private final List<Assignment> assignments;
+      private List<Assignment> assignments;
 
 
       public Classroom()
@@ -57,7 +57,13 @@ public class Classroom implements Paginatable
             this.preReq = "None";
             this.description = "N/A";
             assignments = new ArrayList<>();
+      }
 
+      public Classroom(long channelID, long roleID, String name)
+      {
+            this.channelID = channelID;
+            this.roleID = roleID;
+            this.className = name;
       }
 
       public Classroom(int id, String className)
@@ -339,7 +345,17 @@ public class Classroom implements Paginatable
                   assignments.remove(assignment);
                   return false;
             }
+            assignment.setId(assignmentID);
+            // Times in minutes to remind (1 day, 1 hour, 30 minutes, 10 minutes)
+            DatabaseUtil.addAssignmentReminder(schoolbot, assignment, List.of(1440, 60, 30, 10));
+
             return true;
+      }
+
+      public void removeAssignment(Schoolbot schoolbot, Assignment assignment)
+      {
+            assignments.remove(assignment);
+            DatabaseUtil.removeAssignment(schoolbot, assignment);
       }
 
       public void addAssignment(Assignment assignment)

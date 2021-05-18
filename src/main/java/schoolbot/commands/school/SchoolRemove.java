@@ -92,7 +92,7 @@ public class SchoolRemove extends Command
                               }
 
 
-                              int index = Integer.parseInt(content) - 1;
+                              int index = Integer.parseInt(content);
 
                               if (!Checks.between(index, 1, schools.size()))
                               {
@@ -101,7 +101,7 @@ public class SchoolRemove extends Command
                               }
 
 
-                              this.schoolRemoving = schools.get(index);
+                              this.schoolRemoving = schools.get(index - 1);
                               channel.sendMessageFormat("Are you sure you want to remove [ ** %s **]", schoolRemoving.getSchoolName()).queue();
                               state = 2;
                         }
@@ -109,8 +109,8 @@ public class SchoolRemove extends Command
                         case 2 -> {
                               if (content.equalsIgnoreCase("yes") || content.equalsIgnoreCase("y"))
                               {
-                                    commandEvent.removeSchool(commandEvent, schools.get(0));
-                                    Embed.success(event, "Removed [** %s **] successfully", schools.get(0).getSchoolName());
+                                    commandEvent.removeSchool(commandEvent, schoolRemoving);
+                                    Embed.success(event, "Removed [** %s **] successfully", schoolRemoving.getSchoolName());
                                     event.getJDA().removeEventListener(this);
                               }
                               else if (content.equalsIgnoreCase("no") || content.equalsIgnoreCase("n") || content.equalsIgnoreCase("nah"))

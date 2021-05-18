@@ -27,7 +27,7 @@ public class CommandHandler
       private final Logger CMD_HANDLER_LOGGER = LoggerFactory.getLogger(this.getClass());
 
       private final ClassGraph classGraph = new ClassGraph().acceptPackages(COMMANDS_PACKAGE);
-      private final ExecutorService executor = Executors.newSingleThreadExecutor();
+      private final ExecutorService executor = Executors.newScheduledThreadPool(5, runnable -> new Thread(runnable, "SchoolBot Command-Thread"));
       private final Schoolbot schoolbot;
       private final Map<String, Command> commands;
 
@@ -35,7 +35,6 @@ public class CommandHandler
       {
             this.schoolbot = schoolbot;
             this.commands = initCommands();
-
       }
 
 
@@ -126,13 +125,14 @@ public class CommandHandler
             Command com = commands.get(alias);
 
 
+
             if (message.contains("”"))
             {
                   Embed.error(event,
                           """
-                                                  We notice you are using the `”` character which means you are on an iPhone..
-                                                    In order to use the correct quotes hold down on those quotes and find the straight ones
-                                  """);
+                                  We notice you are using the `”` character which means you are on an iPhone..
+                                  In order to use the correct quotes hold down on those quotes and find the straight ones
+                                             """);
                   return;
             }
 
@@ -143,6 +143,7 @@ public class CommandHandler
 
 
             filteredArgs.remove(0);
+
 
             CommandEvent commandEvent = new CommandEvent(event, com, filteredArgs, schoolbot);
 

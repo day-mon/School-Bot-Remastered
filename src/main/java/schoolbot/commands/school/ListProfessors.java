@@ -41,13 +41,13 @@ public class ListProfessors extends Command
                   School school = schools.get(0);
                   Embed.information(event, "Showing professors from %s because they are the only school with professors in this server", school.getSchoolName());
                   event.getProfessorsAsPaginator(school);
-                  return;
             }
-
-
-            event.getAsPaginatorWithPageNumbers(schools);
-            Embed.information(event, "Please choose a page number from the Paginator");
-            event.getJDA().addEventListener(new ListProfessorStateMachine(event, schools));
+            else
+            {
+                  event.getAsPaginatorWithPageNumbers(schools);
+                  Embed.information(event, "Please choose a page number from the Paginator");
+                  event.getJDA().addEventListener(new ListProfessorStateMachine(event, schools));
+            }
       }
 
       public static class ListProfessorStateMachine extends ListenerAdapter

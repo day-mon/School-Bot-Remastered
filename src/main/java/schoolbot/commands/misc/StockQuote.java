@@ -16,7 +16,8 @@ public class StockQuote extends Command
 
       public StockQuote(Command parent)
       {
-            super(parent, "", "", 1);
+            super(parent, "Gives information about a given security", "[security]", 1);
+            addUsageExample("stock quote MSFT");
       }
 
       @Override

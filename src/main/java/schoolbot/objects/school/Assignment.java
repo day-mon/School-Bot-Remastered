@@ -45,17 +45,18 @@ public class Assignment implements Comparable<Assignment>, Paginatable
             this.professorID = professorID;
             this.id = id;
             this.dueDate = OffsetDateTime.of(timestamp.toLocalDateTime().toLocalDate(), LocalTime.from(timestamp.toLocalDateTime()), ZoneOffset.UTC);
-            this.assignmentType = switch (assignmentType)
-                    {
-                          case "Exam":
-                                yield AssignmentType.EXAM;
-                          case "Quiz":
-                                yield AssignmentType.QUIZ;
-                          case "Extra Credit":
-                                yield AssignmentType.EXTRA_CREDIT;
-                          case "Paper":
-                                yield AssignmentType.PAPER;
-                          default:
+            this.assignmentType =
+                    switch (assignmentType)
+                            {
+                                  case "Exam":
+                                        yield AssignmentType.EXAM;
+                                  case "Quiz":
+                                        yield AssignmentType.QUIZ;
+                                  case "Extra Credit":
+                                        yield AssignmentType.EXTRA_CREDIT;
+                                  case "Paper":
+                                        yield AssignmentType.PAPER;
+                                  default:
                                 yield AssignmentType.HOMEWORK;
                     };
             this.classroom = classroom;
@@ -91,6 +92,7 @@ public class Assignment implements Comparable<Assignment>, Paginatable
       {
             this.name = name;
       }
+
 
       public int getProfessorID()
       {
@@ -133,6 +135,7 @@ public class Assignment implements Comparable<Assignment>, Paginatable
             this.dueDate = dueDate;
       }
 
+
       public int compareTo(@NotNull Assignment o)
       {
             if (this.dueDate.isEqual(o.dueDate))
@@ -145,6 +148,7 @@ public class Assignment implements Comparable<Assignment>, Paginatable
             }
             return -1;
       }
+
 
       public Classroom getClassroom()
       {

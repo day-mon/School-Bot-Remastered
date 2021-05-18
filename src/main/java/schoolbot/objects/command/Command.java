@@ -176,6 +176,11 @@ public abstract class Command
       }
 
 
+      private boolean isChild()
+      {
+            return this.parent != null;
+      }
+
       public void addCooldown(long cooldown)
       {
             this.cooldown = cooldown;
@@ -235,7 +240,7 @@ public abstract class Command
                     .addField("Usage Example",
                             this.usageExample.equalsIgnoreCase("N/A") ?
                                     "`" + this.usageExample + "`" : "`" + SchoolbotConstants.DEFAULT_PREFIX + this.usageExample + "`", false)
-                    .addField("Aliases", String.valueOf(this.calls), false)
+                    .addField("Aliases", (this.isChild()) ? String.valueOf(this.parent.getCalls()) : String.valueOf(this.calls), false)
                     .setColor(Color.BLACK)
                     .setFooter("[] = Required | <> = Optional");
       }

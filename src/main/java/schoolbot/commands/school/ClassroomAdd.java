@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
@@ -99,31 +100,45 @@ public class ClassroomAdd extends Command
                         case 1 -> {
                               schoolClass = new Classroom();
                               schoolClass.setGuildID(guild.getIdLong());
+
                               if (message.equalsIgnoreCase("Yes") || message.equalsIgnoreCase("y"))
                               {
-                                    boolean isDown;
+                                    Connection.Response response = null;
                                     try
                                     {
-                                          isDown = Jsoup.connect("https://psmobile.pitt.edu/app/catalog/classSearch").get().text().contains("PeopleSoft Monthly Maintenance in Progress");
+                                          response = Jsoup.connect("https://psmobile.pitt.edu/app/catalog/classSearch")
+                                                  .followRedirects(true)
+                                                  .execute();
 
                                     }
                                     catch (Exception e)
                                     {
-                                          isDown = true;
                                           e.printStackTrace();
+                                          return;
                                     }
 
-                                    if (isDown)
+
+                                    if (response.url().toString().equals("https://prd.ps.pitt.edu/Maintenance.html"))
                                     {
-                                          Embed.error(event, "People soft is currently down for maintenance **OR** I could not connect to PeopleSoft");
+                                          Embed.error(event, "People soft is currently down for maintenance");
                                           jda.removeEventListener(this);
                                           return;
                                     }
+
+                                    commandEvent.getAsPaginatorWithPageNumbers(pittSchools);
+                                    commandEvent.sendMessage("Please pick the campus based off the page numbers :)");
+                                    state = 2;
+                              }
+                              else if (message.equalsIgnoreCase("no") || message.equalsIgnoreCase("nah"))
+                              {
+                                    // other school logic
+                              }
+                              else
+                              {
+                                    channel.sendMessageFormat("** %s ** is not a yes or no answer.. Try again", message).queue();
                               }
 
-                              commandEvent.getAsPaginatorWithPageNumbers(pittSchools);
-                              commandEvent.sendMessage("Please pick the campus based off the page numbers :)");
-                              state = 2;
+
                         }
                         case 2 -> {
                               if (!Checks.isNumber(message))
@@ -176,12 +191,11 @@ public class ClassroomAdd extends Command
                         case 4 -> {
                               CLASS_SEARCH_URL += message;
 
+
                               School school = schoolClass.getSchool();
                               schoolClass.setURL(CLASS_SEARCH_URL);
                               commandEvent.addPittClass(commandEvent, schoolClass);
                               event.getJDA().removeEventListener(this);
-
-
                         }
                   }
             }

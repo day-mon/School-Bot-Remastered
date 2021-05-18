@@ -170,10 +170,16 @@ public class GuildWrapper
 
       public void addAssignment(Schoolbot schoolbot, Assignment assignment)
       {
-
             String lowerCaseSchoolName = assignment.getName().toLowerCase();
 
             assignment.getClassroom().addAssignment(schoolbot, assignment);
+      }
+
+      public void removeAssignment(Schoolbot schoolbot, Assignment assignment)
+      {
+            String lowerCaseSchoolName = assignment.getName().toLowerCase();
+
+            assignment.getClassroom().removeAssignment(schoolbot, assignment);
       }
 
 
