@@ -143,7 +143,7 @@ public class AssignmentRemove extends Command
                         else
                         {
                               event.getAsPaginatorWithPageNumbers(classrooms);
-                              event.sendMessage("Please choose the page number of the class you want to add an assignment to");
+                              event.sendMessage("Please choose the page number of the class you want to remove an assignment from");
                         }
                   }
             }

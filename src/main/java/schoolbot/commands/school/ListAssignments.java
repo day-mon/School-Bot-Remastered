@@ -15,6 +15,7 @@ import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
 import schoolbot.util.Embed;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -77,7 +78,10 @@ public class ListAssignments extends Command
                         }
                         else
                         {
-                              List<Assignment> assignments = classroom.getAssignments();
+                              List<Assignment> assignments = classroom.getAssignments()
+                                      .stream()
+                                      .filter(assignment -> assignment.getDueDate().isAfter(LocalDateTime.now()))
+                                      .collect(Collectors.toList());
 
                               if (assignments.isEmpty())
                               {

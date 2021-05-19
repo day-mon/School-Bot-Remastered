@@ -25,6 +25,7 @@ public class ReminderHandler
       {
             this.schoolbot = schoolbot;
             runAssignmentsReminder();
+            runClassReminder();
       }
 
       public void runAssignmentsReminder()
@@ -33,6 +34,15 @@ public class ReminderHandler
             {
                   List<Assignment> assignments = DatabaseUtil.checkRemindTimes(schoolbot);
                   assignments.forEach(this::sendAssignmentAlert);
+            }, 0, 10, TimeUnit.SECONDS);
+      }
+
+      public void runClassReminder()
+      {
+            reminderExecutor.scheduleAtFixedRate(() ->
+            {
+                  List<Classroom> classroomList = DatabaseUtil.checkClassRemindTimes(schoolbot);
+                  classroomList.forEach(this::sendClassroomAlert);
             }, 0, 10, TimeUnit.SECONDS);
       }
 
@@ -52,10 +62,35 @@ public class ReminderHandler
                   }
                   else
                   {
-                        String mention = role == null ? role.getAsMention() : "Students of " + classroom.getClassName();
+                        String mention = role != null ? role.getAsMention() : "Students of " + classroom.getClassName();
 
                         LOGGER.info("{} has been notified", classroom.getClassName());
-                        channel.sendMessageFormat("%s, ** %s ** is due in ** %s ** minutes", mention, assignment.getName(), (assignment.getDueDate().toLocalDateTime().minusMinutes(LocalDateTime.now().getMinute()).getMinute())).queue();
+                        channel.sendMessageFormat("%s, ** %s ** is due in ** %s ** minutes", mention, assignment.getName(), (assignment.getDueDate().minusMinutes(LocalDateTime.now().getMinute()).getMinute())).queue();
+                  }
+            }
+            catch (Exception e)
+            {
+                  LOGGER.error("Unexpected Error has occurred", e);
+            }
+      }
+
+
+      private void sendClassroomAlert(Classroom classroom)
+      {
+            try
+            {
+                  TextChannel channel = schoolbot.getJda().getTextChannelById(classroom.getChannelID());
+                  Role role = schoolbot.getJda().getRoleById(classroom.getRoleID());
+
+                  if (channel == null)
+                  {
+                        LOGGER.error("{} has no channel ID", classroom.getClassName());
+                  }
+                  else
+                  {
+                        String mention = role != null ? role.getAsMention() : "Students of " + classroom.getClassName();
+
+                        LOGGER.info("{} has been notified", classroom.getClassName());
                   }
             }
             catch (Exception e)

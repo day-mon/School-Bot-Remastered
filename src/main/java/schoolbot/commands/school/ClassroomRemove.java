@@ -206,10 +206,7 @@ public class ClassroomRemove extends Command
                                     Embed.error(event, "[ ** %s ** ] is not a valid respond.. I will need a **Yes** OR a **No**", message);
                               }
                         }
-
                   }
-
-
             }
       }
 }

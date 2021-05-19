@@ -17,8 +17,11 @@ import schoolbot.objects.misc.Emoji;
 import schoolbot.objects.misc.Paginatable;
 import schoolbot.util.DatabaseUtil;
 import schoolbot.util.Embed;
+import schoolbot.util.Parser;
 
+import java.sql.Date;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -227,6 +230,7 @@ public class School implements Paginatable
 
       public void addPittClass(CommandEvent event, Classroom schoolClass)
       {
+            String save = "";
             Logger LOGGER = event.getSchoolbot().getLogger();
             MessageChannel channel = event.getChannel();
             Document document = null;
@@ -350,8 +354,18 @@ public class School implements Paginatable
                               String[] dates = textRight.split("-");
                               String[] start = dates[0].trim().split("/");
                               String[] end = dates[1].trim().split("/");
-                              schoolClass.setInputClassEndDate(start);
-                              schoolClass.setInputClassStartDate(end);
+
+                              int sYear = Integer.parseInt(start[2]);
+                              int sMonth = Integer.parseInt(start[0]);
+                              int sDay = Integer.parseInt(start[1]);
+
+
+                              int eYear = Integer.parseInt(end[2]);
+                              int eMonth = Integer.parseInt(end[0]);
+                              int eDay = Integer.parseInt(end[1]);
+
+                              schoolClass.setClassStartDate(Date.valueOf(LocalDate.of(sYear, sMonth, sDay)));
+                              schoolClass.setClassEndDate(Date.valueOf(LocalDate.of(eYear, eMonth, eDay)));
                         }
                         case "Units" -> schoolClass.setCreditAmount(Integer.parseInt(textRight.substring(0, 1)));
                         case "Description" -> {
@@ -412,7 +426,10 @@ public class School implements Paginatable
                               }
                         }
 
-                        case "Meets" -> schoolClass.setClassTime(textRight);
+                        case "Meets" -> {
+                              schoolClass.setClassTime(textRight);
+                              save = textRight;
+                        }
                         case "Room" -> schoolClass.setClassRoom(textRight);
                         case "Location" -> schoolClass.setClassLocation(textRight);
                         case "Campus" -> {
@@ -453,12 +470,11 @@ public class School implements Paginatable
                   event.getGuild().getTextChannelById(schoolClass.getChannelID()).delete().queue();
                   return;
             }
-
             schoolClass.setId(classCheck);
+            Parser.classTime(event.getSchoolbot(), save, schoolClass);
             this.classroomList.add(schoolClass);
             this.professorList.add(schoolClass.getProfessor());
             channel.sendMessage(schoolClass.getAsEmbed(event.getSchoolbot())).queue();
-
       }
 
 

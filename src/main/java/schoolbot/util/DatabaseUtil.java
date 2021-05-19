@@ -10,7 +10,6 @@ import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;
 
 import java.sql.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,7 +36,7 @@ public class DatabaseUtil
                           returning id
                           """);
                   preparedStatement.setString(1, assignment.getName());
-                  preparedStatement.setTimestamp(2, Timestamp.valueOf(assignment.getDueDate().toLocalDateTime()));
+                  preparedStatement.setTimestamp(2, Timestamp.valueOf(assignment.getDueDate()));
                   preparedStatement.setString(3, assignment.getAssignmentType().getAssignmentType());
                   preparedStatement.setInt(4, assignment.getProfessorID());
                   preparedStatement.setInt(5, assignment.getPoints());
@@ -57,31 +56,61 @@ public class DatabaseUtil
             }
       }
 
+      public static void addClassReminder(Schoolbot schoolbot, LocalDateTime time, List<Integer> intervals, Classroom classroom)
+      {
+            try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
+            {
+                  PreparedStatement statement = connection.prepareStatement(
+                          """
+                                  INSERT INTO class_reminders (class_id, remind_time)
+                                  VALUES (?, ?)
+                                  """
+                  );
+
+                  for (int interval : intervals)
+                  {
+                        LocalDateTime ldt = time.minusMinutes(interval);
+
+                        statement.setInt(1, classroom.getId());
+                        statement.setTimestamp(2, Timestamp.valueOf(ldt));
+                        statement.addBatch();
+                  }
+
+                  statement.executeBatch();
+            }
+            catch (Exception e)
+            {
+                  LOGGER.error("Database error", e);
+            }
+      }
+
       public static void addAssignmentReminder(Schoolbot schoolBot, Assignment assignment, List<Integer> intervals)
       {
             try (Connection connection = schoolBot.getDatabaseHandler().getDbConnection())
             {
                   PreparedStatement preparedStatement = connection.prepareStatement(
                           """
-                                  INSERT INTO assignments_reminders
-                                  (assignment_id, remind_time) VALUES (?, ?)
+                                      INSERT INTO assignments_reminders
+                                      (assignment_id, remind_time) VALUES (?, ?)
                                   """);
+
 
                   for (int interval : intervals)
                   {
-                        LocalDateTime ldt = assignment.getDueDate().toLocalDateTime().minusMinutes(interval);
+                        LocalDateTime ldt = assignment.getDueDate().minusMinutes(interval);
                         if (ldt.isAfter(LocalDateTime.now()))
                         {
 
                               preparedStatement.setInt(1, assignment.getId());
                               preparedStatement.setTimestamp(2, Timestamp.valueOf(ldt));
-                              preparedStatement.execute();
+                              preparedStatement.addBatch();
                         }
                   }
+                  preparedStatement.executeBatch();
             }
             catch (Exception e)
             {
-                  e.printStackTrace();
+                  LOGGER.error("Database error", e);
             }
       }
 
@@ -164,14 +193,7 @@ public class DatabaseUtil
 
       public static int addClassPitt(CommandEvent event, Classroom clazz)
       {
-            int sYear = Integer.parseInt(clazz.getInputClassStartDate()[2]);
-            int sMonth = Integer.parseInt(clazz.getInputClassStartDate()[0]);
-            int sDay = Integer.parseInt(clazz.getInputClassStartDate()[1]);
 
-
-            int eYear = Integer.parseInt(clazz.getInputClassEndDate()[2]);
-            int eMonth = Integer.parseInt(clazz.getInputClassEndDate()[0]);
-            int eDay = Integer.parseInt(clazz.getInputClassEndDate()[1]);
 
             Schoolbot schoolbot = event.getSchoolbot();
             try (Connection con = schoolbot.getDatabaseHandler().getDbConnection())
@@ -190,8 +212,8 @@ public class DatabaseUtil
                   statement.setInt(1, clazz.getClassNumber());
                   statement.setInt(2, clazz.getProfessor().getID());
                   statement.setString(3, clazz.getClassLocation());
-                  statement.setDate(4, Date.valueOf(LocalDate.of(sYear, sMonth, sDay)));
-                  statement.setDate(5, Date.valueOf(LocalDate.of(eYear, eMonth, eDay)));
+                  statement.setDate(4, Date.valueOf(clazz.getClassStartDate()));
+                  statement.setDate(5, Date.valueOf(clazz.getClassEndDate()));
                   statement.setString(6, clazz.getClassTime());
                   statement.setString(7, clazz.getPreReq());
                   statement.setString(8, clazz.getClassLevel());
@@ -291,6 +313,7 @@ public class DatabaseUtil
             Schoolbot schoolbot = event.getSchoolbot();
             try (Connection con = schoolbot.getDatabaseHandler().getDbConnection())
             {
+                  removeClassReminders(con, id);
                   PreparedStatement statement = con.prepareStatement(
                           "DELETE FROM classes WHERE id=?"
                   );
@@ -349,6 +372,13 @@ public class DatabaseUtil
             preparedStatement.execute();
       }
 
+      private static void removeClassReminders(Connection connection, int id) throws SQLException
+      {
+            PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM class_reminders WHERE class_id=?");
+            preparedStatement.setInt(1, id);
+            preparedStatement.execute();
+      }
+
       public static List<Assignment> checkRemindTimes(Schoolbot schoolbot)
       {
             List<Assignment> assignments = new ArrayList<>();
@@ -376,13 +406,40 @@ public class DatabaseUtil
             }
       }
 
+      public static List<Classroom> checkClassRemindTimes(Schoolbot schoolbot)
+      {
+            List<Classroom> classroomList = new ArrayList<>();
+            try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
+            {
+                  PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM class_reminders WHERE remind_time < now()");
+                  ResultSet resultSet = preparedStatement.executeQuery();
+
+                  while (resultSet.next())
+                  {
+                        int classID = resultSet.getInt("class_id");
+                        int id = resultSet.getInt("id");
+                        classroomList.add(getClassFromID(connection, classID));
+                        removeReminder(connection, id);
+                  }
+
+                  return classroomList;
+
+
+            }
+            catch (Exception e)
+            {
+                  LOGGER.error("Database error", e);
+                  return Collections.emptyList();
+            }
+      }
+
+
       private static Assignment getAssignmentFromID(Connection connection, int assignmentID) throws SQLException
       {
             Assignment assignment = null;
-            ResultSet resultSet = null;
             PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM assignments WHERE id=?");
             preparedStatement.setInt(1, assignmentID);
-            resultSet = preparedStatement.executeQuery();
+            ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next())
             {
@@ -468,11 +525,10 @@ public class DatabaseUtil
 
       private static void getProfessors(Connection connection, School school) throws SQLException
       {
-            ResultSet rs2 = null;
 
             PreparedStatement preparedStatement1 = connection.prepareStatement("SELECT * FROM professors WHERE school_id=?");
             preparedStatement1.setInt(1, school.getID());
-            rs2 = preparedStatement1.executeQuery();
+            ResultSet rs2 = preparedStatement1.executeQuery();
 
 
             while (rs2.next())
@@ -490,10 +546,9 @@ public class DatabaseUtil
 
       private static void getAssignments(Connection connection, Classroom classroom) throws SQLException
       {
-            ResultSet rs4 = null;
             PreparedStatement preparedStatement4 = connection.prepareStatement("SELECT * FROM assignments WHERE class_id=?");
             preparedStatement4.setInt(1, classroom.getId());
-            rs4 = preparedStatement4.executeQuery();
+            ResultSet rs4 = preparedStatement4.executeQuery();
 
             while (rs4.next())
             {

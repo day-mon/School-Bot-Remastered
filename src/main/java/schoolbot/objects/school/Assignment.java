@@ -11,9 +11,8 @@ import schoolbot.objects.misc.Paginatable;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.LocalTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 
@@ -26,7 +25,7 @@ public class Assignment implements Comparable<Assignment>, Paginatable
       private int professorID;
       private int id;
 
-      private OffsetDateTime dueDate;
+      private LocalDateTime dueDate;
 
       private AssignmentType assignmentType;
       private Classroom classroom;
@@ -44,7 +43,7 @@ public class Assignment implements Comparable<Assignment>, Paginatable
             this.points = points;
             this.professorID = professorID;
             this.id = id;
-            this.dueDate = OffsetDateTime.of(timestamp.toLocalDateTime().toLocalDate(), LocalTime.from(timestamp.toLocalDateTime()), ZoneOffset.UTC);
+            this.dueDate = timestamp.toLocalDateTime();
             this.assignmentType =
                     switch (assignmentType)
                             {
@@ -125,12 +124,12 @@ public class Assignment implements Comparable<Assignment>, Paginatable
       }
 
 
-      public OffsetDateTime getDueDate()
+      public LocalDateTime getDueDate()
       {
             return dueDate;
       }
 
-      public void setDueDate(OffsetDateTime dueDate)
+      public void setDueDate(LocalDateTime dueDate)
       {
             this.dueDate = dueDate;
       }
@@ -206,7 +205,7 @@ public class Assignment implements Comparable<Assignment>, Paginatable
                     .addField("Type", assignmentType.getAssignmentType(), false)
                     .addField("Points", String.valueOf(this.points), false)
                     .addField("Class", classroom.getClassName(), false)
-                    .addField("Professor", this.classroom.getProfessor().getFullName(), false)
+                    .addField("Due Date", this.dueDate.format(DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm")), false)
                     .setColor(role == null ? SchoolbotConstants.DEFAULT_EMBED_COLOR : role.getColor())
                     .setTimestamp(Instant.now());
 

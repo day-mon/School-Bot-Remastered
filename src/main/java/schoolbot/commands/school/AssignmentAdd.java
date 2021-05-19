@@ -18,9 +18,8 @@ import schoolbot.util.Checks;
 import schoolbot.util.Embed;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
@@ -42,25 +41,43 @@ public class AssignmentAdd extends Command
                     .stream()
                     .filter(school -> school.getClassesSize() > 0)
                     .collect(Collectors.toList());
-            Classroom classroom = null;
+            Classroom classroom = Checks.messageSentFromClassChannel(event);
+
             int stateToGoto = 1;
 
-
-            if (!member.hasPermission(Permission.ADMINISTRATOR))
+            if (classroom != null)
             {
-
-                  classroom = Checks.messageSentFromClassChannel(event);
-
-                  if (classroom != null)
+                  event.sendMessage("""
+                          ** %s ** has been selected because it you sent it from this channel
+                          Please give me the name of the assignment!
+                          """, classroom.getClassName());
+                  stateToGoto = 4;
+            }
+            else
+            {
+                  if (member.hasPermission(Permission.ADMINISTRATOR))
                   {
-                        event.sendMessage("""
-                                ** %s ** has been selected because it you sent it from this channel
-                                Please give me the name of the assignment!
-                                """, classroom.getClassName());
-                        stateToGoto = 4;
+                        if (schools.isEmpty())
+                        {
+                              Embed.error(event, "This server does not have any school associated with it");
+                        }
+                        else if (schools.size() == 1)
+                        {
+                              classroom = new Classroom();
+                              classroom.setSchool(schools.get(0));
+                              channel.sendMessageFormat("** %s ** has been selected because there is only one school in this server", classroom.getSchool().getSchoolName()).queue();
+                              event.sendMessage("Would you like to continue?");
+                        }
+                        else
+                        {
+                              event.sendMessage("Please choose the School ID of the school you want to add the assignment to ");
+                              event.getAsPaginatorWithPageNumbers(schools);
+                        }
                   }
                   else
                   {
+                        // Not an administrator
+
                         List<Long> validRoles = Checks.validRoleCheck(event);
 
                         List<Classroom> classrooms = event.getGuildClasses()
@@ -71,45 +88,21 @@ public class AssignmentAdd extends Command
 
                         if (classrooms.isEmpty())
                         {
-                              Embed.error(event, "You do not have any roles that indicate you attend any classes");
-                              return;
+                              Embed.error(event, "You do nto have any roles that indicate you attend any classes");
                         }
                         else if (classrooms.size() == 1)
                         {
                               classroom = classrooms.get(0);
+                              Embed.success(event, "** %s ** has been selected because it is the only role you have", classroom.getClassName());
                         }
                         else
                         {
                               event.getAsPaginatorWithPageNumbers(classrooms);
-                              event.sendMessage("Please choose the page number of the class you want to add an assignment to");
+                              event.sendMessage("Select a class by page number (%d / %d)", 1, classrooms.size());
                         }
-
-                  }
-            }
-
-            else
-            {
-                  if (schools.isEmpty())
-                  {
-                        Embed.error(event, "This server does not have any school associated with it!");
-                        return;
-                  }
-                  else if (schools.size() == 1)
-                  {
-                        classroom = new Classroom();
-                        classroom.setSchool(schools.get(0));
-                        event.getChannel().sendMessageFormat("** %s ** has been selected because there is only one school in this server", classroom.getSchool().getSchoolName()).queue();
-                        event.getChannel().sendMessage("Would you like to continue?").queue();
-                        stateToGoto = 2;
-                  }
-                  else
-                  {
-                        event.sendMessage("Please choose the School ID of the school you want to add the assignment to ");
-                        event.getAsPaginatorWithPageNumbers(schools);
                   }
             }
             event.getJDA().addEventListener(new AssignmentAddStateMachine(event, schools, classroom, stateToGoto));
-
       }
 
 
@@ -266,7 +259,7 @@ public class AssignmentAdd extends Command
                               assignment.setPoints(points);
                               Embed.success(event, "** %d ** has been set as ** %s ** point amount", points, assignment.getName());
                               channel.sendMessage("""
-                                      Now I will need the type of assignment it is 
+                                      Now I will need the type of assignment it is
                                       ```
                                       Valid Answers
                                       1. Exam
@@ -344,8 +337,8 @@ public class AssignmentAdd extends Command
                                     int hour = Integer.parseInt(time[0]);
                                     int minute = Integer.parseInt(time[1].replaceAll("am", ""));
 
-                                    assignment.setDueDate(OffsetDateTime.of(date, LocalTime.of(hour, minute), ZoneOffset.UTC));
 
+                                    assignment.setDueDate(LocalDateTime.of(date, LocalTime.of(hour, minute)));
                               }
                               else
                               {
@@ -358,7 +351,7 @@ public class AssignmentAdd extends Command
                                           return;
                                     }
 
-                                    assignment.setDueDate(OffsetDateTime.of(date, LocalTime.of((12 + hour), minute), ZoneOffset.UTC));
+                                    assignment.setDueDate(LocalDateTime.of(date, LocalTime.of((12 + hour), minute)));
                               }
 
                               commandEvent.addAssignment(commandEvent, assignment);
