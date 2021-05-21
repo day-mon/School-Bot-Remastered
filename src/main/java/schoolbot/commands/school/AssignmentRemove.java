@@ -40,7 +40,7 @@ public class AssignmentRemove extends Command
 
             List<School> schools = event.getGuildSchools()
                     .stream()
-                    .filter(school -> school.getClassesSize() > 0)
+                    .filter(school -> !school.getClassroomList().isEmpty())
                     .collect(Collectors.toList());
             List<Assignment> assignmentList = Collections.emptyList();
             Assignment assignment = null;
@@ -107,7 +107,7 @@ public class AssignmentRemove extends Command
                         List<Classroom> classrooms = event.getGuildClasses()
                                 .stream()
                                 .filter(classes -> Collections.frequency(validRoles, classes.getRoleID()) > 1)
-                                .filter(classes -> classes.getAssignments().size() > 0)
+                                .filter(classes -> !classes.getAssignments().isEmpty())
                                 .collect(Collectors.toList());
 
                         if (classrooms.isEmpty())
@@ -230,7 +230,7 @@ public class AssignmentRemove extends Command
 
                               classroomList = commandEvent.getSchool(commandEvent, classroom.getSchool().getSchoolName()).getClassroomList()
                                       .stream()
-                                      .filter(classroom -> classroom.getAssignments().size() > 0)
+                                      .filter(classroom -> !classroom.getAssignments().isEmpty())
                                       .collect(Collectors.toList());
 
                               if (classroomList.isEmpty())

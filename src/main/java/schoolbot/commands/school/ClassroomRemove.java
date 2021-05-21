@@ -36,7 +36,7 @@ public class ClassroomRemove extends Command
       {
             List<School> schools = event.getGuildSchools()
                     .stream()
-                    .filter(school -> school.getClassroomList().size() > 1)
+                    .filter(school -> !school.getClassroomList().isEmpty())
                     .collect(Collectors.toList());
             int stateToSwitch = 1;
 
@@ -52,7 +52,7 @@ public class ClassroomRemove extends Command
 
                   List<Classroom> classrooms = event.getGuildClasses()
                           .stream()
-                          .filter(classroom -> classroom.getAssignments().size() == 0)
+                          .filter(classroom -> classroom.getAssignments().isEmpty())
                           .collect(Collectors.toList());
 
 
@@ -150,7 +150,7 @@ public class ClassroomRemove extends Command
                               this.school = schools.get(index);
                               this.classroomList = school.getClassroomList()
                                       .stream()
-                                      .filter(classroom -> classroom.getAssignments().size() > 0)
+                                      .filter(classroom -> !classroom.getAssignments().isEmpty())
                                       .collect(Collectors.toList());
 
                               if (classroomList.isEmpty())

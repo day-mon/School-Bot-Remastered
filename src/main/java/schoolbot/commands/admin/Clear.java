@@ -46,6 +46,7 @@ public class Clear extends Command
       {
             if (args.isEmpty())
             {
+
                   MessageChannel channel = event.getChannel();
                   Message message = event.getMessage();
                   Member member = event.getMember();

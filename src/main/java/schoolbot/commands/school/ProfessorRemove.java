@@ -36,7 +36,7 @@ public class ProfessorRemove extends Command
 
             List<School> schoolList = event.getGuildSchools()
                     .stream()
-                    .filter(school -> school.getProfessorList().size() > 1)
+                    .filter(school -> !school.getProfessorList().isEmpty())
                     .collect(Collectors.toList());
 
             if (schoolList.isEmpty())
@@ -49,7 +49,7 @@ public class ProfessorRemove extends Command
 
                   List<Professor> professorList = schoolList.get(0).getProfessorList()
                           .stream()
-                          .filter(professor -> professor.getListOfClasses().size() == 0)
+                          .filter(professor -> professor.getListOfClasses().isEmpty())
                           .collect(Collectors.toList());
 
                   if (professorList.size() == 1)
@@ -140,7 +140,7 @@ public class ProfessorRemove extends Command
 
                               List<Professor> professorList = this.professorList
                                       .stream()
-                                      .filter(professors -> professors.getListOfClasses().size() == 0)
+                                      .filter(professors -> professors.getListOfClasses().isEmpty())
                                       .collect(Collectors.toList());
                               if (professorList.isEmpty())
                               {

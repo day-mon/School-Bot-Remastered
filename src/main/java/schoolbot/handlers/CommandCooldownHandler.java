@@ -35,7 +35,7 @@ public class CommandCooldownHandler
                   CooledCommand cooledCommand = entry.getKey();
                   long expiry = entry.getValue();
 
-                  if (cooledCommand.getUserID() == userID && cooledCommand.getGuildID() == guildID && cooledCommand.getCommand().equals(command))
+                  if (cooledCommand.member.getIdLong() == userID && cooledCommand.member.getGuild().getIdLong() == guildID && cooledCommand.command.equals(command))
                   {
                         if (System.currentTimeMillis() <= expiry)
                         {
@@ -55,7 +55,7 @@ public class CommandCooldownHandler
              *      Contains: userID
              *                guildID
              *                Command
-             * With the current time + the cooldown/
+             * With the current time + the cooldown
              */
             COOLDOWN_MAP.put(new CooledCommand(member, command), System.currentTimeMillis() + command.getCooldown());
       }
@@ -70,7 +70,7 @@ public class CommandCooldownHandler
                   CooledCommand cooledCommand = entry.getKey();
                   long expiry = entry.getValue();
 
-                  if (cooledCommand.getUserID() == userID && cooledCommand.getGuildID() == guildID && cooledCommand.getCommand().equals(command))
+                  if (cooledCommand.member.getIdLong() == userID && cooledCommand.member.getGuild().getIdLong() == guildID && cooledCommand.command().equals(command))
                   {
                         return (int) ((int) (expiry / 1000) - (System.currentTimeMillis() / 1000));
                   }
@@ -79,33 +79,9 @@ public class CommandCooldownHandler
       }
 
 
-      public static class CooledCommand
+      public record CooledCommand(Member member, Command command)
       {
-            private final long userID;
-            private final long guildID;
-            private final Command command;
-
-            public CooledCommand(Member member, Command command)
-            {
-                  this.userID = member.getIdLong();
-                  this.guildID = member.getGuild().getIdLong();
-                  this.command = command;
-            }
-
-            public Command getCommand()
-            {
-                  return command;
-            }
-
-            public long getGuildID()
-            {
-                  return guildID;
-            }
-
-            public long getUserID()
-            {
-                  return userID;
-            }
-
       }
+
+
 }

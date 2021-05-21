@@ -39,7 +39,7 @@ public class AssignmentAdd extends Command
             MessageChannel channel = event.getChannel();
             List<School> schools = event.getGuildSchools()
                     .stream()
-                    .filter(school -> school.getClassesSize() > 0)
+                    .filter(school -> !school.getProfessorList().isEmpty())
                     .collect(Collectors.toList());
             Classroom classroom = Checks.messageSentFromClassChannel(event);
 
@@ -83,7 +83,7 @@ public class AssignmentAdd extends Command
                         List<Classroom> classrooms = event.getGuildClasses()
                                 .stream()
                                 .filter(classes -> Collections.frequency(validRoles, classes.getRoleID()) > 1)
-                                .filter(classes -> classes.getAssignments().size() > 0)
+                                .filter(classes -> !classes.getAssignments().isEmpty())
                                 .collect(Collectors.toList());
 
                         if (classrooms.isEmpty())

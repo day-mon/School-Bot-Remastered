@@ -38,7 +38,7 @@ public class ListAssignments extends Command
             MessageChannel channel = event.getChannel();
             long textChanel = event.getTextChannel().getIdLong();
 
-            if (args.size() == 0)
+            if (args.isEmpty())
             {
                   if (!member.hasPermission(Permission.ADMINISTRATOR))
                   {
@@ -65,7 +65,7 @@ public class ListAssignments extends Command
                               List<Classroom> classrooms = classroomList
                                       .stream()
                                       .filter(classes -> Collections.frequency(validRoles, classes.getRoleID()) > 1)
-                                      .filter(classes -> classes.getAssignments().size() > 0)
+                                      .filter(classes -> !classes.getAssignments().isEmpty())
                                       .collect(Collectors.toList());
 
                               if (classrooms.isEmpty())

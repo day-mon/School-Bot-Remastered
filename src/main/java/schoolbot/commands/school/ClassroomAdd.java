@@ -37,9 +37,9 @@ public class ClassroomAdd extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
-            if (args.size() == 0)
+            if (args.isEmpty())
             {
-                  if (event.getGuildSchools().size() == 0)
+                  if (event.getGuildSchools().isEmpty())
                   {
                         Embed.error(event, "This server has no schools");
                         return;

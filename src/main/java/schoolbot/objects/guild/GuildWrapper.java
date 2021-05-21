@@ -25,11 +25,11 @@ public class GuildWrapper
       private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
 
-      public GuildWrapper(@NotNull DatabaseUtil.Data data)
+      public GuildWrapper(@NotNull DatabaseUtil.WrapperReturnValue data)
       {
-            this.guildID = data.getGuildID();
-            this.schoolList = data.getSchoolMap();
-            this.classrooms = Collections.synchronizedList(data.getClassrooms());
+            this.guildID = data.guildID();
+            this.schoolList = data.schoolMap();
+            this.classrooms = Collections.synchronizedList(data.classrooms());
       }
 
       /*

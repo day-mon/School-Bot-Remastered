@@ -128,7 +128,7 @@ public class DatabaseUtil
       }
 
 
-      public static Data getSchools(Schoolbot schoolBot, long guild_id)
+      public static WrapperReturnValue getSchools(Schoolbot schoolBot, long guild_id)
       {
             Map<String, School> schools = new ConcurrentHashMap<>();
             List<Classroom> classrooms = new ArrayList<>();
@@ -150,12 +150,12 @@ public class DatabaseUtil
                         schools.put(sh.getSchoolName().toLowerCase(), sh);
                   }
 
-                  return new Data(schools, classrooms, guild_id);
+                  return new WrapperReturnValue(schools, classrooms, guild_id);
             }
             catch (SQLException e)
             {
                   LOGGER.error("Database error", e);
-                  return new Data();
+                  return new WrapperReturnValue();
             }
       }
 
@@ -567,40 +567,13 @@ public class DatabaseUtil
       }
 
 
-      public static class Data
+      public static record WrapperReturnValue(Map<String, School> schoolMap, List<Classroom> classrooms, long guildID)
       {
-            private final Map<String, School> schoolMap;
-            private final List<Classroom> classrooms;
-            private final long guildID;
-
-            public Data()
+            public WrapperReturnValue()
             {
-                  this.guildID = 0L;
-                  this.schoolMap = Collections.emptyMap();
-                  this.classrooms = Collections.emptyList();
+                  this(Collections.emptyMap(), Collections.emptyList(), 0L);
             }
 
-            public Data(Map<String, School> schoolMap, List<Classroom> classrooms, long guildID)
-            {
-                  this.schoolMap = schoolMap;
-                  this.classrooms = classrooms;
-                  this.guildID = guildID;
-            }
-
-            public List<Classroom> getClassrooms()
-            {
-                  return classrooms;
-            }
-
-            public long getGuildID()
-            {
-                  return guildID;
-            }
-
-            public Map<String, School> getSchoolMap()
-            {
-                  return schoolMap;
-            }
       }
 
 }

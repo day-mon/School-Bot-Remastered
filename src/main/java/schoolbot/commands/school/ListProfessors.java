@@ -28,7 +28,7 @@ public class ListProfessors extends Command
       {
             List<School> schools = event.getGuildSchools()
                     .stream()
-                    .filter(school -> school.getProfessorList().size() > 0)
+                    .filter(school -> !school.getProfessorList().isEmpty())
                     .collect(Collectors.toList());
 
             if (schools.isEmpty())
