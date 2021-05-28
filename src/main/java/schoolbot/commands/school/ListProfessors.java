@@ -39,7 +39,7 @@ public class ListProfessors extends Command
             else if (schools.size() == 1)
             {
                   School school = schools.get(0);
-                  Embed.information(event, "Showing professors from %s because they are the only school with professors in this server", school.getSchoolName());
+                  Embed.information(event, "Showing professors from %s because they are the only school with professors in this server", school.getName());
                   event.getProfessorsAsPaginator(school);
             }
             else
@@ -72,7 +72,7 @@ public class ListProfessors extends Command
                   if (event.getChannel().getIdLong() != channelID) return;
                   if (!event.getMessage().getContentRaw().chars().allMatch(Character::isDigit)) return;
                   // Could put error messages between here...
-                  if (!Checks.between(Integer.parseInt(event.getMessage().getContentRaw()), 1, schools.size())) return;
+                  if (!Checks.between(Integer.parseInt(event.getMessage().getContentRaw()), schools.size())) return;
                   // Could put error messages between here...
 
                   String content = event.getMessage().getContentRaw();
@@ -84,7 +84,7 @@ public class ListProfessors extends Command
 
                   if (professorList.isEmpty())
                   {
-                        Embed.error(event, "** %s ** has no professors..", schools.get(index).getSchoolName());
+                        Embed.error(event, "** %s ** has no professors..", schools.get(index).getName());
                         return;
                   }
                   else if (professorList.size() == 1)

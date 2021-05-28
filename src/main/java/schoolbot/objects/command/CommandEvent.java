@@ -2,7 +2,7 @@ package schoolbot.objects.command;
 
 import com.github.ygimenez.method.Pages;
 import com.github.ygimenez.model.Page;
-import com.github.ygimenez.type.PageType;
+import me.arynxd.button_pagination.ButtonPaginator;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
+import schoolbot.commands.school.SchoolEdit;
 import schoolbot.objects.misc.Paginatable;
 import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
@@ -150,20 +151,38 @@ public class CommandEvent
 
       public <T extends Paginatable> void getAsPaginator(List<T> list)
       {
-            List<Page> pages = new ArrayList<>();
+            List<MessageEmbed> embeds = new ArrayList<>();
+
 
             for (T obj : list)
             {
-                  pages.add(new Page(PageType.EMBED, obj.getAsEmbed(schoolbot)));
+                  embeds.add(obj.getAsEmbed(schoolbot));
             }
+            ButtonPaginator paginator = new ButtonPaginator.Builder()
+                    .setWaiter(this.getSchoolbot().getEventWaiter())
+                    .setEmbeds(embeds)
+                    .setJDA(event.getJDA())
+                    .setChannel(event.getChannel())
+                    .setPredicate(eve -> event.getMember().getIdLong() == this.getMember().getIdLong())
+                    .build();
 
-            getChannel().sendMessage(
-                    (MessageEmbed)
-                            pages.get(0).getContent()
-            ).queue(success ->
-                    Pages.paginate(success, pages)
-            );
+            paginator.paginate();
       }
+
+      public void getAsPaginatorWithEmbeds(List<MessageEmbed> embeds)
+      {
+            ButtonPaginator paginator = new ButtonPaginator.Builder()
+                    .setWaiter(this.getSchoolbot().getEventWaiter())
+                    .setEmbeds(embeds)
+                    .setJDA(this.getJDA())
+                    .setTimeout(30)
+                    .setChannel(event.getChannel())
+                    .setPredicate(eve -> eve.getMember().getIdLong() == this.getMember().getIdLong())
+                    .build();
+            paginator.paginate();
+            this.sendSelfDeletingMessage("`Timeout is set to 30 seconds`");
+      }
+
 
       public <T extends Paginatable> void getAsPaginatorWithPageNumbers(List<T> list)
       {
@@ -174,23 +193,27 @@ public class CommandEvent
                   return;
             }
 
-            List<Page> pages = new ArrayList<>();
+            List<MessageEmbed> embeds = new ArrayList<>();
+
             int i = 1;
             for (T obj : list)
             {
-                  pages.add(new Page(PageType.EMBED, obj.getAsEmbedBuilder(schoolbot)
-                          .setFooter("Page " + i++ + "/" + list.size())
+                  embeds.add(obj.getAsEmbedBuilder(schoolbot)
+                          .setFooter("Page (" + i++ + "/" + list.size() + ")")
                           .build()
-                  ));
+                  );
             }
+            ButtonPaginator paginator = new ButtonPaginator.Builder()
+                    .setWaiter(this.getSchoolbot().getEventWaiter())
+                    .setEmbeds(embeds)
+                    .setJDA(this.getJDA())
+                    .setTimeout(30)
+                    .setChannel(event.getChannel())
+                    .setPredicate(eve -> eve.getMember().getIdLong() == this.getMember().getIdLong())
+                    .build();
+            paginator.paginate();
+            this.sendSelfDeletingMessage("`Timeout is set to 30 seconds`");
 
-
-            getChannel().sendMessage((MessageEmbed) pages.get(0).getContent()).queue(
-                    success ->
-                    {
-                          Pages.paginate(success, pages);
-                    }
-            );
       }
 
 
@@ -232,6 +255,12 @@ public class CommandEvent
       {
             schoolbot.getWrapperHandler().addSchool(event, school);
       }
+
+      public void updateSchool(CommandEvent event, SchoolEdit.SchoolUpdateDTO schoolUpdateDTO)
+      {
+            schoolbot.getWrapperHandler().updateSchool(event, schoolUpdateDTO);
+      }
+
 
       public School getSchool(CommandEvent event, String schoolName)
       {

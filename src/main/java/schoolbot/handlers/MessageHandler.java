@@ -4,12 +4,14 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import okhttp3.*;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
 
-import java.io.File;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -17,11 +19,11 @@ import java.util.concurrent.CompletableFuture;
 
 public class MessageHandler
 {
-      private final String[] FILE_EXTENSIONS = {
+      private final List<String> FILE_EXTENSIONS = List.of(
               "txt", "java", "cpp", "xml", "csharp", "asm",
               "js", "php", "r", "py", "go", "python", "ts", "html",
               "css", "scss"
-      };
+      );
       private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
       private final Schoolbot schoolbot;
       private final OkHttpClient client;
@@ -79,7 +81,7 @@ public class MessageHandler
                         event.getChannel().sendMessage("Uploading to pastecord....").queue(futureMessage ->
                         {
                               final String uniqueIdentifier = UUID.randomUUID() + author.getId();
-                              CompletableFuture<File> future = attachment.downloadToFile()
+                              CompletableFuture<InputStream> future = attachment.retrieveInputStream()
                                       .whenCompleteAsync((file, throwable) ->
                                       {
                                             if (throwable != null)
@@ -100,21 +102,22 @@ public class MessageHandler
       }
 
 
-      private String sendPost(File file)
+      private String sendPost(InputStream file)
       {
-
-            RequestBody body = RequestBody.create(file,
-                    MediaType.parse("application/json"));
-
-            Request request = new Request.Builder()
-                    .url("https://pastecord.com/documents")
-                    .addHeader("User-Agent", "School bot (https://github.com/tykoooo/School-Bot-Remastered)")
-                    .post(body)
-                    .build();
-
             String url = "";
+
             try
             {
+                  RequestBody body = RequestBody.create(IOUtils.toString(file, StandardCharsets.UTF_8),
+                          MediaType.parse("application/json"));
+
+                  Request request = new Request.Builder()
+                          .url("https://pastecord.com/documents")
+                          .addHeader("User-Agent", "School bot (https://github.com/tykoooo/School-Bot-Remastered)")
+                          .post(body)
+                          .build();
+
+
                   Response response = client.newCall(request).execute();
                   if (!response.isSuccessful())
                   {
@@ -130,6 +133,10 @@ public class MessageHandler
                   LOGGER.error("Error occurred in MessageHandler", e);
             }
             return url;
+      }
+
+      public record Triple<T extends CompletableFuture<T>>(T val1, T val2, T val3)
+      {
       }
 
 }

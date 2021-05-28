@@ -10,4 +10,6 @@ public interface Paginatable
       MessageEmbed getAsEmbed(@NotNull Schoolbot schoolbot);
 
       EmbedBuilder getAsEmbedBuilder(@NotNull Schoolbot schoolbot);
+
+
 }

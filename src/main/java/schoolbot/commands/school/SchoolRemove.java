@@ -94,7 +94,7 @@ public class SchoolRemove extends Command
 
                               int index = Integer.parseInt(content);
 
-                              if (!Checks.between(index, 1, schools.size()))
+                              if (!Checks.between(index, schools.size()))
                               {
                                     Embed.error(event, "[** %s **] is not between 1 - %d", content, schools.size());
                                     return;
@@ -102,7 +102,7 @@ public class SchoolRemove extends Command
 
 
                               this.schoolRemoving = schools.get(index - 1);
-                              channel.sendMessageFormat("Are you sure you want to remove [ ** %s **]", schoolRemoving.getSchoolName()).queue();
+                              channel.sendMessageFormat("Are you sure you want to remove [ ** %s **]", schoolRemoving.getName()).queue();
                               state = 2;
                         }
 
@@ -110,7 +110,7 @@ public class SchoolRemove extends Command
                               if (content.equalsIgnoreCase("yes") || content.equalsIgnoreCase("y"))
                               {
                                     commandEvent.removeSchool(commandEvent, schoolRemoving);
-                                    Embed.success(event, "Removed [** %s **] successfully", schoolRemoving.getSchoolName());
+                                    Embed.success(event, "Removed [** %s **] successfully", schoolRemoving.getName());
                                     event.getJDA().removeEventListener(this);
                               }
                               else if (content.equalsIgnoreCase("no") || content.equalsIgnoreCase("n") || content.equalsIgnoreCase("nah"))

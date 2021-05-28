@@ -125,9 +125,33 @@ public class ClassroomAdd extends Command
                                           return;
                                     }
 
-                                    commandEvent.getAsPaginatorWithPageNumbers(pittSchools);
-                                    commandEvent.sendMessage("Please pick the campus based off the page numbers :)");
-                                    state = 2;
+                                    if (pittSchools.isEmpty())
+                                    {
+                                          Embed.error(event, "{} has no pitt schools", event.getGuild().getName());
+                                    }
+                                    else if (pittSchools.size() == 1)
+                                    {
+                                          School school = pittSchools.get(0);
+                                          event.getChannel().sendMessage(school.getAsEmbed(commandEvent.getSchoolbot())).queue();
+                                          event.getChannel().sendMessage(school.getName() + " has automatically been selected because it is the only school available").queue();
+                                          channel.sendMessage("""
+                                                  I will now need your term. I only understand pitt term like
+                                                  ```
+                                                  Fall 2021
+                                                  Spring 2020
+                                                  Summer 2019
+                                                                                
+                                                  Format: <Season> <Year number>
+                                                  ```
+                                                  """).queue();
+                                          state = 3;
+                                    }
+                                    else
+                                    {
+                                          commandEvent.getAsPaginatorWithPageNumbers(pittSchools);
+                                          commandEvent.sendMessage("Please pick the campus based off the page numbers :)");
+                                          state = 2;
+                                    }
                               }
                               else if (message.equalsIgnoreCase("no") || message.equalsIgnoreCase("nah"))
                               {
@@ -150,13 +174,13 @@ public class ClassroomAdd extends Command
 
                               int number = Integer.parseInt(message);
 
-                              if (!Checks.between(number, 1, pittSchools.size()))
+                              if (!Checks.between(number, pittSchools.size()))
                               {
                                     Embed.error(event, "%d is not in between 1 and %d", number, pittSchools.size());
                                     return;
                               }
                               schoolClass.setSchool(pittSchools.get(number - 1));
-                              Embed.success(event, "Successfully set school to %s", schoolClass.getSchool().getSchoolName());
+                              Embed.success(event, "Successfully set school to %s", schoolClass.getSchool().getName());
                               channel.sendMessage("""
                                       I will now need your term. I only understand pitt term like
                                       ```
@@ -190,7 +214,6 @@ public class ClassroomAdd extends Command
                         }
                         case 4 -> {
                               CLASS_SEARCH_URL += message;
-
 
                               School school = schoolClass.getSchool();
                               schoolClass.setURL(CLASS_SEARCH_URL);

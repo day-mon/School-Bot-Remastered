@@ -45,7 +45,7 @@ public class ProfessorRemove extends Command
             }
             else if (schoolList.size() == 1)
             {
-                  Embed.information(event, "** %s ** has been selected because this is the only school with professors", schoolList.get(0).getSchoolName());
+                  Embed.information(event, "** %s ** has been selected because this is the only school with professors", schoolList.get(0).getName());
 
                   List<Professor> professorList = schoolList.get(0).getProfessorList()
                           .stream()
@@ -124,7 +124,7 @@ public class ProfessorRemove extends Command
 
                               int page = Integer.parseInt(message);
 
-                              if (!Checks.between(page, 1, schoolList.size()))
+                              if (!Checks.between(page, schoolList.size()))
                               {
                                     Embed.error(event, "%d is not a number between 1 and %d. Try again", page, schoolList.size());
                                     return;
@@ -170,7 +170,7 @@ public class ProfessorRemove extends Command
 
                               int page = Integer.parseInt(message);
 
-                              if (!Checks.between(page, 1, schoolList.size()))
+                              if (!Checks.between(page, schoolList.size()))
                               {
                                     Embed.error(event, "%d is not a number between 1 and %d. Try again", page, schoolList.size() + 1);
                                     return;

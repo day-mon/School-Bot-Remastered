@@ -1,10 +1,5 @@
 package schoolbot;
 
-import com.github.ygimenez.exception.InvalidHandlerException;
-import com.github.ygimenez.method.Pages;
-import com.github.ygimenez.model.Paginator;
-import com.github.ygimenez.model.PaginatorBuilder;
-import com.github.ygimenez.type.Emote;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -21,7 +16,6 @@ import schoolbot.listener.MainListener;
 import schoolbot.objects.config.ConfigOption;
 import schoolbot.objects.info.BotInfo;
 import schoolbot.objects.info.SystemInfo;
-import schoolbot.objects.misc.Emoji;
 
 import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
@@ -41,8 +35,6 @@ public class Schoolbot extends ListenerAdapter
       private final ReminderHandler reminderHandler;
       private final Logger LOGGER;
 
-
-      private Paginator paginator;
       private JDA jda;
 
       public Schoolbot()
@@ -89,33 +81,13 @@ public class Schoolbot extends ListenerAdapter
       public void onReady(@Nonnull ReadyEvent event)
       {
             getJda().getPresence().setPresence(OnlineStatus.ONLINE, Activity.streaming("Prefix: " + SchoolbotConstants.DEFAULT_PREFIX, "https://www.youtube.com/watch?v=Lju6h-C37hE"));
-            getLogger().info("Account:           " + event.getJDA().getSelfUser());
-            getLogger().info("Java Version:      " + SystemInfo.getJavaVersion());
-            getLogger().info("JDA Version:       " + JDAInfo.VERSION);
-            getLogger().info("Schoolbot Version: " + BotInfo.getSchoolbotVersion());
-            getLogger().info("Operating System:  " + SystemInfo.getOperatingSystem());
-            getLogger().info("Github Repo:       " + BotInfo.getGithubRepo());
-            getLogger().info("Startup Time:      " + Duration.between(getBotStartTime(), LocalDateTime.now()).toMillisPart() + " ms");
-
-
-            try
-            {
-                  this.paginator = PaginatorBuilder.createPaginator()
-                          .setEmote(Emote.NEXT, Emoji.ARROW_RIGHT.getUnicode())
-                          .setEmote(Emote.PREVIOUS, Emoji.ARROW_LEFT.getUnicode())
-                          .setEmote(Emote.GOTO_FIRST, Emoji.TRACK_PREVIOUS.getUnicode())
-                          .setEmote(Emote.GOTO_LAST, Emoji.TRACK_NEXT.getUnicode())
-                          .setHandler(getJda())
-                          .shouldRemoveOnReact(false)
-                          .build();
-
-                  Pages.activate(paginator);
-            }
-            catch (InvalidHandlerException e)
-            {
-                  getLogger().error("Paginator Error... Exiting because half of the bot uses paginator", e);
-                  System.exit(1);
-            }
+            LOGGER.info("Account:           " + event.getJDA().getSelfUser());
+            LOGGER.info("Java Version:      " + SystemInfo.getJavaVersion());
+            LOGGER.info("JDA Version:       " + JDAInfo.VERSION);
+            LOGGER.info("Schoolbot Version: " + BotInfo.getSchoolbotVersion());
+            LOGGER.info("Operating System:  " + SystemInfo.getOperatingSystem());
+            LOGGER.info("Github Repo:       " + BotInfo.getGithubRepo());
+            LOGGER.info("Startup Time:      " + Duration.between(getBotStartTime(), LocalDateTime.now()).toMillisPart() + " ms");
       }
 
 
@@ -157,11 +129,6 @@ public class Schoolbot extends ListenerAdapter
       public MessageHandler getMessageHandler()
       {
             return messageHandler;
-      }
-
-      public Paginator getPaginator()
-      {
-            return paginator;
       }
 
       public WrapperHandler getWrapperHandler()

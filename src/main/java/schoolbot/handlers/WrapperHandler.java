@@ -5,6 +5,7 @@ import com.github.ygimenez.type.PageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
+import schoolbot.commands.school.SchoolEdit;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.guild.GuildWrapper;
 import schoolbot.objects.school.Assignment;
@@ -106,6 +107,15 @@ public class WrapperHandler
             return guildWrappers.get(guildID).getSchool(schoolName);
       }
 
+      public void updateSchool(CommandEvent event, SchoolEdit.SchoolUpdateDTO schoolUpdateDTO)
+      {
+            long guildID = event.getGuild().getIdLong();
+
+            guildCheck(guildID);
+            guildWrappers.get(guildID).updateSchool(event, schoolUpdateDTO);
+      }
+
+
       public void removeSchool(CommandEvent event, School school)
       {
             long guildID = event.getGuild().getIdLong();
@@ -147,7 +157,7 @@ public class WrapperHandler
             guildCheck(guildID);
 
             List<Page> pages = new ArrayList<>();
-            List<Professor> professorList = getProfessors(event, school.getSchoolName().toLowerCase());
+            List<Professor> professorList = getProfessors(event, school.getName().toLowerCase());
 
 
             int i = 1;

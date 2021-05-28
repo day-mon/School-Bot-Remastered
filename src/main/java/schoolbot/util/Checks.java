@@ -37,9 +37,9 @@ public class Checks
             return matcher.matches();
       }
 
-      public static boolean between(int i, int minValueInclusive, int maxValueInclusive)
+      public static boolean between(int i, int maxValueInclusive)
       {
-            return (i >= minValueInclusive && i <= maxValueInclusive);
+            return (i >= 1 && i <= maxValueInclusive);
       }
 
       public static boolean isValidAssignmentDate(String potDate, Classroom classroom)

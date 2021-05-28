@@ -1,8 +1,5 @@
 package schoolbot.commands.school;
 
-import com.github.ygimenez.method.Pages;
-import com.github.ygimenez.model.Page;
-import com.github.ygimenez.type.PageType;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -26,7 +23,10 @@ import schoolbot.util.Checks;
 import schoolbot.util.Embed;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 public class SchoolAdd extends Command
 {
@@ -110,13 +110,7 @@ public class SchoolAdd extends Command
             else
             {
                   event.sendMessage("More than one school that has been found with your search.. Type the number that matches your desired result");
-                  ArrayList<Page> pages = new ArrayList<>();
-                  for (MessageEmbed embeds : schools.values())
-                  {
-                        pages.add(new Page(PageType.EMBED, embeds));
-                  }
-                  event.getChannel().sendMessage((MessageEmbed) pages.get(0).getContent()).queue(success ->
-                          Pages.paginate(success, pages));
+                  event.getAsPaginatorWithEmbeds(List.copyOf(schools.values()));
 
 
                   //TODO: Why would I ever do this if I pass the event through.. Fix this later..
@@ -150,7 +144,8 @@ public class SchoolAdd extends Command
                   if (event.getAuthor().getIdLong() != authorID) return;
                   if (event.getChannel().getIdLong() != channelID) return;
                   if (!event.getMessage().getContentRaw().chars().allMatch(Character::isDigit)) return;
-                  if (!Checks.between(Integer.parseInt(event.getMessage().getContentRaw()), 1, schools.size())) return;
+                  int pageNum = Integer.parseInt(event.getMessage().getContentRaw());
+                  if (!Checks.between(pageNum, schools.size())) return;
 
                   int schoolChoice = Integer.parseInt(event.getMessage().getContentRaw());
                   MessageEmbed embed = schools.get(schoolChoice);

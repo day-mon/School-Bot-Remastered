@@ -28,9 +28,7 @@ import java.util.Random;
 
 public class School implements Paginatable
 {
-
-
-      private String schoolName;
+      private String name;
       private String URL;
       private String emailSuffix;
       private long guildID;
@@ -44,14 +42,14 @@ public class School implements Paginatable
       public School()
       {
             this.roleID = 0L;
-            this.schoolName = "N/A";
+            this.name = "N/A";
             this.classroomList = new ArrayList<>();
             this.professorList = new ArrayList<>();
       }
 
       public School(String name, String suffix, long roleID, long guildID, String url)
       {
-            this.schoolName = name;
+            this.name = name;
             this.emailSuffix = suffix;
             this.roleID = roleID;
             this.guildID = guildID;
@@ -65,7 +63,7 @@ public class School implements Paginatable
 
       public School(String schoolName)
       {
-            this.schoolName = schoolName;
+            this.name = schoolName;
             this.roleID = 0L;
             this.classroomList = new ArrayList<>();
             this.professorList = new ArrayList<>();
@@ -73,7 +71,7 @@ public class School implements Paginatable
 
       public School(long guildID, String schoolName, String emailSuffix)
       {
-            this.schoolName = schoolName;
+            this.name = schoolName;
             this.guildID = guildID;
             this.emailSuffix = emailSuffix;
             this.roleID = 0L;
@@ -85,7 +83,7 @@ public class School implements Paginatable
       public School(int id, String name, long roleID, boolean isPittSchool, String email_suffix, String url)
       {
             this.id = id;
-            this.schoolName = name;
+            this.name = name;
             this.roleID = roleID;
             this.isPittSchool = isPittSchool;
             this.emailSuffix = email_suffix;
@@ -97,7 +95,7 @@ public class School implements Paginatable
       public School(int id, String name, long roleID, boolean isPittSchool, long guildID, String emailSuffix, String url)
       {
             this.id = id;
-            this.schoolName = name;
+            this.name = name;
             this.roleID = roleID;
             this.isPittSchool = isPittSchool;
             this.guildID = guildID;
@@ -110,9 +108,9 @@ public class School implements Paginatable
       /**
        * @return school name
        */
-      public String getSchoolName()
+      public String getName()
       {
-            return schoolName;
+            return name;
       }
 
       public void addClass(Classroom classroom)
@@ -178,11 +176,11 @@ public class School implements Paginatable
       }
 
       /**
-       * @param schoolName
+       * @param name
        */
-      public void setSchoolName(String schoolName)
+      public void setName(String name)
       {
-            this.schoolName = schoolName;
+            this.name = name;
       }
 
       public void setEmailSuffix(String emailSuffix)
@@ -213,7 +211,7 @@ public class School implements Paginatable
             Role role = schoolbot.getJda().getRoleById(this.roleID);
 
             return new EmbedBuilder()
-                    .setTitle(Emoji.BOOKS.getAsChat() + " " + this.schoolName + " " + Emoji.BOOKS.getAsChat(), URL)
+                    .setTitle(Emoji.BOOKS.getAsChat() + " " + this.name + " " + Emoji.BOOKS.getAsChat(), URL)
                     .addField("Role", role == null ? "N/A" : role.getAsMention(), false)
                     .addField("Email Suffix", this.emailSuffix, false)
                     .addField("Amount of Classes", String.valueOf(this.classroomList.size()), false)
@@ -230,6 +228,7 @@ public class School implements Paginatable
 
       public void addPittClass(CommandEvent event, Classroom schoolClass)
       {
+
             String save = "";
             Logger LOGGER = event.getSchoolbot().getLogger();
             MessageChannel channel = event.getChannel();
@@ -242,7 +241,8 @@ public class School implements Paginatable
             }
             catch (Exception e)
             {
-                  Embed.error(event, "Could not connect to Peoplesoft.. Try again later!");
+                  Embed.error(event, "Could not connect to Peoplesoft.. Try again later!", e);
+                  e.printStackTrace();
                   return;
             }
 
@@ -267,7 +267,7 @@ public class School implements Paginatable
 
             if (duplicateClass)
             {
-                  Embed.error(event, "This class already exist for ** %s **", schoolClass.getSchoolWithoutID().getSchoolName());
+                  Embed.error(event, "This class already exist for ** %s **", schoolClass.getSchoolWithoutID().getName());
                   return;
             }
 
@@ -318,7 +318,6 @@ public class School implements Paginatable
                             {
                                   schoolClass.setRoleID(roleSuccess.getIdLong());
                                   LOGGER.info("Role successfully created");
-
                                   event.getGuild().createTextChannel(className)
                                           .queue(
                                                   textChannelSuccess ->
@@ -378,7 +377,7 @@ public class School implements Paginatable
                         }
                         case "Enrollment Requirements" -> schoolClass.setPreReq(textRight);
                         case "Instructor(s)" -> {
-                              List<Professor> professorList = event.getSchoolsProfessors(schoolName);
+                              List<Professor> professorList = event.getSchoolsProfessors(name);
                               boolean found = false;
                               Professor professorFound = null;
                               if (!professorList.isEmpty())
@@ -433,8 +432,8 @@ public class School implements Paginatable
                         case "Room" -> schoolClass.setClassRoom(textRight);
                         case "Location" -> schoolClass.setClassLocation(textRight);
                         case "Campus" -> {
-                              int length = schoolClass.getSchool().getSchoolName().split("\\s").length;
-                              String campus = schoolClass.getSchool().getSchoolName().split("\\s+")[length - 1];
+                              int length = schoolClass.getSchool().getName().split("\\s").length;
+                              String campus = schoolClass.getSchool().getName().split("\\s+")[length - 1];
                               String classesCampus = textRight.split("\\s+")[0];
                               if (!campus.toLowerCase().contains(classesCampus.toLowerCase()))
                               {

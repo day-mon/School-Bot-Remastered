@@ -16,7 +16,9 @@ public enum Emoji
       ORANGE_CIRCLE(":orange_circle:", "\uF7E0", true),
       WHITE_CIRCLE(":white_circle:", "\u26AA", true),
       PURPLE_CIRCLE(":purple_circle:", "\u26AA", true),
-      BLACK_CIRCLE(":black_circle:", "\u26AB", true);
+      BLACK_CIRCLE(":black_circle:", "\u26AB", true),
+      HOURGLASS(":hourglass:", "\u231B", false),
+      STOPWATCH(":stopwatch:", "\u23F1", false);
 
 
       private final String emote;

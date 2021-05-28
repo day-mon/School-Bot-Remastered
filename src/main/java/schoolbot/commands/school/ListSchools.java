@@ -16,7 +16,6 @@ public class ListSchools extends Command
             super("List schools all schools in database", "[none]", 0);
             addCalls("schools", "school-list");
             addFlags(CommandFlag.DATABASE);
-
       }
 
 
@@ -24,6 +23,7 @@ public class ListSchools extends Command
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
             List<School> schools = event.getGuildSchools();
+
 
             if (schools.isEmpty())
             {

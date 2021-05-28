@@ -3,6 +3,7 @@ package schoolbot.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
+import schoolbot.commands.school.SchoolEdit;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
@@ -38,6 +39,7 @@ public class DatabaseUtil
                   preparedStatement.setString(1, assignment.getName());
                   preparedStatement.setTimestamp(2, Timestamp.valueOf(assignment.getDueDate()));
                   preparedStatement.setString(3, assignment.getAssignmentType().getAssignmentType());
+                  // this is horible i will figure out why i did this l8er
                   preparedStatement.setInt(4, assignment.getProfessorID());
                   preparedStatement.setInt(5, assignment.getPoints());
                   preparedStatement.setString(6, assignment.getDescription());
@@ -147,7 +149,7 @@ public class DatabaseUtil
                               getAssignments(connection, classroom);
                         }
                         classrooms.addAll(classroomList);
-                        schools.put(sh.getSchoolName().toLowerCase(), sh);
+                        schools.put(sh.getName().toLowerCase(), sh);
                   }
 
                   return new WrapperReturnValue(schools, classrooms, guild_id);
@@ -193,8 +195,6 @@ public class DatabaseUtil
 
       public static int addClassPitt(CommandEvent event, Classroom clazz)
       {
-
-
             Schoolbot schoolbot = event.getSchoolbot();
             try (Connection con = schoolbot.getDatabaseHandler().getDbConnection())
             {
@@ -253,7 +253,7 @@ public class DatabaseUtil
                           VALUES (?, ?, ?, ?, ?, ?)
                           returning id
                           """);
-                  statement.setString(1, school.getSchoolName());
+                  statement.setString(1, school.getName());
                   statement.setLong(2, school.getRoleID());
                   statement.setString(3, school.getEmailSuffix());
                   statement.setLong(4, school.getGuildID());
@@ -338,7 +338,7 @@ public class DatabaseUtil
             while (rs.next())
             {
                   School school = new School();
-                  school.setSchoolName(rs.getString("name"));
+                  school.setName(rs.getString("name"));
                   school.setRoleID(rs.getLong("role_id"));
                   school.setEmailSuffix(rs.getString("email_suffix"));
                   school.setGuildID(rs.getLong("guild_id"));
@@ -391,8 +391,15 @@ public class DatabaseUtil
                   {
                         int assignment_id = resultSet.getInt("assignment_id");
                         int id = resultSet.getInt("id");
-                        assignments.add(getAssignmentFromID(connection, assignment_id));
+
+                        Assignment assignment = getAssignmentFromID(connection, assignment_id);
+                        assignments.add(assignment);
                         removeReminder(connection, id);
+
+                        if (assignment.getDueDate().isBefore(LocalDateTime.now()))
+                        {
+                              removeAssignment(connection, assignment);
+                        }
                   }
 
                   return assignments;
@@ -430,6 +437,21 @@ public class DatabaseUtil
             {
                   LOGGER.error("Database error", e);
                   return Collections.emptyList();
+            }
+      }
+
+      public static void updateSchool(SchoolEdit.SchoolUpdateDTO schoolUpdateDTO, Schoolbot schoolbot)
+      {
+            try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
+            {
+                  PreparedStatement preparedStatement = connection.prepareStatement("UPDATE schools SET " + schoolUpdateDTO.updateColumn() + "= ? WHERE id=?");
+                  preparedStatement.setObject(1, schoolUpdateDTO.value());
+                  preparedStatement.setInt(2, schoolUpdateDTO.school().getID());
+                  preparedStatement.execute();
+            }
+            catch (Exception e)
+            {
+                  LOGGER.error("Error occurred while updating schools", e);
             }
       }
 

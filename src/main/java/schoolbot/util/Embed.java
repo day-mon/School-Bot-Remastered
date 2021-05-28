@@ -69,6 +69,12 @@ public class Embed
                     .build()).queue();
       }
 
+      public static void notANumberError(GuildMessageReceivedEvent event, String message)
+      {
+            error(event, "** %s ** is not a number.. Try again", message);
+      }
+
+
       public static void error(GuildMessageReceivedEvent event, String message, Object... args)
       {
             MessageChannel channel = event.getChannel();

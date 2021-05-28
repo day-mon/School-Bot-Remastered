@@ -1,9 +1,11 @@
 package schoolbot.objects.guild;
 
+import net.dv8tion.jda.api.entities.Role;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
+import schoolbot.commands.school.SchoolEdit;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
@@ -20,7 +22,6 @@ public class GuildWrapper
 {
       private final long guildID;
       private final Map<String, School> schoolList;
-      // This is a really bad and I will fix it later;
       private final List<Classroom> classrooms;
       private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
@@ -40,7 +41,7 @@ public class GuildWrapper
 
       public boolean addSchool(CommandEvent event, School school)
       {
-            String lowerCaseSchoolName = school.getSchoolName().toLowerCase();
+            String lowerCaseSchoolName = school.getName().toLowerCase();
             if (schoolList.containsKey(lowerCaseSchoolName)) return false;
 
             int id = DatabaseUtil.addSchool(event, school);
@@ -57,24 +58,75 @@ public class GuildWrapper
             return schoolList.get(schoolName.toLowerCase());
       }
 
+      public void updateSchool(CommandEvent event, SchoolEdit.SchoolUpdateDTO schoolUpdateDTO)
+      {
+            String update = schoolUpdateDTO.updateColumn();
+            School school = schoolUpdateDTO.school();
+            String schoolName = school.getName().toLowerCase();
+
+            switch (update)
+            {
+                  case "name" -> {
+                        schoolList.remove(schoolName);
+
+                        String updatedName = (String) schoolUpdateDTO.value();
+                        school.setName(updatedName);
+                        schoolList.put(update.toLowerCase(), school);
+                  }
+                  case "role_id" -> {
+                        Role role = event.getJDA().getRoleById(school.getRoleID());
+
+                        if (role != null)
+                        {
+                              role.delete().queue(
+                                      success ->
+                                      {
+                                            LOGGER.info("Role for {} successfully has been deleted", school.getName());
+                                      },
+                                      failure ->
+                                      {
+                                            LOGGER.error("Role for {} could not be deleted", school.getName(), failure);
+                                      });
+                        }
+                        Long newRoleID = (Long) schoolUpdateDTO.value();
+                        schoolList.get(schoolName).setRoleID(newRoleID);
+
+                  }
+
+                  case "url" -> {
+                        // Could check if valid URL.... but..
+                        String URL = (String) schoolUpdateDTO.value();
+                        schoolList.get(schoolName).setURL(URL);
+                  }
+
+                  case "email_suffix" -> {
+                        String email = (String) schoolUpdateDTO.value();
+                        schoolList.get(schoolName).setURL(email);
+                  }
+            }
+
+            DatabaseUtil.updateSchool(schoolUpdateDTO, event.getSchoolbot());
+
+      }
+
       public void removeSchool(Schoolbot schoolbot, School school)
       {
-            schoolList.remove(school.getSchoolName().toLowerCase());
+            schoolList.remove(school.getName().toLowerCase());
             if (schoolbot.getJda().getRoleById(school.getRoleID()) != null)
             {
                   schoolbot.getJda().getRoleById(school.getRoleID()).delete().queue(
                           success ->
                           {
-                                LOGGER.info("Successfully deleted role for {}", school.getSchoolName());
+                                LOGGER.info("Successfully deleted role for {}", school.getName());
                           },
 
                           failure ->
                           {
-                                LOGGER.warn("Could not delete role for {} ", school.getSchoolName(), failure);
+                                LOGGER.warn("Could not delete role for {} ", school.getName(), failure);
                           }
                   );
             }
-            DatabaseUtil.removeSchool(schoolbot, school.getSchoolName());
+            DatabaseUtil.removeSchool(schoolbot, school.getName());
       }
 
 

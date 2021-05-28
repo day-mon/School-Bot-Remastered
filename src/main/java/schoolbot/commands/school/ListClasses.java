@@ -32,7 +32,7 @@ public class ListClasses extends Command
 
             if (school.getClassroomList().isEmpty())
             {
-                  Embed.error(event, "** %s ** has no classes", school.getSchoolName());
+                  Embed.error(event, "** %s ** has no classes", school.getName());
                   return;
             }
 

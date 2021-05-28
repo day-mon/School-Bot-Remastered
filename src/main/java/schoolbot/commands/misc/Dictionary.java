@@ -42,7 +42,7 @@ public class Dictionary extends Command
 
             try
             {
-                  document = Jsoup.connect(dictURL + word)
+                  document = Jsoup.connect(dictURL + word.replaceAll("\\s", "%20"))
                           .ignoreContentType(true)
                           .get();
             }
@@ -61,6 +61,11 @@ public class Dictionary extends Command
       private MessageEmbed parseJson(List<String> args, Document document)
       {
 
+
+            String audioPronounce = "http://google.com";
+            String pronounce = "N/A";
+
+
             String parseAbleJson =
                     Jsoup.parse(document.outerHtml())
                             .body()
@@ -73,13 +78,15 @@ public class Dictionary extends Command
 
             JSONObject jsonObject = jsonArray.getJSONObject(0);
             JSONArray phoneticsArray = (JSONArray) jsonObject.get("phonetics");
-            JSONObject phonetics = phoneticsArray.getJSONObject(0);
-            String pronounce = phonetics.getString("text");
-            String audioPronounce = phonetics.getString("audio");
 
+            if (!phoneticsArray.isEmpty())
+            {
+                  JSONObject phonetics = phoneticsArray.getJSONObject(0);
+                  pronounce = phonetics.getString("text");
+                  audioPronounce = phonetics.getString("audio");
+            }
 
             JSONArray meaningsArray = (JSONArray) jsonObject.get("meanings");
-
 
             JSONObject meanings = meaningsArray.getJSONObject(0);
 

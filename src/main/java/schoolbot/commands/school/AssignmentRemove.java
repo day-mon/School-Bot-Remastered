@@ -90,7 +90,7 @@ public class AssignmentRemove extends Command
                         {
                               classroom = new Classroom();
                               classroom.setSchool(schools.get(0));
-                              event.getChannel().sendMessageFormat("** %s ** has been selected because there is only one school in this server", classroom.getSchool().getSchoolName()).queue();
+                              event.getChannel().sendMessageFormat("** %s ** has been selected because there is only one school in this server", classroom.getSchool().getName()).queue();
                               event.getChannel().sendMessage("Would you like to continue?").queue();
                               stateToGoto = 2;
                         }
@@ -207,14 +207,14 @@ public class AssignmentRemove extends Command
 
                               int pageNumber = Integer.parseInt(message);
 
-                              if (!Checks.between(pageNumber, 1, schools.size()))
+                              if (!Checks.between(pageNumber, schools.size()))
                               {
                                     Embed.error(event, "** %s ** was not one of the school ids...", message);
                                     return;
                               }
 
                               classroom.setSchool(schools.get(pageNumber - 1));
-                              Embed.success(event, "** %s ** successfully selected", classroom.getSchool().getSchoolName());
+                              Embed.success(event, "** %s ** successfully selected", classroom.getSchool().getName());
                               channel.sendMessage("Would you like to continue?").queue();
                               state = 2;
                         }
@@ -228,7 +228,7 @@ public class AssignmentRemove extends Command
                                     return;
                               }
 
-                              classroomList = commandEvent.getSchool(commandEvent, classroom.getSchool().getSchoolName()).getClassroomList()
+                              classroomList = commandEvent.getSchool(commandEvent, classroom.getSchool().getName()).getClassroomList()
                                       .stream()
                                       .filter(classroom -> !classroom.getAssignments().isEmpty())
                                       .collect(Collectors.toList());
@@ -264,7 +264,7 @@ public class AssignmentRemove extends Command
 
                               int index = Integer.parseInt(message) - 1;
 
-                              if (!Checks.between(index + 1, 1, classroomList.size()))
+                              if (!Checks.between(index + 1, classroomList.size()))
                               {
                                     Embed.error(event, "** %s ** was not one of the class ids...", message);
                                     event.getJDA().removeEventListener(this);
@@ -308,7 +308,7 @@ public class AssignmentRemove extends Command
 
                               int pageNumber = Integer.parseInt(message);
 
-                              if (!Checks.between(pageNumber, 1, assignmentList.size()))
+                              if (!Checks.between(pageNumber, assignmentList.size()))
                               {
                                     Embed.error(event, "** %s ** was not one of the assignment page numbers...", message);
                                     return;

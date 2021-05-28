@@ -88,7 +88,7 @@ public class ProfessorAdd extends Command
                               professor.setFullName(professor.getFirstName() + " " + professor.getLastName());
                               if (schools.size() == 1)
                               {
-                                    channel.sendMessageFormat("** %s ** only has one school associated with it. I will automatically assign your professor to  ** %s **", event.getGuild().getName(), schools.get(0).getSchoolName()).queue();
+                                    channel.sendMessageFormat("** %s ** only has one school associated with it. I will automatically assign your professor to  ** %s **", event.getGuild().getName(), schools.get(0).getName()).queue();
                                     professor.setProfessorsSchool(schools.get(0));
                                     channel.sendMessage("Lastly, enter his email prefix: ").queue();
                                     state = 3;

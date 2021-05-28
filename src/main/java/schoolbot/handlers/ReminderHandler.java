@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ReminderHandler
 {
-      private static final ScheduledExecutorService reminderExecutor = Executors.newScheduledThreadPool(10, runnable -> new Thread(runnable, "SchoolBot Reminder-Thread"));
+      private static final ScheduledExecutorService reminderExecutor = Executors.newScheduledThreadPool(10, runnable -> new Thread(runnable, "SchoolBot Reminder-Thread " + runnable));
       private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
       private final Schoolbot schoolbot;
 
@@ -62,10 +62,16 @@ public class ReminderHandler
                   }
                   else
                   {
+                        int due = assignment.getDueDate().minusMinutes(LocalDateTime.now().getMinute()).getMinute();
                         String mention = role != null ? role.getAsMention() : "Students of " + classroom.getClassName();
+                        String dueMessage = (assignment.getDueDate().minusMinutes(LocalDateTime.now().getMinute()).getMinute() <= 0) ?
+                                String.format("%s, ** %s ** is **now due**", mention, assignment.getName())
+                                :
+                                String.format("%s, ** %s ** is due in ** %d ** minutes", mention, assignment.getName(), due);
+
 
                         LOGGER.info("{} has been notified", classroom.getClassName());
-                        channel.sendMessageFormat("%s, ** %s ** is due in ** %s ** minutes", mention, assignment.getName(), (assignment.getDueDate().minusMinutes(LocalDateTime.now().getMinute()).getMinute())).queue();
+                        channel.sendMessage(dueMessage).queue();
                   }
             }
             catch (Exception e)

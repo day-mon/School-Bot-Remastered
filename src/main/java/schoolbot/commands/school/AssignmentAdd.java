@@ -65,7 +65,7 @@ public class AssignmentAdd extends Command
                         {
                               classroom = new Classroom();
                               classroom.setSchool(schools.get(0));
-                              channel.sendMessageFormat("** %s ** has been selected because there is only one school in this server", classroom.getSchool().getSchoolName()).queue();
+                              channel.sendMessageFormat("** %s ** has been selected because there is only one school in this server", classroom.getSchool().getName()).queue();
                               event.sendMessage("Would you like to continue?");
                         }
                         else
@@ -162,14 +162,14 @@ public class AssignmentAdd extends Command
 
                               int pageNumber = Integer.parseInt(message);
 
-                              if (!Checks.between(pageNumber, 1, schools.size()))
+                              if (!Checks.between(pageNumber, schools.size()))
                               {
                                     Embed.error(event, "** %s ** was not one of the school ids...", message);
                                     return;
                               }
 
                               classroom.setSchool(schools.get(pageNumber - 1));
-                              Embed.success(event, "** %s ** successfully selected", classroom.getSchool().getSchoolName());
+                              Embed.success(event, "** %s ** successfully selected", classroom.getSchool().getName());
                               channel.sendMessage("Would you like to continue?").queue();
                               state = 2;
                         }
@@ -183,7 +183,7 @@ public class AssignmentAdd extends Command
                                     return;
                               }
 
-                              classroomList = commandEvent.getSchool(commandEvent, classroom.getSchool().getSchoolName()).getClassroomList();
+                              classroomList = commandEvent.getSchool(commandEvent, classroom.getSchool().getName()).getClassroomList();
 
                               if (classroomList.isEmpty())
                               {
@@ -212,7 +212,7 @@ public class AssignmentAdd extends Command
 
                               int index = Integer.parseInt(message) - 1;
 
-                              if (!Checks.between(index + 1, 1, classroomList.size()))
+                              if (!Checks.between(index + 1, classroomList.size()))
                               {
                                     Embed.error(event, "** %s ** was not one of the class ids...", message);
                                     event.getJDA().removeEventListener(this);
@@ -266,6 +266,7 @@ public class AssignmentAdd extends Command
                                       2. Quiz
                                       3. Extra Credit
                                       4. Homework
+                                      5. Paper
                                       ```
                                       """).queue();
                               state = 7;
@@ -274,9 +275,14 @@ public class AssignmentAdd extends Command
                         case 7 -> {
                               String content = message.toLowerCase();
 
+
                               if (message.contains("exam") || message.contains("1"))
                               {
                                     assignment.setAssignmentType(Assignment.AssignmentType.EXAM);
+                              }
+                              else if (message.contains("paper") || message.contains("5"))
+                              {
+                                    assignment.setAssignmentType(Assignment.AssignmentType.PAPER);
                               }
                               else if (message.contains("homework") || message.contains("work") || message.contains("4"))
                               {
@@ -298,7 +304,7 @@ public class AssignmentAdd extends Command
                               Embed.success(event, "** %s ** has been set as your assignment type", assignment.getAssignmentType().getAssignmentType());
                               channel.sendMessage("""
                                       I will need your due date..
-                                      Please use the following format: `M/dd/yyy`
+                                      Please use the following format: `M/dd/yyyy`
                                       An Example: `2/9/2004`
                                       """).queue();
                               state = 8;

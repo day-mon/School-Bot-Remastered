@@ -347,7 +347,7 @@ public class Classroom implements Paginatable
             }
             assignment.setId(assignmentID);
             // Times in minutes to remind (1 day, 1 hour, 30 minutes, 10 minutes)
-            DatabaseUtil.addAssignmentReminder(schoolbot, assignment, List.of(1440, 60, 30, 10));
+            DatabaseUtil.addAssignmentReminder(schoolbot, assignment, List.of(1440, 60, 30, 10, 0));
 
             return true;
       }

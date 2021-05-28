@@ -155,11 +155,11 @@ public class ClassroomRemove extends Command
 
                               if (classroomList.isEmpty())
                               {
-                                    Embed.error(commandEvent, "** %s ** has no classes without assignments already assigned to it", school.getSchoolName());
+                                    Embed.error(commandEvent, "** %s ** has no classes without assignments already assigned to it", school.getName());
                                     jda.removeEventListener(this);
                                     return;
                               }
-                              Embed.success(event, "** %s ** has been selected", school.getSchoolName());
+                              Embed.success(event, "** %s ** has been selected", school.getName());
                               commandEvent.getAsPaginatorWithPageNumbers(classroomList);
                               Embed.information(commandEvent, "Please select a page number of the class you want to remove");
 
@@ -176,7 +176,7 @@ public class ClassroomRemove extends Command
 
                               int index = Integer.parseInt(message) - 1;
 
-                              if (!Checks.between(index + 1, 1, this.classroomList.size()))
+                              if (!Checks.between(index + 1, this.classroomList.size()))
                               {
                                     Embed.error(event, "** %s ** is not between 1 - %d", message, this.classroomList.size());
                                     return;

@@ -2,7 +2,9 @@ package schoolbot.listener;
 
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.GenericEvent;
+import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.role.RoleDeleteEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 import schoolbot.Schoolbot;
 
@@ -31,7 +33,15 @@ public class MainListener implements EventListener
 
 
                   schoolbot.getMessageHandler().handle((GuildMessageReceivedEvent) event);
-
             }
+            else if (event instanceof RoleDeleteEvent)
+            {
+                  RoleDeleteEvent eve = (RoleDeleteEvent) event;
+            }
+            else if (event instanceof TextChannelDeleteEvent)
+            {
+                  TextChannelDeleteEvent eve = (TextChannelDeleteEvent) event;
+            }
+
       }
 }
