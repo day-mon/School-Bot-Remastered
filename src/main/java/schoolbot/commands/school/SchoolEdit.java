@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.misc.DatabaseDTO;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
 import schoolbot.util.Embed;
@@ -120,14 +121,16 @@ public class SchoolEdit extends Command
                               state = 2;
                         }
 
-                        case 2 -> {
-
+                        case -1 -> {
                               if (!message.equalsIgnoreCase("yes") && !message.equalsIgnoreCase("y") && !message.toLowerCase().contains("yes"))
                               {
                                     channel.sendMessage("Okay aborting...").queue();
                                     jda.removeEventListener(this);
                               }
+                              state = 2;
+                        }
 
+                        case 2 -> {
                               channel.sendMessageFormat("What attribute of ** %s ** would you like to edit", school.getName()).queue();
                               channel.sendMessage("""
                                         ```
@@ -147,101 +150,107 @@ public class SchoolEdit extends Command
                                     return;
                               }
 
-                              if (content.contains("1") || content.contains("name"))
-                              {
-                                    updateColumn = "name";
-                                    channel.sendMessage("Please send me the name you would like the school to be").queue();
-                              }
-                              else if (content.contains("url") || content.contains("2"))
-                              {
-                                    updateColumn = "url";
-                                    channel.sendMessage("Please send me the new school URL you would like the school to be").queue();
-                              }
-                              else if (content.contains("suffix") || content.contains("email") || content.contains("3"))
-                              {
-                                    updateColumn = "email_suffix";
-                                    channel.sendMessage("Give me the email suffix you would like").queue();
-                              }
-                              else if (content.contains("role") || content.contains("4"))
-                              {
-                                    updateColumn = "role_id";
-                                    channel.sendMessage("Please mention the role you would like the school to change to").queue();
-                              }
-                              else
-                              {
-                                    Embed.error(event, "** %s ** is not a valid entry");
-                                    return;
-                              }
+                              evaluateChoice(content, event);
+
                               state = 4;
                         }
 
                         case 4 -> {
-                              switch (updateColumn)
-                              {
-                                    case "name" -> {
-                                          if (Checks.isNumber(message))
-                                          {
-                                                Embed.error(event, "School names cannot contain numbers.. Try again");
-                                                return;
-                                          }
-
-                                          boolean duplicateSchool = commandEvent.schoolExist(message);
-
-                                          if (duplicateSchool)
-                                          {
-                                                Embed.error(event, "** %s ** already exist as a school.. Please try again with a different name");
-                                                return;
-                                          }
-                                          commandEvent.updateSchool(commandEvent, new SchoolUpdateDTO(school, updateColumn, message));
-                                    }
-                                    case "url" -> {
-                                          // TODO: Add valid url checks..
-                                          commandEvent.updateSchool(commandEvent, new SchoolUpdateDTO(school, updateColumn, message));
-                                    }
-                                    case "email_suffix" -> {
-                                          // TODO: Add valid email checks...
-                                          commandEvent.updateSchool(commandEvent, new SchoolUpdateDTO(school, updateColumn, message));
-                                    }
-                                    case "role_id" -> {
-                                          Message eventMessage = event.getMessage();
-
-                                          if (eventMessage.getMentionedRoles().isEmpty() && !message.equalsIgnoreCase("0"))
-                                          {
-                                                Embed.error(event, "You did not mention any roles, Try again!");
-                                                return;
-                                          }
-
-                                          Long roleID = message.equalsIgnoreCase("0") ? 0L : eventMessage.getMentionedRoles().get(0).getIdLong();
-
-                                          if (roleID != 0 && roleID == school.getRoleID())
-                                          {
-                                                Embed.error(event, "%s, is already %s role", jda.getRoleById(school.getRoleID()).getAsMention(), school.getName());
-                                                jda.removeEventListener(this);
-                                                return;
-                                          }
-
-                                          if (roleID == 0 && school.getRoleID() == 0)
-                                          {
-                                                Embed.error(event, "%s already has no role.", school.getName());
-                                                jda.removeEventListener(this);
-                                                return;
-                                          }
-
-                                          commandEvent.updateSchool(commandEvent, new SchoolUpdateDTO(school, updateColumn, roleID));
-                                    }
-                              }
-                              Embed.success(event, "** %s ** has been successfully been updated to ** %s ** ", updateColumn.replace("_", " "), message);
-                              jda.removeEventListener(this);
+                              evaluateColumn(message, event);
                         }
 
                   }
             }
+
+            private void evaluateChoice(String content, GuildMessageReceivedEvent event)
+            {
+                  MessageChannel channel = event.getChannel();
+                  if (content.contains("1") || content.contains("name"))
+                  {
+                        updateColumn = "name";
+                        channel.sendMessage("Please send me the name you would like the school to be").queue();
+                  }
+                  else if (content.contains("url") || content.contains("2"))
+                  {
+                        updateColumn = "url";
+                        channel.sendMessage("Please send me the new school URL you would like the school to be").queue();
+                  }
+                  else if (content.contains("suffix") || content.contains("email") || content.contains("3"))
+                  {
+                        updateColumn = "email_suffix";
+                        channel.sendMessage("Give me the email suffix you would like").queue();
+                  }
+                  else if (content.contains("role") || content.contains("4"))
+                  {
+                        updateColumn = "role_id";
+                        channel.sendMessage("Please mention the role you would like the school to change to").queue();
+                  }
+                  else
+                  {
+                        Embed.error(event, "** %s ** is not a valid entry");
+                  }
+            }
+
+            private void evaluateColumn(String message, GuildMessageReceivedEvent event)
+            {
+                  JDA jda = event.getJDA();
+                  switch (updateColumn)
+                  {
+                        case "name" -> {
+                              if (Checks.isNumber(message))
+                              {
+                                    Embed.error(event, "School names cannot contain numbers.. Try again");
+                                    return;
+                              }
+
+                              boolean duplicateSchool = commandEvent.schoolExist(message);
+
+                              if (duplicateSchool)
+                              {
+                                    Embed.error(event, "** %s ** already exist as a school.. Please try again with a different name");
+                                    return;
+                              }
+                              commandEvent.updateSchool(commandEvent, new DatabaseDTO(school, updateColumn, message));
+                        }
+                        case "url" -> {
+                              // TODO: Add valid url checks..
+                              commandEvent.updateSchool(commandEvent, new DatabaseDTO(school, updateColumn, message));
+                        }
+                        case "email_suffix" -> {
+                              // TODO: Add valid email checks...
+                              commandEvent.updateSchool(commandEvent, new DatabaseDTO(school, updateColumn, message));
+                        }
+                        case "role_id" -> {
+                              Message eventMessage = event.getMessage();
+
+                              if (eventMessage.getMentionedRoles().isEmpty() && !message.equalsIgnoreCase("0"))
+                              {
+                                    Embed.error(event, "You did not mention any roles, Try again!");
+                                    return;
+                              }
+
+                              long roleID = message.equalsIgnoreCase("0") ? 0L : eventMessage.getMentionedRoles().get(0).getIdLong();
+
+                              if (roleID != 0 && roleID == school.getRoleID())
+                              {
+                                    Embed.error(event, "%s, is already %s role", jda.getRoleById(school.getRoleID()).getAsMention(), school.getName());
+                                    jda.removeEventListener(this);
+                                    return;
+                              }
+
+                              if (roleID == 0 && school.getRoleID() == 0)
+                              {
+                                    Embed.error(event, "%s already has no role.", school.getName());
+                                    jda.removeEventListener(this);
+                                    return;
+                              }
+
+                              commandEvent.updateSchool(commandEvent, new DatabaseDTO(school, updateColumn, roleID));
+                        }
+                        default -> Embed.error(event, "** %s ** is not a valid response", message);
+                  }
+                  Embed.success(event, "** %s ** has been successfully been updated to ** %s ** ", updateColumn.replace("_", " "), message);
+                  jda.removeEventListener(this);
+            }
       }
-
-
-      public static record SchoolUpdateDTO(School school, String updateColumn, Object value)
-      {
-      }
-
-
 }

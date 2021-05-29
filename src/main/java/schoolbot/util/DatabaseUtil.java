@@ -3,8 +3,8 @@ package schoolbot.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
-import schoolbot.commands.school.SchoolEdit;
 import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.misc.DatabaseDTO;
 import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.Professor;
@@ -440,13 +440,14 @@ public class DatabaseUtil
             }
       }
 
-      public static void updateSchool(SchoolEdit.SchoolUpdateDTO schoolUpdateDTO, Schoolbot schoolbot)
+      public static void updateSchool(DatabaseDTO schoolUpdateDTO, Schoolbot schoolbot)
       {
             try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
             {
                   PreparedStatement preparedStatement = connection.prepareStatement("UPDATE schools SET " + schoolUpdateDTO.updateColumn() + "= ? WHERE id=?");
+                  School school = (School) schoolUpdateDTO.value();
                   preparedStatement.setObject(1, schoolUpdateDTO.value());
-                  preparedStatement.setInt(2, schoolUpdateDTO.school().getID());
+                  preparedStatement.setInt(2, school.getID());
                   preparedStatement.execute();
             }
             catch (Exception e)

@@ -5,9 +5,9 @@ import com.github.ygimenez.type.PageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
-import schoolbot.commands.school.SchoolEdit;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.guild.GuildWrapper;
+import schoolbot.objects.misc.DatabaseDTO;
 import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.Professor;
@@ -107,7 +107,7 @@ public class WrapperHandler
             return guildWrappers.get(guildID).getSchool(schoolName);
       }
 
-      public void updateSchool(CommandEvent event, SchoolEdit.SchoolUpdateDTO schoolUpdateDTO)
+      public void updateSchool(CommandEvent event, DatabaseDTO schoolUpdateDTO)
       {
             long guildID = event.getGuild().getIdLong();
 

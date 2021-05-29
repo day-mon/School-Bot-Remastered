@@ -5,8 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
-import schoolbot.commands.school.SchoolEdit;
 import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.misc.DatabaseDTO;
 import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.Professor;
@@ -58,10 +58,10 @@ public class GuildWrapper
             return schoolList.get(schoolName.toLowerCase());
       }
 
-      public void updateSchool(CommandEvent event, SchoolEdit.SchoolUpdateDTO schoolUpdateDTO)
+      public void updateSchool(CommandEvent event, DatabaseDTO schoolUpdateDTO)
       {
             String update = schoolUpdateDTO.updateColumn();
-            School school = schoolUpdateDTO.school();
+            School school = (School) schoolUpdateDTO.value();
             String schoolName = school.getName().toLowerCase();
 
             switch (update)

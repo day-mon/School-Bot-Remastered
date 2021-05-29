@@ -13,8 +13,6 @@ import schoolbot.SchoolbotConstants;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class MessageHandler
@@ -60,51 +58,44 @@ public class MessageHandler
       {
             User author = event.getAuthor();
             Message message = event.getMessage();
-
-
             List<Message.Attachment> attachments = message.getAttachments();
+            message.delete().queue();
 
-            for (Message.Attachment attachment : attachments)
-            {
-                  boolean hasFileExt = false;
-                  for (String fileExt : FILE_EXTENSIONS)
-                  {
-                        if (Objects.equals(attachment.getFileExtension(), fileExt))
-                        {
-                              hasFileExt = true;
-                              break;
-                        }
-                  }
 
-                  if (hasFileExt)
-                  {
-                        event.getChannel().sendMessage("Uploading to pastecord....").queue(futureMessage ->
-                        {
-                              final String uniqueIdentifier = UUID.randomUUID() + author.getId();
-                              CompletableFuture<InputStream> future = attachment.retrieveInputStream()
-                                      .whenCompleteAsync((file, throwable) ->
-                                      {
-                                            if (throwable != null)
-                                            {
-                                                  LOGGER.error("Error occurred:", throwable);
-                                                  futureMessage.editMessage("Upload to pastecord failed!").queue();
-                                            }
-                                            else
-                                            {
-                                                  String urlToSend = "https://pastecord.com/" + sendPost(file);
-                                                  futureMessage.editMessage("File uploaded for " + event.getAuthor().getAsMention() + " " + urlToSend).queue();
-                                            }
-                                      });
-                              event.getMessage().delete().queue();
-                        });
-                  }
-            }
+            attachments.stream()
+                    .filter(attachment -> FILE_EXTENSIONS.contains(attachment.getFileExtension()))
+                    .map(future ->
+                    {
+                          CompletableFuture<Message> messageFuture = event.getChannel().sendMessage("Uploading to pastecord...").submit();
+                          CompletableFuture<InputStream> inputStreamFuture = future.retrieveInputStream();
+                          CompletableFuture<Void> allFutures = CompletableFuture.allOf(messageFuture, inputStreamFuture);
+                          return new Triple(messageFuture, inputStreamFuture, allFutures);
+                    })
+                    .forEach(trip ->
+                    {
+                          trip.val3.whenCompleteAsync((empty, object) ->
+                          {
+                                var sentMessage = trip.val1.getNow(null);
+                                var inputStream = trip.val2.getNow(null);
+
+
+                                if (sentMessage == null || inputStream == null)
+                                {
+                                      event.getChannel().sendMessage("Could not upload to pastecord..").queue();
+                                      return;
+                                }
+
+                                var urlToSend = "https://pastecord.com/" + sendPost(inputStream);
+                                sentMessage.editMessageFormat("File uploaded for %s [%s] ", event.getAuthor().getAsMention(), urlToSend).queue();
+                          });
+                    });
       }
 
 
       private String sendPost(InputStream file)
       {
             String url = "";
+            Response response = null;
 
             try
             {
@@ -118,7 +109,7 @@ public class MessageHandler
                           .build();
 
 
-                  Response response = client.newCall(request).execute();
+                  response = client.newCall(request).execute();
                   if (!response.isSuccessful())
                   {
                         LOGGER.error("Request not successful. Refer to pastecord or check your connection to it");
@@ -132,10 +123,18 @@ public class MessageHandler
             {
                   LOGGER.error("Error occurred in MessageHandler", e);
             }
+            finally
+            {
+                  if (response != null)
+                  {
+                        response.close();
+                  }
+            }
             return url;
       }
 
-      public record Triple<T extends CompletableFuture<T>>(T val1, T val2, T val3)
+      public record Triple(CompletableFuture<Message> val1, CompletableFuture<InputStream> val2,
+                           CompletableFuture<Void> val3)
       {
       }
 

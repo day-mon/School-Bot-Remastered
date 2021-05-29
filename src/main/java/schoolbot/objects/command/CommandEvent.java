@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
 import schoolbot.SchoolbotConstants;
-import schoolbot.commands.school.SchoolEdit;
+import schoolbot.objects.misc.DatabaseDTO;
 import schoolbot.objects.misc.Paginatable;
 import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
@@ -256,7 +256,7 @@ public class CommandEvent
             schoolbot.getWrapperHandler().addSchool(event, school);
       }
 
-      public void updateSchool(CommandEvent event, SchoolEdit.SchoolUpdateDTO schoolUpdateDTO)
+      public void updateSchool(CommandEvent event, DatabaseDTO schoolUpdateDTO)
       {
             schoolbot.getWrapperHandler().updateSchool(event, schoolUpdateDTO);
       }

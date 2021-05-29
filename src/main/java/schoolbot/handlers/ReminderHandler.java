@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ReminderHandler
 {
-      private static final ScheduledExecutorService reminderExecutor = Executors.newScheduledThreadPool(10, runnable -> new Thread(runnable, "SchoolBot Reminder-Thread " + runnable));
+      private static final ScheduledExecutorService reminderExecutor = Executors.newScheduledThreadPool(10, runnable -> new Thread(runnable, "SchoolBot Reminder-Thread"));
       private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
       private final Schoolbot schoolbot;
 
