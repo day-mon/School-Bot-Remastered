@@ -38,8 +38,8 @@ public class DatabaseUtil
                           """);
                   preparedStatement.setString(1, assignment.getName());
                   preparedStatement.setTimestamp(2, Timestamp.valueOf(assignment.getDueDate()));
-                  preparedStatement.setString(3, assignment.getAssignmentType().getAssignmentType());
-                  // this is horible i will figure out why i did this l8er
+                  preparedStatement.setString(3, assignment.getType().getAssignmentType());
+                  // this is horrible i will figure out why i did this l8er
                   preparedStatement.setInt(4, assignment.getProfessorID());
                   preparedStatement.setInt(5, assignment.getPoints());
                   preparedStatement.setString(6, assignment.getDescription());
@@ -209,20 +209,20 @@ public class DatabaseUtil
                           returning id
                           """);
 
-                  statement.setInt(1, clazz.getClassNumber());
+                  statement.setInt(1, clazz.getNumber());
                   statement.setInt(2, clazz.getProfessor().getID());
-                  statement.setString(3, clazz.getClassLocation());
-                  statement.setDate(4, Date.valueOf(clazz.getClassStartDate()));
-                  statement.setDate(5, Date.valueOf(clazz.getClassEndDate()));
-                  statement.setString(6, clazz.getClassTime());
-                  statement.setString(7, clazz.getPreReq());
-                  statement.setString(8, clazz.getClassLevel());
+                  statement.setString(3, clazz.getLocation());
+                  statement.setDate(4, Date.valueOf(clazz.getStartDate()));
+                  statement.setDate(5, Date.valueOf(clazz.getEndDate()));
+                  statement.setString(6, clazz.getTime());
+                  statement.setString(7, clazz.getPrerequisite());
+                  statement.setString(8, clazz.getLevel());
                   statement.setInt(9, clazz.getSchool().getID());
                   statement.setString(10, clazz.getClassIdentifier());
                   statement.setString(11, clazz.getTerm());
                   statement.setString(12, clazz.getDescription());
                   statement.setLong(13, event.getGuild().getIdLong());
-                  statement.setString(14, clazz.getClassName());
+                  statement.setString(14, clazz.getName());
                   statement.setLong(15, clazz.getRoleID());
                   statement.setLong(16, clazz.getChannelID());
                   statement.execute();
@@ -257,7 +257,7 @@ public class DatabaseUtil
                   statement.setLong(2, school.getRoleID());
                   statement.setString(3, school.getEmailSuffix());
                   statement.setLong(4, school.getGuildID());
-                  statement.setBoolean(5, school.getIsPittSchool());
+                  statement.setBoolean(5, school.isPittSchool());
                   statement.setString(6, school.getURL());
                   statement.executeQuery();
 
@@ -372,6 +372,13 @@ public class DatabaseUtil
             preparedStatement.execute();
       }
 
+      private static void removeReminderByAssignmentID(Connection connection, int assignmentID) throws SQLException
+      {
+            PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM assignments_reminders WHERE assignment_id=?");
+            preparedStatement.setInt(1, assignmentID);
+            preparedStatement.execute();
+      }
+
       private static void removeClassReminders(Connection connection, int id) throws SQLException
       {
             PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM class_reminders WHERE class_id=?");
@@ -453,6 +460,48 @@ public class DatabaseUtil
             catch (Exception e)
             {
                   LOGGER.error("Error occurred while updating schools", e);
+            }
+      }
+
+      public static void updateProfessor(DatabaseDTO schoolUpdateDTO, Schoolbot schoolbot)
+      {
+            try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
+            {
+                  PreparedStatement preparedStatement = connection.prepareStatement("UPDATE professors SET " + schoolUpdateDTO.updateColumn() + "= ? WHERE id=?");
+                  Professor professor = (Professor) schoolUpdateDTO.obj();
+                  preparedStatement.setObject(1, schoolUpdateDTO.value());
+                  preparedStatement.setInt(2, professor.getID());
+                  preparedStatement.execute();
+            }
+            catch (Exception e)
+            {
+                  LOGGER.error("Error occurred while updating professors", e);
+            }
+      }
+
+      public static void updateAssignment(DatabaseDTO assignmentUpdateDTO, Schoolbot schoolbot)
+      {
+            try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
+            {
+                  PreparedStatement preparedStatement = connection.prepareStatement("UPDATE assignments SET " + assignmentUpdateDTO.updateColumn() + "= ? WHERE id=?");
+                  Assignment assignment = (Assignment) assignmentUpdateDTO.obj();
+                  preparedStatement.setObject(1, assignmentUpdateDTO.value());
+                  preparedStatement.setInt(2, assignment.getId());
+                  preparedStatement.execute();
+
+                  if (assignmentUpdateDTO.updateColumn().equals("due_date"))
+                  {
+                        removeReminderByAssignmentID(connection, assignment.getId());
+
+                        LocalDateTime localDateTime = (LocalDateTime) assignmentUpdateDTO.value();
+                        assignment.setDueDate(localDateTime);
+
+                        addAssignmentReminder(schoolbot, assignment, List.of(1440, 60, 30, 10, 0));
+                  }
+            }
+            catch (Exception e)
+            {
+                  LOGGER.error("Error occurred while updating assignments", e);
             }
       }
 

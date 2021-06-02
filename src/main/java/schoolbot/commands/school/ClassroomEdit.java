@@ -12,6 +12,7 @@ public class ClassroomEdit extends Command
       public ClassroomEdit(Command parent)
       {
             super(parent, "", "", 0);
+
             addUsageExample("N/A");
       }
 

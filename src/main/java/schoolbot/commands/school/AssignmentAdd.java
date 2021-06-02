@@ -50,7 +50,7 @@ public class AssignmentAdd extends Command
                   event.sendMessage("""
                           ** %s ** has been selected because it you sent it from this channel
                           Please give me the name of the assignment!
-                          """, classroom.getClassName());
+                          """, classroom.getName());
                   stateToGoto = 4;
             }
             else
@@ -93,7 +93,7 @@ public class AssignmentAdd extends Command
                         else if (classrooms.size() == 1)
                         {
                               classroom = classrooms.get(0);
-                              Embed.success(event, "** %s ** has been selected because it is the only role you have", classroom.getClassName());
+                              Embed.success(event, "** %s ** has been selected because it is the only role you have", classroom.getName());
                         }
                         else
                         {
@@ -192,7 +192,7 @@ public class AssignmentAdd extends Command
                               }
                               else if (classroomList.size() == 1)
                               {
-                                    Embed.success(event, "** %s ** has been selected automatically because you only have one class associated with you!", classroomList.get(0).getClassName());
+                                    Embed.success(event, "** %s ** has been selected automatically because you only have one class associated with you!", classroomList.get(0).getName());
                                     channel.sendMessageFormat("""
                                             Now that we have all that sorted the fun stuff can start %s
                                             Im going to start by asking for your assignment name
@@ -219,7 +219,7 @@ public class AssignmentAdd extends Command
                                     return;
                               }
                               this.classroom = classroomList.get(index);
-                              Embed.success(event, "** %s ** has successfully been selected", this.classroom.getClassName());
+                              Embed.success(event, "** %s ** has successfully been selected", this.classroom.getName());
                               channel.sendMessageFormat("""
                                               Now that we have all that sorted the fun stuff can start %s
                                               Im going to start by asking for your assignment name
@@ -278,30 +278,30 @@ public class AssignmentAdd extends Command
 
                               if (message.contains("exam") || message.contains("1"))
                               {
-                                    assignment.setAssignmentType(Assignment.AssignmentType.EXAM);
+                                    assignment.setType(Assignment.AssignmentType.EXAM);
                               }
                               else if (message.contains("paper") || message.contains("5"))
                               {
-                                    assignment.setAssignmentType(Assignment.AssignmentType.PAPER);
+                                    assignment.setType(Assignment.AssignmentType.PAPER);
                               }
                               else if (message.contains("homework") || message.contains("work") || message.contains("4"))
                               {
-                                    assignment.setAssignmentType(Assignment.AssignmentType.HOMEWORK);
+                                    assignment.setType(Assignment.AssignmentType.HOMEWORK);
                               }
                               else if (message.contains("quiz") || message.contains("2"))
                               {
-                                    assignment.setAssignmentType(Assignment.AssignmentType.QUIZ);
+                                    assignment.setType(Assignment.AssignmentType.QUIZ);
                               }
                               else if (message.contains("extra") || message.contains("credit") || message.contains("3"))
                               {
-                                    assignment.setAssignmentType(Assignment.AssignmentType.EXTRA_CREDIT);
+                                    assignment.setType(Assignment.AssignmentType.EXTRA_CREDIT);
                               }
                               else
                               {
                                     Embed.error(event, "** %s ** is not a valid entry", message);
                                     return;
                               }
-                              Embed.success(event, "** %s ** has been set as your assignment type", assignment.getAssignmentType().getAssignmentType());
+                              Embed.success(event, "** %s ** has been set as your assignment type", assignment.getType().getAssignmentType());
                               channel.sendMessage("""
                                       I will need your due date..
                                       Please use the following format: `M/dd/yyyy`
@@ -323,7 +323,7 @@ public class AssignmentAdd extends Command
                               channel.sendMessage("""
                                       Lastly I will need the time in which your assignment is due
                                       Please use the following format: `HH:mm AM/PM`
-                                      An Example: `12:30pm`
+                                      An Example: `12:30pm` or `8:30am`
                                       """).queue();
                               state = 9;
                         }
@@ -362,7 +362,7 @@ public class AssignmentAdd extends Command
 
                               commandEvent.addAssignment(commandEvent, assignment);
 
-                              Embed.success(event, "** %s ** has successfully been added to ** %s **", assignment.getName(), assignment.getClassroom().getClassName());
+                              Embed.success(event, "** %s ** has successfully been added to ** %s **", assignment.getName(), assignment.getClassroom().getName());
                               event.getJDA().removeEventListener(this);
 
                         }

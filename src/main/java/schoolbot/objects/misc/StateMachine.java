@@ -1,2 +1,0 @@
-package schoolbot.objects.misc;
-

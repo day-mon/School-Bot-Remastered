@@ -1,7 +1,6 @@
 package schoolbot.handlers;
 
-import com.github.ygimenez.model.Page;
-import com.github.ygimenez.type.PageType;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
@@ -116,6 +115,23 @@ public class WrapperHandler
       }
 
 
+      public void updateProfessor(CommandEvent event, DatabaseDTO schoolUpdateDTO)
+      {
+            long guildID = event.getGuild().getIdLong();
+
+            guildCheck(guildID);
+            guildWrappers.get(guildID).updateProfessor(event, schoolUpdateDTO);
+      }
+
+      public void updateAssignment(CommandEvent event, DatabaseDTO assignmentUpdate)
+      {
+            long guildID = event.getGuild().getIdLong();
+
+            guildCheck(guildID);
+            guildWrappers.get(guildID).updateAssignment(event, assignmentUpdate);
+      }
+
+
       public void removeSchool(CommandEvent event, School school)
       {
             long guildID = event.getGuild().getIdLong();
@@ -149,29 +165,24 @@ public class WrapperHandler
       }
 
 
-      public List<Page> getProfessorsAsPaginator(CommandEvent event, School school)
+      public List<MessageEmbed> getProfessorsAsPaginator(CommandEvent event, School school)
       {
             Schoolbot schoolbot = event.getSchoolbot();
 
             long guildID = event.getGuild().getIdLong();
             guildCheck(guildID);
 
-            List<Page> pages = new ArrayList<>();
             List<Professor> professorList = getProfessors(event, school.getName().toLowerCase());
+            List<MessageEmbed> embeds = new ArrayList<>();
 
 
             int i = 1;
 
             for (Professor professor : professorList)
             {
-                  pages.add(new Page
-                          (PageType.EMBED,
-                                  professor.getAsEmbedBuilder(schoolbot)
-                                          .setFooter("Page " + i++ + "/" + professorList.size())
-                                          .build()
-                          ));
+                  embeds.add(professor.getAsEmbed(schoolbot));
             }
-            return pages;
+            return embeds;
       }
 
       private void guildCheck(long guildID)

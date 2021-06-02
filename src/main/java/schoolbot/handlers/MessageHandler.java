@@ -12,6 +12,8 @@ import schoolbot.SchoolbotConstants;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -59,7 +61,6 @@ public class MessageHandler
             User author = event.getAuthor();
             Message message = event.getMessage();
             List<Message.Attachment> attachments = message.getAttachments();
-            message.delete().queue();
 
 
             attachments.stream()
@@ -87,6 +88,8 @@ public class MessageHandler
 
                                 var urlToSend = "https://pastecord.com/" + sendPost(inputStream);
                                 sentMessage.editMessageFormat("File uploaded for %s [%s] ", event.getAuthor().getAsMention(), urlToSend).queue();
+                                message.delete().queue();
+
                           });
                     });
       }
@@ -94,6 +97,7 @@ public class MessageHandler
 
       private String sendPost(InputStream file)
       {
+
             String url = "";
             Response response = null;
 
@@ -108,8 +112,10 @@ public class MessageHandler
                           .post(body)
                           .build();
 
-
+                  LocalDateTime ldt = LocalDateTime.now();
                   response = client.newCall(request).execute();
+                  LOGGER.debug("Response time to execute: {} ms", Duration.between(ldt, LocalDateTime.now()).toMillis());
+
                   if (!response.isSuccessful())
                   {
                         LOGGER.error("Request not successful. Refer to pastecord or check your connection to it");

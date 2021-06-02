@@ -20,23 +20,23 @@ import java.util.List;
 public class Classroom implements Paginatable
 {
       private String description;
-      private String preReq;
+      private String prerequisite;
       private String instructor;
-      private String classTime;
-      private String classLocation;
-      private String classLevel;
-      private String classRoom;
-      private String className;
+      private String time;
+      private String location;
+      private String level;
+      private String room;
+      private String name;
       private String[] inputClassStartDate;
       private String[] inputClassEndDate;
       private String classIdentifier;
       private String term;
       private String URL;
 
-      private LocalDate classStartDate;
-      private LocalDate classEndDate;
+      private LocalDate startDate;
+      private LocalDate endDate;
 
-      private int classNumber;
+      private int number;
       private int creditAmount;
       private int id;
 
@@ -54,7 +54,7 @@ public class Classroom implements Paginatable
       {
             this.channelID = 0;
             this.roleID = 0;
-            this.preReq = "None";
+            this.prerequisite = "None";
             this.description = "N/A";
             assignments = new ArrayList<>();
       }
@@ -63,7 +63,7 @@ public class Classroom implements Paginatable
       {
             this.channelID = channelID;
             this.roleID = roleID;
-            this.className = name;
+            this.name = name;
       }
 
       public Classroom(int id, String className)
@@ -71,28 +71,28 @@ public class Classroom implements Paginatable
             this.channelID = 0;
             this.roleID = 0;
             this.id = id;
-            this.className = className;
+            this.name = className;
             assignments = new ArrayList<>();
       }
 
 
-      public Classroom(String description, String classTime, String classLocation, String classLevel, String classRoom, String className, String classIdentifier, String term, Date classStartDate, Date classEndDate, int schoolID, int professorID, int classNumber, int id, long roleID, long channelID, long guildID, School school, Professor professor)
+      public Classroom(String description, String time, String location, String classLevel, String room, String className, String classIdentifier, String term, Date startDate, Date endDate, int schoolID, int professorID, int number, int id, long roleID, long channelID, long guildID, School school, Professor professor)
       {
             this.description = description;
-            this.classTime = classTime;
-            this.classLocation = classLocation;
-            this.classLevel = classLevel;
-            this.classRoom = classRoom;
-            this.className = className;
+            this.time = time;
+            this.location = location;
+            this.level = classLevel;
+            this.room = room;
+            this.name = className;
             this.classIdentifier = classIdentifier;
             this.term = term;
-            this.classStartDate = Instant.ofEpochMilli(classStartDate.getTime())
+            this.startDate = Instant.ofEpochMilli(startDate.getTime())
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
-            this.classEndDate = Instant.ofEpochMilli(classEndDate.getTime())
+            this.endDate = Instant.ofEpochMilli(endDate.getTime())
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
-            this.classNumber = classNumber;
+            this.number = number;
             this.id = id;
             this.roleID = roleID;
             this.channelID = channelID;
@@ -126,14 +126,14 @@ public class Classroom implements Paginatable
             return instructor;
       }
 
-      public int getClassNumber()
+      public int getNumber()
       {
-            return classNumber;
+            return number;
       }
 
-      public void setClassNumber(int classNumber)
+      public void setNumber(int number)
       {
-            this.classNumber = classNumber;
+            this.number = number;
       }
 
       public int getCreditAmount()
@@ -181,88 +181,88 @@ public class Classroom implements Paginatable
             this.description = description;
       }
 
-      public String getPreReq()
+      public String getPrerequisite()
       {
-            return preReq;
+            return prerequisite;
       }
 
-      public void setPreReq(String preReq)
+      public void setPrerequisite(String prerequisite)
       {
-            this.preReq = preReq;
+            this.prerequisite = prerequisite;
       }
 
-      public String getClassTime()
+      public String getTime()
       {
-            return classTime;
+            return time;
       }
 
-      public void setClassTime(String classTime)
+      public void setTime(String time)
       {
-            this.classTime = classTime;
+            this.time = time;
       }
 
-      public String getClassLocation()
+      public String getLocation()
       {
-            return classLocation;
+            return location;
       }
 
-      public void setClassLocation(String classLocation)
+      public void setLocation(String location)
       {
-            this.classLocation = classLocation;
+            this.location = location;
       }
 
-      public String getClassLevel()
+      public String getLevel()
       {
-            return classLevel;
+            return level;
       }
 
-      public void setClassLevel(String classLevel)
+      public void setLevel(String level)
       {
-            this.classLevel = classLevel;
+            this.level = level;
       }
 
-      public String getClassRoom()
+      public String getRoom()
       {
-            return classRoom;
+            return room;
       }
 
-      public void setClassRoom(String classRoom)
+      public void setRoom(String room)
       {
-            this.classRoom = classRoom;
+            this.room = room;
       }
 
-      public LocalDate getClassStartDate()
+      public LocalDate getStartDate()
       {
-            return classStartDate;
+            return startDate;
       }
 
-      public void setClassStartDate(java.sql.Date classStartDate)
+      public void setStartDate(java.sql.Date startDate)
       {
-            this.classStartDate = Instant.ofEpochMilli(classStartDate.getTime())
+            this.startDate = Instant.ofEpochMilli(startDate.getTime())
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
       }
 
-      public LocalDate getClassEndDate()
+      public LocalDate getEndDate()
       {
-            return classEndDate;
+            return endDate;
       }
 
-      public void setClassEndDate(java.sql.Date classEndDate)
+      public void setEndDate(java.sql.Date endDate)
       {
-            this.classEndDate = Instant.ofEpochMilli(classEndDate.getTime())
+            this.endDate = Instant.ofEpochMilli(endDate.getTime())
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
       }
 
-      public String getClassName()
+      public String getName()
       {
-            return className;
+            return name;
       }
 
-      public void setClassName(String className)
+      public void setName(String name)
       {
-            this.className = className;
+            this.name = name;
       }
 
       public String getClassIdentifier()
@@ -397,22 +397,38 @@ public class Classroom implements Paginatable
                     .build();
       }
 
+      public Assignment getAssignmentByID(int id)
+      {
+            return assignments
+                    .stream()
+                    .filter(assignment -> assignment.getId() == id)
+                    .findFirst()
+                    .orElse(null);
+      }
+
+      public boolean hasAssignments()
+      {
+            return !this.assignments.isEmpty();
+      }
+
+
       public EmbedBuilder getAsEmbedBuilder(Schoolbot schoolbot)
       {
             Role role = schoolbot.getJda().getRoleById(this.roleID);
             TextChannel textChannel = schoolbot.getJda().getTextChannelById(this.channelID);
 
             return new EmbedBuilder()
-                    .setTitle(this.className + " | (" + this.classIdentifier + ")")
-                    .addField("Class number", String.valueOf(this.classNumber), false)
-                    .addField("Meeting time", this.getClassTime(), false)
+                    .setTitle(this.name + " | (" + this.classIdentifier + ")", URL)
+                    .addField("Class number", String.valueOf(this.number), false)
+                    .addField("Meeting time", this.getTime(), false)
                     .addField("Description", this.description, false)
-                    .addField("Start Date", this.classStartDate == null ? Arrays.toString(this.inputClassStartDate) : this.classStartDate.toString(), false)
-                    .addField("End Date", this.classEndDate == null ? Arrays.toString(this.inputClassEndDate) : this.classEndDate.toString(), false)
+                    .addField("Start Date", this.startDate == null ? Arrays.toString(this.inputClassStartDate) : this.startDate.toString(), false)
+                    .addField("End Date", this.endDate == null ? Arrays.toString(this.inputClassEndDate) : this.endDate.toString(), false)
                     .addField("Class ID", String.valueOf(this.id), false)
                     .addField("Professor", this.professor.getFullName(), false)
                     .addField("Role", role == null ? "N/A" : role.getAsMention(), false)
                     .addField("Text Channel", textChannel == null ? "N/A" : textChannel.getAsMention(), false)
+                    .addField("Assignments Pending", String.valueOf(this.assignments.size()), false)
                     .setColor(role == null ? SchoolbotConstants.DEFAULT_EMBED_COLOR : role.getColor());
       }
 

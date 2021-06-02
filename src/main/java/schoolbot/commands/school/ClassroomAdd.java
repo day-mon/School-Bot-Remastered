@@ -20,11 +20,15 @@ import schoolbot.util.Embed;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 
 public class ClassroomAdd extends Command
 {
+      public static final ExecutorService executorService = Executors.newSingleThreadScheduledExecutor(runnable -> new Thread("StateMachine-Thread"));
+
       public ClassroomAdd(Command parent)
       {
             super(parent, "Adds a class given a target school", "[none]", 0);
@@ -64,16 +68,16 @@ public class ClassroomAdd extends Command
                   this.channelID = event.getChannel().getIdLong();
                   this.authorID = event.getUser().getIdLong();
                   this.commandEvent = event;
-
-
             }
 
             @Override
             public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event)
             {
+
                   if (event.getAuthor().isBot()) return;
                   if (event.getAuthor().getIdLong() != authorID) return;
                   if (event.getChannel().getIdLong() != channelID) return;
+
 
                   Guild guild = event.getGuild();
                   MessageChannel channel = event.getChannel();
@@ -81,7 +85,7 @@ public class ClassroomAdd extends Command
                   List<School> cachedSchools = commandEvent.getGuildSchools();
                   List<School> pittSchools = commandEvent.getGuildSchools()
                           .stream()
-                          .filter(School::getIsPittSchool)
+                          .filter(School::isPittSchool)
                           .collect(Collectors.toList());
                   JDA jda = event.getJDA();
 
@@ -132,6 +136,7 @@ public class ClassroomAdd extends Command
                                     else if (pittSchools.size() == 1)
                                     {
                                           School school = pittSchools.get(0);
+                                          this.schoolClass.setSchool(school);
                                           event.getChannel().sendMessage(school.getAsEmbed(commandEvent.getSchoolbot())).queue();
                                           event.getChannel().sendMessage(school.getName() + " has automatically been selected because it is the only school available").queue();
                                           channel.sendMessage("""

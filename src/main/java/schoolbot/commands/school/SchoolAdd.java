@@ -36,7 +36,8 @@ public class SchoolAdd extends Command
 
       public SchoolAdd(Command parent)
       {
-            super(parent, "Adds a school to the server", "[school name] [school email suffix] [school reference]", 1);
+            super(parent, "Adds a school to the server", "[school name]", 1);
+            addUsageExample("school add \"University of Pittsburgh\"");
             addPermissions(Permission.ADMINISTRATOR);
             addSelfPermissions(Permission.MANAGE_ROLES);
             addFlags(CommandFlag.DATABASE);

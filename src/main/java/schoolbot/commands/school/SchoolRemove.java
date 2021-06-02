@@ -43,9 +43,11 @@ public class SchoolRemove extends Command
             }
             else if (schools.size() == 1)
             {
-                  event.sendMessage(schools.get(0).getAsEmbed(event.getSchoolbot()));
+                  School school = schools.get(0);
+
+                  event.sendMessage(school.getAsEmbed(event.getSchoolbot()));
                   event.sendMessage("This is the only school available to delete would you like to delete it?");
-                  event.getJDA().addEventListener(new SchoolRemoveStateMachine(event, schools, 2));
+                  event.getJDA().addEventListener(new SchoolRemoveStateMachine(event, school, 2));
                   return;
             }
 
@@ -58,7 +60,7 @@ public class SchoolRemove extends Command
       public static class SchoolRemoveStateMachine extends ListenerAdapter
       {
             private final long channelId, authorId;
-            private final List<School> schools;
+            private List<School> schools;
             private int state = 1;
             private final CommandEvent commandEvent;
             private School schoolRemoving;
@@ -68,6 +70,15 @@ public class SchoolRemove extends Command
                   this.authorId = event.getUser().getIdLong();
                   this.channelId = event.getChannel().getIdLong();
                   this.schools = school;
+                  this.state = stateToSwitch;
+                  this.commandEvent = event;
+            }
+
+            public SchoolRemoveStateMachine(CommandEvent event, School school, int stateToSwitch)
+            {
+                  this.authorId = event.getUser().getIdLong();
+                  this.channelId = event.getChannel().getIdLong();
+                  this.schoolRemoving = school;
                   this.state = stateToSwitch;
                   this.commandEvent = event;
             }

@@ -83,7 +83,15 @@ public class Professor implements Paginatable
 
       public void setFirstName(String firstName)
       {
-            this.firstName = firstName;
+            if (this.lastName != null)
+            {
+                  this.firstName = firstName;
+                  this.fullName = this.firstName + " " + this.lastName;
+            }
+            else
+            {
+                  this.firstName = firstName;
+            }
       }
 
       public int getID()
@@ -98,7 +106,15 @@ public class Professor implements Paginatable
 
       public void setLastName(String lastName)
       {
-            this.lastName = lastName;
+            if (this.firstName != null)
+            {
+                  this.lastName = lastName;
+                  this.fullName = this.firstName + " " + this.lastName;
+            }
+            else
+            {
+                  this.lastName = lastName;
+            }
       }
 
 

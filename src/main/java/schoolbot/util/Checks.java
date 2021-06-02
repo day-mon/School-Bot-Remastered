@@ -46,7 +46,7 @@ public class Checks
       {
             if (!potDate.contains("/")) return false;
 
-            LocalDate ld = null;
+            LocalDate ld;
 
             try
             {
@@ -54,6 +54,21 @@ public class Checks
                   ld = LocalDate.parse(potDate, DateTimeFormatter.ofPattern("M/d/yyyy"));
                   return ld.isAfter(LocalDate.now()) || ld.isEqual(LocalDate.now());
                   // return ld.isAfter(classroom.getClassStartDate()) && ld.isBefore(classroom.getClassEndDate()); commented out because other things arent implemented yet
+            }
+            catch (Exception e)
+            {
+                  e.printStackTrace();
+                  return false;
+            }
+      }
+
+      public static boolean checkValidDate(String potentialDate)
+      {
+            LocalDate ld;
+            try
+            {
+                  ld = LocalDate.parse(potentialDate, DateTimeFormatter.ofPattern("M/d/yyyy"));
+                  return true;
             }
             catch (Exception e)
             {

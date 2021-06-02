@@ -55,7 +55,6 @@ public class ClassroomRemove extends Command
                           .filter(classroom -> classroom.getAssignments().isEmpty())
                           .collect(Collectors.toList());
 
-
                   if (classrooms.isEmpty())
                   {
                         Embed.error(event, "There are no classes are available to remove");
@@ -67,17 +66,13 @@ public class ClassroomRemove extends Command
                         event.sendMessage("Are you sure you want to remove this class?");
                         event.getJDA().addEventListener(new ClassroomRemoveStateMachine(event, classrooms.get(0), 3));
                         return;
-
                   }
                   else
                   {
                         event.sendMessage("What class would you like to remove?");
                         event.getAsPaginatorWithPageNumbers(classrooms);
                         event.getJDA().addEventListener(new ClassroomRemoveStateMachine(event, classrooms, schools, 2));
-
                   }
-
-
             }
             else
             {
@@ -135,7 +130,6 @@ public class ClassroomRemove extends Command
                         return;
                   }
 
-
                   switch (state)
                   {
                         case 1 -> {
@@ -185,7 +179,7 @@ public class ClassroomRemove extends Command
                               this.classroom = classroomList.get(index);
 
 
-                              channel.sendMessageFormat("Are you sure you want to remove ** %s **", this.classroom.getClassName()).queue();
+                              channel.sendMessageFormat("Are you sure you want to remove ** %s **", this.classroom.getName()).queue();
                               state = 3;
                         }
 
@@ -193,7 +187,7 @@ public class ClassroomRemove extends Command
                               if (message.equalsIgnoreCase("yes") || message.equalsIgnoreCase("y"))
                               {
                                     commandEvent.removeClass(commandEvent, this.classroom);
-                                    Embed.success(event, "Removed [** %s **] successfully", this.classroom.getClassName());
+                                    Embed.success(event, "Removed [** %s **] successfully", this.classroom.getName());
                                     event.getJDA().removeEventListener(this);
                               }
                               else if (message.equalsIgnoreCase("no") || message.equalsIgnoreCase("n") || message.equalsIgnoreCase("nah"))

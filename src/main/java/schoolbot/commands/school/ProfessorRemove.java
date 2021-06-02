@@ -54,9 +54,10 @@ public class ProfessorRemove extends Command
 
                   if (professorList.size() == 1)
                   {
-                        event.sendMessage(professorList.get(0).getAsEmbed(event.getSchoolbot()));
+                        Professor professor = professorList.get(0);
+                        event.sendMessage(professor.getAsEmbed(event.getSchoolbot()));
                         event.sendMessage("This is the only professor would you like to delete?");
-                        event.getJDA().addEventListener(new ProfessorRemoveStateMachine(event, schoolList, professorList, 4));
+                        event.getJDA().addEventListener(new ProfessorRemoveStateMachine(event, professor, 4));
                   }
                   else
                   {
@@ -79,7 +80,7 @@ public class ProfessorRemove extends Command
       {
             private final long authorID, channelID;
             private final CommandEvent commandEvent;
-            private final List<School> schoolList;
+            private List<School> schoolList;
             private School school;
             private Professor professor;
             private List<Professor> professorList;
@@ -91,6 +92,15 @@ public class ProfessorRemove extends Command
                   this.commandEvent = commandEvent;
                   this.schoolList = school;
                   this.professorList = professorList;
+                  this.state = state;
+                  this.channelID = commandEvent.getChannel().getIdLong();
+                  this.authorID = commandEvent.getUser().getIdLong();
+            }
+
+            public ProfessorRemoveStateMachine(CommandEvent commandEvent, Professor professor, int state)
+            {
+                  this.commandEvent = commandEvent;
+                  this.professor = professor;
                   this.state = state;
                   this.channelID = commandEvent.getChannel().getIdLong();
                   this.authorID = commandEvent.getUser().getIdLong();

@@ -52,13 +52,13 @@ public class AssignmentRemove extends Command
                   event.sendMessage("""
                           ** %s ** has been selected because it you sent it from this channel
                           Please give me the name of the assignment!
-                          """, classroom.getClassName());
+                          """, classroom.getName());
 
                   assignmentList = classroom.getAssignments();
 
                   if (assignmentList.isEmpty())
                   {
-                        Embed.error(event, "** %s ** has no assignments.", classroom.getClassName());
+                        Embed.error(event, "** %s ** has no assignments.", classroom.getName());
                         return;
                   }
                   else if (assignmentList.size() == 1)
@@ -123,7 +123,7 @@ public class AssignmentRemove extends Command
 
                               if (assignmentList.isEmpty())
                               {
-                                    Embed.error(event, "** %s ** has no assignments.", classroom.getClassName());
+                                    Embed.error(event, "** %s ** has no assignments.", classroom.getName());
                                     return;
                               }
                               else if (assignmentList.size() == 1)
@@ -240,7 +240,7 @@ public class AssignmentRemove extends Command
                               }
                               else if (classroomList.size() == 1)
                               {
-                                    Embed.success(event, "** %s ** has been selected automatically because you only have one class associated with you!", classroomList.get(0).getClassName());
+                                    Embed.success(event, "** %s ** has been selected automatically because you only have one class associated with you!", classroomList.get(0).getName());
                                     channel.sendMessageFormat("""
                                                 
                                             """, Emoji.SMILEY_FACE.getAsChat()
@@ -272,12 +272,12 @@ public class AssignmentRemove extends Command
                               }
                               this.classroom = classroomList.get(index);
 
-                              Embed.success(event, "** %s ** has successfully been selected", this.classroom.getClassName());
+                              Embed.success(event, "** %s ** has successfully been selected", this.classroom.getName());
 
                               this.assignmentList = classroom.getAssignments();
                               if (assignmentList.isEmpty())
                               {
-                                    Embed.error(event, "** %s ** has no assignments.", classroom.getClassName());
+                                    Embed.error(event, "** %s ** has no assignments.", classroom.getName());
                                     return;
                               }
                               else if (assignmentList.size() == 1)

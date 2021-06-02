@@ -1,8 +1,8 @@
 package schoolbot.objects.command;
 
-import com.github.ygimenez.method.Pages;
-import com.github.ygimenez.model.Page;
-import me.arynxd.button_pagination.ButtonPaginator;
+
+import me.arynxd.button_utils.builder.pagination.StandardPaginatorBuilder;
+import me.arynxd.button_utils.pagination.Paginator;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -158,7 +158,7 @@ public class CommandEvent
             {
                   embeds.add(obj.getAsEmbed(schoolbot));
             }
-            ButtonPaginator paginator = new ButtonPaginator.Builder()
+            Paginator paginator = new StandardPaginatorBuilder()
                     .setWaiter(this.getSchoolbot().getEventWaiter())
                     .setEmbeds(embeds)
                     .setJDA(event.getJDA())
@@ -171,16 +171,17 @@ public class CommandEvent
 
       public void getAsPaginatorWithEmbeds(List<MessageEmbed> embeds)
       {
-            ButtonPaginator paginator = new ButtonPaginator.Builder()
-                    .setWaiter(this.getSchoolbot().getEventWaiter())
+
+            Paginator paginator = new StandardPaginatorBuilder()
+                    .setWaiter(this.schoolbot.getEventWaiter())
                     .setEmbeds(embeds)
                     .setJDA(this.getJDA())
-                    .setTimeout(30)
+                    .setTimeout(60)
                     .setChannel(event.getChannel())
-                    .setPredicate(eve -> eve.getMember().getIdLong() == this.getMember().getIdLong())
+                    .setPredicate(event -> event.getMember().getIdLong() == this.getMember().getIdLong())
                     .build();
             paginator.paginate();
-            this.sendSelfDeletingMessage("`Timeout is set to 30 seconds`");
+            this.sendSelfDeletingMessage("`Timeout is set to 1 minute`");
       }
 
 
@@ -203,11 +204,12 @@ public class CommandEvent
                           .build()
                   );
             }
-            ButtonPaginator paginator = new ButtonPaginator.Builder()
+
+            System.out.println(embeds.size());
+            Paginator paginator = new StandardPaginatorBuilder()
                     .setWaiter(this.getSchoolbot().getEventWaiter())
                     .setEmbeds(embeds)
                     .setJDA(this.getJDA())
-                    .setTimeout(30)
                     .setChannel(event.getChannel())
                     .setPredicate(eve -> eve.getMember().getIdLong() == this.getMember().getIdLong())
                     .build();
@@ -219,14 +221,19 @@ public class CommandEvent
 
       public void getProfessorsAsPaginator(School school)
       {
-            List<Page> pages = schoolbot.getWrapperHandler().getProfessorsAsPaginator(this, school);
+            List<MessageEmbed> embeds = schoolbot.getWrapperHandler().getProfessorsAsPaginator(this, school);
 
-            getChannel().sendMessage(
-                    (MessageEmbed)
-                            pages.get(0).getContent()
-            ).queue(success ->
-                    Pages.paginate(success, pages)
-            );
+
+            Paginator paginator = new StandardPaginatorBuilder()
+                    .setWaiter(this.getSchoolbot().getEventWaiter())
+                    .setEmbeds(embeds)
+                    .setJDA(this.getJDA())
+                    .setTimeout(30)
+                    .setChannel(event.getChannel())
+                    .setPredicate(eve -> eve.getMember().getIdLong() == this.getMember().getIdLong())
+                    .build();
+            paginator.paginate();
+            this.sendSelfDeletingMessage("`Timeout is set to 30 seconds`");
       }
 
 
@@ -261,6 +268,15 @@ public class CommandEvent
             schoolbot.getWrapperHandler().updateSchool(event, schoolUpdateDTO);
       }
 
+      public void updateProfessor(CommandEvent event, DatabaseDTO professorUpdate)
+      {
+            schoolbot.getWrapperHandler().updateProfessor(event, professorUpdate);
+      }
+
+      public void updateAssignment(CommandEvent event, DatabaseDTO assignmentUpdate)
+      {
+            schoolbot.getWrapperHandler().updateAssignment(event, assignmentUpdate);
+      }
 
       public School getSchool(CommandEvent event, String schoolName)
       {

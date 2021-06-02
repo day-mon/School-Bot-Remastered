@@ -105,6 +105,7 @@ public class SchoolEdit extends Command
                               if (!Checks.isNumber(message))
                               {
                                     Embed.notANumberError(event, message);
+                                    return;
                               }
 
                               int index = Integer.parseInt(message);
@@ -112,9 +113,10 @@ public class SchoolEdit extends Command
                               if (!Checks.between(index, schoolList.size()))
                               {
                                     Embed.error(event, "%d is not between 1 - %d. Try again", index, schoolList.size());
+                                    return;
                               }
 
-                              school = schoolList.get(index);
+                              school = schoolList.get(index - 1);
 
                               channel.sendMessage(school.getAsEmbed(commandEvent.getSchoolbot())).queue();
                               channel.sendMessageFormat("** %s ** has been selected, Would you like to continue?", school.getName()).queue();
@@ -167,6 +169,12 @@ public class SchoolEdit extends Command
                   MessageChannel channel = event.getChannel();
                   if (content.contains("1") || content.contains("name"))
                   {
+
+                        if (school.isPittSchool())
+                        {
+                              Embed.error(event, "** %s ** You cannot edit the name of a pitt school", school.getName());
+                              return;
+                        }
                         updateColumn = "name";
                         channel.sendMessage("Please send me the name you would like the school to be").queue();
                   }
@@ -210,6 +218,7 @@ public class SchoolEdit extends Command
                                     Embed.error(event, "** %s ** already exist as a school.. Please try again with a different name");
                                     return;
                               }
+
                               commandEvent.updateSchool(commandEvent, new DatabaseDTO(school, updateColumn, message));
                         }
                         case "url" -> {

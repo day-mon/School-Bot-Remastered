@@ -13,6 +13,7 @@ import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;
 import schoolbot.util.DatabaseUtil;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -104,10 +105,101 @@ public class GuildWrapper
                         schoolList.get(schoolName).setURL(email);
                   }
             }
-
             DatabaseUtil.updateSchool(schoolUpdateDTO, event.getSchoolbot());
+      }
+
+      public void updateAssignment(CommandEvent event, DatabaseDTO assignmentDTO)
+      {
+            String update = assignmentDTO.updateColumn();
+            Assignment assignment = (Assignment) assignmentDTO.obj();
+            School school = assignment.getClassroom().getSchool();
+            String schoolName = school.getName().toLowerCase();
+            Classroom classroom = assignment.getClassroom();
+
+
+            switch (update)
+            {
+                  case "name" -> {
+                        String updatedElement = (String) assignmentDTO.value();
+
+                        schoolList.get(schoolName)
+                                .getClassroomByID(classroom.getId())
+                                .getAssignmentByID(assignment.getId())
+                                .setName(updatedElement);
+                  }
+
+                  case "description" -> {
+                        String updatedElement = (String) assignmentDTO.value();
+
+                        schoolList.get(schoolName)
+                                .getClassroomByID(classroom.getId())
+                                .getAssignmentByID(assignment.getId())
+                                .setDescription(updatedElement);
+                  }
+
+                  case "points_possible" -> {
+                        int updatedElement = (Integer) assignmentDTO.value();
+
+                        schoolList.get(schoolName)
+                                .getClassroomByID(classroom.getId())
+                                .getAssignmentByID(assignment.getId())
+                                .setPoints(updatedElement);
+                  }
+
+                  case "type" -> {
+                        Assignment.AssignmentType type = (Assignment.AssignmentType) assignmentDTO.value();
+
+                        schoolList.get(schoolName)
+                                .getClassroomByID(classroom.getId())
+                                .getAssignmentByID(assignment.getId())
+                                .setType(type);
+                  }
+
+                  case "due_date" -> {
+                        LocalDateTime ldt = (LocalDateTime) assignmentDTO.value();
+                        schoolList.get(schoolName)
+                                .getClassroomByID(classroom.getId())
+                                .getAssignmentByID(assignment.getId())
+                                .setDueDate(ldt);
+                  }
+            }
+
+            DatabaseUtil.updateAssignment(assignmentDTO, event.getSchoolbot());
 
       }
+
+
+      public void updateProfessor(CommandEvent event, DatabaseDTO databaseDTO)
+      {
+            String update = databaseDTO.updateColumn();
+            Professor professor = (Professor) databaseDTO.obj();
+            School school = professor.getProfessorsSchool();
+            String schoolName = school.getName().toLowerCase();
+
+            String updatedElement = (String) databaseDTO.value();
+
+            switch (update)
+            {
+                  case "first_name" -> {
+                        schoolList.get(schoolName)
+                                .getProfessorByID(professor.getID())
+                                .setFirstName(updatedElement);
+                  }
+                  case "last_name" -> {
+                        schoolList.get(schoolName)
+                                .getProfessorByID(professor.getID())
+                                .setLastName(updatedElement);
+                  }
+                  case "email_prefix" -> {
+                        schoolList.get(schoolName)
+                                .getProfessorByID(professor.getID())
+                                .setEmailPrefix(updatedElement);
+                  }
+            }
+
+            DatabaseUtil.updateProfessor(databaseDTO, event.getSchoolbot());
+      }
+
 
       public void removeSchool(Schoolbot schoolbot, School school)
       {
@@ -170,9 +262,9 @@ public class GuildWrapper
                   if (event.getJDA().getRoleById(classroom.getRoleID()) != null)
                   {
                         event.getJDA().getRoleById(classroom.getRoleID()).delete().queue(success ->
-                                        LOGGER.info("Successfully deleted role for {}", classroom.getClassName()),
+                                        LOGGER.info("Successfully deleted role for {}", classroom.getName()),
                                 failure ->
-                                        LOGGER.warn("Could not delete role for {} ", classroom.getClassName(), failure)
+                                        LOGGER.warn("Could not delete role for {} ", classroom.getName(), failure)
                         );
                   }
             }
@@ -183,9 +275,9 @@ public class GuildWrapper
                   {
                         event.getJDA().getTextChannelById(classroom.getChannelID()).delete().queue(
                                 success ->
-                                        LOGGER.info("Successfully deleted channel for {}", classroom.getClassName()),
+                                        LOGGER.info("Successfully deleted channel for {}", classroom.getName()),
                                 failure ->
-                                        LOGGER.warn("Could nto delete class for {} ", classroom.getClassName(), failure)
+                                        LOGGER.warn("Could nto delete class for {} ", classroom.getName(), failure)
                         );
                   }
             }

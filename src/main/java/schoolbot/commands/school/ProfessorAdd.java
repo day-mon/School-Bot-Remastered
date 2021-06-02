@@ -1,7 +1,6 @@
 package schoolbot.commands.school;
 
-import com.github.ygimenez.model.Page;
-import com.github.ygimenez.type.PageType;
+
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -15,7 +14,6 @@ import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
 import schoolbot.util.Embed;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ProfessorAdd extends Command
@@ -154,24 +152,5 @@ public class ProfessorAdd extends Command
                   int schoolListSize = schools.size();
                   return (schoolListSize >= 1 && schoolListSize <= maxValueInclusive);
             }
-
-            private List<Page> paginate(Schoolbot schoolbot, List<School> list)
-            {
-                  List<Page> pages = new ArrayList<>();
-                  int i = 1;
-
-                  for (School school : list)
-                  {
-                        pages.add(new Page(PageType.EMBED,
-                                school.getAsEmbedBuilder(schoolbot)
-                                        .setFooter("Page " + i++ + "/" + list.size())
-                                        .build()
-                        ));
-                  }
-
-                  return pages;
-            }
-
-
       }
 }

@@ -27,7 +27,7 @@ public class Assignment implements Comparable<Assignment>, Paginatable
 
       private LocalDateTime dueDate;
 
-      private AssignmentType assignmentType;
+      private AssignmentType type;
       private Classroom classroom;
 
 
@@ -36,7 +36,7 @@ public class Assignment implements Comparable<Assignment>, Paginatable
 
       }
 
-      public Assignment(String name, String description, int points, int professorID, int id, String assignmentType, Timestamp timestamp, Classroom classroom)
+      public Assignment(String name, String description, int points, int professorID, int id, String type, Timestamp timestamp, Classroom classroom)
       {
             this.name = name;
             this.description = description;
@@ -44,8 +44,8 @@ public class Assignment implements Comparable<Assignment>, Paginatable
             this.professorID = professorID;
             this.id = id;
             this.dueDate = timestamp.toLocalDateTime();
-            this.assignmentType =
-                    switch (assignmentType)
+            this.type =
+                    switch (type)
                             {
                                   case "Exam":
                                         yield AssignmentType.EXAM;
@@ -61,14 +61,14 @@ public class Assignment implements Comparable<Assignment>, Paginatable
             this.classroom = classroom;
       }
 
-      public AssignmentType getAssignmentType()
+      public AssignmentType getType()
       {
-            return assignmentType;
+            return type;
       }
 
-      public void setAssignmentType(AssignmentType assignmentType)
+      public void setType(AssignmentType type)
       {
-            this.assignmentType = assignmentType;
+            this.type = type;
       }
 
 
@@ -165,13 +165,13 @@ public class Assignment implements Comparable<Assignment>, Paginatable
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Assignment that = (Assignment) o;
-            return points == that.points && professorID == that.professorID && id == that.id && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(dueDate, that.dueDate) && assignmentType == that.assignmentType;
+            return points == that.points && professorID == that.professorID && id == that.id && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(dueDate, that.dueDate) && type == that.type;
       }
 
       @Override
       public int hashCode()
       {
-            return Objects.hash(name, description, points, professorID, id, dueDate, assignmentType);
+            return Objects.hash(name, description, points, professorID, id, dueDate, type);
       }
 
       @Override
@@ -184,7 +184,7 @@ public class Assignment implements Comparable<Assignment>, Paginatable
                    ", professorID=" + professorID +
                    ", id=" + id +
                    ", dueDate=" + dueDate +
-                   ", assignmentType=" + assignmentType +
+                   ", assignmentType=" + type +
                    '}';
       }
 
@@ -202,9 +202,9 @@ public class Assignment implements Comparable<Assignment>, Paginatable
             return new EmbedBuilder()
                     .setTitle(this.name)
                     .addField("Description", this.description, false)
-                    .addField("Type", assignmentType.getAssignmentType(), false)
+                    .addField("Type", type.getAssignmentType(), false)
                     .addField("Points", String.valueOf(this.points), false)
-                    .addField("Class", classroom.getClassName(), false)
+                    .addField("Class", classroom.getName(), false)
                     .addField("Due Date", this.dueDate.format(DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm")), false)
                     .setColor(role == null ? SchoolbotConstants.DEFAULT_EMBED_COLOR : role.getColor())
                     .setTimestamp(Instant.now());

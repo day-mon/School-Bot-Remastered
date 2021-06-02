@@ -69,10 +69,10 @@ public class Parser
             Map<DayOfWeek, LocalDateTime> stuff = parseTime(classroom, time);
 
 
-            LocalDate ld = classroom.getClassStartDate().isBefore(LocalDate.now()) ? LocalDate.now() : classroom.getClassStartDate();
+            LocalDate ld = classroom.getStartDate().isBefore(LocalDate.now()) ? LocalDate.now() : classroom.getStartDate();
 
             // Could speed this up by only jumping to valid days
-            for (; ld.isBefore(classroom.getClassEndDate()); ld = ld.plusDays(1))
+            for (; ld.isBefore(classroom.getEndDate()); ld = ld.plusDays(1))
             {
                   if (ld.isAfter(LocalDate.now()))
                   {
@@ -128,13 +128,11 @@ public class Parser
                   minute = Integer.parseInt(classTimeSplit[1].replaceAll("pm", ""));
             }
 
-
             for (String sd : daysSplit)
             {
                   if (stringDayOfWeekMap.containsKey(sd))
                   {
-
-                        s.put(stringDayOfWeekMap.get(sd), LocalDateTime.of(classroom.getClassStartDate(), LocalTime.of(hour, minute)));
+                        s.put(stringDayOfWeekMap.get(sd), LocalDateTime.of(classroom.getStartDate(), LocalTime.of(hour, minute)));
                   }
             }
             return s;

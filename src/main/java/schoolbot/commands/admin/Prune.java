@@ -40,9 +40,10 @@ public class Prune extends Command
                           event.getChannel().purgeMessages(messagesToDelete);
 
                           return messagesToDelete.size();
-                    }).whenCompleteAsync((messageTotal, throwable) -> event.getChannel().sendMessage(
-                    Emoji.RECYCLE.getAsChat() + " Successfully purged `" + messageTotal + "` messages"
-            ).queue(botMessage -> botMessage.delete().queueAfter(5, TimeUnit.SECONDS)));
+                    })
+                    .whenCompleteAsync((messageTotal, throwable) -> event.getChannel().sendMessage(
+                            Emoji.RECYCLE.getAsChat() + " Successfully purged `" + messageTotal + "` messages"
+                    ).queue(botMessage -> botMessage.delete().queueAfter(5, TimeUnit.SECONDS)));
 
       }
 }

@@ -1,8 +1,6 @@
 package schoolbot.commands.school.pitt;
 
-import com.github.ygimenez.method.Pages;
-import com.github.ygimenez.model.Page;
-import com.github.ygimenez.type.PageType;
+
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.jetbrains.annotations.NotNull;
@@ -122,15 +120,7 @@ public class Laundry extends Command
             }
 
 
-            ArrayList<Page> pages = new ArrayList<>();
-
-            for (MessageEmbed em : embeds)
-            {
-                  pages.add(new Page(PageType.EMBED, em));
-            }
-
-            event.getChannel().sendMessage((MessageEmbed) pages.get(0).getContent()).queue(success ->
-                    Pages.paginate(success, pages));
+            event.getAsPaginatorWithEmbeds(embeds);
 
 
       }

@@ -14,6 +14,7 @@ public class ListClasses extends Command
       {
             super("", "", 1);
             addCalls("classes", "classlist");
+            addUsageExample("classes \" University of Pittsburgh \"");
       }
 
 

@@ -32,13 +32,14 @@ public class Schoolbot extends ListenerAdapter
       private final DatabaseHandler databaseHandler;
       private final MessageHandler messageHandler;
       private final WrapperHandler wrapperHandler;
-      private final ReminderHandler reminderHandler;
       private final Logger LOGGER;
 
+      private ReminderHandler reminderHandler;
       private JDA jda;
 
       public Schoolbot()
       {
+            this.botStartTime = LocalDateTime.now();
             this.LOGGER = LoggerFactory.getLogger(Schoolbot.class);
             this.messageHandler = new MessageHandler(this);
             this.eventWaiter = new EventWaiter();
@@ -46,8 +47,6 @@ public class Schoolbot extends ListenerAdapter
             this.wrapperHandler = new WrapperHandler(this);
             this.commandHandler = new CommandHandler(this);
             this.databaseHandler = new DatabaseHandler(this);
-            this.reminderHandler = new ReminderHandler(this);
-            this.botStartTime = LocalDateTime.now();
       }
 
       public void build() throws LoginException, InterruptedException
@@ -80,6 +79,8 @@ public class Schoolbot extends ListenerAdapter
       @Override
       public void onReady(@Nonnull ReadyEvent event)
       {
+            this.reminderHandler = new ReminderHandler(this);
+
             getJda().getPresence().setPresence(OnlineStatus.ONLINE, Activity.streaming("Prefix: " + SchoolbotConstants.DEFAULT_PREFIX, "https://www.youtube.com/watch?v=Lju6h-C37hE"));
             LOGGER.info("Account:           " + event.getJDA().getSelfUser());
             LOGGER.info("Java Version:      " + SystemInfo.getJavaVersion());
