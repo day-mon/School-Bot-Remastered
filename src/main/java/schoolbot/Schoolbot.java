@@ -60,6 +60,8 @@ public class Schoolbot extends ListenerAdapter
                             GatewayIntent.DIRECT_MESSAGES,
                             GatewayIntent.DIRECT_MESSAGE_REACTIONS,
 
+                            GatewayIntent.GUILD_MEMBERS,
+
                             GatewayIntent.GUILD_MESSAGES,
                             GatewayIntent.GUILD_MESSAGE_REACTIONS,
                             GatewayIntent.GUILD_VOICE_STATES
@@ -81,7 +83,7 @@ public class Schoolbot extends ListenerAdapter
       {
             this.reminderHandler = new ReminderHandler(this);
 
-            getJda().getPresence().setPresence(OnlineStatus.ONLINE, Activity.streaming("Prefix: " + SchoolbotConstants.DEFAULT_PREFIX, "https://www.youtube.com/watch?v=Lju6h-C37hE"));
+            getJda().getPresence().setPresence(OnlineStatus.ONLINE, Activity.streaming("Prefix: " + Constants.DEFAULT_PREFIX, "https://www.youtube.com/watch?v=Lju6h-C37hE"));
             LOGGER.info("Account:           " + event.getJDA().getSelfUser());
             LOGGER.info("Java Version:      " + SystemInfo.getJavaVersion());
             LOGGER.info("JDA Version:       " + JDAInfo.VERSION);

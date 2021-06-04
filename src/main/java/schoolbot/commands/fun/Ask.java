@@ -1,4 +1,4 @@
-package schoolbot.commands.misc;
+package schoolbot.commands.fun;
 
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;

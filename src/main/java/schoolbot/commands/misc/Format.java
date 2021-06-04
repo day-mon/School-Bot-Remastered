@@ -2,7 +2,7 @@ package schoolbot.commands.misc;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import org.jetbrains.annotations.NotNull;
-import schoolbot.SchoolbotConstants;
+import schoolbot.Constants;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 
@@ -24,7 +24,7 @@ public class Format extends Command
             event.sendMessage(new EmbedBuilder()
                     .setDescription("""
                             Surround code with:
-                                \\`\\`\\` language 
+                                \\`\\`\\` language
                             Person p = new Person(); \\`\\`\\` 
                             This should display: 
                             ```java
@@ -33,7 +33,7 @@ public class Format extends Command
                                                     
                             This character can be found at the top left of your keyboard!
                             """)
-                    .setColor(SchoolbotConstants.DEFAULT_EMBED_COLOR));
+                    .setColor(Constants.DEFAULT_EMBED_COLOR));
 
 
 /*
@@ -45,7 +45,7 @@ public class Format extends Command
                         "\n Replace 'language' with the alphabetic character (in lower case) of another language. For example: C++ -> cpp, Python -> python or  py " +
                         "\n\n This character can be found at the top left of your keyboard")
 
-                .setColor(SchoolbotConstants.DEFAULT_EMBED_COLOR));
+                .setColor(Constants.DEFAULT_EMBED_COLOR));
 
 
          */

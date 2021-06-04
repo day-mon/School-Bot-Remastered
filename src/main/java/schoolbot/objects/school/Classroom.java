@@ -4,8 +4,8 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
+import schoolbot.Constants;
 import schoolbot.Schoolbot;
-import schoolbot.SchoolbotConstants;
 import schoolbot.objects.misc.Paginatable;
 import schoolbot.util.DatabaseUtil;
 
@@ -429,7 +429,6 @@ public class Classroom implements Paginatable
                     .addField("Role", role == null ? "N/A" : role.getAsMention(), false)
                     .addField("Text Channel", textChannel == null ? "N/A" : textChannel.getAsMention(), false)
                     .addField("Assignments Pending", String.valueOf(this.assignments.size()), false)
-                    .setColor(role == null ? SchoolbotConstants.DEFAULT_EMBED_COLOR : role.getColor());
+                    .setColor(role == null ? Constants.DEFAULT_EMBED_COLOR : role.getColor());
       }
-
 }

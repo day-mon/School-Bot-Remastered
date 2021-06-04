@@ -13,8 +13,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import schoolbot.Constants;
 import schoolbot.Schoolbot;
-import schoolbot.SchoolbotConstants;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
@@ -222,7 +222,7 @@ public class SchoolAdd extends Command
                           .addField("Email Suffix", schoolDomains.toString(), false)
                           .addField("Country", country, false)
                           .addField("School #", String.valueOf(i + 1), false)
-                          .setColor(SchoolbotConstants.DEFAULT_EMBED_COLOR)
+                          .setColor(Constants.DEFAULT_EMBED_COLOR)
                           .setFooter("Big thanks to https://github.com/Hipo/university-domains-list-api")
                           .setTimestamp(Instant.now())
                           .build()

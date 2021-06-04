@@ -8,6 +8,8 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.misc.DatabaseDTO;
@@ -21,11 +23,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class AssignmentEdit extends Command
 {
+      Logger LOGGER = LoggerFactory.getLogger(this.getClass());
       public AssignmentEdit(Command parent)
       {
             super(parent, "Edits an assignment", "[none]", 0);
@@ -37,36 +40,46 @@ public class AssignmentEdit extends Command
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
             JDA jda = event.getJDA();
-            List<School> schools = event.getGuildSchools()
-                    .stream()
-                    .filter(school -> school.getClassroomList()
-                            .stream()
-                            .anyMatch(Classroom::hasAssignments))
-                    .collect(Collectors.toList());
 
-            if (schools.isEmpty())
+            List<School> schoolList = new ArrayList<>();
+            for (School school : event.getGuildSchools())
+            {
+                  List<Classroom> classroomList = new ArrayList<>();
+                  for (Classroom classroom : school.getClassroomList())
+                  {
+                        if (classroom.hasAssignments())
+                        {
+                              classroomList.add(classroom);
+                        }
+                  }
+                  school.setClassroomList(classroomList);
+                  schoolList.add(school);
+            }
+
+
+            if (schoolList.isEmpty())
             {
                   Embed.error(event, "** %s ** has no classes with assignments in them", event.getGuild().getName());
                   return;
             }
 
-            if (schools.size() == 1)
+            if (schoolList.size() == 1)
             {
-                  School school = schools.get(0);
+                  School school = schoolList.get(0);
 
                   evaluateClassroom(event, school.getClassroomList());
                   return;
             }
 
-            if (schools.size() > 1)
+            if (schoolList.size() > 1)
             {
-                  event.getAsPaginatorWithPageNumbers(schools);
+                  event.getAsPaginatorWithPageNumbers(schoolList);
                   event.sendMessage("What school would you like to edit an assignment in...");
-                  jda.addEventListener(new AssignmentEditStateMachine(event, schools, null, null, 1));
+                  jda.addEventListener(new AssignmentEditStateMachine(event, schoolList, null, null, 1));
                   return;
             }
 
-            School school = schools.get(0);
+            School school = schoolList.get(0);
 
             evaluateClassroom(event, school.getClassroomList());
       }
@@ -84,14 +97,23 @@ public class AssignmentEdit extends Command
                   if (assignments.size() == 1)
                   {
                         Assignment assignment = classroom.getAssignments().get(0);
-                        event.sendMessage("** %s ** has been chosen its the only assignment..", assignment.getName());
+                        event.sendMessage("** %s ** has been chosen its the only assignment. What would you like to edit?", assignment.getName());
+                        event.sendMessage("""
+                                ```
+                                1. Name
+                                2. Description
+                                3. Point Amount
+                                4. Type
+                                5. Due Date
+                                6. Due Time```
+                                 """);
                         jda.addEventListener(new AssignmentEditStateMachine(event, assignment));
                   }
                   else
                   {
                         event.getAsPaginatorWithPageNumbers(assignments);
                         event.sendMessage("Please give me the page number of the assignment you want to edit");
-                        jda.addEventListener(new AssignmentEditStateMachine(event, null, classroomList, assignments, 0));
+                        jda.addEventListener(new AssignmentEditStateMachine(event, null, classroomList, assignments, 3));
 
                   }
             }
@@ -105,7 +127,7 @@ public class AssignmentEdit extends Command
       }
 
 
-      public class AssignmentEditStateMachine extends ListenerAdapter
+      public static class AssignmentEditStateMachine extends ListenerAdapter
       {
 
             private final CommandEvent commandEvent;
@@ -113,8 +135,6 @@ public class AssignmentEdit extends Command
             private List<School> schools;
             private List<Classroom> classroomList;
             private List<Assignment> assignmentList;
-            private School school;
-            private Classroom classroom;
             private Assignment assignment;
             private int state;
             private String updateColumn;
@@ -125,6 +145,7 @@ public class AssignmentEdit extends Command
                   this.authorID = event.getUser().getIdLong();
                   this.channelID = event.getChannel().getIdLong();
                   this.assignment = assignment;
+                  this.state = 4;
             }
 
             public AssignmentEditStateMachine(@NotNull CommandEvent event, @Nullable List<School> schoolList,
@@ -146,6 +167,7 @@ public class AssignmentEdit extends Command
             {
                   if (event.getAuthor().getIdLong() != authorID) return;
                   if (event.getChannel().getIdLong() != channelID) return;
+
 
                   MessageChannel channel = event.getChannel();
                   String message = event.getMessage().getContentRaw();
@@ -180,7 +202,7 @@ public class AssignmentEdit extends Command
                                     return;
                               }
 
-                              school = schools.get(pageNumber - 1);
+                              School school = schools.get(pageNumber - 1);
                               classroomList = school.getClassroomList();
                               channel.sendMessageFormat("Now that we have selected ** %s **, I will now need the class you want to the assignment", school.getName()).queue();
                               commandEvent.getAsPaginatorWithPageNumbers(school.getClassroomList());
@@ -206,7 +228,7 @@ public class AssignmentEdit extends Command
                                     return;
                               }
 
-                              classroom = classroomList.get(pageNumber - 1);
+                              Classroom classroom = classroomList.get(pageNumber - 1);
                               this.assignmentList = classroom.getAssignments();
                               channel.sendMessageFormat("Now that we have selected ** %s **, I will now need the assignment you would like to edit", classroom.getName()).queue();
                               commandEvent.getAsPaginatorWithPageNumbers(assignmentList);
@@ -310,6 +332,7 @@ public class AssignmentEdit extends Command
 
                         case 5 -> {
                               evaluateUpdate(commandEvent, message);
+                              commandEvent.sendMessage(assignment.getAsEmbed(commandEvent.getSchoolbot()));
                         }
                   }
             }
@@ -322,7 +345,7 @@ public class AssignmentEdit extends Command
                   {
                         case "name", "description" -> {
                               commandEvent.updateAssignment(commandEvent, new DatabaseDTO(assignment, updateColumn, message));
-                              event.sendMessage(message.equals("name") ? "Name" : "Description" + " successfully changed to %s", message);
+                              event.sendMessage(updateColumn.equals("name") ? "Name" : "Description" + " successfully changed to %s", message);
 
                         }
 
@@ -384,7 +407,7 @@ public class AssignmentEdit extends Command
                         }
 
 
-                        // TODO: Add some date checks and remove old reminders n such
+                        // TODO: Add some date checks and remoqve old reminders n such
                         case "due_datet" -> {
                               updateColumn = updateColumn.substring(0, updateColumn.lastIndexOf("t"));
 

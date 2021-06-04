@@ -11,7 +11,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import org.jetbrains.annotations.NotNull;
-import schoolbot.SchoolbotConstants;
+import schoolbot.Constants;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.util.Checks;
@@ -74,7 +74,7 @@ public class Clear extends Command
                         prompt.addReaction("\u274E").queue(); // X-Mark.
 
                         event.getSchoolbot().getEventWaiter().waitForEvent(MessageReactionAddEvent.class, reactionEvent -> reactionEvent.getMessageIdLong() == prompt.getIdLong()
-                                                                                                                           && Objects.equals(reactionEvent.getUser(), author) || Objects.equals(reactionEvent.getUser().getId(), SchoolbotConstants.GENIUS_OWNER_ID), reactionEvent ->
+                                                                                                                           && Objects.equals(reactionEvent.getUser(), author) || Objects.equals(reactionEvent.getUser().getId(), Constants.GENIUS_OWNER_ID), reactionEvent ->
                         {
 
                               switch (reactionEvent.getReaction().getReactionEmote().getName())

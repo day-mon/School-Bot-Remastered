@@ -1,4 +1,4 @@
-package schoolbot.commands.misc;
+package schoolbot.commands.info;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDAInfo;
@@ -10,13 +10,13 @@ import schoolbot.objects.info.SystemInfo;
 import java.lang.management.ManagementFactory;
 import java.util.List;
 
-public class Info extends Command
+public class BotInfo extends Command
 {
 
-      public Info()
+      public BotInfo()
       {
-            super("info", "Shows some bot info", 0);
-            addCalls("info");
+            super("BotInfo", "Shows some bot info", 0);
+            addCalls("botinfo", "binfo");
       }
 
       @Override
@@ -24,6 +24,7 @@ public class Info extends Command
       {
             var runtime = Runtime.getRuntime();
             var jda = event.getJDA();
+
 
             event.getChannel().sendMessage(
                     new EmbedBuilder()
@@ -35,6 +36,10 @@ public class Info extends Command
 
                             .addField("Memory Usage:", ((runtime.totalMemory() - runtime.freeMemory()) >> 20) + "MB / " + (runtime.maxMemory() >> 20) + "MB", true)
                             .addField("Thread Count:", String.valueOf(ManagementFactory.getThreadMXBean().getThreadCount()), true)
+                            .addBlankField(true)
+
+
+                            .addField("Guild Count:", String.valueOf(jda.getGuildCache().size()), true)
                             .addBlankField(true)
                             .build()
             ).queue();

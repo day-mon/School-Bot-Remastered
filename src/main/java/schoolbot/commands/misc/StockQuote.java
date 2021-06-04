@@ -6,6 +6,7 @@ import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.util.Checks;
 import schoolbot.util.Embed;
+import schoolbot.util.StringUtils;
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
 
@@ -59,12 +60,12 @@ public class StockQuote extends Command
                     .addField("Normal Trading Data", "", false)
                     .addField("Price", "$" + stockQuote.getPrice().toPlainString(), false)
                     .addField("Today's Change", stockQuote.getChange().toPlainString() + "$", false)
-                    .addField("Average Volume", String.valueOf(stockQuote.getAvgVolume()), false)
-                    .addField("Previous Close", stockQuote.getPreviousClose().toPlainString(), false)
-                    .addField("Market Cap", stock.getStats().getMarketCap().toPlainString(), false)
-                    .addField("52 Week High", stockQuote.getYearHigh().toPlainString(), false)
+                    .addField("Average Volume", StringUtils.parseNumberWithCommas(stockQuote.getAvgVolume()), false)
+                    .addField("Previous Close", StringUtils.parseNumberWithCommas(stockQuote.getPreviousClose()), false)
+                    .addField("Market Cap", StringUtils.parseNumberWithCommas(stock.getStats().getMarketCap()), false)
+                    .addField("52 Week High", StringUtils.parseNumberWithCommas(stockQuote.getYearHigh()), false)
                     .addField("52 Week Low", stockQuote.getYearLow().toPlainString(), false)
-                    .addField("52 Week Change (High)", stockQuote.getChangeFromYearHighInPercent().toPlainString(), false)
+                    .addField("52 Week Change (High)", stockQuote.getChangeFromYearHigh().toPlainString() + "$", false)
             );
       }
 }

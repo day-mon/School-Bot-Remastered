@@ -485,7 +485,17 @@ public class DatabaseUtil
             {
                   PreparedStatement preparedStatement = connection.prepareStatement("UPDATE assignments SET " + assignmentUpdateDTO.updateColumn() + "= ? WHERE id=?");
                   Assignment assignment = (Assignment) assignmentUpdateDTO.obj();
-                  preparedStatement.setObject(1, assignmentUpdateDTO.value());
+                  if (assignmentUpdateDTO.value() instanceof Assignment.AssignmentType)
+                  {
+                        String type = ((Assignment.AssignmentType) assignmentUpdateDTO.value()).getAssignmentType();
+                        preparedStatement.setString(1, type);
+
+                  }
+                  else
+                  {
+                        preparedStatement.setObject(1, assignmentUpdateDTO.value());
+
+                  }
                   preparedStatement.setInt(2, assignment.getId());
                   preparedStatement.execute();
 

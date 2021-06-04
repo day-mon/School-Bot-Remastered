@@ -7,8 +7,8 @@ import okhttp3.*;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import schoolbot.Constants;
 import schoolbot.Schoolbot;
-import schoolbot.SchoolbotConstants;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -46,7 +46,7 @@ public class MessageHandler
                   handleFile(event);
             }
 
-            if (!messageStr.startsWith(SchoolbotConstants.DEFAULT_PREFIX))
+            if (!messageStr.startsWith(Constants.DEFAULT_PREFIX))
             {
                   return;
             }

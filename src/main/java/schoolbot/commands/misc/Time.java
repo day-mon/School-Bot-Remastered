@@ -2,7 +2,7 @@ package schoolbot.commands.misc;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import org.jetbrains.annotations.NotNull;
-import schoolbot.SchoolbotConstants;
+import schoolbot.Constants;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.util.Embed;
@@ -29,7 +29,7 @@ public class Time extends Command
             {
                   event.sendMessage(new EmbedBuilder()
                           .setDescription(new SimpleDateFormat().format(new Date()))
-                          .setColor(SchoolbotConstants.DEFAULT_EMBED_COLOR));
+                          .setColor(Constants.DEFAULT_EMBED_COLOR));
             }
             else
             {

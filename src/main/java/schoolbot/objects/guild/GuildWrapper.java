@@ -286,7 +286,7 @@ public class GuildWrapper
             DatabaseUtil.removeClassroom(event, classroom);
       }
 
-      public List<Classroom> getAllClasses(CommandEvent event)
+      public List<Classroom> getAllClasses()
       {
             return classrooms;
       }

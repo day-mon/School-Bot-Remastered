@@ -6,8 +6,8 @@ import io.github.classgraph.ScanResult;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import schoolbot.Constants;
 import schoolbot.Schoolbot;
-import schoolbot.SchoolbotConstants;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.util.Embed;
@@ -95,12 +95,12 @@ public class CommandHandler
 
             String message = event.getMessage().getContentRaw();
 
-            if (!message.startsWith(SchoolbotConstants.DEFAULT_PREFIX))
+            if (!message.startsWith(Constants.DEFAULT_PREFIX))
             {
                   return;
             }
 
-            message = message.substring(SchoolbotConstants.DEFAULT_PREFIX.length());
+            message = message.substring(Constants.DEFAULT_PREFIX.length());
 
 
             List<String> filteredArgs = Parser.args(message)
@@ -116,7 +116,7 @@ public class CommandHandler
 
             String alias = filteredArgs.get(0).toLowerCase();
 
-            if (alias.isBlank() || alias.startsWith(SchoolbotConstants.DEFAULT_PREFIX))
+            if (alias.isBlank() || alias.startsWith(Constants.DEFAULT_PREFIX))
             {
                   return;
             }
@@ -145,7 +145,7 @@ public class CommandHandler
             filteredArgs.remove(0);
 
 
-            CommandEvent commandEvent = new CommandEvent(event, com, filteredArgs, schoolbot);
+            CommandEvent commandEvent = new CommandEvent(event, com, filteredArgs, schoolbot, executor);
 
 
             // If someone sends a parent command or doesnt have any children
@@ -160,7 +160,7 @@ public class CommandHandler
                     .filter(child -> child.getName().split(child.getParent().getName())[1].equalsIgnoreCase(filteredArgs.get(0)))
                     .findFirst()
                     .ifPresentOrElse(
-                            child -> executor.execute(() -> child.process(new CommandEvent(event, child, filteredArgs.subList(1, filteredArgs.size()), schoolbot))),
+                            child -> executor.execute(() -> child.process(new CommandEvent(event, child, filteredArgs.subList(1, filteredArgs.size()), schoolbot, executor))),
                             () -> executor.execute(() -> com.process(commandEvent))
                     );
       }

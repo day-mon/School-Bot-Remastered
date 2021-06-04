@@ -57,7 +57,7 @@
         <dependency>
             <groupId>com.github.arynxd</groupId>
             <artifactId>button-pagination</artifactId>
-            <version>bc4174864e</version>
+            <version>master-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.jsoup</groupId>
@@ -130,7 +130,6 @@
             <artifactId>classgraph</artifactId>
             <version>4.8.107</version>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -150,7 +149,7 @@
                     <transformers>
                         <transformer
                                 implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>schoolbot.Main</mainClass>
+                            <mainClass>src.main.java.schoolbot.Main</mainClass>
                             <!-- You have to replace this with a path to your main class like my.path.Main -->
                         </transformer>
                     </transformers>

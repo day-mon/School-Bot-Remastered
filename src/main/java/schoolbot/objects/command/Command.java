@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.entities.Member;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import schoolbot.SchoolbotConstants;
+import schoolbot.Constants;
 import schoolbot.handlers.CommandCooldownHandler;
 import schoolbot.util.Embed;
 
@@ -239,7 +239,7 @@ public abstract class Command
                     .addField("Syntax", "`" + this.syntax + "`", false)
                     .addField("Usage Example",
                             this.usageExample.equalsIgnoreCase("N/A") ?
-                                    "`" + this.usageExample + "`" : "`" + SchoolbotConstants.DEFAULT_PREFIX + this.usageExample + "`", false)
+                                    "`" + this.usageExample + "`" : "`" + Constants.DEFAULT_PREFIX + this.usageExample + "`", false)
                     .addField("Aliases", (this.isChild()) ? String.valueOf(this.parent.getCalls()) : String.valueOf(this.calls), false)
                     .setColor(Color.BLACK)
                     .setFooter("[] = Required | <> = Optional");

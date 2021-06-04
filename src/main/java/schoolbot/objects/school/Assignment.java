@@ -5,8 +5,8 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import org.jetbrains.annotations.NotNull;
+import schoolbot.Constants;
 import schoolbot.Schoolbot;
-import schoolbot.SchoolbotConstants;
 import schoolbot.objects.misc.Paginatable;
 
 import java.sql.Timestamp;
@@ -206,7 +206,7 @@ public class Assignment implements Comparable<Assignment>, Paginatable
                     .addField("Points", String.valueOf(this.points), false)
                     .addField("Class", classroom.getName(), false)
                     .addField("Due Date", this.dueDate.format(DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm")), false)
-                    .setColor(role == null ? SchoolbotConstants.DEFAULT_EMBED_COLOR : role.getColor())
+                    .setColor(role == null ? Constants.DEFAULT_EMBED_COLOR : role.getColor())
                     .setTimestamp(Instant.now());
 
       }

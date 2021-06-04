@@ -1,8 +1,8 @@
-package schoolbot.commands.misc;
+package schoolbot.commands.info;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import org.jetbrains.annotations.NotNull;
-import schoolbot.SchoolbotConstants;
+import schoolbot.Constants;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 
@@ -30,6 +30,6 @@ public class Uptime extends Command
                             " hours, " + timeBetween.toMinutesPart() +
                             " minutes, " + timeBetween.toSecondsPart() +
                             " seconds.")
-                    .setColor(SchoolbotConstants.DEFAULT_EMBED_COLOR));
+                    .setColor(Constants.DEFAULT_EMBED_COLOR));
       }
 }

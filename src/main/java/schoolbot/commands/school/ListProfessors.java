@@ -34,7 +34,6 @@ public class ListProfessors extends Command
             if (schools.isEmpty())
             {
                   Embed.error(event, "** %s ** has no schools..", event.getGuild().getName());
-                  return;
             }
             else if (schools.size() == 1)
             {

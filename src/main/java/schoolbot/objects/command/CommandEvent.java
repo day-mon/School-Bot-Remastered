@@ -10,8 +10,8 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import schoolbot.Constants;
 import schoolbot.Schoolbot;
-import schoolbot.SchoolbotConstants;
 import schoolbot.objects.misc.DatabaseDTO;
 import schoolbot.objects.misc.Paginatable;
 import schoolbot.objects.school.Assignment;
@@ -23,6 +23,7 @@ import java.awt.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class CommandEvent
@@ -32,13 +33,15 @@ public class CommandEvent
       private final Schoolbot schoolbot;
       private final Command command;
       private final List<String> args;
+      private final ExecutorService commandThreadPool;
 
-      public CommandEvent(GuildMessageReceivedEvent event, Command command, List<String> args, Schoolbot schoolbot)
+      public CommandEvent(GuildMessageReceivedEvent event, Command command, List<String> args, Schoolbot schoolbot, ExecutorService commandThreadPool)
       {
             this.event = event;
             this.command = command;
             this.args = args;
             this.schoolbot = schoolbot;
+            this.commandThreadPool = commandThreadPool;
       }
 
       public GuildMessageReceivedEvent getEvent()
@@ -69,6 +72,11 @@ public class CommandEvent
       public TextChannel getTextChannel()
       {
             return event.getChannel();
+      }
+
+      public ExecutorService getCommandThreadPool()
+      {
+            return commandThreadPool;
       }
 
       public User getUser()
@@ -130,7 +138,7 @@ public class CommandEvent
       public void sendMessage(EmbedBuilder embedBuilder)
       {
             getChannel().sendMessage(
-                    embedBuilder.setColor(SchoolbotConstants.DEFAULT_EMBED_COLOR)
+                    embedBuilder.setColor(Constants.DEFAULT_EMBED_COLOR)
                             .setTimestamp(Instant.now()).build())
                     .queue();
       }
@@ -171,7 +179,6 @@ public class CommandEvent
 
       public void getAsPaginatorWithEmbeds(List<MessageEmbed> embeds)
       {
-
             Paginator paginator = new StandardPaginatorBuilder()
                     .setWaiter(this.schoolbot.getEventWaiter())
                     .setEmbeds(embeds)
@@ -223,7 +230,6 @@ public class CommandEvent
       {
             List<MessageEmbed> embeds = schoolbot.getWrapperHandler().getProfessorsAsPaginator(this, school);
 
-
             Paginator paginator = new StandardPaginatorBuilder()
                     .setWaiter(this.getSchoolbot().getEventWaiter())
                     .setEmbeds(embeds)
@@ -247,6 +253,10 @@ public class CommandEvent
             return schoolbot.getWrapperHandler().getSchools(this);
       }
 
+      /**
+       * @param School Name
+       * @return List of Professors within the school
+       */
       public List<Professor> getSchoolsProfessors(String schoolName)
       {
             return schoolbot.getWrapperHandler().getProfessors(this, schoolName);
@@ -327,7 +337,7 @@ public class CommandEvent
 
       public boolean isDeveloper()
       {
-            return event.getAuthor().getIdLong() == SchoolbotConstants.GENIUS_OWNER_ID;
+            return event.getAuthor().getIdLong() == Constants.GENIUS_OWNER_ID;
       }
 
 

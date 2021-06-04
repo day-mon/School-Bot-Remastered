@@ -7,9 +7,8 @@ import net.dv8tion.jda.api.entities.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-import org.slf4j.Logger;
+import schoolbot.Constants;
 import schoolbot.Schoolbot;
-import schoolbot.SchoolbotConstants;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.misc.Emoji;
 import schoolbot.objects.misc.Paginatable;
@@ -23,8 +22,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
 
 public class School implements Paginatable
 {
@@ -35,7 +33,7 @@ public class School implements Paginatable
       private long roleID;
       private int id;
       private boolean isPittSchool;
-      private final List<Classroom> classroomList;
+      private List<Classroom> classroomList;
       private final List<Professor> professorList;
 
 
@@ -118,6 +116,53 @@ public class School implements Paginatable
             classroomList.add(classroom);
       }
 
+      private static int evaluateConstraints(Guild guild, Classroom classroom, Document document)
+      {
+
+            if (guild.getRoles().size() == Constants.MAX_GUILD_ROLE_COUNT)
+            {
+                  return 1;
+            }
+
+            if (guild.getTextChannels().size() == Constants.MAX_GUILD_TEXTCHANNEL_COUNT)
+            {
+                  return 2;
+            }
+
+            if (document.text().contains("Unexpected error occurred."))
+            {
+                  return 3;
+            }
+
+
+            // The class name will always be the primary head so we can just automatically it will be a list(0)
+            String className = document.getElementsByClass("primary-head").get(0).text();
+            classroom.setName(className);
+
+            if (className.length() >= 100)
+            {
+                  return 4;
+            }
+
+
+            boolean duplicateClass = classroom.getSchool().getClassroomList()
+                    .stream()
+                    .anyMatch(classrooms ->
+                            className.equalsIgnoreCase(classrooms.getName())
+                            &&
+                            classroom.getTerm().equalsIgnoreCase(classrooms.getTerm())
+                            &&
+                            classroom.getNumber() == classrooms.getNumber());
+
+            if (duplicateClass)
+            {
+                  return 5;
+            }
+
+            return -1;
+
+      }
+
       public void addProfessor(Professor professor)
       {
             professorList.add(professor);
@@ -149,7 +194,6 @@ public class School implements Paginatable
       }
 
 
-
       public void setGuildID(long guildID)
       {
             this.guildID = guildID;
@@ -166,6 +210,7 @@ public class School implements Paginatable
       {
             return classroomList;
       }
+
 
       public int getClassesSize()
       {
@@ -208,6 +253,115 @@ public class School implements Paginatable
                     .build();
       }
 
+      private static void initDate(Classroom classroom, String date)
+      {
+            String[] dates = date.split("-");
+            String[] start = dates[0].trim().split("/");
+            String[] end = dates[1].trim().split("/");
+
+            int sYear = Integer.parseInt(start[2]);
+            int sMonth = Integer.parseInt(start[0]);
+            int sDay = Integer.parseInt(start[1]);
+
+
+            int eYear = Integer.parseInt(end[2]);
+            int eMonth = Integer.parseInt(end[0]);
+            int eDay = Integer.parseInt(end[1]);
+
+            classroom.setStartDate(Date.valueOf(LocalDate.of(sYear, sMonth, sDay)));
+            classroom.setEndDate(Date.valueOf(LocalDate.of(eYear, eMonth, eDay)));
+      }
+
+
+      public void setURL(String URL)
+      {
+            this.URL = URL;
+      }
+
+      private static void evaluateInstructor(CommandEvent event, Classroom classroom, String text)
+      {
+            String name = classroom.getSchool().getName();
+
+            event.getSchoolsProfessors(name)
+                    .stream()
+                    .filter(professor ->
+                    {
+                          if (professor.getFirstName().equalsIgnoreCase("Staff") && text.toLowerCase().contains("staff"))
+                          {
+                                return true;
+                          }
+
+                          String firstAndLast = professor.getFirstName() + " " + professor.getLastName();
+
+                          return firstAndLast.equalsIgnoreCase(text);
+                    })
+                    .findFirst().map(professor ->
+            {
+                  classroom.setInstructor(text);
+                  classroom.setProfessor(professor);
+                  return professor;
+
+            }).orElseGet(() ->
+            {
+                  event.getChannel().sendMessage("This professor has not been found in my database for this server... adding him now!").queue();
+                  int length = text.split("\\s+").length;
+
+                  String firstName = text.split("\\s+")[0];
+                  String lastName = (length < 2) ? "Unknown" : text.split("\\s+")[1];
+
+
+                  Professor prof = new Professor(
+                          firstName,
+                          lastName,
+                          classroom.getSchool()
+                  );
+
+                  if (!event.addProfessor(event, prof))
+                  {
+                        removeSequence(event, classroom);
+                        return null;
+                  }
+                  classroom.setProfessor(prof);
+                  return prof;
+            });
+      }
+
+      private static boolean evaluateCampus(Classroom classroom, String campus)
+      {
+            int length = classroom.getSchool().getName().split("\\s").length;
+            String classCampus = classroom.getSchool().getName().split("\\s+")[length - 1];
+            // This may seem confusing me a class can have more than one campus so I am just going to grab the first 1
+            String classesCampus = classCampus.split("\\s+")[0];
+
+            if (!campus.toLowerCase().contains(classesCampus.toLowerCase()))
+            {
+                  return false;
+            }
+
+            if (classroom.getLocation() == null)
+            {
+                  classroom.setLocation(classCampus);
+            }
+            return true;
+
+      }
+
+      private static void removeSequence(CommandEvent event, Classroom classroom)
+      {
+            var guild = event.getGuild();
+
+            guild.getRoleById(classroom.getRoleID()).delete().queue();
+
+            event.removeProfessor(event, classroom.getProfessor());
+            event.getGuild().getRoleById(classroom.getRoleID()).delete().queue();
+            event.getGuild().getTextChannelById(classroom.getChannelID()).delete().queue();
+      }
+
+      public void setClassroomList(List<Classroom> classroomList)
+      {
+            this.classroomList = classroomList;
+      }
+
       public EmbedBuilder getAsEmbedBuilder(Schoolbot schoolbot)
       {
             Role role = schoolbot.getJda().getRoleById(this.roleID);
@@ -219,270 +373,156 @@ public class School implements Paginatable
                     .addField("Amount of Classes", String.valueOf(this.classroomList.size()), false)
                     .addField("Amount of Professors", String.valueOf(this.professorList.size()), false)
                     .addField("School ID", String.valueOf(id), false)
-                    .setColor(role == null ? SchoolbotConstants.DEFAULT_EMBED_COLOR : role.getColor())
+                    .setColor(role == null ? Constants.DEFAULT_EMBED_COLOR : role.getColor())
                     .setTimestamp(Instant.now());
-      }
-
-
-      public void setURL(String URL)
-      {
-            this.URL = URL;
       }
 
       public void addPittClass(CommandEvent event, Classroom schoolClass)
       {
+            String save = "";
+            MessageChannel channel = event.getChannel();
+            Document document;
+            Guild guild = event.getGuild();
 
-            ExecutorService executorService = Executors.newSingleThreadScheduledExecutor(runnable -> new Thread("StateMachine-Thread"));
-
-            executorService.execute(() ->
+            try
             {
+                  document = Jsoup.connect(schoolClass.getURL()).get();
+            }
+            catch (Exception e)
+            {
+                  Embed.error(event, "Could not connect to Peoplesoft.. Try again later!");
+                  e.printStackTrace();
+                  return;
+            }
 
-                  String save = "";
-                  Logger LOGGER = event.getSchoolbot().getLogger();
-                  MessageChannel channel = event.getChannel();
-                  Document document = null;
-                  Guild guild = event.getGuild();
 
-                  try
-                  {
-                        document = Jsoup.connect(schoolClass.getURL()).get();
-                  }
-                  catch (Exception e)
-                  {
-                        Embed.error(event, "Could not connect to Peoplesoft.. Try again later!", e);
-                        e.printStackTrace();
+            var evaluateErrors = evaluateConstraints(guild, schoolClass, document);
+
+            switch (evaluateErrors)
+            {
+                  case 1 -> {
+                        Embed.error(event, "Cannot create a role because your server is already at capacity");
                         return;
                   }
-
-                  if (document.text().contains("Unexpected error occurred."))
-                  {
+                  case 2 -> {
+                        Embed.error(event, "Cannot create text channel because you are at capacity");
+                        return;
+                  }
+                  case 3 -> {
                         Embed.error(event, "Class information not found.");
                         return;
                   }
-
-                  LOGGER.info("THREAD CHECK");
-                  LOGGER.info("THREAD CHECK");
-                  LOGGER.info("THREAD CHECK");
-                  LOGGER.info("THREAD CHECK");
-                  LOGGER.info("THREAD CHECK");
-                  LOGGER.info("THREAD CHECK");
-
-
-                  // The class name will always be the primary head so we can just automatically it will be a list(0)
-                  String className = document.getElementsByClass("primary-head").get(0).text();
-                  schoolClass.setName(className);
-
-
-                  // Check if class already exist just in case...
-                  boolean duplicateClass = schoolClass.getSchool().getClassroomList()
-                          .stream()
-                          .anyMatch(classroom ->
-                                  className.equalsIgnoreCase(classroom.getName())
-                                  && classroom.getTerm().equalsIgnoreCase(schoolClass.getTerm()));
-
-
-                  if (duplicateClass)
-                  {
+                  case 4 -> {
+                        Embed.error(event, "Class name has a name longer than 100 characters.. Please add the class manually");
+                        return;
+                  }
+                  case 5 -> {
                         Embed.error(event, "This class already exist for ** %s **", schoolClass.getSchoolWithoutID().getName());
                         return;
                   }
 
-                  // All Elements on left side of class page
-                  Elements elementsLeft = document.getElementsByClass("pull-left");
-
-                  // All Elements on right side of class page
-                  Elements elementsRight = document.getElementsByClass("pull-right");
-
-                  // Identifier for class Ex: CS 0015, COMP 101;
-                  String[] identifier = document.getElementsByClass("page-title  with-back-btn").get(0).text().split("\\s");
-
-                  // Parsing the subject and the class number
-                  String subject = identifier[0];
-                  String classNameNum = identifier[identifier.length - 1];
-                  String subjectAndClassNameAndNum = subject + " " + classNameNum;
+            }
 
 
-                  // Setting classname and identifier
-                  schoolClass.setClassIdentifier(subjectAndClassNameAndNum);
+            String className = schoolClass.getName();
 
 
-                  // TODO: when cleaning code up make this a function
+            // All Elements on left side of class page
+            Elements elementsLeft = document.getElementsByClass("pull-left");
 
-                  if (guild.getRoles().size() == SchoolbotConstants.MAX_GUILD_ROLE_COUNT)
+            // All Elements on right side of class page
+            Elements elementsRight = document.getElementsByClass("pull-right");
+
+            // Identifier for class Ex: CS 0015, COMP 101;
+            String[] identifier = document.getElementsByClass("page-title  with-back-btn").get(0).text().split("\\s");
+
+            // Parsing the subject and the class number
+            String subject = identifier[0];
+            String classNameNum = identifier[identifier.length - 1];
+            String subjectAndClassNameAndNum = subject + " " + classNameNum;
+
+            // Setting classname and identifier
+            schoolClass.setClassIdentifier(subjectAndClassNameAndNum);
+
+            Role role = guild.createRole()
+                    .setName(className.toLowerCase().replaceAll("\\s", "-"))
+                    .setColor(new Random().nextInt(0xFFFFFF))
+                    .complete();
+
+            // Makes channel only viewable by the role that was just created
+            TextChannel textChannel = guild.createTextChannel(className)
+                    .addRolePermissionOverride(role.getIdLong(), Permission.ALL_GUILD_PERMISSIONS, 0L)
+                    .addRolePermissionOverride(event.getGuild().getIdLong(), 0L, Permission.ALL_GUILD_PERMISSIONS)
+                    .complete();
+
+            schoolClass.setRoleID(role.getIdLong());
+            schoolClass.setChannelID(textChannel.getIdLong());
+
+            for (int left = 1, right = 2; right <= elementsRight.size() - 1; left++, right++)
+            {
+
+                  // Gotta check if the current tag w e are on is a div because if its not we are not on something we wanna scrape.
+                  while (!elementsRight.get(right).tag().getName().equalsIgnoreCase("div"))
                   {
-                        channel.sendMessage("Cannot create a role because your server is already at capacity").queue();
-                        return;
+                        right++;
                   }
 
-                  if (guild.getTextChannels().size() == SchoolbotConstants.MAX_GUILD_TEXTCHANNEL_COUNT)
+                  // Text on left side of class page (i.e Description, Class Times, etc);
+                  String textLeft = elementsLeft.get(left).text();
+                  // Text on right side of class page (i.e actual data)
+                  String textRight = elementsRight.get(right).text();
+
+
+                  switch (textLeft)
                   {
-                        channel.sendMessage("Cannot create text channel because you are at capacity").queue();
-                        return;
-                  }
-
-                  if (className.length() >= 100)
-                  {
-                        channel.sendMessage("Class name has a name longer than 100 characters.. Please add the class manually").queue();
-                        return;
-                  }
-
-                  Role role = guild.createRole()
-                          .setName(className.toLowerCase().replaceAll("\\s", "-"))
-                          .setColor(new Random().nextInt(0xFFFFFF))
-                          .complete();
-                  TextChannel textChannel = guild.createTextChannel(className)
-                          .addRolePermissionOverride(role.getIdLong(), Permission.ALL_TEXT_PERMISSIONS, 0L)
-                          .removePermissionOverride(guildID)
-                          .complete();
-
-                  schoolClass.setRoleID(role.getIdLong());
-                  schoolClass.setChannelID(textChannel.getIdLong());
-
-                  for (int left = 1, right = 2; right <= elementsRight.size() - 1; left++, right++)
-                  {
-
-                        // Gotta check if the current tag w e are on is a div because if its not we are not on something we wanna scrape.
-                        while (!elementsRight.get(right).tag().getName().equalsIgnoreCase("div"))
-                        {
-                              right++;
+                        case "Career" -> schoolClass.setLevel(textRight);
+                        case "Dates" -> initDate(schoolClass, textRight);
+                        case "Units" -> schoolClass.setCreditAmount(Integer.parseInt(textRight.substring(0, 1)));
+                        case "Description" -> {
+                              String temp = textRight;
+                              if (temp.length() > 1024)
+                              {
+                                    temp = temp.split("\\.")[0] + "....";
+                              }
+                              schoolClass.setDescription(temp);
                         }
+                        case "Enrollment Requirements" -> schoolClass.setPrerequisite(textRight);
+                        case "Instructor(s)" -> evaluateInstructor(event, schoolClass, textRight);
+                        case "Meets" -> {
+                              schoolClass.setTime(textRight);
+                              save = textRight;
+                        }
+                        case "Room" -> schoolClass.setRoom(textRight);
+                        case "Location" -> schoolClass.setLocation(textRight);
+                        case "Campus" -> {
+                              var success = evaluateCampus(schoolClass, textRight);
 
-                        // Text on left side of class page (i.e Description, Class Times, etc);
-                        String textLeft = elementsLeft.get(left).text();
-                        // Text on right side of class page (i.e actual data)
-                        String textRight = elementsRight.get(right).text();
-
-
-                        switch (textLeft)
-                        {
-                              case "Class Number" -> schoolClass.setNumber(Integer.parseInt(textRight));
-                              case "Career" -> schoolClass.setLevel(textRight);
-                              case "Dates" -> {
-                                    String[] dates = textRight.split("-");
-                                    String[] start = dates[0].trim().split("/");
-                                    String[] end = dates[1].trim().split("/");
-
-                                    int sYear = Integer.parseInt(start[2]);
-                                    int sMonth = Integer.parseInt(start[0]);
-                                    int sDay = Integer.parseInt(start[1]);
-
-
-                                    int eYear = Integer.parseInt(end[2]);
-                                    int eMonth = Integer.parseInt(end[0]);
-                                    int eDay = Integer.parseInt(end[1]);
-
-                                    schoolClass.setStartDate(Date.valueOf(LocalDate.of(sYear, sMonth, sDay)));
-                                    schoolClass.setEndDate(Date.valueOf(LocalDate.of(eYear, eMonth, eDay)));
+                              if (!success)
+                              {
+                                    Embed.error(event, "");
+                                    removeSequence(event, schoolClass);
+                                    return;
                               }
-                              case "Units" -> schoolClass.setCreditAmount(Integer.parseInt(textRight.substring(0, 1)));
-                              case "Description" -> {
-                                    String temp = textRight;
-                                    if (temp.length() > 1024)
-                                    {
-                                          temp = temp.split("\\.")[0] + "....";
-                                    }
-                                    schoolClass.setDescription(temp);
-                              }
-                              case "Enrollment Requirements" -> schoolClass.setPrerequisite(textRight);
-                              case "Instructor(s)" -> {
-                                    List<Professor> professorList = event.getSchoolsProfessors(name);
-                                    boolean found = false;
-                                    Professor professorFound = null;
-                                    if (!professorList.isEmpty())
-                                    {
-                                          for (Professor professor : professorList)
-                                          {
-                                                String firstAndLast = professor.getFirstName() + " " + professor.getLastName();
-                                                if (firstAndLast.equalsIgnoreCase(textRight))
-                                                {
-                                                      // Could change the found flag to just if professorFound == null
-                                                      // Clean this up later
-                                                      found = true;
-                                                      schoolClass.setInstructor(textRight);
-                                                      schoolClass.setProfessor(professor);
-                                                      break;
-                                                }
-                                          }
-                                    }
-
-
-                                    if (!found)
-                                    {
-                                          channel.sendMessage("This professor has not been found in my database for this server... adding him now!").queue();
-                                          int length = textRight.split("\\s+").length;
-
-                                          String firstName = textRight.split("\\s+")[0];
-                                          String lastName = (length < 2) ? "Unknown" : textRight.split("\\s+")[1];
-
-
-                                          Professor prof = new Professor(
-                                                  firstName,
-                                                  lastName,
-                                                  schoolClass.getSchool()
-                                          );
-
-                                          if (!event.addProfessor(event, prof))
-                                          {
-                                                Embed.error(event, "Could not add professor. Please try again");
-                                                event.getGuild().getRoleById(schoolClass.getRoleID()).delete().queue();
-                                                event.getGuild().getTextChannelById(schoolClass.getChannelID()).delete().queue();
-                                                return;
-                                          }
-                                          schoolClass.setProfessor(prof);
-
-                                    }
-                              }
-
-                              case "Meets" -> {
-                                    schoolClass.setTime(textRight);
-                                    save = textRight;
-                              }
-                              case "Room" -> schoolClass.setRoom(textRight);
-                              case "Location" -> schoolClass.setLocation(textRight);
-                              case "Campus" -> {
-                                    int length = schoolClass.getSchool().getName().split("\\s").length;
-                                    String campus = schoolClass.getSchool().getName().split("\\s+")[length - 1];
-                                    String classesCampus = textRight.split("\\s+")[0];
-                                    if (!campus.toLowerCase().contains(classesCampus.toLowerCase()))
-                                    {
-                                          event.removeProfessor(event, schoolClass.getProfessor());
-                                          event.getGuild().getRoleById(schoolClass.getRoleID()).delete().queue();
-                                          event.getGuild().getTextChannelById(schoolClass.getChannelID()).delete().queue();
-
-                                          Embed.error(event, """
-                                                  You said you goto the ** %s ** campus this class takes place on the ** %s ** campus\040
-                                                  Professor %s has been removed\040
-                                                  """, campus, classesCampus, schoolClass.getProfessor().getFullName());
-                                          return;
-                                    }
-                                    if (schoolClass.getLocation() == null)
-                                    {
-                                          schoolClass.setLocation(textRight);
-                                    }
-                                    right = elementsRight.size();
-
-                              }
+                              right = elementsRight.size();
                         }
                   }
+            }
 
 
-                  int classCheck = DatabaseUtil.addClassPitt(event, schoolClass);
-                  if (classCheck == -1)
-                  {
-                        Embed.error(event, """
-                                Database failed to add ** %s **
-                                """, schoolClass.getName());
-                        event.removeProfessor(event, schoolClass.getProfessor());
-                        event.getGuild().getRoleById(schoolClass.getRoleID()).delete().queue();
-                        event.getGuild().getTextChannelById(schoolClass.getChannelID()).delete().queue();
-                        return;
-                  }
-                  schoolClass.setId(classCheck);
-                  Parser.classTime(event.getSchoolbot(), save, schoolClass);
-                  this.classroomList.add(schoolClass);
-                  this.professorList.add(schoolClass.getProfessor());
-                  channel.sendMessage(schoolClass.getAsEmbed(event.getSchoolbot())).queue();
-            });
+            int classCheck = DatabaseUtil.addClassPitt(event, schoolClass);
+            if (classCheck == -1)
+            {
+                  Embed.error(event, """
+                          Database failed to add ** %s **
+                          """, schoolClass.getName());
+                  removeSequence(event, schoolClass);
+                  return;
+            }
+            schoolClass.setId(classCheck);
+            Parser.classTime(event.getSchoolbot(), save, schoolClass);
+            this.classroomList.add(schoolClass);
+            this.professorList.add(schoolClass.getProfessor());
+            channel.sendMessage(schoolClass.getAsEmbed(event.getSchoolbot())).queue();
       }
 
 
@@ -529,5 +569,20 @@ public class School implements Paginatable
                     .orElse(null);
       }
 
+      @Override
+      public String toString()
+      {
+            return "School{" +
+                   "name='" + name + '\'' +
+                   ", URL='" + URL + '\'' +
+                   ", emailSuffix='" + emailSuffix + '\'' +
+                   ", guildID=" + guildID +
+                   ", roleID=" + roleID +
+                   ", id=" + id +
+                   ", isPittSchool=" + isPittSchool +
+                   ", classroomList=" + classroomList +
+                   ", professorList=" + professorList +
+                   '}';
+      }
 }
 

@@ -3,7 +3,7 @@ package schoolbot.commands.admin;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import org.jetbrains.annotations.NotNull;
-import schoolbot.SchoolbotConstants;
+import schoolbot.Constants;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.misc.Emoji;
@@ -27,13 +27,15 @@ public class Prune extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
+            var selfUser = event.getJDA().getSelfUser();
+
             event.getTextChannel().getIterableHistory()
                     .takeAsync(100)
                     .thenApplyAsync(messages ->
                     {
                           List<Message> messagesToDelete = messages
                                   .stream()
-                                  .filter(msg -> msg.getContentRaw().startsWith(SchoolbotConstants.DEFAULT_PREFIX) || msg.getAuthor().getId().equals(SchoolbotConstants.GENIUS_ID_STRING))
+                                  .filter(msg -> msg.getContentRaw().startsWith(Constants.DEFAULT_PREFIX) || msg.getAuthor().getIdLong() == selfUser.getIdLong())
                                   .filter(msg -> Duration.between(msg.getTimeCreated(), event.getMessage().getTimeCreated()).toHours() <= 24)
                                   .collect(Collectors.toList());
 

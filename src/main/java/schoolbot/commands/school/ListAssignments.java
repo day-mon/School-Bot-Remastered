@@ -25,7 +25,7 @@ public class ListAssignments extends Command
 
       public ListAssignments()
       {
-            super("description", "syntax", 0);
+            super("List all assignments in a given class", "[none]", 0);
             addCalls("assignments");
       }
 

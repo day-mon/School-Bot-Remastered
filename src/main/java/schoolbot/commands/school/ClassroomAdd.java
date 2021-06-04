@@ -20,14 +20,11 @@ import schoolbot.util.Embed;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 
 public class ClassroomAdd extends Command
 {
-      public static final ExecutorService executorService = Executors.newSingleThreadScheduledExecutor(runnable -> new Thread("StateMachine-Thread"));
 
       public ClassroomAdd(Command parent)
       {
@@ -73,7 +70,6 @@ public class ClassroomAdd extends Command
             @Override
             public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event)
             {
-
                   if (event.getAuthor().isBot()) return;
                   if (event.getAuthor().getIdLong() != authorID) return;
                   if (event.getChannel().getIdLong() != channelID) return;
@@ -214,15 +210,25 @@ public class ClassroomAdd extends Command
                               }
                               schoolClass.setTerm(termFixed(message));
                               CLASS_SEARCH_URL += term + "/";
-                              channel.sendMessage("What is your class #\n Hint: This can normally be found on your syllabus, psmobile or peoplesoft, or in the link of your class ").queue();
+                              channel.sendMessage("""
+                                      What is your class number
+                                      `Hint: This can normally be found on your Syllabus, PsMobile or PeopleSoft, or in the link of your class`
+                                      """).queue();
                               state = 4;
                         }
                         case 4 -> {
+
+                              if (!Checks.isNumber(message))
+                              {
+                                    Embed.notANumberError(event, message);
+                                    return;
+                              }
                               CLASS_SEARCH_URL += message;
 
                               School school = schoolClass.getSchool();
                               schoolClass.setURL(CLASS_SEARCH_URL);
-                              commandEvent.addPittClass(commandEvent, schoolClass);
+                              schoolClass.setNumber(Integer.parseInt(message));
+                              commandEvent.getCommandThreadPool().execute(() -> school.addPittClass(commandEvent, schoolClass));
                               event.getJDA().removeEventListener(this);
                         }
                   }
@@ -279,5 +285,4 @@ public class ClassroomAdd extends Command
 
             return String.valueOf(termCharArr) + " " + term.split("\\s+")[1];
       }
-
 }

@@ -6,6 +6,7 @@ import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.util.Checks;
 import schoolbot.util.Embed;
+import schoolbot.util.StringUtils;
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
 
@@ -51,13 +52,7 @@ public class StockPrice extends Command
             event.sendMessage(
                     new EmbedBuilder()
                             .setTitle(stock.getName())
-                            .setDescription("$" + stock.getQuote().getPrice().toEngineeringString())
+                            .setDescription("$" + StringUtils.parseNumberWithCommas(stock.getQuote().getPrice()))
             );
-
-            {
-                  String s = "s";
-            }
-
-
       }
 }

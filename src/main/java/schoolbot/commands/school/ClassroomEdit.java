@@ -1,5 +1,6 @@
 package schoolbot.commands.school;
 
+import net.dv8tion.jda.api.Permission;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
@@ -11,9 +12,8 @@ public class ClassroomEdit extends Command
 
       public ClassroomEdit(Command parent)
       {
-            super(parent, "", "", 0);
-
-            addUsageExample("N/A");
+            super(parent, "Edits an classroom", "[none]", 0);
+            addPermissions(Permission.ADMINISTRATOR);
       }
 
       @Override

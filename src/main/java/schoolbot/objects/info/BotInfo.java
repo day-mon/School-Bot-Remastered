@@ -1,6 +1,6 @@
 package schoolbot.objects.info;
 
-import schoolbot.SchoolbotConstants;
+import schoolbot.Constants;
 
 public class BotInfo
 {
@@ -15,7 +15,7 @@ public class BotInfo
 
       public static String getSchoolbotVersion()
       {
-            return SchoolbotConstants.VERSION;
+            return Constants.VERSION;
       }
 
 }
