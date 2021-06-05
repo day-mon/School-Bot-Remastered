@@ -125,7 +125,19 @@ public class DatabaseUtil
             }
             catch (Exception e)
             {
-                  e.printStackTrace();
+                  LOGGER.error("Database error has occurred while removing an assignment", e);
+            }
+      }
+
+      public static void removeAssignmentReminderByAssignment(Schoolbot schoolbot, Assignment assignment)
+      {
+            try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
+            {
+                  removeReminderByAssignmentID(connection, assignment.getId());
+            }
+            catch (Exception e)
+            {
+                  LOGGER.error("Database error has occured while  removing an assignment reminder", e);
             }
       }
 

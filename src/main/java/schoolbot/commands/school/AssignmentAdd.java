@@ -71,7 +71,7 @@ public class AssignmentAdd extends Command
                         else
                         {
                               event.sendMessage("Please choose the School ID of the school you want to add the assignment to ");
-                              event.getAsPaginatorWithPageNumbers(schools);
+                              event.sendAsPaginatorWithPageNumbers(schools);
                         }
                   }
                   else
@@ -97,7 +97,7 @@ public class AssignmentAdd extends Command
                         }
                         else
                         {
-                              event.getAsPaginatorWithPageNumbers(classrooms);
+                              event.sendAsPaginatorWithPageNumbers(classrooms);
                               event.sendMessage("Select a class by page number (%d / %d)", 1, classrooms.size());
                         }
                   }

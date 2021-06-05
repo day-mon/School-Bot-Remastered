@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
@@ -70,14 +71,14 @@ public class ClassroomRemove extends Command
                   else
                   {
                         event.sendMessage("What class would you like to remove?");
-                        event.getAsPaginatorWithPageNumbers(classrooms);
+                        event.sendAsPaginatorWithPageNumbers(classrooms);
                         event.getJDA().addEventListener(new ClassroomRemoveStateMachine(event, classrooms, schools, 2));
                   }
             }
             else
             {
                   event.sendMessage("Please tell me the school you want to a class from by the page numbers");
-                  event.getAsPaginatorWithPageNumbers(schools);
+                  event.sendAsPaginatorWithPageNumbers(schools);
                   event.getJDA().addEventListener(new ClassroomRemoveStateMachine(event, null, schools, stateToSwitch));
             }
       }
@@ -91,9 +92,8 @@ public class ClassroomRemove extends Command
             private int state;
             private School school;
             private Classroom classroom;
-            // TODO: come back and fix it so you can use two separate constructors
 
-            public ClassroomRemoveStateMachine(CommandEvent event, List<Classroom> classrooms, List<School> schools, int stateToSwitchTo)
+            public ClassroomRemoveStateMachine(@NotNull CommandEvent event, @Nullable List<Classroom> classrooms, @NotNull List<School> schools, int stateToSwitchTo)
             {
                   this.commandEvent = event;
                   this.schools = schools;
@@ -103,7 +103,7 @@ public class ClassroomRemove extends Command
                   this.classroomList = classrooms;
             }
 
-            public ClassroomRemoveStateMachine(CommandEvent event, Classroom classroom, int stateToSwitchTo)
+            public ClassroomRemoveStateMachine(@NotNull CommandEvent event, @NotNull Classroom classroom, int stateToSwitchTo)
             {
                   this.commandEvent = event;
                   this.classroom = classroom;
@@ -154,7 +154,7 @@ public class ClassroomRemove extends Command
                                     return;
                               }
                               Embed.success(event, "** %s ** has been selected", school.getName());
-                              commandEvent.getAsPaginatorWithPageNumbers(classroomList);
+                              commandEvent.sendAsPaginatorWithPageNumbers(classroomList);
                               Embed.information(commandEvent, "Please select a page number of the class you want to remove");
 
                               state = 2;

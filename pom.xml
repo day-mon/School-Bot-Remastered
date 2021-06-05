@@ -50,9 +50,9 @@
             <version>5.0.0-alpha.2</version>
         </dependency>
         <dependency>
-            <groupId>com.github.DV8FromTheWorld</groupId>
+            <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>5885efc</version>
+            <version>4.2.1_269</version>
         </dependency>
         <dependency>
             <groupId>com.github.arynxd</groupId>

@@ -93,7 +93,7 @@ public class ProfessorAdd extends Command
                                     break;
                               }
                               channel.sendMessage("Moving on.. I will need you professors school.. Here is a list of all this servers schools! ").queue();
-                              commandEvent.getAsPaginatorWithPageNumbers(commandEvent.getGuildSchools());
+                              commandEvent.sendAsPaginatorWithPageNumbers(commandEvent.getGuildSchools());
 
                               state = 2;
                         }
@@ -105,14 +105,15 @@ public class ProfessorAdd extends Command
                                     return;
 
                               }
+                              int index = Integer.parseInt(content) - 1;
 
-                              if (!between(schools.size()))
+
+                              if (!Checks.between(index+1, schools.size()))
                               {
                                     Embed.error(event, "** %s ** is not a valid number please choose a number between %d - %d ", content, 1, schools.size());
                                     return;
                               }
 
-                              int index = Integer.parseInt(content) - 1;
 
                               professor.setProfessorsSchool(schools.get(index));
                               channel.sendMessage("""
@@ -146,11 +147,5 @@ public class ProfessorAdd extends Command
                   }
             }
 
-            //TODO: Speed running right now will clean this to just check the School List size
-            private boolean between(int maxValueInclusive)
-            {
-                  int schoolListSize = schools.size();
-                  return (schoolListSize >= 1 && schoolListSize <= maxValueInclusive);
-            }
       }
 }

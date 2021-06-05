@@ -61,7 +61,7 @@ public class ProfessorRemove extends Command
                   }
                   else
                   {
-                        event.getAsPaginatorWithPageNumbers(professorList);
+                        event.sendAsPaginatorWithPageNumbers(professorList);
                         event.sendMessage("Please choose the page number of the professor you would like to remove");
                         event.getJDA().addEventListener(new ProfessorRemoveStateMachine(event, schoolList, professorList, 3));
                   }
@@ -69,7 +69,7 @@ public class ProfessorRemove extends Command
             }
             else
             {
-                  event.getAsPaginatorWithPageNumbers(schoolList);
+                  event.sendAsPaginatorWithPageNumbers(schoolList);
                   event.sendMessage("Please give me the page number of the school you want to remove the professor from");
                   event.getJDA().addEventListener(new ProfessorRemoveStateMachine(event, schoolList, null, 1));
             }
@@ -165,7 +165,7 @@ public class ProfessorRemove extends Command
                               }
                               else
                               {
-                                    commandEvent.getAsPaginatorWithPageNumbers(professorList);
+                                    commandEvent.sendAsPaginatorWithPageNumbers(professorList);
                                     channel.sendMessage("Please choose the page number of the professor you would like to remove").queue();
                                     state = 3;
                               }

@@ -45,7 +45,7 @@ public class SchoolEdit extends Command
             else
             {
                   event.sendMessage("Please give me the school you want to edit in page numbers");
-                  event.getAsPaginatorWithPageNumbers(schools);
+                  event.sendAsPaginatorWithPageNumbers(schools);
                   jda.addEventListener(new SchoolEditStateMachine(event, schools));
 
             }

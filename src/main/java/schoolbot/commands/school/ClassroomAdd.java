@@ -149,7 +149,7 @@ public class ClassroomAdd extends Command
                                     }
                                     else
                                     {
-                                          commandEvent.getAsPaginatorWithPageNumbers(pittSchools);
+                                          commandEvent.sendAsPaginatorWithPageNumbers(pittSchools);
                                           commandEvent.sendMessage("Please pick the campus based off the page numbers :)");
                                           state = 2;
                                     }

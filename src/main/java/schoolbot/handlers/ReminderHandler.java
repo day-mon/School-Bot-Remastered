@@ -8,8 +8,11 @@ import schoolbot.Schoolbot;
 import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
 import schoolbot.util.DatabaseUtil;
+import schoolbot.util.StringUtils;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -51,11 +54,10 @@ public class ReminderHandler
       {
             try
             {
+
                   Classroom classroom = assignment.getClassroom();
                   TextChannel channel = schoolbot.getJda().getTextChannelById(classroom.getChannelID());
                   Role role = schoolbot.getJda().getRoleById(classroom.getRoleID());
-
-                  // TODO: Could cause problems if bot is shut down... Will send reminders.. Find fix
 
                   if (channel == null)
                   {
@@ -69,6 +71,20 @@ public class ReminderHandler
                                 String.format("%s, ** %s ** is **now due**", mention, assignment.getName())
                                 :
                                 String.format("%s, ** %s ** is due in ** %d ** minutes", mention, assignment.getName(), due);
+
+                        /*
+                         * This will check if the assignment is pass due by one minute and 10 seconds
+                         * If it is past this time this means that either
+                         * A. There was a heartbeat issue where the bot was offline for 10 seconds after the initial due time
+                         * or
+                         * B. The bot was just offline and couldn't alert
+                         */
+                        boolean overDueCheck = Duration.between(assignment.getDueDate(), LocalDateTime.now()).getSeconds() > 70;
+
+                        if (overDueCheck)
+                        {
+                              dueMessage = String.format("%s, ** %s ** was due at ** %s ** but we could not alert you due to some unfortunate down time. I am working to improve", mention, assignment.getName(), StringUtils.formatDate(assignment.getDueDate()));
+                        }
 
 
                         LOGGER.info("{} has been notified", classroom.getName());

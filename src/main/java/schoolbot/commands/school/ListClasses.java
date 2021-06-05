@@ -37,6 +37,6 @@ public class ListClasses extends Command
                   return;
             }
 
-            event.getAsPaginatorWithPageNumbers(school.getClassroomList());
+            event.sendAsPaginatorWithPageNumbers(school.getClassroomList());
       }
 }

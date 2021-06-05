@@ -73,7 +73,7 @@ public class AssignmentEdit extends Command
 
             if (schoolList.size() > 1)
             {
-                  event.getAsPaginatorWithPageNumbers(schoolList);
+                  event.sendAsPaginatorWithPageNumbers(schoolList);
                   event.sendMessage("What school would you like to edit an assignment in...");
                   jda.addEventListener(new AssignmentEditStateMachine(event, schoolList, null, null, 1));
                   return;
@@ -111,7 +111,7 @@ public class AssignmentEdit extends Command
                   }
                   else
                   {
-                        event.getAsPaginatorWithPageNumbers(assignments);
+                        event.sendAsPaginatorWithPageNumbers(assignments);
                         event.sendMessage("Please give me the page number of the assignment you want to edit");
                         jda.addEventListener(new AssignmentEditStateMachine(event, null, classroomList, assignments, 3));
 
@@ -120,7 +120,7 @@ public class AssignmentEdit extends Command
 
             if (classroomList.size() > 1)
             {
-                  event.getAsPaginatorWithPageNumbers(classroomList);
+                  event.sendAsPaginatorWithPageNumbers(classroomList);
                   event.sendMessage("Please give me the page number of the class that contains the assignment you want to edit");
                   jda.addEventListener(new AssignmentEditStateMachine(event, null, classroomList, null, 2));
             }
@@ -205,7 +205,7 @@ public class AssignmentEdit extends Command
                               School school = schools.get(pageNumber - 1);
                               classroomList = school.getClassroomList();
                               channel.sendMessageFormat("Now that we have selected ** %s **, I will now need the class you want to the assignment", school.getName()).queue();
-                              commandEvent.getAsPaginatorWithPageNumbers(school.getClassroomList());
+                              commandEvent.sendAsPaginatorWithPageNumbers(school.getClassroomList());
                               state = 2;
                         }
 
@@ -231,7 +231,7 @@ public class AssignmentEdit extends Command
                               Classroom classroom = classroomList.get(pageNumber - 1);
                               this.assignmentList = classroom.getAssignments();
                               channel.sendMessageFormat("Now that we have selected ** %s **, I will now need the assignment you would like to edit", classroom.getName()).queue();
-                              commandEvent.getAsPaginatorWithPageNumbers(assignmentList);
+                              commandEvent.sendAsPaginatorWithPageNumbers(assignmentList);
                               state = 3;
                         }
 
@@ -399,6 +399,8 @@ public class AssignmentEdit extends Command
                                     Embed.error(event, "** %s ** is not a valid date", message);
                               }
 
+
+
                               LocalDateTime localDateTime = LocalDateTime.of(LocalDate.parse(message, DateTimeFormatter.ofPattern("M/d/yyyy")), assignment.getDueDate().toLocalTime());
 
                               commandEvent.updateAssignment(event, new DatabaseDTO(assignment, updateColumn, localDateTime));
@@ -406,8 +408,6 @@ public class AssignmentEdit extends Command
 
                         }
 
-
-                        // TODO: Add some date checks and remoqve old reminders n such
                         case "due_datet" -> {
                               updateColumn = updateColumn.substring(0, updateColumn.lastIndexOf("t"));
 
@@ -429,6 +429,14 @@ public class AssignmentEdit extends Command
 
 
                                     localDateTime = LocalDateTime.of(assignment.getDueDate().toLocalDate(), LocalTime.of((hour), minute));
+
+                                    if  (!localDateTime.isAfter(LocalDateTime.now()))
+                                    {
+                                          String formatedTime =  localDateTime.format(DateTimeFormatter.ofPattern("M/dd/yyyy @ HH:mm"));
+                                          Embed.error(event, "** %s ** is not a valid date.. Try again", formatedTime);
+                                          return;
+                                    }
+
                               }
                               else
                               {
@@ -442,6 +450,14 @@ public class AssignmentEdit extends Command
                                     }
 
                                     localDateTime = LocalDateTime.of(assignment.getDueDate().toLocalDate(), LocalTime.of((12 + hour), minute));
+
+                                    if  (!localDateTime.isAfter(LocalDateTime.now()))
+                                    {
+                                          String formatedTime =  localDateTime.format(DateTimeFormatter.ofPattern("M/dd/yyyy @ HH:mm"));
+                                          Embed.error(event, "** %s ** is not a valid date.. Try again", formatedTime);
+                                          return;
+                                    }
+
                               }
                               commandEvent.updateAssignment(event, new DatabaseDTO(assignment, updateColumn, localDateTime));
                               event.sendMessage("Date successfully changed to %s", localDateTime);

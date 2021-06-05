@@ -36,7 +36,7 @@ public class ListSchools extends Command
             }
             else
             {
-                  event.getAsPaginatorWithPageNumbers(schools);
+                  event.sendAsPaginatorWithPageNumbers(schools);
             }
       }
 }

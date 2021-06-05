@@ -115,6 +115,7 @@ public class GuildWrapper
             School school = assignment.getClassroom().getSchool();
             String schoolName = school.getName().toLowerCase();
             Classroom classroom = assignment.getClassroom();
+            var schoolbot =  event.getSchoolbot();
 
 
             switch (update)
@@ -161,6 +162,12 @@ public class GuildWrapper
                                 .getClassroomByID(classroom.getId())
                                 .getAssignmentByID(assignment.getId())
                                 .setDueDate(ldt);
+
+                        assignment.setDueDate(ldt);
+
+                        DatabaseUtil.removeAssignmentReminderByAssignment(schoolbot, assignment);
+                        DatabaseUtil.addAssignmentReminder(schoolbot, assignment, List.of(1440, 60, 30, 10, 0));
+
                   }
             }
 

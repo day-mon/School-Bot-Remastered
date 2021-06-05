@@ -53,7 +53,7 @@ public class SchoolRemove extends Command
 
 
             event.sendMessage("Please tell me the school you want to remove by telling me the page number!");
-            event.getAsPaginatorWithPageNumbers(schools);
+            event.sendAsPaginatorWithPageNumbers(schools);
             event.getJDA().addEventListener(new SchoolRemoveStateMachine(event, schools, 1));
       }
 

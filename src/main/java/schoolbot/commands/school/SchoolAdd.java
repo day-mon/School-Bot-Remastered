@@ -111,11 +111,10 @@ public class SchoolAdd extends Command
             else
             {
                   event.sendMessage("More than one school that has been found with your search.. Type the number that matches your desired result");
-                  event.getAsPaginatorWithEmbeds(List.copyOf(schools.values()));
+                  event.sendAsPaginator(List.copyOf(schools.values()));
 
 
-                  //TODO: Why would I ever do this if I pass the event through.. Fix this later..
-                  event.getJDA().addEventListener(new SchoolStateMachine(event.getSchoolbot(), event.getChannel(), event.getUser(), schools, event));
+                  event.getJDA().addEventListener(new SchoolStateMachine(event, schools));
             }
       }
 
@@ -130,13 +129,13 @@ public class SchoolAdd extends Command
             private final int state = 0;
 
 
-            public SchoolStateMachine(Schoolbot schoolbot, MessageChannel channel, User author, Map<Integer, MessageEmbed> schools, CommandEvent cmdEvent)
+            public SchoolStateMachine(@NotNull CommandEvent event, @NotNull Map<Integer, MessageEmbed> schools)
             {
-                  this.cmdEvent = cmdEvent;
-                  this.authorID = author.getIdLong();
-                  this.channelID = channel.getIdLong();
+                  this.cmdEvent = event;
+                  this.authorID = event.getUser().getIdLong();
+                  this.channelID = event.getChannel().getIdLong();
                   this.schools = schools;
-                  this.schoolbot = schoolbot;
+                  this.schoolbot = event.getSchoolbot();
             }
 
             @Override

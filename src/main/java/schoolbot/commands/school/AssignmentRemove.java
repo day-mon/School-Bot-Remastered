@@ -71,7 +71,7 @@ public class AssignmentRemove extends Command
                   }
                   else
                   {
-                        event.getAsPaginatorWithPageNumbers(assignmentList);
+                        event.sendAsPaginatorWithPageNumbers(assignmentList);
                         event.sendMessage("Please select the assignment by page number");
                         stateToGoto = 4;
 
@@ -97,7 +97,7 @@ public class AssignmentRemove extends Command
                         else
                         {
                               event.sendMessage("Please choose the School ID of the school you want to add the assignment to ");
-                              event.getAsPaginatorWithPageNumbers(schools);
+                              event.sendAsPaginatorWithPageNumbers(schools);
                         }
                   }
                   else
@@ -136,13 +136,13 @@ public class AssignmentRemove extends Command
                               }
                               else
                               {
-                                    event.getAsPaginatorWithPageNumbers(assignmentList);
+                                    event.sendAsPaginatorWithPageNumbers(assignmentList);
                                     event.sendMessage("Please select the assignment by page number");
                               }
                         }
                         else
                         {
-                              event.getAsPaginatorWithPageNumbers(classrooms);
+                              event.sendAsPaginatorWithPageNumbers(classrooms);
                               event.sendMessage("Please choose the page number of the class you want to remove an assignment from");
                         }
                   }
@@ -250,7 +250,7 @@ public class AssignmentRemove extends Command
                               }
                               else
                               {
-                                    commandEvent.getAsPaginatorWithPageNumbers(classroomList);
+                                    commandEvent.sendAsPaginatorWithPageNumbers(classroomList);
                                     channel.sendMessage("Please give me the page number of the class you want to remove the assignment from").queue();
                               }
                         }
@@ -290,7 +290,7 @@ public class AssignmentRemove extends Command
                               }
                               else
                               {
-                                    commandEvent.getAsPaginatorWithPageNumbers(assignmentList);
+                                    commandEvent.sendAsPaginatorWithPageNumbers(assignmentList);
                                     channel.sendMessage("Please select the assignment by page number").queue();
                               }
                               state = 4;

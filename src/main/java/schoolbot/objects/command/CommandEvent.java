@@ -157,7 +157,7 @@ public class CommandEvent
                     .queue();
       }
 
-      public <T extends Paginatable> void getAsPaginator(List<T> list)
+      public <T extends Paginatable> void sendAsNormalPaginator(List<T> list)
       {
             List<MessageEmbed> embeds = new ArrayList<>();
 
@@ -177,7 +177,7 @@ public class CommandEvent
             paginator.paginate();
       }
 
-      public void getAsPaginatorWithEmbeds(List<MessageEmbed> embeds)
+      public void sendAsPaginator(List<MessageEmbed> embeds)
       {
             Paginator paginator = new StandardPaginatorBuilder()
                     .setWaiter(this.schoolbot.getEventWaiter())
@@ -192,12 +192,12 @@ public class CommandEvent
       }
 
 
-      public <T extends Paginatable> void getAsPaginatorWithPageNumbers(List<T> list)
+      public <T extends Paginatable> void sendAsPaginatorWithPageNumbers(List<T> list)
       {
             // This is just in case I call a list with pages when theres only one page...
             if (list.size() == 1)
             {
-                  getAsPaginator(list);
+                  sendAsNormalPaginator(list);
                   return;
             }
 
@@ -212,7 +212,6 @@ public class CommandEvent
                   );
             }
 
-            System.out.println(embeds.size());
             Paginator paginator = new StandardPaginatorBuilder()
                     .setWaiter(this.getSchoolbot().getEventWaiter())
                     .setEmbeds(embeds)
@@ -254,7 +253,7 @@ public class CommandEvent
       }
 
       /**
-       * @param School Name
+       * @param schoolName
        * @return List of Professors within the school
        */
       public List<Professor> getSchoolsProfessors(String schoolName)
@@ -328,7 +327,6 @@ public class CommandEvent
       {
             schoolbot.getWrapperHandler().removeAssignment(event, assignment);
       }
-
 
       public List<Classroom> getGuildClasses()
       {

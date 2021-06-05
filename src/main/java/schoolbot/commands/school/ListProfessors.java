@@ -43,7 +43,7 @@ public class ListProfessors extends Command
             }
             else
             {
-                  event.getAsPaginatorWithPageNumbers(schools);
+                  event.sendAsPaginatorWithPageNumbers(schools);
                   Embed.information(event, "Please choose a page number from the Paginator");
                   event.getJDA().addEventListener(new ListProfessorStateMachine(event, schools));
             }

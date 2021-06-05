@@ -64,9 +64,9 @@ public class UserInfo extends Command
 
             channel.sendMessage(new EmbedBuilder()
                     .setTitle("Information on **" + user.getName() + "** ")
-                    .addField("Join date", StringUtils.parseJoinDate(member.getTimeJoined()), false)
-                    .addField("Boosting Since", member.getTimeBoosted() == null ? "Not Boosting" : StringUtils.parseJoinDate(member.getTimeBoosted()), false)
-                    .addField("Account Creation Date", StringUtils.parseJoinDate(member.getTimeCreated()), false)
+                    .addField("Join date", StringUtils.formatDate(member.getTimeJoined()), false)
+                    .addField("Boosting Since", member.getTimeBoosted() == null ? "Not Boosting" : StringUtils.formatDate(member.getTimeBoosted()), false)
+                    .addField("Account Creation Date", StringUtils.formatDate(member.getTimeCreated()), false)
                     .addField("User ID", member.getId(), false)
                     .addField("Roles", member.getRoles().stream().map(Role::getAsMention).collect(Collectors.joining(", ")), false)
                     .setThumbnail(user.getAvatarUrl())

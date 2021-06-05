@@ -74,7 +74,7 @@ public class ListAssignments extends Command
                                     return;
                               }
 
-                              event.getAsPaginatorWithPageNumbers(classrooms);
+                              event.sendAsPaginatorWithPageNumbers(classrooms);
                         }
                         else
                         {
@@ -93,7 +93,7 @@ public class ListAssignments extends Command
                               }
                               else
                               {
-                                    event.getAsPaginatorWithPageNumbers(assignments);
+                                    event.sendAsPaginatorWithPageNumbers(assignments);
                               }
                         }
 

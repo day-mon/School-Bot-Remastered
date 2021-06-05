@@ -69,7 +69,7 @@ public class ProfessorEdit extends Command
                   }
                   else
                   {
-                        event.getAsPaginatorWithPageNumbers(professors);
+                        event.sendAsPaginatorWithPageNumbers(professors);
                         event.sendMessage("Please choose a professor that you choose to edit based off page number");
                         jda.addEventListener(new ProfessorEditStateMachine(event, professors, schools, 3));
                   }
@@ -77,7 +77,7 @@ public class ProfessorEdit extends Command
             else
             {
                   event.sendMessage("There are multiple schools with editable professors.. Please select the page number of the school you want!");
-                  event.getAsPaginatorWithPageNumbers(schools);
+                  event.sendAsPaginatorWithPageNumbers(schools);
                   jda.addEventListener(new ProfessorEditStateMachine(event, null, schools, 1));
             }
       }
@@ -163,7 +163,7 @@ public class ProfessorEdit extends Command
                                     jda.removeEventListener(this);
                               }
 
-                              commandEvent.getAsPaginatorWithPageNumbers(professors);
+                              commandEvent.sendAsPaginatorWithPageNumbers(professors);
                               channel.sendMessage("Please give me the page number associated with the professor you want to edit").queue();
 
                               state = 3;

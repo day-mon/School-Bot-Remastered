@@ -57,7 +57,7 @@ public class Checks
             }
             catch (Exception e)
             {
-                  e.printStackTrace();
+                  LOGGER.error("Error has occurred whilst parsing assignment date", e);
                   return false;
             }
       }
