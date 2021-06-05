@@ -14,6 +14,7 @@ public class ClassroomEdit extends Command
       {
             super(parent, "Edits an classroom", "[none]", 0);
             addPermissions(Permission.ADMINISTRATOR);
+            addSelfPermissions(Permission.MANAGE_ROLES);
       }
 
       @Override

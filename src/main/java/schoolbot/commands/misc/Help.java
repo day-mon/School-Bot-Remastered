@@ -1,5 +1,6 @@
 package schoolbot.commands.misc;
 
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
@@ -63,7 +64,15 @@ public class Help extends Command
 
             if (cmd.hasChildren())
             {
-                  //TODO: Make it so if someone calls a parent command it just gives a list of the children
+                  List<MessageEmbed> embeds = null;
+                  cmd.getChildren()
+                          .forEach(c0mmand ->
+                          {
+                                embeds.add(c0mmand.getAsHelpEmbed().build());
+                          });
+
+                  event.sendAsPaginator(embeds);
+
                   event.sendMessage("This is a parent command please try and specifying your search.. Here are its children `%s`", cmd.getChildren());
             }
             else

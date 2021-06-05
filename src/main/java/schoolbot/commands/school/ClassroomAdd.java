@@ -1,9 +1,6 @@
 package schoolbot.commands.school;
 
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -75,15 +72,17 @@ public class ClassroomAdd extends Command
                   if (event.getChannel().getIdLong() != channelID) return;
 
 
-                  Guild guild = event.getGuild();
-                  MessageChannel channel = event.getChannel();
                   String message = event.getMessage().getContentRaw();
                   List<School> cachedSchools = commandEvent.getGuildSchools();
                   List<School> pittSchools = commandEvent.getGuildSchools()
                           .stream()
                           .filter(School::isPittSchool)
                           .collect(Collectors.toList());
-                  JDA jda = event.getJDA();
+
+                  var jda = event.getJDA();
+                  var guild = event.getGuild();
+                  var channel = event.getChannel();
+
 
                   if (message.equalsIgnoreCase("stop"))
                   {

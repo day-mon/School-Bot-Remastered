@@ -222,6 +222,7 @@ public class SchoolEdit extends Command
                               commandEvent.updateSchool(commandEvent, new DatabaseDTO(school, updateColumn, message));
                         }
                         case "url" -> {
+
                               // TODO: Add valid url checks..
                               commandEvent.updateSchool(commandEvent, new DatabaseDTO(school, updateColumn, message));
                         }

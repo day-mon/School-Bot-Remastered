@@ -166,6 +166,8 @@ public class CommandEvent
             {
                   embeds.add(obj.getAsEmbed(schoolbot));
             }
+
+
             Paginator paginator = new StandardPaginatorBuilder()
                     .setWaiter(this.getSchoolbot().getEventWaiter())
                     .setEmbeds(embeds)

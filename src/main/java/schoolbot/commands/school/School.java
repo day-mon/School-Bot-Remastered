@@ -27,9 +27,9 @@ public class School extends Command
       {
             Embed.information(event, """
                     I believe you called this command on accident.. That's okay let me help you!
-                    You want to ** add ** a school? Use ** -school add **
-                    You want to ** edit ** a school? Use ** -school edit **
-                    or do you want to ** remove ** a school? Use ** -school remove **
+                    You want to ** add ** a school? Use ** school add **
+                    You want to ** edit ** a school? Use ** school edit **
+                    or do you want to ** remove ** a school? Use ** school remove **
                                     
                     I hope this helps!
                     """);

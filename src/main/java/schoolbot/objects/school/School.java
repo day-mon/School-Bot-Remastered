@@ -572,7 +572,7 @@ public class School implements Paginatable
       @Override
       public String toString()
       {
-            return "School{" +
+            return "School {" +
                    "name='" + name + '\'' +
                    ", URL='" + URL + '\'' +
                    ", emailSuffix='" + emailSuffix + '\'' +

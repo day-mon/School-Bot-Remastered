@@ -26,9 +26,9 @@ public class Assignment extends Command
       {
             Embed.information(event, """
                     I believe you called this command on accident.. That's okay let me help you!
-                    You want to ** add ** a assignment? Use ** -assignment add **
-                    You want to ** edit ** a assignment? Use ** -assignment edit **
-                    or do you want to ** remove ** a assignment? Use ** -assignment remove **
+                    You want to ** add ** a assignment? Use ** assignment add **
+                    You want to ** edit ** a assignment? Use ** assignment edit **
+                    or do you want to ** remove ** a assignment? Use ** assignment remove **
                                     
                     I hope this helps!
                     """);

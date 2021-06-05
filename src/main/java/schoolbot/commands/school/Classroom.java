@@ -32,9 +32,9 @@ public class Classroom extends Command
       {
             Embed.information(event, """
                     I believe you called this command on accident.. That's okay let me help you!
-                    You want to ** add ** a class? Use ** -class add **
-                    You want to ** edit ** a class? Use ** -class edit **
-                    or do you want to ** remove ** a class? Use ** -class remove **
+                    You want to ** add ** a class? Use ** class add **
+                    You want to ** edit ** a class? Use ** class edit **
+                    or do you want to ** remove ** a class? Use ** class remove **
                                     
                     I hope this helps!
                     """);

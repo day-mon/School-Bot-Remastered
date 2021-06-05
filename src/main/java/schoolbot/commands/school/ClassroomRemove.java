@@ -23,7 +23,7 @@ public class ClassroomRemove extends Command
 
       public ClassroomRemove(Command parent)
       {
-            super(parent, "Removes a class from a school", "", 0);
+            super(parent, "Removes a class from a school", "[none]", 0);
             addUsageExample("N/A");
             addPermissions(Permission.ADMINISTRATOR);
             addSelfPermissions(Permission.MANAGE_ROLES);

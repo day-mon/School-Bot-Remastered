@@ -25,7 +25,6 @@ public class ConfigHandler
             initFile();
             this.configValues = loadValues();
             this.schoolbot = schoolbot;
-
       }
 
       private void initFolder()
