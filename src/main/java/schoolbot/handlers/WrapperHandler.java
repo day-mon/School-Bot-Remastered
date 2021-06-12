@@ -30,13 +30,12 @@ public class WrapperHandler
 
       }
 
-      public boolean addSchool(CommandEvent event, School school)
+      public void addSchool(CommandEvent event, School school)
       {
             long guildID = event.getGuild().getIdLong();
 
             guildCheck(guildID);
             guildWrappers.get(guildID).addSchool(event, school);
-            return true;
       }
 
       public List<School> getSchools(CommandEvent event)
@@ -136,6 +135,14 @@ public class WrapperHandler
 
             guildCheck(guildID);
             guildWrappers.get(guildID).updateAssignment(event, assignmentUpdate);
+      }
+
+      public void updateClassroom(CommandEvent event, DatabaseDTO classroomUpdate)
+      {
+            long guildID = event.getGuild().getIdLong();
+
+            guildCheck(guildID);
+            guildWrappers.get(guildID).updateClassroom(event, classroomUpdate);
       }
 
 

@@ -137,7 +137,19 @@ public class DatabaseUtil
             }
             catch (Exception e)
             {
-                  LOGGER.error("Database error has occured while  removing an assignment reminder", e);
+                  LOGGER.error("Database error has occurred while  removing an assignment reminder", e);
+            }
+      }
+
+      public static void removeClassReminderByClass(Schoolbot schoolbot, Classroom classroom)
+      {
+            try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
+            {
+                  removeClassReminders(connection, classroom.getId());
+            }
+            catch (Exception e)
+            {
+                  LOGGER.error("Database error has occurred while removing an assignment reminder", e);
             }
       }
 
@@ -189,7 +201,7 @@ public class DatabaseUtil
                   statement.setString(1, professor.getFirstName());
                   statement.setString(2, professor.getLastName());
                   statement.setString(3, professor.getEmailPrefix());
-                  statement.setInt(4, professor.getSchoolID());
+                  statement.setInt(4, professor.getSchoolId());
                   statement.setString(5, professor.getFullName());
                   statement.execute();
 
@@ -214,15 +226,15 @@ public class DatabaseUtil
                           INSERT INTO public.classes(
                            number, professor_id, location, start_date, end_date, time, preqs,
                            level, school_id, identifier, term, description, guild_id, name,
-                           role_id, channel_id)
+                           role_id, channel_id, autofilled, room)
                            
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                                                    
                           returning id
                           """);
 
                   statement.setInt(1, clazz.getNumber());
-                  statement.setInt(2, clazz.getProfessor().getID());
+                  statement.setInt(2, clazz.getProfessor().getId());
                   statement.setString(3, clazz.getLocation());
                   statement.setDate(4, Date.valueOf(clazz.getStartDate()));
                   statement.setDate(5, Date.valueOf(clazz.getEndDate()));
@@ -237,6 +249,8 @@ public class DatabaseUtil
                   statement.setString(14, clazz.getName());
                   statement.setLong(15, clazz.getRoleID());
                   statement.setLong(16, clazz.getChannelID());
+                  statement.setBoolean(17, clazz.isAutoFilled());
+                  statement.setString(18, clazz.getRoom());
                   statement.execute();
 
 
@@ -304,7 +318,7 @@ public class DatabaseUtil
 
       public static void removeProfessor(Schoolbot schoolBot, Professor professor)
       {
-            int id = professor.getID();
+            int id = professor.getId();
             try (Connection con = schoolBot.getDatabaseHandler().getDbConnection())
             {
                   PreparedStatement statement = con.prepareStatement(
@@ -336,7 +350,6 @@ public class DatabaseUtil
             {
                   LOGGER.error("Database error", e);
             }
-
       }
 
       private static List<School> getSchools(Connection connection, long guildID) throws SQLException
@@ -420,10 +433,7 @@ public class DatabaseUtil
                               removeAssignment(connection, assignment);
                         }
                   }
-
                   return assignments;
-
-
             }
             catch (Exception e)
             {
@@ -447,10 +457,7 @@ public class DatabaseUtil
                         classroomList.add(getClassFromID(connection, classID));
                         removeReminder(connection, id);
                   }
-
                   return classroomList;
-
-
             }
             catch (Exception e)
             {
@@ -464,8 +471,8 @@ public class DatabaseUtil
             try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
             {
                   PreparedStatement preparedStatement = connection.prepareStatement("UPDATE schools SET " + schoolUpdateDTO.updateColumn() + "= ? WHERE id=?");
-                  School school = (School) schoolUpdateDTO.value();
-                  preparedStatement.setObject(1, schoolUpdateDTO.value());
+                  School school = (School) schoolUpdateDTO.objectBeingUpdated();
+                  preparedStatement.setObject(1, schoolUpdateDTO.valueBeingChanged());
                   preparedStatement.setInt(2, school.getID());
                   preparedStatement.execute();
             }
@@ -480,9 +487,25 @@ public class DatabaseUtil
             try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
             {
                   PreparedStatement preparedStatement = connection.prepareStatement("UPDATE professors SET " + schoolUpdateDTO.updateColumn() + "= ? WHERE id=?");
-                  Professor professor = (Professor) schoolUpdateDTO.obj();
-                  preparedStatement.setObject(1, schoolUpdateDTO.value());
-                  preparedStatement.setInt(2, professor.getID());
+                  Professor professor = (Professor) schoolUpdateDTO.objectBeingUpdated();
+                  preparedStatement.setObject(1, schoolUpdateDTO.valueBeingChanged());
+                  preparedStatement.setInt(2, professor.getId());
+                  preparedStatement.execute();
+            }
+            catch (Exception e)
+            {
+                  LOGGER.error("Error occurred while updating professors", e);
+            }
+      }
+
+      public static void updateClassroom(DatabaseDTO classroomUpdateDTO, Schoolbot schoolbot)
+      {
+            try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
+            {
+                  PreparedStatement preparedStatement = connection.prepareStatement("UPDATE classes SET " + classroomUpdateDTO.updateColumn() + "= ? WHERE id=?");
+                  Classroom classroom = (Classroom) classroomUpdateDTO.objectBeingUpdated();
+                  preparedStatement.setObject(1, classroomUpdateDTO.valueBeingChanged());
+                  preparedStatement.setInt(2, classroom.getId());
                   preparedStatement.execute();
             }
             catch (Exception e)
@@ -496,16 +519,16 @@ public class DatabaseUtil
             try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
             {
                   PreparedStatement preparedStatement = connection.prepareStatement("UPDATE assignments SET " + assignmentUpdateDTO.updateColumn() + "= ? WHERE id=?");
-                  Assignment assignment = (Assignment) assignmentUpdateDTO.obj();
-                  if (assignmentUpdateDTO.value() instanceof Assignment.AssignmentType)
+                  Assignment assignment = (Assignment) assignmentUpdateDTO.objectBeingUpdated();
+                  if (assignmentUpdateDTO.valueBeingChanged() instanceof Assignment.AssignmentType)
                   {
-                        String type = ((Assignment.AssignmentType) assignmentUpdateDTO.value()).getAssignmentType();
+                        String type = ((Assignment.AssignmentType) assignmentUpdateDTO.valueBeingChanged()).getAssignmentType();
                         preparedStatement.setString(1, type);
 
                   }
                   else
                   {
-                        preparedStatement.setObject(1, assignmentUpdateDTO.value());
+                        preparedStatement.setObject(1, assignmentUpdateDTO.valueBeingChanged());
 
                   }
                   preparedStatement.setInt(2, assignment.getId());
@@ -515,7 +538,7 @@ public class DatabaseUtil
                   {
                         removeReminderByAssignmentID(connection, assignment.getId());
 
-                        LocalDateTime localDateTime = (LocalDateTime) assignmentUpdateDTO.value();
+                        LocalDateTime localDateTime = (LocalDateTime) assignmentUpdateDTO.valueBeingChanged();
                         assignment.setDueDate(localDateTime);
 
                         addAssignmentReminder(schoolbot, assignment, List.of(1440, 60, 30, 10, 0));
@@ -545,10 +568,8 @@ public class DatabaseUtil
                           resultSet.getInt("id"),
                           resultSet.getString("type"),
                           resultSet.getTimestamp("due_date"),
-                          getClassFromID(connection, resultSet.getInt("class_id"))
-                  );
+                          getClassFromID(connection, resultSet.getInt("class_id")));
             }
-
             return assignment;
       }
 
@@ -559,14 +580,12 @@ public class DatabaseUtil
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
 
-
             while (rs.next())
             {
                   classroom = new Classroom(
                           rs.getLong("channel_id"),
                           rs.getLong("role_id"),
-                          rs.getString("name")
-                  );
+                          rs.getString("name"));
             }
             return classroom;
 
@@ -577,39 +596,40 @@ public class DatabaseUtil
       {
             PreparedStatement ps = conn.prepareStatement("SELECT * FROM classes WHERE school_id=?");
             ps.setInt(1, school.getID());
-            ResultSet rs3 = ps.executeQuery();
+            ResultSet resultSet = ps.executeQuery();
             List<Classroom> out = new ArrayList<>();
 
-            while (rs3.next())
+            while (resultSet.next())
             {
                   Classroom classroom;
-                  int professorID = rs3.getInt("professor_id");
+                  int professorID = resultSet.getInt("professor_id");
                   school.addClass(
                           classroom = new Classroom(
-                                  rs3.getString("description"), //You can refactor the rs3
-                                  rs3.getString("time"),
-                                  rs3.getString("location"),
-                                  rs3.getString("level"),
-                                  rs3.getString("room"),
-                                  rs3.getString("name"),
-                                  rs3.getString("identifier"),
-                                  rs3.getString("term"),
-                                  rs3.getDate("start_date"),
-                                  rs3.getDate("end_date"),
-                                  rs3.getInt("school_id"),
-                                  rs3.getInt("professor_id"),
-                                  rs3.getInt("number"),
-                                  rs3.getInt("id"),
-                                  rs3.getLong("role_id"),
-                                  rs3.getLong("channel_id"),
-                                  rs3.getLong("guild_id"),
+                                  resultSet.getString("description"), //You can refactor the resultSet
+                                  resultSet.getString("time"),
+                                  resultSet.getString("location"),
+                                  resultSet.getString("level"),
+                                  resultSet.getString("room"),
+                                  resultSet.getString("name"),
+                                  resultSet.getString("identifier"),
+                                  resultSet.getString("term"),
+                                  resultSet.getDate("start_date"),
+                                  resultSet.getDate("end_date"),
+                                  resultSet.getInt("school_id"),
+                                  resultSet.getInt("professor_id"),
+                                  resultSet.getInt("number"),
+                                  resultSet.getInt("id"),
+                                  resultSet.getLong("role_id"),
+                                  resultSet.getLong("channel_id"),
+                                  resultSet.getLong("guild_id"),
                                   school,
                                   school.getProfessorList()
                                           .stream()
-                                          .filter(professor -> professor.getID() == professorID)
+                                          .filter(professor -> professor.getId() == professorID)
                                           .limit(1)
                                           .collect(Collectors.toList())
-                                          .get(0)
+                                          .get(0),
+                                  resultSet.getBoolean("autofilled")
                           )
                   );
                   out.add(classroom);

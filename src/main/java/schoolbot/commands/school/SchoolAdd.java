@@ -3,9 +3,7 @@ package schoolbot.commands.school;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -30,8 +28,6 @@ import java.util.Random;
 
 public class SchoolAdd extends Command
 {
-      // This can be replaced with http://universities.hipolabs.com/ if the ip below is not available
-      private static final String API_URL = "http://193.239.146.56:5000/search?name=";
       private static final String BACKUP_API_URL = "http://universities.hipolabs.com/search?name=";
 
       public SchoolAdd(Command parent)
@@ -39,32 +35,58 @@ public class SchoolAdd extends Command
             super(parent, "Adds a school to the server", "[school name]", 1);
             addUsageExample("school add \"University of Pittsburgh\"");
             addPermissions(Permission.ADMINISTRATOR);
-            addSelfPermissions(Permission.MANAGE_ROLES);
+            addSelfPermissions(Permission.MANAGE_ROLES, Permission.MANAGE_CHANNEL);
             addFlags(CommandFlag.DATABASE);
 
       }
 
+      private static boolean addToDbAndCreateRole(MessageEmbed embed, Schoolbot schoolbot, CommandEvent event)
+      {
+            String schoolName = embed.getTitle();
+
+            if (event.schoolExist(schoolName)) return false;
+
+            String url = embed.getFields().get(0).getValue();
+            String suffix = embed.getFields().get(1).getValue();
+            Guild guild = event.getGuild();
+
+
+            guild.createRole()
+                    .setName(schoolName)
+                    .setColor(new Random().nextInt(0xFFFFFF))
+                    .queue(role ->
+                            event.addSchool(event, new School(
+                                    schoolName,
+                                    suffix,
+                                    role.getIdLong(),
+                                    guild.getIdLong(),
+                                    url.contains(",") ? url.split(",")[0] : url
+                            )));
+            return true;
+      }
 
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
-            MessageChannel channel = event.getChannel();
-            User user = event.getUser();
             String firstArg = args.get(0);
-            Guild guild = event.getGuild();
-            Schoolbot schoolbot = event.getSchoolbot();
+
+
+            var channel = event.getChannel();
+            var user = event.getUser();
+            var guild = event.getGuild();
+            var schoolbot = event.getSchoolbot();
 
             if (Checks.isNumber(firstArg))
             {
                   Embed.error(event, "Your school name cannot contain numbers!");
                   return;
             }
-            Document doc = null;
+            Document doc;
             try
             {
                   doc = Jsoup.connect(BACKUP_API_URL + firstArg)
                           .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
-                          .referrer("http://www.google.com")
+                          .referrer("https://www.google.com")
                           .ignoreContentType(true)
                           .get();
             }
@@ -113,66 +135,9 @@ public class SchoolAdd extends Command
                   event.sendMessage("More than one school that has been found with your search.. Type the number that matches your desired result");
                   event.sendAsPaginator(List.copyOf(schools.values()));
 
-
                   event.getJDA().addEventListener(new SchoolStateMachine(event, schools));
             }
       }
-
-
-      public static class SchoolStateMachine extends ListenerAdapter
-      { // start
-            private final long channelID, authorID;
-            private final Map<Integer, MessageEmbed> schools;
-            private final Schoolbot schoolbot;
-            private final CommandEvent cmdEvent;
-
-            private final int state = 0;
-
-
-            public SchoolStateMachine(@NotNull CommandEvent event, @NotNull Map<Integer, MessageEmbed> schools)
-            {
-                  this.cmdEvent = event;
-                  this.authorID = event.getUser().getIdLong();
-                  this.channelID = event.getChannel().getIdLong();
-                  this.schools = schools;
-                  this.schoolbot = event.getSchoolbot();
-            }
-
-            @Override
-            public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event)
-            {
-                  if (event.getAuthor().getIdLong() != authorID) return;
-                  if (event.getChannel().getIdLong() != channelID) return;
-                  if (!event.getMessage().getContentRaw().chars().allMatch(Character::isDigit)) return;
-                  int pageNum = Integer.parseInt(event.getMessage().getContentRaw());
-                  if (!Checks.between(pageNum, schools.size())) return;
-
-                  int schoolChoice = Integer.parseInt(event.getMessage().getContentRaw());
-                  MessageEmbed embed = schools.get(schoolChoice);
-                  CommandEvent commandEvent = cmdEvent;
-                  Guild guild = event.getGuild();
-
-                  if (event.getMessage().getContentRaw().equalsIgnoreCase("stop"))
-                  {
-                        event.getChannel().sendMessage("Okay aborting..").queue();
-                        event.getJDA().removeEventListener(this);
-                        return;
-                  }
-
-
-                  if (addToDbAndCreateRole(embed, schoolbot, commandEvent))
-                  {
-                        event.getChannel().sendMessage("School Created").queue();
-                        event.getChannel().sendMessage(embed).queue();
-                  }
-                  else
-                  {
-                        Embed.error(event, "School already exist");
-                  }
-
-                  event.getJDA().removeEventListener(this);
-            }
-      } // end
 
 
       private Map<Integer, MessageEmbed> evalSchools(JSONArray jsonArray)
@@ -231,31 +196,60 @@ public class SchoolAdd extends Command
             return em;
       }
 
-      private static boolean addToDbAndCreateRole(MessageEmbed embed, Schoolbot schoolbot, CommandEvent event)
+      public static class SchoolStateMachine extends ListenerAdapter
       {
-            String schoolName = embed.getTitle();
+            private final long channelID, authorID;
+            private final Map<Integer, MessageEmbed> schools;
+            private final Schoolbot schoolbot;
+            private final CommandEvent cmdEvent;
 
-            if (event.schoolExist(schoolName)) return false;
-
-            String url = embed.getFields().get(0).getValue();
-            String suffix = embed.getFields().get(1).getValue();
-            Guild guild = event.getGuild();
+            private final int state = 0;
 
 
-            guild.createRole()
-                    .setName(schoolName)
-                    .setColor(new Random().nextInt(0xFFFFFF))
-                    .queue(role ->
-                    {
-                          event.addSchool(event, new School(
-                                  schoolName,
-                                  suffix,
-                                  role.getIdLong(),
-                                  guild.getIdLong(),
-                                  url.contains(",") ? url.split(",")[0] : url
-                          ));
-                    });
-            return true;
-      }
+            public SchoolStateMachine(@NotNull CommandEvent event, @NotNull Map<Integer, MessageEmbed> schools)
+            {
+                  this.cmdEvent = event;
+                  this.authorID = event.getUser().getIdLong();
+                  this.channelID = event.getChannel().getIdLong();
+                  this.schools = schools;
+                  this.schoolbot = event.getSchoolbot();
+            }
+
+            @Override
+            public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event)
+            {
+                  if (event.getAuthor().getIdLong() != authorID) return;
+                  if (event.getChannel().getIdLong() != channelID) return;
+                  if (!event.getMessage().getContentRaw().chars().allMatch(Character::isDigit)) return;
+                  int pageNum = Integer.parseInt(event.getMessage().getContentRaw());
+                  if (!Checks.between(pageNum, schools.size())) return;
+
+                  int schoolChoice = Integer.parseInt(event.getMessage().getContentRaw());
+                  MessageEmbed embed = schools.get(schoolChoice);
+
+                  var guild = event.getGuild();
+
+
+                  if (event.getMessage().getContentRaw().equalsIgnoreCase("stop"))
+                  {
+                        event.getChannel().sendMessage("Okay aborting..").queue();
+                        event.getJDA().removeEventListener(this);
+                        return;
+                  }
+
+
+                  if (addToDbAndCreateRole(embed, schoolbot, cmdEvent))
+                  {
+                        event.getChannel().sendMessage("School Created").queue();
+                        event.getChannel().sendMessage(embed).queue();
+                  }
+                  else
+                  {
+                        Embed.error(event, "School already exist");
+                  }
+
+                  event.getJDA().removeEventListener(this);
+            }
+      } // end
 }
 

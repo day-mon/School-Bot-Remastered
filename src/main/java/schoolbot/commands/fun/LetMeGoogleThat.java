@@ -23,8 +23,6 @@ public class LetMeGoogleThat extends Command
             String urlToSend = args.get(0).replaceAll("\\s+", "+");
 
             event.getChannel().sendMessage("Hold on... Let me google that for you....").queue(message ->
-            {
-                  message.editMessage(BASE_URL + urlToSend).queueAfter(3, TimeUnit.SECONDS);
-            });
+                    message.editMessage(BASE_URL + urlToSend).queueAfter(3, TimeUnit.SECONDS));
       }
 }

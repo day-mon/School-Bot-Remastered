@@ -25,29 +25,14 @@ public class Format extends Command
                     .setDescription("""
                             Surround code with:
                                 \\`\\`\\` language
-                            Person p = new Person(); \\`\\`\\` 
-                            This should display: 
+                            Person p = new Person(); \\`\\`\\`
+                            This should display:
                             ```java
-                            Person p = new Person(); ``` 
-                            Replace 'language' with the alphabetic character (in lower case) of another language. For example: C++ -> cpp, Python -> python or  py 
+                            Person p = new Person(); ```
+                            Replace 'language' with the alphabetic character (in lower case) of another language. For example: C++ -> cpp, Python -> python or  py
                                                     
                             This character can be found at the top left of your keyboard!
                             """)
                     .setColor(Constants.DEFAULT_EMBED_COLOR));
-
-
-/*
-        event.sendMessage(new EmbedBuilder()
-                .setDescription("Surround code with: \n \\`\\`\\` language " +
-                        "\n Person p = new Person(); \\`\\`\\` " +
-                        "\n This should display: " +
-                        "\n ```java\n Person p = new Person(); ``` " +
-                        "\n Replace 'language' with the alphabetic character (in lower case) of another language. For example: C++ -> cpp, Python -> python or  py " +
-                        "\n\n This character can be found at the top left of your keyboard")
-
-                .setColor(Constants.DEFAULT_EMBED_COLOR));
-
-
-         */
       }
 }

@@ -1,6 +1,7 @@
 package schoolbot.util;
 
 import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -16,6 +17,12 @@ public class StringUtils
       {
             return dateTime.format(DateTimeFormatter.ofPattern("M/dd/yyyy **@** HH:mm:ss"));
       }
+
+      public static String formatDate(LocalDate dateTime)
+      {
+            return dateTime.format(DateTimeFormatter.ofPattern("M/dd/yyyy"));
+      }
+
 
       public static String formatDate(LocalDateTime time)
       {

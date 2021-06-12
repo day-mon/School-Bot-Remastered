@@ -18,9 +18,6 @@ import java.util.stream.Collectors;
 
 public class ProfessorRemove extends Command
 {
-      /**
-       * @param parent
-       */
       public ProfessorRemove(Command parent)
       {
             super(parent, "Removes a professor from the guild", "[none]", 0);
@@ -81,7 +78,6 @@ public class ProfessorRemove extends Command
             private final long authorID, channelID;
             private final CommandEvent commandEvent;
             private List<School> schoolList;
-            private School school;
             private Professor professor;
             private List<Professor> professorList;
             private int state;
@@ -140,7 +136,7 @@ public class ProfessorRemove extends Command
                                     return;
                               }
 
-                              this.school = schoolList.get(page - 1);
+                              School school = schoolList.get(page - 1);
                               this.professorList = school.getProfessorList();
                               state = 2;
 

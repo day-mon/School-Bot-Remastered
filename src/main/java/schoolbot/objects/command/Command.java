@@ -42,9 +42,9 @@ public abstract class Command
       /**
        * Command constructor with aliases for the command.
        *
-       * @param description command aliases
-       * @param minimalArgs
-       * @parm syntax
+       * @param description Command description
+       * @param syntax      Language of the command
+       * @param minimalArgs The minimal arguments the command must follow
        */
       protected Command(String description, String syntax, int minimalArgs)
       {
@@ -64,10 +64,10 @@ public abstract class Command
       }
 
       /**
-       * @param parent
-       * @param description
-       * @param syntax
-       * @param minimalArgs
+       * @param parent        Parent command to the command used in the constructor
+       * @param description   Command description
+       * @param syntax        Language of the command
+       * @param minimalArgs   The minimal arguments the command must follow
        */
       protected Command(Command parent, String description, String syntax, int minimalArgs)
       {
@@ -91,7 +91,9 @@ public abstract class Command
       public abstract void run(@NotNull CommandEvent event, @NotNull List<String> args);
 
       /**
-       * @return
+       * Returns description of command
+       *
+       * @return description
        */
       public String getDescription()
       {
@@ -99,13 +101,14 @@ public abstract class Command
       }
 
       /**
-       * @return
+       * Returns list of Permissions that the bot has
+       *
+       * @return List of permissions that the bot has
        */
       public List<Permission> getSelfPermissions()
       {
             return selfPermissions;
       }
-
 
 
 

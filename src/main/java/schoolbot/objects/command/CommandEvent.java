@@ -167,7 +167,6 @@ public class CommandEvent
                   embeds.add(obj.getAsEmbed(schoolbot));
             }
 
-
             Paginator paginator = new StandardPaginatorBuilder()
                     .setWaiter(this.getSchoolbot().getEventWaiter())
                     .setEmbeds(embeds)
@@ -214,15 +213,18 @@ public class CommandEvent
                   );
             }
 
+
             Paginator paginator = new StandardPaginatorBuilder()
-                    .setWaiter(this.getSchoolbot().getEventWaiter())
+                    .setWaiter(schoolbot.getEventWaiter())
                     .setEmbeds(embeds)
-                    .setJDA(this.getJDA())
+                    .setJDA(getJDA())
                     .setChannel(event.getChannel())
                     .setPredicate(eve -> eve.getMember().getIdLong() == this.getMember().getIdLong())
                     .build();
+
             paginator.paginate();
             this.sendSelfDeletingMessage("`Timeout is set to 30 seconds`");
+
 
       }
 
@@ -255,7 +257,7 @@ public class CommandEvent
       }
 
       /**
-       * @param schoolName
+       * @param schoolName Name of school
        * @return List of Professors within the school
        */
       public List<Professor> getSchoolsProfessors(String schoolName)
@@ -289,6 +291,11 @@ public class CommandEvent
             schoolbot.getWrapperHandler().updateAssignment(event, assignmentUpdate);
       }
 
+      public void updateClassroom(CommandEvent event, DatabaseDTO classroomUpdate)
+      {
+            schoolbot.getWrapperHandler().updateClassroom(event, classroomUpdate);
+      }
+
       public School getSchool(CommandEvent event, String schoolName)
       {
             return schoolbot.getWrapperHandler().getSchool(event, schoolName);
@@ -313,7 +320,6 @@ public class CommandEvent
       {
             schoolbot.getWrapperHandler().removeClassroom(event, classroom);
       }
-
 
       public boolean addProfessor(CommandEvent event, Professor professor)
       {

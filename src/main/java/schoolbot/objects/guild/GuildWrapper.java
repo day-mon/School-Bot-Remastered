@@ -1,7 +1,6 @@
 package schoolbot.objects.guild;
 
 import net.dv8tion.jda.api.entities.Role;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
@@ -13,6 +12,7 @@ import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;
 import schoolbot.util.DatabaseUtil;
 
+import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,7 +27,7 @@ public class GuildWrapper
       private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
 
-      public GuildWrapper(@NotNull DatabaseUtil.WrapperReturnValue data)
+      public GuildWrapper(DatabaseUtil.WrapperReturnValue data)
       {
             this.guildID = data.guildID();
             this.schoolList = data.schoolMap();
@@ -40,18 +40,17 @@ public class GuildWrapper
             Things like ListSchools, ListProfessor, ListAssignments, and ListClasses should not have database calls.. Not really needed and slow
        */
 
-      public boolean addSchool(CommandEvent event, School school)
+      public void addSchool(CommandEvent event, School school)
       {
             String lowerCaseSchoolName = school.getName().toLowerCase();
-            if (schoolList.containsKey(lowerCaseSchoolName)) return false;
+            if (schoolList.containsKey(lowerCaseSchoolName)) return;
 
             int id = DatabaseUtil.addSchool(event, school);
-            if (id == -1) return false;
+            if (id == -1) return;
 
             school.setSchoolID(id);
             schoolList.put(lowerCaseSchoolName, school);
 
-            return true;
       }
 
       public School getSchool(String schoolName)
@@ -62,7 +61,7 @@ public class GuildWrapper
       public void updateSchool(CommandEvent event, DatabaseDTO schoolUpdateDTO)
       {
             String update = schoolUpdateDTO.updateColumn();
-            School school = (School) schoolUpdateDTO.value();
+            School school = (School) schoolUpdateDTO.objectBeingUpdated();
             String schoolName = school.getName().toLowerCase();
 
             switch (update)
@@ -70,7 +69,7 @@ public class GuildWrapper
                   case "name" -> {
                         schoolList.remove(schoolName);
 
-                        String updatedName = (String) schoolUpdateDTO.value();
+                        String updatedName = (String) schoolUpdateDTO.valueBeingChanged();
                         school.setName(updatedName);
                         schoolList.put(update.toLowerCase(), school);
                   }
@@ -81,85 +80,165 @@ public class GuildWrapper
                         {
                               role.delete().queue(
                                       success ->
-                                      {
-                                            LOGGER.info("Role for {} successfully has been deleted", school.getName());
-                                      },
+                                              LOGGER.info("Role for {} successfully has been deleted", school.getName()),
                                       failure ->
-                                      {
-                                            LOGGER.error("Role for {} could not be deleted", school.getName(), failure);
-                                      });
+                                              LOGGER.error("Role for {} could not be deleted", school.getName(), failure));
                         }
-                        Long newRoleID = (Long) schoolUpdateDTO.value();
+                        Long newRoleID = (Long) schoolUpdateDTO.valueBeingChanged();
                         schoolList.get(schoolName).setRoleID(newRoleID);
 
                   }
 
                   case "url" -> {
                         // Could check if valid URL.... but..
-                        String URL = (String) schoolUpdateDTO.value();
+                        String URL = (String) schoolUpdateDTO.valueBeingChanged();
                         schoolList.get(schoolName).setURL(URL);
                   }
 
                   case "email_suffix" -> {
-                        String email = (String) schoolUpdateDTO.value();
+                        String email = (String) schoolUpdateDTO.valueBeingChanged();
                         schoolList.get(schoolName).setURL(email);
                   }
             }
             DatabaseUtil.updateSchool(schoolUpdateDTO, event.getSchoolbot());
       }
 
+      public void updateClassroom(CommandEvent event, DatabaseDTO classroomDTO)
+      {
+            var classroom = (Classroom) classroomDTO.objectBeingUpdated();
+            var school = classroom.getSchool();
+            var schoolbot = event.getSchoolbot();
+
+            String update = classroomDTO.updateColumn();
+            String schoolName = school.getName().toLowerCase();
+
+            int classId = classroom.getId();
+
+            switch (update)
+            {
+                  case "name" -> {
+                        String updateElement = (String) classroomDTO.valueBeingChanged();
+
+                        schoolList.get(schoolName)
+                                .getClassroomByID(classId)
+                                .setName(updateElement);
+                  }
+
+                  case "description" -> {
+                        String updateElement = (String) classroomDTO.valueBeingChanged();
+
+                        schoolList.get(schoolName)
+                                .getClassroomByID(classId)
+                                .setDescription(updateElement);
+                  }
+
+                  case "professor_id" -> {
+                        int professorId = (int) classroomDTO.valueBeingChanged();
+                        Professor professor = schoolList.get(schoolName)
+                                .getProfessorByID(professorId);
+
+                        schoolList.get(schoolName)
+                                .getClassroomByID(classId)
+                                .setProfessor(professor);
+                  }
+
+
+                  case "start_date", "end_date" -> {
+                        LocalDateTime ld = (LocalDateTime) classroomDTO.valueBeingChanged();
+                        if (update.contains("start"))
+                        {
+                              schoolList.get(schoolName)
+                                      .getClassroomByID(classId)
+                                      .setStartDate(Date.valueOf(ld.toLocalDate()));
+                        }
+                        else
+                        {
+                              schoolList.get(schoolName)
+                                      .getClassroomByID(classId)
+                                      .setEndDate(Date.valueOf(ld.toLocalDate()));
+                        }
+                  }
+
+                  case "number" -> {
+                        int classNumber = (int) classroomDTO.valueBeingChanged();
+                        schoolList.get(schoolName)
+                                .getClassroomByID(classId)
+                                .setNumber(classNumber);
+                  }
+
+                  case "role_id", "channel_id" -> {
+                        long id = (long) classroomDTO.valueBeingChanged();
+
+                        if (update.contains("role"))
+                        {
+                              schoolList.get(schoolName)
+                                      .getClassroomByID(classId)
+                                      .setRoleID(id);
+                        }
+                        else
+                        {
+                              schoolList.get(schoolName)
+                                      .getClassroomByID(classId)
+                                      .setChannelID(id);
+                        }
+                  }
+
+                  case "time" -> {
+                        schoolList.get(schoolName)
+                                .getClassroomByID(classId);
+                  }
+
+            }
+            DatabaseUtil.updateClassroom(classroomDTO, schoolbot);
+      }
+
       public void updateAssignment(CommandEvent event, DatabaseDTO assignmentDTO)
       {
             String update = assignmentDTO.updateColumn();
-            Assignment assignment = (Assignment) assignmentDTO.obj();
+            Assignment assignment = (Assignment) assignmentDTO.objectBeingUpdated();
             School school = assignment.getClassroom().getSchool();
-            String schoolName = school.getName().toLowerCase();
             Classroom classroom = assignment.getClassroom();
-            var schoolbot =  event.getSchoolbot();
+            var schoolbot = event.getSchoolbot();
 
 
             switch (update)
             {
                   case "name" -> {
-                        String updatedElement = (String) assignmentDTO.value();
+                        String updatedElement = (String) assignmentDTO.valueBeingChanged();
 
-                        schoolList.get(schoolName)
-                                .getClassroomByID(classroom.getId())
+                        assignment.getClassroom()
                                 .getAssignmentByID(assignment.getId())
                                 .setName(updatedElement);
                   }
 
                   case "description" -> {
-                        String updatedElement = (String) assignmentDTO.value();
+                        String updatedElement = (String) assignmentDTO.valueBeingChanged();
 
-                        schoolList.get(schoolName)
-                                .getClassroomByID(classroom.getId())
+                        assignment.getClassroom()
                                 .getAssignmentByID(assignment.getId())
                                 .setDescription(updatedElement);
                   }
 
                   case "points_possible" -> {
-                        int updatedElement = (Integer) assignmentDTO.value();
+                        int updatedElement = (Integer) assignmentDTO.valueBeingChanged();
 
-                        schoolList.get(schoolName)
-                                .getClassroomByID(classroom.getId())
+                        assignment.getClassroom()
                                 .getAssignmentByID(assignment.getId())
                                 .setPoints(updatedElement);
                   }
 
                   case "type" -> {
-                        Assignment.AssignmentType type = (Assignment.AssignmentType) assignmentDTO.value();
+                        Assignment.AssignmentType type = (Assignment.AssignmentType) assignmentDTO.valueBeingChanged();
 
-                        schoolList.get(schoolName)
-                                .getClassroomByID(classroom.getId())
+                        assignment.getClassroom()
                                 .getAssignmentByID(assignment.getId())
                                 .setType(type);
                   }
 
                   case "due_date" -> {
-                        LocalDateTime ldt = (LocalDateTime) assignmentDTO.value();
-                        schoolList.get(schoolName)
-                                .getClassroomByID(classroom.getId())
+                        LocalDateTime ldt = (LocalDateTime) assignmentDTO.valueBeingChanged();
+
+                        assignment.getClassroom()
                                 .getAssignmentByID(assignment.getId())
                                 .setDueDate(ldt);
 
@@ -179,29 +258,23 @@ public class GuildWrapper
       public void updateProfessor(CommandEvent event, DatabaseDTO databaseDTO)
       {
             String update = databaseDTO.updateColumn();
-            Professor professor = (Professor) databaseDTO.obj();
+            Professor professor = (Professor) databaseDTO.objectBeingUpdated();
             School school = professor.getProfessorsSchool();
-            String schoolName = school.getName().toLowerCase();
-
-            String updatedElement = (String) databaseDTO.value();
+            String updatedElement = (String) databaseDTO.valueBeingChanged();
 
             switch (update)
             {
-                  case "first_name" -> {
-                        schoolList.get(schoolName)
-                                .getProfessorByID(professor.getID())
-                                .setFirstName(updatedElement);
-                  }
-                  case "last_name" -> {
-                        schoolList.get(schoolName)
-                                .getProfessorByID(professor.getID())
-                                .setLastName(updatedElement);
-                  }
-                  case "email_prefix" -> {
-                        schoolList.get(schoolName)
-                                .getProfessorByID(professor.getID())
-                                .setEmailPrefix(updatedElement);
-                  }
+                  case "first_name" -> professor.getProfessorsSchool()
+                          .getProfessorByID(professor.getId())
+                          .setFirstName(updatedElement);
+
+                  case "last_name" -> professor.getProfessorsSchool()
+                          .getProfessorByID(professor.getId())
+                          .setLastName(updatedElement);
+
+                  case "email_prefix" -> professor.getProfessorsSchool()
+                          .getProfessorByID(professor.getId())
+                          .setEmailPrefix(updatedElement);
             }
 
             DatabaseUtil.updateProfessor(databaseDTO, event.getSchoolbot());
@@ -215,14 +288,10 @@ public class GuildWrapper
             {
                   schoolbot.getJda().getRoleById(school.getRoleID()).delete().queue(
                           success ->
-                          {
-                                LOGGER.info("Successfully deleted role for {}", school.getName());
-                          },
+                                  LOGGER.info("Successfully deleted role for {}", school.getName()),
 
                           failure ->
-                          {
-                                LOGGER.warn("Could not delete role for {} ", school.getName(), failure);
-                          }
+                                  LOGGER.warn("Could not delete role for {} ", school.getName(), failure)
                   );
             }
             DatabaseUtil.removeSchool(schoolbot, school.getName());
@@ -240,8 +309,6 @@ public class GuildWrapper
 
       public boolean addProfessor(Schoolbot schoolbot, Professor professor)
       {
-
-
             int id = DatabaseUtil.addProfessor(schoolbot, professor);
 
             if (id == -1)
@@ -261,14 +328,16 @@ public class GuildWrapper
 
       public void removeClassroom(CommandEvent event, Classroom classroom)
       {
+
+            var jda = event.getJDA();
             classroom.getSchool().removeClass(classroom);
             classrooms.remove(classroom);
 
             if (classroom.getRoleID() != 0)
             {
-                  if (event.getJDA().getRoleById(classroom.getRoleID()) != null)
+                  if (jda.getRoleById(classroom.getRoleID()) != null)
                   {
-                        event.getJDA().getRoleById(classroom.getRoleID()).delete().queue(success ->
+                        jda.getRoleById(classroom.getRoleID()).delete().queue(success ->
                                         LOGGER.info("Successfully deleted role for {}", classroom.getName()),
                                 failure ->
                                         LOGGER.warn("Could not delete role for {} ", classroom.getName(), failure)
@@ -278,13 +347,13 @@ public class GuildWrapper
 
             if (classroom.getChannelID() != 0)
             {
-                  if (event.getJDA().getTextChannelById(classroom.getChannelID()) != null)
+                  if (jda.getTextChannelById(classroom.getChannelID()) != null)
                   {
-                        event.getJDA().getTextChannelById(classroom.getChannelID()).delete().queue(
+                        jda.getTextChannelById(classroom.getChannelID()).delete().queue(
                                 success ->
                                         LOGGER.info("Successfully deleted channel for {}", classroom.getName()),
                                 failure ->
-                                        LOGGER.warn("Could nto delete class for {} ", classroom.getName(), failure)
+                                        LOGGER.warn("Could not delete class for {} ", classroom.getName(), failure)
                         );
                   }
             }
@@ -336,6 +405,6 @@ public class GuildWrapper
 
       public List<School> getSchoolList()
       {
-            return new ArrayList<School>(schoolList.values());
+            return new ArrayList<>(schoolList.values());
       }
 }

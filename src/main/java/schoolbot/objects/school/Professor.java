@@ -28,7 +28,7 @@ public class Professor implements Paginatable
       private String lastName;
       private String fullName;
       private int age;
-      private int schoolID;
+      private int schoolId;
       private int id;
 
 
@@ -49,7 +49,7 @@ public class Professor implements Paginatable
             listOfClasses = new ArrayList<>();
       }
 
-      public Professor(@NotNull String firstName, @NotNull String lastName, @NotNull String emailPrefix, @NotNull int id, @NotNull School school)
+      public Professor(@NotNull String firstName, @NotNull String lastName, @NotNull String emailPrefix, int id, @NotNull School school)
       {
             this.firstName = firstName;
             this.lastName = lastName;
@@ -94,7 +94,7 @@ public class Professor implements Paginatable
             }
       }
 
-      public int getID()
+      public int getId()
       {
             return id;
       }
@@ -117,15 +117,14 @@ public class Professor implements Paginatable
             }
       }
 
-
-      public void setSchoolID(int schoolID)
-      {
-            this.schoolID = schoolID;
-      }
-
-      public int getSchoolID()
+      public int getSchoolId()
       {
             return getProfessorsSchool().getID();
+      }
+
+      public void setSchoolId(int schoolId)
+      {
+            this.schoolId = schoolId;
       }
 
 
@@ -234,23 +233,15 @@ public class Professor implements Paginatable
             this.professorsSchool = professorsSchool;
       }
 
-      public MessageEmbed getAsEmbed(Schoolbot schoolbot)
+      public MessageEmbed getAsEmbed(@NotNull Schoolbot schoolbot)
       {
             Role role = schoolbot.getJda().getRoleById(this.professorsSchool.getRoleID());
 
-            return new EmbedBuilder()
-                    .setTitle("Professor " + lastName)
-                    .addField("Professor Name", fullName, false)
-                    .addField("Email", email + " \n ***(These are assumed unless set otherwise)*** ", false)
-                    .addField("Office Hours", this.officeHours, false)
-                    .addField("Classes Taught", String.valueOf(listOfClasses.size()), false)
-                    .addField("Professor ID", String.valueOf(this.id), false)
-                    .setColor(role == null ? Color.BLUE : role.getColor())
-                    .setTimestamp(Instant.now())
+            return getAsEmbedBuilder(schoolbot)
                     .build();
       }
 
-      public EmbedBuilder getAsEmbedBuilder(Schoolbot schoolbot)
+      public EmbedBuilder getAsEmbedBuilder(@NotNull Schoolbot schoolbot)
       {
 
             Role role = schoolbot.getJda().getRoleById(this.professorsSchool.getRoleID());

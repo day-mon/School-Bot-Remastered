@@ -6,6 +6,7 @@ import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.util.Embed;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ public class Help extends Command
 
 
       @Override
-      public void run(CommandEvent event, @NotNull List<String> args)
+      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
             Map<String, Command> commands = event.getSchoolbot().getCommandHandler().getCommands();
             String command = args.get(0);
@@ -64,12 +65,10 @@ public class Help extends Command
 
             if (cmd.hasChildren())
             {
-                  List<MessageEmbed> embeds = null;
+                  List<MessageEmbed> embeds = new ArrayList<>();
                   cmd.getChildren()
-                          .forEach(c0mmand ->
-                          {
-                                embeds.add(c0mmand.getAsHelpEmbed().build());
-                          });
+                          .forEach(commandIt ->
+                                  embeds.add(commandIt.getAsHelpEmbed().build()));
 
                   event.sendAsPaginator(embeds);
 

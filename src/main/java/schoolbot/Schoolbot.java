@@ -1,6 +1,6 @@
 package schoolbot;
 
-import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
+import me.arynxd.button_utils.util.EventWaiter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.JDAInfo;
@@ -49,7 +49,7 @@ public class Schoolbot extends ListenerAdapter
             this.databaseHandler = new DatabaseHandler(this);
       }
 
-      public void build() throws LoginException, InterruptedException
+      public void build() throws LoginException
       {
             this.jda = JDABuilder.createDefault
                     (
@@ -74,8 +74,6 @@ public class Schoolbot extends ListenerAdapter
                     .setActivity(Activity.playing("building..."))
                     .setStatus(OnlineStatus.DO_NOT_DISTURB)
                     .build();
-
-
       }
 
       @Override

@@ -38,7 +38,7 @@ public class Dictionary extends Command
                   return;
             }
 
-            Document document = null;
+            Document document;
 
             try
             {
@@ -62,7 +62,7 @@ public class Dictionary extends Command
       {
 
 
-            String audioPronounce = "http://google.com";
+            String audioPronounce = "https://google.com";
             String pronounce = "N/A";
 
 

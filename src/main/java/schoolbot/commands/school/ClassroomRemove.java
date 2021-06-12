@@ -42,6 +42,8 @@ public class ClassroomRemove extends Command
             int stateToSwitch = 1;
 
 
+            // bug with class remove maybe.. not sure
+
             if (schools.isEmpty())
             {
                   Embed.error(event, "There is no valid schools you can delete.. Schools can only be deleted if they have no **classes** and **professors** assigned to it");
@@ -59,14 +61,12 @@ public class ClassroomRemove extends Command
                   if (classrooms.isEmpty())
                   {
                         Embed.error(event, "There are no classes are available to remove");
-                        return;
                   }
                   else if (classrooms.size() == 1)
                   {
                         event.sendMessage(classrooms.get(0).getAsEmbed(event.getSchoolbot()));
                         event.sendMessage("Are you sure you want to remove this class?");
                         event.getJDA().addEventListener(new ClassroomRemoveStateMachine(event, classrooms.get(0), 3));
-                        return;
                   }
                   else
                   {
@@ -83,14 +83,13 @@ public class ClassroomRemove extends Command
             }
       }
 
-      public class ClassroomRemoveStateMachine extends ListenerAdapter
+      public static class ClassroomRemoveStateMachine extends ListenerAdapter
       {
             private final long channelId, authorId;
             private final CommandEvent commandEvent;
             private List<School> schools;
             private List<Classroom> classroomList;
             private int state;
-            private School school;
             private Classroom classroom;
 
             public ClassroomRemoveStateMachine(@NotNull CommandEvent event, @Nullable List<Classroom> classrooms, @NotNull List<School> schools, int stateToSwitchTo)
@@ -141,7 +140,7 @@ public class ClassroomRemove extends Command
 
                               int index = Integer.parseInt(message) - 1;
 
-                              this.school = schools.get(index);
+                              School school = schools.get(index);
                               this.classroomList = school.getClassroomList()
                                       .stream()
                                       .filter(classroom -> !classroom.getAssignments().isEmpty())

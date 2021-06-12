@@ -18,7 +18,8 @@ public enum Emoji
       PURPLE_CIRCLE(":purple_circle:", "\u26AA", true),
       BLACK_CIRCLE(":black_circle:", "\u26AB", true),
       HOURGLASS(":hourglass:", "\u231B", false),
-      STOPWATCH(":stopwatch:", "\u23F1", false);
+      STOPWATCH(":stopwatch:", "\u23F1", false),
+      WARNING(":warning:", "\u26A0", false);
 
 
       private final String emote;

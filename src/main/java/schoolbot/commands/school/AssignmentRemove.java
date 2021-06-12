@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class AssignmentRemove extends Command
 {
       /**
-       * @param parent
+       * @param parent Parent command of [Assignment]
        */
       public AssignmentRemove(Command parent)
       {

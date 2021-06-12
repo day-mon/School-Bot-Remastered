@@ -57,7 +57,7 @@ public class SchoolEdit extends Command
       {
             private final long channelID, authorID;
             private final CommandEvent commandEvent;
-            private int state = 0;
+            private int state;
             private School school;
             private String updateColumn = "";
             private List<School> schoolList;
@@ -157,9 +157,7 @@ public class SchoolEdit extends Command
                               state = 4;
                         }
 
-                        case 4 -> {
-                              evaluateColumn(message, event);
-                        }
+                        case 4 -> evaluateColumn(message, event);
 
                   }
             }
@@ -221,15 +219,10 @@ public class SchoolEdit extends Command
 
                               commandEvent.updateSchool(commandEvent, new DatabaseDTO(school, updateColumn, message));
                         }
-                        case "url" -> {
-
-                              // TODO: Add valid url checks..
-                              commandEvent.updateSchool(commandEvent, new DatabaseDTO(school, updateColumn, message));
-                        }
-                        case "email_suffix" -> {
-                              // TODO: Add valid email checks...
-                              commandEvent.updateSchool(commandEvent, new DatabaseDTO(school, updateColumn, message));
-                        }
+                        case "url" -> // TODO: Add valid url checks..
+                                commandEvent.updateSchool(commandEvent, new DatabaseDTO(school, updateColumn, message));
+                        case "email_suffix" -> // TODO: Add valid email checks...
+                                commandEvent.updateSchool(commandEvent, new DatabaseDTO(school, updateColumn, message));
                         case "role_id" -> {
                               Message eventMessage = event.getMessage();
 

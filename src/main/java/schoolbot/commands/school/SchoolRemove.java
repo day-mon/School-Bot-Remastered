@@ -21,7 +21,7 @@ public class SchoolRemove extends Command
       {
             super(parent, "Removes a school given the name", "[school name]", 0);
             addPermissions(Permission.ADMINISTRATOR);
-            addSelfPermissions(Permission.MANAGE_ROLES);
+            addSelfPermissions(Permission.MANAGE_ROLES, Permission.MANAGE_CHANNEL);
             addFlags(CommandFlag.DATABASE);
       }
 

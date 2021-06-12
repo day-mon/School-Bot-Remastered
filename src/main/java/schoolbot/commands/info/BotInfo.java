@@ -28,7 +28,7 @@ public class BotInfo extends Command
 
             event.getChannel().sendMessage(
                     new EmbedBuilder()
-                            .setTitle("Schoolbot Information", "http://schoolbot.dev")
+                            .setTitle("Schoolbot Information", "https://schoolbot.dev")
                             .addField("JVM Version:", SystemInfo.getJavaVersion(), true)
                             .addField("JDA Version:", JDAInfo.VERSION, true)
                             .addBlankField(true)

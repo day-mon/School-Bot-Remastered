@@ -86,7 +86,7 @@ public class ProfessorEdit extends Command
       {
             private final long channelID, authorID;
             private final CommandEvent commandEvent;
-            private int state = 0;
+            private int state;
             private School school;
             private String updateColumn = "";
             private List<School> schoolList;
@@ -211,9 +211,7 @@ public class ProfessorEdit extends Command
                               state = 5;
                         }
 
-                        case 5 -> {
-                              evaluateColumn(message, event);
-                        }
+                        case 5 -> evaluateColumn(message, event);
 
                   }
             }
@@ -255,9 +253,7 @@ public class ProfessorEdit extends Command
                               }
                               commandEvent.updateProfessor(commandEvent, new DatabaseDTO(professor, updateColumn, message));
                         }
-                        case "email_prefix" -> {
-                              commandEvent.updateProfessor(commandEvent, new DatabaseDTO(professor, updateColumn, message));
-                        }
+                        case "email_prefix" -> commandEvent.updateProfessor(commandEvent, new DatabaseDTO(professor, updateColumn, message));
 
                         default -> {
                               Embed.error(event, "** %s ** is not a valid response", message);

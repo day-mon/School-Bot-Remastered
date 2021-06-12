@@ -16,6 +16,7 @@ import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
 import schoolbot.util.Embed;
+import schoolbot.util.Processor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -151,27 +152,16 @@ public class AssignmentAdd extends Command
                   switch (state)
                   {
                         case 1 -> {
-                              if (!Checks.isNumber(message))
+                              var success = Processor.validateMessage(event, schools);
+
+                              if (success != null)
                               {
-                                    Embed.error(event, """
-                                            ** %s ** is not a number
-                                            Please Enter a number
-                                            """, message);
-                                    return;
+                                    classroom.setSchool(success);
+
+                                    Embed.success(event, "** %s ** successfully selected", classroom.getSchool().getName());
+                                    channel.sendMessage("Would you like to continue?").queue();
+                                    state = 2;
                               }
-
-                              int pageNumber = Integer.parseInt(message);
-
-                              if (!Checks.between(pageNumber, schools.size()))
-                              {
-                                    Embed.error(event, "** %s ** was not one of the school ids...", message);
-                                    return;
-                              }
-
-                              classroom.setSchool(schools.get(pageNumber - 1));
-                              Embed.success(event, "** %s ** successfully selected", classroom.getSchool().getName());
-                              channel.sendMessage("Would you like to continue?").queue();
-                              state = 2;
                         }
 
 
@@ -351,13 +341,14 @@ public class AssignmentAdd extends Command
                                     int hour = Integer.parseInt(time[0]);
                                     int minute = Integer.parseInt(time[1].replaceAll("pm", ""));
 
+                                    // TODO: Fix bug with time  being 12
+
                                     if (hour == 12)
                                     {
-                                          Embed.error(event, "That doesnt make sense.... Please input a valid date");
-                                          return;
+                                          hour = -12;
                                     }
 
-                                    assignment.setDueDate(LocalDateTime.of(date, LocalTime.of((12 + hour), minute)));
+                                    assignment.setDueDate(LocalDateTime.of(date, LocalTime.of((hour + 12), minute)));
                               }
 
                               commandEvent.addAssignment(commandEvent, assignment);

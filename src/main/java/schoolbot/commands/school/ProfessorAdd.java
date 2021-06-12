@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import schoolbot.Schoolbot;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
@@ -45,7 +44,6 @@ public class ProfessorAdd extends Command
             private final long channelId, authorId;
             private final List<School> schools;
             private int state = 0;
-            private final Schoolbot schoolbot;
             private final Professor professor;
             private final CommandEvent commandEvent;
             int schoolID = 0;
@@ -56,7 +54,6 @@ public class ProfessorAdd extends Command
                   this.schools = schools;
                   this.channelId = event.getChannel().getIdLong();
                   this.authorId = event.getUser().getIdLong();
-                  this.schoolbot = event.getSchoolbot();
                   this.commandEvent = event;
                   professor = new Professor();
             }

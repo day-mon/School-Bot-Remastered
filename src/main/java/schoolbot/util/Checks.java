@@ -1,13 +1,18 @@
 package schoolbot.util;
 
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
 import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.misc.StateMachine;
 import schoolbot.objects.school.Classroom;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +28,18 @@ public class Checks
       public static boolean isNumber(String number)
       {
             return number.matches("-?\\d+(\\.\\d+)?");
+      }
+
+      public static int isNum(String number)
+      {
+            try
+            {
+                  return Integer.parseInt(number);
+            }
+            catch (Exception e)
+            {
+                  return -1;
+            }
       }
 
       public static boolean allMatchesNumber(String message)
@@ -62,18 +79,18 @@ public class Checks
             }
       }
 
-      public static boolean checkValidDate(String potentialDate)
+      public static LocalDate checkValidDate(String potentialDate)
       {
-            LocalDate ld;
+
             try
             {
-                  ld = LocalDate.parse(potentialDate, DateTimeFormatter.ofPattern("M/d/yyyy"));
-                  return true;
+                  LocalDate ld = LocalDate.parse(potentialDate, DateTimeFormatter.ofPattern("M/d/yyyy"));
+                  return ld;
             }
             catch (Exception e)
             {
                   e.printStackTrace();
-                  return false;
+                  return null;
             }
       }
 
@@ -84,7 +101,42 @@ public class Checks
             if (time.toLowerCase().contains("am") && time.toLowerCase().contains("pm")) return false;
             if (time.split(":").length != 2) return false;
             return isNumber(time.replaceAll(":", "")
-                    .replaceAll(time.contains("am") ? "am" : "pm", ""));
+                    .replaceAll(time.toLowerCase().contains("am") ? "am" : "pm", ""));
+      }
+
+      public static LocalDateTime validTime(GuildMessageReceivedEvent event, LocalDate date)
+      {
+            String time = event.getMessage().getContentRaw();
+
+            if (!time.contains(":")) return null;
+            if (!(time.toLowerCase().contains("pm") || time.toLowerCase().contains("am"))) return null;
+            if (time.toLowerCase().contains("am") && time.toLowerCase().contains("pm")) return null;
+            if (time.split(":").length != 2) return null;
+            if (!isNumber(time.replaceAll(":", "")
+                    .replaceAll(time.toLowerCase().contains("am") ? "am" : "pm", ""))) return null;
+
+            String[] t = time.split(":");
+
+
+            if (time.toLowerCase().contains("am"))
+            {
+                  int hour = Integer.parseInt(t[0]);
+                  int minute = Integer.parseInt(t[1].replaceAll("am", ""));
+
+                  return LocalDateTime.of(date, LocalTime.of(hour, minute));
+            }
+            else
+            {
+                  int hour = Integer.parseInt(t[0]);
+                  int minute = Integer.parseInt(t[1].replaceAll("pm", ""));
+
+                  if (hour == 12)
+                  {
+                        return null;
+                  }
+
+                  return LocalDateTime.of(date, LocalTime.of((12 + hour), minute));
+            }
       }
 
       public static Classroom messageSentFromClassChannel(CommandEvent event)
@@ -103,17 +155,60 @@ public class Checks
             if (classChannels.contains(textChanel))
             {
                   // Get class room
-                  Classroom classroom = classroomList
+
+                  return classroomList
                           .stream()
                           .filter(clazzroom -> clazzroom.getChannelID() == textChanel)
                           .findFirst()
                           .orElseThrow(() -> new IllegalStateException("Class does not exist"));
+            }
+            return null;
+      }
 
+      /**
+       * Returns if the event contains the same user and channel as the base event
+       * The event argument is the event fired when a message is sent in a guild.
+       * The IDs field are expected to be channelIDs and a userID
+       * The machine field is the current state machine that we are checking
+       *
+       * @param event   GuildMessageReceivedEvent anticipated to be respond event
+       * @param machine The state machine that we are using
+       * @param ids     Channel ID, User ID
+       * @return If the event contains same user and channel as base event false otherwise
+       */
+      public static <S extends StateMachine> boolean eventMeetsPrerequisites(@NotNull GuildMessageReceivedEvent event, S machine, Long... ids)
+      {
+            var jda = event.getJDA();
 
-                  return classroom;
+            if (ids.length != 2)
+            {
+                  LOGGER.warn("You passed too many or not enough IDs through this function!");
+                  jda.removeEventListener(machine);
+                  return false;
             }
 
-            return null;
+
+            long channelId = ids[0];
+            long userId = ids[1];
+            String message = event.getMessage().getContentRaw().toLowerCase();
+
+
+            var sameUser = event.getChannel().getIdLong() == channelId
+                           && event.getAuthor().getIdLong() == userId;
+
+
+            if (!sameUser)
+            {
+                  return false;
+            }
+
+            if (message.equalsIgnoreCase("stop") || message.equalsIgnoreCase("exit"))
+            {
+                  jda.removeEventListener(machine);
+                  return false;
+            }
+
+            return true;
       }
 
       public static List<Long> validRoleCheck(CommandEvent event)
@@ -128,7 +223,7 @@ public class Checks
                     .getRoles()
                     .stream()
                     .map(Role::getIdLong)
-                    .filter(validRolez -> Collections.frequency(classRoles, validRolez) > 1)
+                    .filter(validRoles -> Collections.frequency(classRoles, validRoles) > 1)
                     .collect(Collectors.toList());
       }
 

@@ -4,6 +4,8 @@ package schoolbot.objects.school;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -222,9 +224,6 @@ public class School implements Paginatable
             return URL;
       }
 
-      /**
-       * @param name
-       */
       public void setName(String name)
       {
             this.name = name;
@@ -245,7 +244,7 @@ public class School implements Paginatable
             this.isPittSchool = isPittSchool;
       }
 
-      public MessageEmbed getAsEmbed(Schoolbot schoolbot)
+      public MessageEmbed getAsEmbed(@NotNull Schoolbot schoolbot)
       {
             Role role = schoolbot.getJda().getRoleById(this.roleID);
 
@@ -362,9 +361,14 @@ public class School implements Paginatable
             this.classroomList = classroomList;
       }
 
-      public EmbedBuilder getAsEmbedBuilder(Schoolbot schoolbot)
+      public EmbedBuilder getAsEmbedBuilder(@NotNull Schoolbot schoolbot)
       {
             Role role = schoolbot.getJda().getRoleById(this.roleID);
+
+            if (URL.isBlank() || URL.isBlank() || URL == null)
+            {
+                  this.URL = "https://schoolbot.dev";
+            }
 
             return new EmbedBuilder()
                     .setTitle(Emoji.BOOKS.getAsChat() + " " + this.name + " " + Emoji.BOOKS.getAsChat(), URL)
@@ -379,6 +383,7 @@ public class School implements Paginatable
 
       public void addPittClass(CommandEvent event, Classroom schoolClass)
       {
+
             String save = "";
             MessageChannel channel = event.getChannel();
             Document document;
@@ -458,6 +463,7 @@ public class School implements Paginatable
             schoolClass.setRoleID(role.getIdLong());
             schoolClass.setChannelID(textChannel.getIdLong());
 
+
             for (int left = 1, right = 2; right <= elementsRight.size() - 1; left++, right++)
             {
 
@@ -496,7 +502,6 @@ public class School implements Paginatable
                         case "Location" -> schoolClass.setLocation(textRight);
                         case "Campus" -> {
                               var success = evaluateCampus(schoolClass, textRight);
-
                               if (!success)
                               {
                                     Embed.error(event, "");
@@ -508,6 +513,8 @@ public class School implements Paginatable
                   }
             }
 
+
+            schoolClass.setWasAutoFilled(true);
 
             int classCheck = DatabaseUtil.addClassPitt(event, schoolClass);
             if (classCheck == -1)
@@ -523,6 +530,8 @@ public class School implements Paginatable
             this.classroomList.add(schoolClass);
             this.professorList.add(schoolClass.getProfessor());
             channel.sendMessage(schoolClass.getAsEmbed(event.getSchoolbot())).queue();
+
+
       }
 
 
@@ -551,11 +560,20 @@ public class School implements Paginatable
             return roleID;
       }
 
+
+      /**
+       * Returns professor if found null if not
+       * The id parameter is the professors id in correlation to the database
+       *
+       * @param id A potential professor id
+       * @return Professor if found <b>NULL</b> if not found
+       */
+      @Nullable
       public Professor getProfessorByID(int id)
       {
             return professorList
                     .stream()
-                    .filter(professor -> professor.getID() == id)
+                    .filter(professor -> professor.getId() == id)
                     .findFirst()
                     .orElse(null);
       }

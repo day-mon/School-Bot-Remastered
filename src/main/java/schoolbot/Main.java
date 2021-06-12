@@ -23,9 +23,5 @@ public class Main
             {
                   MAIN_LOGGER.error("Token is invalid");
             }
-            catch (InterruptedException e)
-            {
-                  MAIN_LOGGER.debug("Schoolbot was interrupted on start up. Please try again!");
-            }
       }
 }

@@ -4,7 +4,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
@@ -27,7 +26,7 @@ public class UserInfo extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
-            MessageChannel channel = event.getChannel();
+            var channel = event.getChannel();
 
             if (args.isEmpty())
             {
@@ -60,7 +59,7 @@ public class UserInfo extends Command
 
       private void displayInfo(Member member, MessageChannel channel)
       {
-            User user = member.getUser();
+            var user = member.getUser();
 
             channel.sendMessage(new EmbedBuilder()
                     .setTitle("Information on **" + user.getName() + "** ")
@@ -70,7 +69,7 @@ public class UserInfo extends Command
                     .addField("User ID", member.getId(), false)
                     .addField("Roles", member.getRoles().stream().map(Role::getAsMention).collect(Collectors.joining(", ")), false)
                     .setThumbnail(user.getAvatarUrl())
-                    .setColor(Color.BLUE)
+                    .setColor(Color.black)
                     .build()).queue();
       }
 }

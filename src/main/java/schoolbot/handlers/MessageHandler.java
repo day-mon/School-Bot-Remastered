@@ -73,25 +73,23 @@ public class MessageHandler
                           return new Triple(messageFuture, inputStreamFuture, allFutures);
                     })
                     .forEach(trip ->
-                    {
-                          trip.val3.whenCompleteAsync((empty, object) ->
-                          {
-                                var sentMessage = trip.val1.getNow(null);
-                                var inputStream = trip.val2.getNow(null);
+                            trip.val3.whenCompleteAsync((empty, object) ->
+                            {
+                                  var sentMessage = trip.val1.getNow(null);
+                                  var inputStream = trip.val2.getNow(null);
 
 
-                                if (sentMessage == null || inputStream == null)
-                                {
-                                      event.getChannel().sendMessage("Could not upload to pastecord..").queue();
-                                      return;
-                                }
+                                  if (sentMessage == null || inputStream == null)
+                                  {
+                                        event.getChannel().sendMessage("Could not upload to pastecord..").queue();
+                                        return;
+                                  }
 
-                                var urlToSend = "https://pastecord.com/" + sendPost(inputStream);
-                                sentMessage.editMessageFormat("File uploaded for %s [%s] ", event.getAuthor().getAsMention(), urlToSend).queue();
-                                message.delete().queue();
+                                  var urlToSend = "https://pastecord.com/" + sendPost(inputStream);
+                                  sentMessage.editMessageFormat("File uploaded for %s [%s] ", event.getAuthor().getAsMention(), urlToSend).queue();
+                                  message.delete().queue();
 
-                          });
-                    });
+                            }));
       }
 
 

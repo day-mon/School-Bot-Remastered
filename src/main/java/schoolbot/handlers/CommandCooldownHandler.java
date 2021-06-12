@@ -50,12 +50,12 @@ public class CommandCooldownHandler
 
       public static void addCooldown(Member member, Command command)
       {
-            /**
-             * Will put a CoolCommand object
-             *      Contains: userID
-             *                guildID
-             *                Command
-             * With the current time + the cooldown
+            /*
+              Will put a CoolCommand object
+                   Contains: userID
+                             guildID
+                             Command
+              With the current time + the cooldown
              */
             COOLDOWN_MAP.put(new CooledCommand(member, command), System.currentTimeMillis() + command.getCooldown());
       }

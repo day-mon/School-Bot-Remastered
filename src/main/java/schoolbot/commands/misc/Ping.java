@@ -26,14 +26,12 @@ public class Ping extends Command
 
             jda.getRestPing()
                     .queue(restPing ->
-                    {
-                          event.sendMessage(
-                                  new EmbedBuilder()
-                                          .addField("Gateway Ping", Emoji.HOURGLASS.getAsChat() + " " + jda.getGatewayPing() + "ms", false)
-                                          .addField("Rest Ping", Emoji.STOPWATCH.getAsChat() + " " + restPing + "ms", false)
-                                          .setFooter("Ping tested by " + member.getNickname(), member.getUser().getAvatarUrl())
-                                          .build()
-                          );
-                    });
+                            event.sendMessage(
+                                    new EmbedBuilder()
+                                            .addField("Gateway Ping", Emoji.HOURGLASS.getAsChat() + " " + jda.getGatewayPing() + "ms", false)
+                                            .addField("Rest Ping", Emoji.STOPWATCH.getAsChat() + " " + restPing + "ms", false)
+                                            .setFooter("Ping tested by " + member.getNickname(), member.getUser().getAvatarUrl())
+                                            .build()
+                            ));
       }
 }

@@ -76,24 +76,10 @@ public class ConfigHandler
                   String line;
                   while ((line = br.readLine()) != null)
                   {
-                        /**
-                         * Read values;
-                         */
                         if (!line.contains("=") || line.startsWith("*"))
                         {
-                              /**
-                               * Not a valid config lone
-                               */
                               continue;
                         }
-                        /**
-                         * splits the string by the equal side
-                         * Ex:
-                         * TESTKEY=TESTVALUE
-                         * elementSplit[0]=TESTKEY;
-                         * elementSplit[1]=TESTVALUE;
-                         *
-                         */
                         String[] elementSplit = line.split("=");
                         values.add(new ConfigurationValue(elementSplit[0], elementSplit[1]));
                   }
@@ -109,9 +95,6 @@ public class ConfigHandler
 
       public String getString(ConfigOption configOption)
       {
-            /**
-             * Thread safety, dont be silly, dont mess with jda P_P
-             */
             synchronized (configValues)
             {
                   for (ConfigurationValue configurationValue : configValues)
@@ -144,7 +127,7 @@ public class ConfigHandler
             }
             catch (Exception exception)
             {
-                  schoolbot.getLogger().error("CONFIG ERROR HAS OCCURED", exception);
+                  schoolbot.getLogger().error("CONFIG ERROR HAS OCCURRED", exception);
 
                   exception.printStackTrace();
             }

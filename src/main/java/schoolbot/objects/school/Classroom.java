@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
+import org.jetbrains.annotations.NotNull;
 import schoolbot.Constants;
 import schoolbot.Schoolbot;
 import schoolbot.objects.misc.Paginatable;
@@ -47,6 +48,8 @@ public class Classroom implements Paginatable
       private School school;
       private Professor professor;
 
+      private boolean wasAutoFilled;
+
       private List<Assignment> assignments;
 
 
@@ -58,6 +61,17 @@ public class Classroom implements Paginatable
             this.description = "N/A";
             assignments = new ArrayList<>();
       }
+
+      public Classroom(long guildId)
+      {
+            this.guildID = guildId;
+            this.channelID = 0;
+            this.roleID = 0;
+            this.prerequisite = "None";
+            this.description = "N/A";
+            assignments = new ArrayList<>();
+      }
+
 
       public Classroom(long channelID, long roleID, String name)
       {
@@ -76,10 +90,11 @@ public class Classroom implements Paginatable
       }
 
 
-      public Classroom(String description, String time, String location, String classLevel, String room, String className, String classIdentifier, String term, Date startDate, Date endDate, int schoolID, int professorID, int number, int id, long roleID, long channelID, long guildID, School school, Professor professor)
+      public Classroom(String description, String time, String location, String classLevel, String room, String className, String classIdentifier, String term, Date startDate, Date endDate, int schoolID, int professorID, int number, int id, long roleID, long channelID, long guildID, School school, Professor professor, boolean wasAutoFilled)
       {
             this.description = description;
             this.time = time;
+            this.wasAutoFilled = wasAutoFilled;
             this.location = location;
             this.level = classLevel;
             this.room = room;
@@ -118,7 +133,7 @@ public class Classroom implements Paginatable
 
       public int getProfessorID()
       {
-            return this.professor.getID();
+            return this.professor.getId();
       }
 
       public String getInstructor()
@@ -243,6 +258,16 @@ public class Classroom implements Paginatable
                     .toLocalDate();
       }
 
+      public boolean isAutoFilled()
+      {
+            return wasAutoFilled;
+      }
+
+      public void setWasAutoFilled(boolean wasAutoFilled)
+      {
+            this.wasAutoFilled = wasAutoFilled;
+      }
+
       public LocalDate getEndDate()
       {
             return endDate;
@@ -335,7 +360,7 @@ public class Classroom implements Paginatable
             return this.school;
       }
 
-      public boolean addAssignment(Schoolbot schoolbot, Assignment assignment)
+      public void addAssignment(Schoolbot schoolbot, Assignment assignment)
       {
             assignments.add(assignment);
             int assignmentID = DatabaseUtil.addAssignment(schoolbot, assignment);
@@ -343,13 +368,12 @@ public class Classroom implements Paginatable
             if (assignmentID == -1)
             {
                   assignments.remove(assignment);
-                  return false;
+                  return;
             }
             assignment.setId(assignmentID);
             // Times in minutes to remind (1 day, 1 hour, 30 minutes, 10 minutes)
             DatabaseUtil.addAssignmentReminder(schoolbot, assignment, List.of(1440, 60, 30, 10, 0));
 
-            return true;
       }
 
       public void removeAssignment(Schoolbot schoolbot, Assignment assignment)
@@ -389,7 +413,7 @@ public class Classroom implements Paginatable
             this.URL = URL;
       }
 
-      public MessageEmbed getAsEmbed(Schoolbot schoolbot)
+      public MessageEmbed getAsEmbed(@NotNull Schoolbot schoolbot)
       {
             Role role = schoolbot.getJda().getRoleById(this.roleID);
 
@@ -412,7 +436,7 @@ public class Classroom implements Paginatable
       }
 
 
-      public EmbedBuilder getAsEmbedBuilder(Schoolbot schoolbot)
+      public EmbedBuilder getAsEmbedBuilder(@NotNull Schoolbot schoolbot)
       {
             Role role = schoolbot.getJda().getRoleById(this.roleID);
             TextChannel textChannel = schoolbot.getJda().getTextChannelById(this.channelID);

@@ -36,7 +36,7 @@ public class Google extends Command
                   {
                         Document doc = Jsoup.connect(baseUrl)
                                 .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
-                                .referrer("http://www.google.com")
+                                .referrer("https://www.google.com")
                                 .get();
 
                         String toSend = String.format("http://%s - %s - %s", doc.getElementsByClass("link-text").get(0).text(), doc.select("a[href]").get(0).text(), doc.getElementsByClass("result-snippet").get(0).text());
@@ -63,7 +63,7 @@ public class Google extends Command
                   {
                         Document doc = Jsoup.connect(baseUrl)
                                 .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
-                                .referrer("http://www.google.com")
+                                .referrer("https://www.google.com")
                                 .get();
 
                         String toSend = String.format("http://%s - %s - %s", doc.getElementsByClass("link-text").get(num).text(), doc.select("a[href]").get(num).text(), doc.getElementsByClass("result-snippet").get(num).text());

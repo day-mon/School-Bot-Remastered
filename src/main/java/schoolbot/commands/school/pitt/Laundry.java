@@ -60,12 +60,12 @@ public class Laundry extends Command
 
             String laundryURL = BASE_URL + LAUNDRY_API_CALLS.get(potLaundryName);
 
-            Document doc = null;
+            Document doc;
             try
             {
                   doc = Jsoup.connect(laundryURL)
                           .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
-                          .referrer("http://www.google.com")
+                          .referrer("https://www.google.com")
                           .ignoreContentType(true)
                           .get();
             }

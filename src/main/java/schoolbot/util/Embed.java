@@ -71,7 +71,7 @@ public class Embed
 
       public static void notANumberError(GuildMessageReceivedEvent event, String message)
       {
-            error(event, "** %s ** is not a number.. Try again", message);
+            error(event, "** %s ** is not a number. Please retry with a valid entry", message);
       }
 
 
@@ -85,11 +85,33 @@ public class Embed
                     .build()).queue();
       }
 
+      public static void warn(GuildMessageReceivedEvent event, String message, Object... args)
+      {
+            var channel = event.getChannel();
+
+            channel.sendMessage(new EmbedBuilder()
+                    .setTitle(Emoji.WARNING.getAsChat() + " Warning " + Emoji.WARNING.getAsChat()).setColor(Color.YELLOW)
+                    .setDescription(String.format(message, args))
+                    .build()).queue();
+      }
+
+      public static void warn(GuildMessageReceivedEvent event, String message)
+      {
+            var channel = event.getChannel();
+
+            channel.sendMessage(new EmbedBuilder()
+                    .setTitle(Emoji.WARNING.getAsChat() + " Warning " + Emoji.WARNING.getAsChat())
+                    .setColor(Color.YELLOW)
+                    .setDescription(message)
+                    .build()).queue();
+      }
+
+
       public static void error(CommandEvent event, String message, Object... args)
       {
             event.sendMessage(new EmbedBuilder()
                     .setColor(Color.RED)
-                    .setDescription(Emoji.CROSS_MARK.getAsChat() + " " + String.format(message, args))
+                    .setDescription(String.format(message, args))
                     .build());
       }
 
@@ -101,7 +123,9 @@ public class Embed
                     .collect(Collectors.toList());
 
             StringBuilder perms = new StringBuilder();
-            permissionsMemberHas.forEach(f -> perms.append(" `").append(f).append("` "));
+            permissionsMemberHas.forEach(permission -> perms.append(" `")
+                    .append(permission)
+                    .append("` "));
 
             event.sendMessage("This command requires you to have at least this permission" + perms + "in order to execute it!");
       }

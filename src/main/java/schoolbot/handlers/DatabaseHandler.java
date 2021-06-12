@@ -21,13 +21,11 @@ public class DatabaseHandler
 {
       private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
       private final ConfigHandler configHandler;
-      private final Schoolbot schoolbot;
       private final HikariDataSource pool;
 
       public DatabaseHandler(Schoolbot schoolbot)
       {
             this.configHandler = schoolbot.getConfigHandler();
-            this.schoolbot = schoolbot;
             this.pool = initHikari();
             initTables();
       }
@@ -43,14 +41,14 @@ public class DatabaseHandler
 
             /*
                     The property controls the maximum size that the pool is allowed to reach, including both idle and in-use connections.
-                    Basically this value will determine the maximum number of actual connections to the database backend.
+                    Basically this valueBeingChanged will determine the maximum number of actual connections to the database backend.
                     When the pool reaches this size, and no idle connections are available,
                     calls to getConnection() will block for up to connectionTimeout milliseconds before timing out.
              */
             hikariConfig.setMaximumPoolSize(20);
             /*
                     The property controls the minimum number of idle connections that HikariCP tries to maintain in the pool, including both idle and in-use connections.
-                    If the idle connections dip below this value, HikariCP will make a best effort to restore them quickly and efficiently.
+                    If the idle connections dip below this valueBeingChanged, HikariCP will make a best effort to restore them quickly and efficiently.
 
 
              */
@@ -58,9 +56,9 @@ public class DatabaseHandler
             /*
                      Set the maximum number of milliseconds that a client will wait for a connection from the pool.
                      If this time is exceeded without a connection becoming available, a SQLException will be thrown from DataSource.getConnection().
-                     10 Seconds = 10000 ms
+                     15 Seconds = 15000 ms
              */
-            hikariConfig.setConnectionTimeout(10000);
+            hikariConfig.setConnectionTimeout(15000);
 
 
             try
@@ -108,7 +106,11 @@ public class DatabaseHandler
                   {
                         fileName = fileName.split("\\.")[0];
                         var sqlTable = DatabaseUtil.class.getResourceAsStream("/sql/" + fileName + ".sql");
-                        getDbConnection().createStatement().execute(IOUtils.toString(sqlTable, StandardCharsets.UTF_8));
+
+                        if (sqlTable != null)
+                        {
+                              getDbConnection().createStatement().execute(IOUtils.toString(sqlTable, StandardCharsets.UTF_8));
+                        }
                   }
                   catch (Exception e)
                   {
@@ -124,8 +126,9 @@ public class DatabaseHandler
             {
                   return pool.getConnection();
             }
-            catch (SQLException throwables)
+            catch (SQLException throwable)
             {
+                  LOGGER.error("Database Error has occurred", throwable);
                   return getDbConnection();
             }
       }

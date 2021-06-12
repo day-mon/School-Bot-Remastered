@@ -33,7 +33,7 @@ public class MainListener implements EventListener
                   String message = event.getMessage().getContentRaw();
                   User author = event.getAuthor();
 
-                  schoolbot.getLogger().info("[{}] -> {} ({}) has sent the message: {} ", event.getGuild().getName(), author.getAsTag(), author.getId(), message);
+                  LOGGER.info("[{}] -> {} ({}) has sent the message: {} ", event.getGuild().getName(), author.getAsTag(), author.getId(), message);
 
 
                   schoolbot.getMessageHandler().handle(event);

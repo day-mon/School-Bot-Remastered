@@ -2,8 +2,6 @@ package schoolbot.commands.school;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -13,11 +11,13 @@ import org.slf4j.LoggerFactory;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.misc.DatabaseDTO;
+import schoolbot.objects.misc.StateMachine;
 import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
 import schoolbot.util.Embed;
+import schoolbot.util.Processor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -39,6 +39,8 @@ public class AssignmentEdit extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
+            // TODO: If there is one of anything automatically select it instead of akign
+
             JDA jda = event.getJDA();
 
             List<School> schoolList = new ArrayList<>();
@@ -127,7 +129,7 @@ public class AssignmentEdit extends Command
       }
 
 
-      public static class AssignmentEditStateMachine extends ListenerAdapter
+      public static class AssignmentEditStateMachine extends ListenerAdapter implements StateMachine
       {
 
             private final CommandEvent commandEvent;
@@ -165,14 +167,17 @@ public class AssignmentEdit extends Command
             @Override
             public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event)
             {
-                  if (event.getAuthor().getIdLong() != authorID) return;
-                  if (event.getChannel().getIdLong() != channelID) return;
 
+                  if (!Checks.eventMeetsPrerequisites(event, this, channelID, authorID))
+                  {
+                        return;
+                  }
 
-                  MessageChannel channel = event.getChannel();
                   String message = event.getMessage().getContentRaw();
-                  JDA jda = event.getJDA();
-                  Guild guild = event.getGuild();
+
+                  var channel = event.getChannel();
+                  var jda = event.getJDA();
+                  var guild = event.getGuild();
 
 
                   if (message.equalsIgnoreCase("stop"))
@@ -185,76 +190,53 @@ public class AssignmentEdit extends Command
                   switch (state)
                   {
                         case 1 -> {
-                              if (!Checks.isNumber(message))
+
+                              var success = Processor.validateMessage(event, schools);
+
+
+                              if (success == null)
                               {
-                                    Embed.error(event, """
-                                            ** %s ** is not a number
-                                            Please Enter a number
-                                            """, message);
                                     return;
                               }
 
-                              int pageNumber = Integer.parseInt(message);
 
-                              if (!Checks.between(pageNumber, schools.size()))
-                              {
-                                    Embed.error(event, "** %s ** was not one of the school ids...", message);
-                                    return;
-                              }
+                              classroomList = success.getClassroomList();
 
-                              School school = schools.get(pageNumber - 1);
-                              classroomList = school.getClassroomList();
-                              channel.sendMessageFormat("Now that we have selected ** %s **, I will now need the class you want to the assignment", school.getName()).queue();
-                              commandEvent.sendAsPaginatorWithPageNumbers(school.getClassroomList());
+
+                              channel.sendMessageFormat("Now that we have selected ** %s **, I will now need the class you want to the assignment", success.getName()).queue();
+                              commandEvent.sendAsPaginatorWithPageNumbers(success.getClassroomList());
                               state = 2;
                         }
 
                         case 2 -> {
-                              int classSize = classroomList.size();
-                              if (!Checks.isNumber(message))
+
+                              var success = Processor.validateMessage(event, classroomList);
+
+                              if (success == null)
                               {
-                                    Embed.error(event, """
-                                            ** %s ** is not a number
-                                            Please Enter a number
-                                            """, message);
                                     return;
                               }
 
-                              int pageNumber = Integer.parseInt(message);
+                              this.assignmentList = success.getAssignments();
 
-                              if (!Checks.between(pageNumber, classSize))
-                              {
-                                    Embed.error(event, "** %s ** was not one of the school ids...", message);
-                                    return;
-                              }
+                              channel.sendMessageFormat("Now that we have selected ** %s **, I will now need the assignment you would like to edit", success.getName()).queue();
 
-                              Classroom classroom = classroomList.get(pageNumber - 1);
-                              this.assignmentList = classroom.getAssignments();
-                              channel.sendMessageFormat("Now that we have selected ** %s **, I will now need the assignment you would like to edit", classroom.getName()).queue();
+
                               commandEvent.sendAsPaginatorWithPageNumbers(assignmentList);
                               state = 3;
                         }
 
                         case 3 -> {
-                              int assignmentSize = assignmentList.size();
-                              if (!Checks.isNumber(message))
+
+                              var success = Processor.validateMessage(event, assignmentList);
+
+                              if (success == null)
                               {
-                                    Embed.error(event, """
-                                            ** %s ** is not a number
-                                            Please Enter a number
-                                            """, message);
                                     return;
                               }
 
-                              int pageNumber = Integer.parseInt(message);
+                              assignment = success;
 
-                              if (!Checks.between(pageNumber, assignmentSize))
-                              {
-                                    Embed.error(event, "** %s ** was not one of the page numbers.", message);
-                                    return;
-                              }
-
-                              assignment = assignmentList.get(pageNumber - 1);
                               channel.sendMessageFormat("What attribute of ** %s ** would you like to edit", assignment.getName()).queue();
                               channel.sendMessage("""
                                       ```
@@ -432,8 +414,8 @@ public class AssignmentEdit extends Command
 
                                     if  (!localDateTime.isAfter(LocalDateTime.now()))
                                     {
-                                          String formatedTime =  localDateTime.format(DateTimeFormatter.ofPattern("M/dd/yyyy @ HH:mm"));
-                                          Embed.error(event, "** %s ** is not a valid date.. Try again", formatedTime);
+                                          String formattedTime = localDateTime.format(DateTimeFormatter.ofPattern("M/dd/yyyy @ HH:mm"));
+                                          Embed.error(event, "** %s ** is not a valid date.. Try again", formattedTime);
                                           return;
                                     }
 
@@ -445,16 +427,15 @@ public class AssignmentEdit extends Command
 
                                     if (hour == 12)
                                     {
-                                          Embed.error(event, "That doesnt make sense.... Please input a valid date");
-                                          return;
+                                          hour = -12;
                                     }
 
                                     localDateTime = LocalDateTime.of(assignment.getDueDate().toLocalDate(), LocalTime.of((12 + hour), minute));
 
                                     if  (!localDateTime.isAfter(LocalDateTime.now()))
                                     {
-                                          String formatedTime =  localDateTime.format(DateTimeFormatter.ofPattern("M/dd/yyyy @ HH:mm"));
-                                          Embed.error(event, "** %s ** is not a valid date.. Try again", formatedTime);
+                                          String formattedTime = localDateTime.format(DateTimeFormatter.ofPattern("M/dd/yyyy @ HH:mm"));
+                                          Embed.error(event, "** %s ** is not a valid date.. Try again", formattedTime);
                                           return;
                                     }
 

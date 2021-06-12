@@ -63,12 +63,11 @@ public class CommandHandler
 
                         Object instance = constructors[0].newInstance();
 
-                        if (!(instance instanceof Command))
+                        if (!(instance instanceof Command command))
                         {
                               CMD_HANDLER_LOGGER.warn("{} is a non command class found in the commands package", cls.getSimpleName());
                               continue;
                         }
-                        Command command = (Command) instance;
 
 
                         commandMap.put(command.getName(), command);
@@ -125,7 +124,6 @@ public class CommandHandler
             Command com = commands.get(alias);
 
 
-
             if (message.contains("”"))
             {
                   Embed.error(event,
@@ -151,8 +149,10 @@ public class CommandHandler
             // If someone sends a parent command or doesnt have any children
             if (!com.hasChildren() || filteredArgs.isEmpty())
             {
+
                   executor.execute(() -> com.process(commandEvent));
                   return;
+
             }
 
             com.getChildren()

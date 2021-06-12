@@ -189,14 +189,14 @@ public class Assignment implements Comparable<Assignment>, Paginatable
       }
 
       @Override
-      public MessageEmbed getAsEmbed(Schoolbot schoolbot)
+      public MessageEmbed getAsEmbed(@NotNull Schoolbot schoolbot)
       {
             return getAsEmbedBuilder(schoolbot)
                     .build();
       }
 
       @Override
-      public EmbedBuilder getAsEmbedBuilder(Schoolbot schoolbot)
+      public EmbedBuilder getAsEmbedBuilder(@NotNull Schoolbot schoolbot)
       {
             Role role = schoolbot.getJda().getRoleById(this.classroom.getRoleID());
             return new EmbedBuilder()
@@ -219,7 +219,7 @@ public class Assignment implements Comparable<Assignment>, Paginatable
             EXTRA_CREDIT("Exam Credit"),
             PAPER("PAPER");
 
-            String assignmentType;
+            final String assignmentType;
 
             AssignmentType(String assignmentType)
             {
