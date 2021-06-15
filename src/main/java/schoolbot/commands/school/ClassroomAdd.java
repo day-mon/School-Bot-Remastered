@@ -201,7 +201,6 @@ public class ClassroomAdd extends Command
                                                   """, school.getName()).queue();
                                           values.getClassroom().setSchool(school);
                                           state = 3;
-                                          return;
                                     }
                                     else if (success == 2) state = 2;
                                     // else case here dont forget

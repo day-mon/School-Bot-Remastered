@@ -207,6 +207,7 @@ public class StateMachineValues
 
       }
 
+      @SuppressWarnings("unchecked")
       public <T extends Paginatable> void setList(List<T> list)
       {
             String className = list.get(0).getClass().getName();

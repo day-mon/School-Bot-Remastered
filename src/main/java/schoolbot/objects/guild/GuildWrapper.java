@@ -183,10 +183,8 @@ public class GuildWrapper
                         }
                   }
 
-                  case "time" -> {
-                        schoolList.get(schoolName)
-                                .getClassroomByID(classId);
-                  }
+                  case "time" -> schoolList.get(schoolName)
+                          .getClassroomByID(classId);
 
             }
             DatabaseUtil.updateClassroom(classroomDTO, schoolbot);

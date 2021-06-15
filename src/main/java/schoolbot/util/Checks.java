@@ -84,12 +84,10 @@ public class Checks
 
             try
             {
-                  LocalDate ld = LocalDate.parse(potentialDate, DateTimeFormatter.ofPattern("M/d/yyyy"));
-                  return ld;
+                  return LocalDate.parse(potentialDate, DateTimeFormatter.ofPattern("M/d/yyyy"));
             }
             catch (Exception e)
             {
-                  e.printStackTrace();
                   return null;
             }
       }

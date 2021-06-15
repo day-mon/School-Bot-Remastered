@@ -7,10 +7,12 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 public class Parser
@@ -60,56 +62,58 @@ public class Parser
       public static boolean classTime(Schoolbot schoolbot, String time, Classroom classroom)
       {
 
-            if (time.isEmpty() || time.isBlank()) return false;
-            if (!time.contains(":")) return false;
-            if (!time.contains("am") && !time.contains("pm")) return false;
-            // too lazy to do negation rn
-            if (time.contains("Mo") || time.contains("Tu") || time.contains("We") || time.contains("Th") || time.contains("Fr"))
-                  ;
-            else return false;
+            String timeLoweCased = time.toLowerCase();
 
+            if (timeLoweCased.isEmpty() || time.isBlank()) return false;
+            if (!timeLoweCased.contains(":")) return false;
+            if (!timeLoweCased.contains("pm") && !timeLoweCased.contains("am")) return false;
+            // too lazy to do negation rn
+            //  if (!timeLoweCased.contains("am") || !timeLoweCased.contains("pm")); else return false;
+            // too lazy to do negation rn
+            // if (timeLoweCased.contains("Mo") || time.contains("Tu") || time.contains("We") || time.contains("Th") || time.contains("Fr")); else return false;
+
+            DatabaseUtil.removeClassReminderByClass(schoolbot, classroom);
 
             Map<DayOfWeek, LocalDateTime> stuff = parseTime(classroom, time);
+            List<DayOfWeek> dayOfWeekList = new ArrayList<>(stuff.keySet())
+                    .stream()
+                    .sorted()
+                    .collect(Collectors.toList());
 
 
             LocalDate ld = classroom.getStartDate().isBefore(LocalDate.now()) ? LocalDate.now() : classroom.getStartDate();
 
-            DatabaseUtil.removeClassReminderByClass(schoolbot, classroom);
-
-            // Could speed this up by only jumping to valid days
-            // TODO: Switch to while loop and only jump to days we need.
-
             while (ld.isBefore(classroom.getEndDate()))
             {
-                  if (ld.isAfter(LocalDate.now()))
+                  DayOfWeek day = ld.getDayOfWeek();
+                  if (stuff.containsKey(day))
                   {
-                        DayOfWeek day = ld.getDayOfWeek();
-                        if (stuff.containsKey(day))
+                        LocalTime localTime = stuff.get(day).toLocalTime();
+
+                        DatabaseUtil.addClassReminder(schoolbot, LocalDateTime.of(ld, localTime), List.of(60, 30, 10), classroom);
+
+                        if (dayOfWeekList.get(dayOfWeekList.size() - 1) == ld.getDayOfWeek())
                         {
-                              LocalTime localTime = stuff.get(day).toLocalTime();
-
-                              DatabaseUtil.addClassReminder(schoolbot, LocalDateTime.of(ld, localTime), List.of(60, 30, 10), classroom);
-
+                              DayOfWeek beginning = dayOfWeekList.get(0);
+                              ld = ld.with(TemporalAdjusters.next(beginning));
                         }
+                        else
+                        {
+                              DayOfWeek nextDay = dayOfWeekList
+                                      .stream()
+                                      .filter(dayOfWeek -> dayOfWeek.getValue() > day.getValue())
+                                      .filter(stuff::containsKey)
+                                      .findFirst()
+                                      .orElseThrow(() -> new IllegalStateException("I dont know how this happened"));
+                              ld = ld.with(TemporalAdjusters.next(nextDay));
+                        }
+                        continue;
                   }
                   ld = ld.plusDays(1);
             }
-            /*
-            for (; ld.isBefore(classroom.getEndDate()); ld = ld.plusDays(1))
-            {
-                  if (ld.isAfter(LocalDate.now()))
-                  {
-                        if (stuff.containsKey(ld.getDayOfWeek()))
-                        {
-                              LocalTime s = stuff.get(ld.getDayOfWeek()).toLocalTime();
-
-                              DatabaseUtil.addClassReminder(schoolbot, LocalDateTime.of(ld, s), List.of(60, 30, 10), classroom);
-                        }
-                  }
-            }
-             */
             return true;
       }
+
 
       public static boolean parseClassEditTime(String potTime, Classroom classroom)
       {

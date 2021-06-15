@@ -215,8 +215,8 @@ public class ClassroomEdit extends Command
                               this.event.updateClassroom(this.event, new DatabaseDTO(classroom, updateColumn, time));
                               jda.removeEventListener(this);
                         }
-                  } // end state
-            } // end onguild
+                  }
+            }
 
             private int evaluateChoice(GuildMessageReceivedEvent event)
             {
@@ -497,10 +497,10 @@ public class ClassroomEdit extends Command
                                       Day(s) <start time> - <end time>
                                                                             
                                       Example:
-                                      MoWeFri 1:00PM - 1:50PM This class is on Monday Wednesday and Friday from 1:00pm to 1:50pm```                           
+                                      MoWeFri 1:00PM - 1:50PM This class is on Monday Wednesday and Friday from 1:00pm to 1:50pm```
                                       """);
 
-                              updateColumn = "start_date";
+                              updateColumn = "time";
                         }
                         case "start date", "end date", "5", "6" -> {
                               if (classroom.isAutoFilled())

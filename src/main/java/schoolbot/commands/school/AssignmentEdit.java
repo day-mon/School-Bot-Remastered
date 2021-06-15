@@ -39,7 +39,7 @@ public class AssignmentEdit extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
-            // TODO: If there is one of anything automatically select it instead of akign
+            // TODO: If there is one of anything automatically select it instead of asking
 
             JDA jda = event.getJDA();
 

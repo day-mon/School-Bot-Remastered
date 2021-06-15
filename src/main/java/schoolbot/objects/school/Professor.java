@@ -28,7 +28,6 @@ public class Professor implements Paginatable
       private String lastName;
       private String fullName;
       private int age;
-      private int schoolId;
       private int id;
 
 
@@ -122,12 +121,6 @@ public class Professor implements Paginatable
             return getProfessorsSchool().getID();
       }
 
-      public void setSchoolId(int schoolId)
-      {
-            this.schoolId = schoolId;
-      }
-
-
       public String getEmailPrefix()
       {
             return emailPrefix;
@@ -137,7 +130,6 @@ public class Professor implements Paginatable
       {
             return email + professorsSchool.getEmailSuffix();
       }
-
 
       public String getLastName()
       {
@@ -165,7 +157,7 @@ public class Professor implements Paginatable
 
 
       /**
-       * @return int return the age
+       * @return age return the age
        */
       public int getAge()
       {
