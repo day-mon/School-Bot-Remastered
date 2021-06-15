@@ -49,6 +49,27 @@ public class StateMachineValues
             this.machine = machine;
       }
 
+      public StateMachineValues(CommandEvent event)
+      {
+            this.event = event;
+            this.schoolList = event.getGuildSchools();
+            this.pittClass = event.getGuildSchools()
+                    .stream()
+                    .filter(School::isPittSchool)
+                    .collect(Collectors.toList());
+            this.classroomList = event.getGuildClasses();
+            this.authorId = event.getUser().getIdLong();
+            this.channelId = event.getChannel().getIdLong();
+            this.jda = event.getJDA();
+            this.school = null;
+            this.classroom = null;
+            this.assignment = null;
+            this.professor = null;
+            this.professorList = null;
+            this.assignmentList = null;
+            this.machine = null;
+      }
+
       public Professor getProfessor()
       {
             return professor;
@@ -171,6 +192,7 @@ public class StateMachineValues
             this.pittClass = pittClass;
       }
 
+      @Nullable
       public StateMachine getMachine()
       {
             return machine;

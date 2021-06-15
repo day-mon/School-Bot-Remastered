@@ -76,6 +76,7 @@ public class Processor
             }
       }
 
+
       /**
        * Nullable method
        * <br>
@@ -122,7 +123,7 @@ public class Processor
             switch (className)
             {
                   case "School" -> {
-                        return "%s has no schools".formatted(guild.getName());
+                        return "%s has no schools that following the criteria I am searching for.".formatted(guild.getName());
                   }
 
                   case "Classroom" -> {

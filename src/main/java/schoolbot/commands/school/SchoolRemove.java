@@ -1,16 +1,18 @@
 package schoolbot.commands.school;
 
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
+import schoolbot.objects.misc.StateMachine;
+import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
 import schoolbot.util.Embed;
+import schoolbot.util.Processor;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,109 +31,94 @@ public class SchoolRemove extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
+
+            StateMachineValues values = new StateMachineValues(event);
             List<School> schools = event.getGuildSchools()
                     .stream()
                     .filter(school -> school.getClassroomList().isEmpty())
                     .filter(school -> school.getProfessorList().isEmpty())
                     .collect(Collectors.toList());
+            values.setSchoolList(schools);
+
+            var processedList = Processor.processGenericList(values, schools, School.class);
 
 
-            if (schools.isEmpty())
+            if (processedList == 1)
             {
-                  Embed.error(event, "There is no valid schools you can delete.. Schools can only be deleted if they have no **classes** and **professors** assigned to it");
-                  return;
-            }
-            else if (schools.size() == 1)
-            {
-                  School school = schools.get(0);
-
-                  event.sendMessage(school.getAsEmbed(event.getSchoolbot()));
                   event.sendMessage("This is the only school available to delete would you like to delete it?");
-                  event.getJDA().addEventListener(new SchoolRemoveStateMachine(event, school, 2));
-                  return;
+
+                  var school = values.getSchool();
+
+                  event.getJDA().addEventListener(new SchoolRemoveStateMachine(values, 2));
             }
-
-
-            event.sendMessage("Please tell me the school you want to remove by telling me the page number!");
-            event.sendAsPaginatorWithPageNumbers(schools);
-            event.getJDA().addEventListener(new SchoolRemoveStateMachine(event, schools, 1));
+            else if (processedList == 2)
+            {
+                  event.getJDA().addEventListener(new SchoolRemoveStateMachine(values, 1));
+            }
       }
 
-      public static class SchoolRemoveStateMachine extends ListenerAdapter
+      public static class SchoolRemoveStateMachine extends ListenerAdapter implements StateMachine
       {
             private final long channelId, authorId;
-            private List<School> schools;
-            private int state = 1;
-            private final CommandEvent commandEvent;
-            private School schoolRemoving;
+            private final StateMachineValues values;
+            private int state;
 
-            public SchoolRemoveStateMachine(CommandEvent event, List<School> school, int stateToSwitch)
-            {
-                  this.authorId = event.getUser().getIdLong();
-                  this.channelId = event.getChannel().getIdLong();
-                  this.schools = school;
-                  this.state = stateToSwitch;
-                  this.commandEvent = event;
-            }
 
-            public SchoolRemoveStateMachine(CommandEvent event, School school, int stateToSwitch)
+            public SchoolRemoveStateMachine(StateMachineValues values, int state)
             {
-                  this.authorId = event.getUser().getIdLong();
-                  this.channelId = event.getChannel().getIdLong();
-                  this.schoolRemoving = school;
-                  this.state = stateToSwitch;
-                  this.commandEvent = event;
+                  this.authorId = values.getAuthorId();
+                  this.channelId = values.getChannelId();
+                  this.state = state;
+                  this.values = values;
             }
 
 
             @Override
             public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event)
             {
-                  if (event.getAuthor().getIdLong() != authorId) return;
-                  if (event.getChannel().getIdLong() != channelId) return;
+                  var channel = event.getChannel();
+                  var message = event.getMessage().getContentRaw();
+                  var school = values.getSchool();
 
-                  String content = event.getMessage().getContentRaw();
-                  MessageChannel channel = event.getChannel();
+                  if (!Checks.eventMeetsPrerequisites(event, this, channelId, authorId))
+                  {
+                        return;
+                  }
 
                   switch (state)
                   {
                         case 1 -> {
-                              if (!Checks.isNumber(content))
+                              var schools = values.getSchoolList();
+                              var success = Processor.validateMessage(event, schools);
+
+                              if (success == null)
                               {
-                                    Embed.error(event, "[ ** %s ** ] is not a number", content);
                                     return;
                               }
 
+                              values.setSchool(success);
 
-                              int index = Integer.parseInt(content);
-
-                              if (!Checks.between(index, schools.size()))
-                              {
-                                    Embed.error(event, "[** %s **] is not between 1 - %d", content, schools.size());
-                                    return;
-                              }
-
-
-                              this.schoolRemoving = schools.get(index - 1);
-                              channel.sendMessageFormat("Are you sure you want to remove [ ** %s **]", schoolRemoving.getName()).queue();
+                              channel.sendMessageFormat("Are you sure you want to remove [ ** %s **]", school.getName()).queue();
                               state = 2;
                         }
 
                         case 2 -> {
-                              if (content.equalsIgnoreCase("yes") || content.equalsIgnoreCase("y"))
+
+                              var commandEvent = values.getEvent();
+                              if (message.equalsIgnoreCase("yes") || message.equalsIgnoreCase("y"))
                               {
-                                    commandEvent.removeSchool(commandEvent, schoolRemoving);
-                                    Embed.success(event, "Removed [** %s **] successfully", schoolRemoving.getName());
+                                    commandEvent.removeSchool(commandEvent, school);
+                                    Embed.success(event, "Removed [** %s **] successfully", school.getName());
                                     event.getJDA().removeEventListener(this);
                               }
-                              else if (content.equalsIgnoreCase("no") || content.equalsIgnoreCase("n") || content.equalsIgnoreCase("nah"))
+                              else if (message.equalsIgnoreCase("no") || message.equalsIgnoreCase("n") || message.equalsIgnoreCase("nah"))
                               {
                                     channel.sendMessage("Okay.. aborting..").queue();
                                     event.getJDA().removeEventListener(this);
                               }
                               else
                               {
-                                    Embed.error(event, "[ ** %s ** ] is not a valid respond.. I will need a **Yes** OR a **No**", content);
+                                    Embed.error(event, "[ ** %s ** ] is not a valid respond.. I will need a **Yes** OR a **No**", message);
                               }
                         }
                   }

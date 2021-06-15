@@ -16,6 +16,7 @@ import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;
 import schoolbot.util.*;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -204,15 +205,18 @@ public class ClassroomEdit extends Command
                         case 4 -> state = evaluateChoice(event);
 
                         case 5 -> {
-                              var time = Checks.validTime(event, classroom.getStartDate());
+                              var cmdEvent = this.event;
+                              var evaluation = Parser.classTime(cmdEvent.getSchoolbot(), message, classroom);
 
-
-                              if (time == null)
+                              if (!evaluation)
                               {
+                                    cmdEvent.sendMessage("Please try again, the time is incorrectly formatted.");
                                     return;
                               }
 
-                              this.event.updateClassroom(this.event, new DatabaseDTO(classroom, updateColumn, time));
+
+                              cmdEvent.updateClassroom(cmdEvent, new DatabaseDTO(classroom, updateColumn, message));
+                              Embed.success(event, "Time Successfully changed!");
                               jda.removeEventListener(this);
                         }
                   }
@@ -238,7 +242,6 @@ public class ClassroomEdit extends Command
                                     return 4;
                               }
 
-
                               String newNames = message.toLowerCase().replace("\\s", "-");
 
 
@@ -261,6 +264,7 @@ public class ClassroomEdit extends Command
                               }
 
                               cmdEvent.updateClassroom(cmdEvent, new DatabaseDTO(classroom, updateColumn, message));
+                              Embed.success(event, "Name successfully changed to: %s", message);
                               // done
                         }
 
@@ -273,6 +277,8 @@ public class ClassroomEdit extends Command
                                     return 4;
                               }
 
+
+                              Embed.success(event, "Description changed successfully!");
                               cmdEvent.updateClassroom(cmdEvent, new DatabaseDTO(classroom, updateColumn, message));
                               // done
                         }
@@ -284,7 +290,8 @@ public class ClassroomEdit extends Command
 
                               if (success != null)
                               {
-                                    cmdEvent.updateClassroom(this.event, new DatabaseDTO(classroom, updateColumn, success.getId()));
+                                    cmdEvent.updateClassroom(cmdEvent, new DatabaseDTO(classroom, updateColumn, success.getId()));
+                                    Embed.success(event, "Professor successfully changed to %s", success.getFullName());
                                     jda.removeEventListener(this);
                               }
                               // done
@@ -311,6 +318,7 @@ public class ClassroomEdit extends Command
                                                            """,
                                                   StringUtils.formatDate(date));
                                     }
+                                    classroom.setStartDate(Date.valueOf(date));
                               }
                               else
                               {
@@ -324,13 +332,29 @@ public class ClassroomEdit extends Command
                                                    """, StringUtils.formatDate(date));
                                           return 4;
                                     }
+                                    classroom.setEndDate(Date.valueOf(date));
+
                               }
-                              Embed.success(event, """
-                                      ** %s ** has been now stored.
+
+                              cmdEvent.sendMessage("""
+                                      Please give me the time now.
                                                                             
-                                      Now please give me the time. **Format: hour:minute (am/pm)**
-                                      Examples include: `10:00am` and `3:20pm`
-                                      """, StringUtils.formatDate(date));
+                                      I will need the day and the time.
+
+                                      ```
+                                      Day Mappings:
+                                      Mo = Monday
+                                      Tu = Tuesday
+                                      We = Wednesday
+                                      Th = Thursday
+                                      Fr = Friday
+                                                                            
+                                      Format:
+                                      Day(s) <start time> - <end time>
+                                                                            
+                                      Example:
+                                      MoWeFri 1:00PM - 1:50PM This class is on Monday Wednesday and Friday from 1:00pm to 1:50pm```
+                                      """);
                               return 5;
                         }
 
@@ -342,6 +366,8 @@ public class ClassroomEdit extends Command
                                     Embed.error(event, "** %s ** is not a number. Please try again!", message);
                                     return 4;
                               }
+
+                              Embed.success(event, "Class Number successfully changed to: %s", number);
 
                               cmdEvent.updateClassroom(cmdEvent, new DatabaseDTO(classroom, updateColumn, number));
                         }
@@ -362,6 +388,7 @@ public class ClassroomEdit extends Command
                                                   I will use the first one you mentioned, which is %s
                                                   """, mentionedRoles, role.getAsMention());
                                     }
+                                    Embed.success(event, "Role successfully changed to: %s", role.getAsMention());
                                     cmdEvent.updateClassroom(cmdEvent, new DatabaseDTO(classroom, updateColumn, role.getIdLong()));
                                     break;
                               }
@@ -373,7 +400,7 @@ public class ClassroomEdit extends Command
                                             .setName(className.toLowerCase().replaceAll("\\s", "-"))
                                             .setColor(new Random().nextInt(0xFFFFFF))
                                             .complete();
-
+                                    Embed.success(event, "Role successfully changed to: %s", role.getAsMention());
                                     cmdEvent.updateClassroom(cmdEvent, new DatabaseDTO(classroom, updateColumn, role.getIdLong()));
                               }
                         }
@@ -392,6 +419,8 @@ public class ClassroomEdit extends Command
                                                   You have mentioned ** %d ** channels.
                                                   I will use the first one you mentioned, which is %s
                                                   """, mentionedChannels, textChannel.getAsMention());
+                                          Embed.success(event, "Role successfully changed to: %s", textChannel.getAsMention());
+
                                     }
                                     cmdEvent.updateClassroom(cmdEvent, new DatabaseDTO(classroom, updateColumn, textChannel.getIdLong()));
                                     break;
@@ -421,6 +450,8 @@ public class ClassroomEdit extends Command
                                                   .complete();
                                     }
                                     cmdEvent.updateClassroom(cmdEvent, new DatabaseDTO(classroom, updateColumn, channel.getIdLong()));
+                                    Embed.success(event, "Role successfully changed to: %s", channel.getAsMention());
+
                               }
                         }
 
@@ -432,6 +463,8 @@ public class ClassroomEdit extends Command
                                     cmdEvent.sendMessage("Please try again!");
                                     return 4;
                               }
+
+                              Embed.success(event, "Time Successfully changed!");
                         }
                   }
                   jda.removeEventListener(this);

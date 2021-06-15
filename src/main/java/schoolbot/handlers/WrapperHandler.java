@@ -137,12 +137,12 @@ public class WrapperHandler
             guildWrappers.get(guildID).updateAssignment(event, assignmentUpdate);
       }
 
-      public void updateClassroom(CommandEvent event, DatabaseDTO classroomUpdate)
+      public void updateClassroom(CommandEvent event, DatabaseDTO classroomUpdateDTO)
       {
             long guildID = event.getGuild().getIdLong();
 
             guildCheck(guildID);
-            guildWrappers.get(guildID).updateClassroom(event, classroomUpdate);
+            guildWrappers.get(guildID).updateClassroom(event, classroomUpdateDTO);
       }
 
 

@@ -291,9 +291,9 @@ public class CommandEvent
             schoolbot.getWrapperHandler().updateAssignment(event, assignmentUpdate);
       }
 
-      public void updateClassroom(CommandEvent event, DatabaseDTO classroomUpdate)
+      public void updateClassroom(CommandEvent event, DatabaseDTO classroomUpdateDTO)
       {
-            schoolbot.getWrapperHandler().updateClassroom(event, classroomUpdate);
+            schoolbot.getWrapperHandler().updateClassroom(event, classroomUpdateDTO);
       }
 
       public School getSchool(CommandEvent event, String schoolName)

@@ -171,15 +171,18 @@ public class Checks
        *
        * @param event   GuildMessageReceivedEvent anticipated to be respond event
        * @param machine The state machine that we are using
-       * @param ids     Channel ID, User ID
+       * @param ids     Channel ID, User ID (in that exact order)
        * @return If the event contains same user and channel as base event false otherwise
        */
       public static <S extends StateMachine> boolean eventMeetsPrerequisites(@NotNull GuildMessageReceivedEvent event, S machine, Long... ids)
       {
             var jda = event.getJDA();
+            var channel = event.getChannel();
+
 
             if (ids.length != 2)
             {
+                  channel.sendMessage("This command has been programmed incorrectly. Please contact damon#9999").queue();
                   LOGGER.warn("You passed too many or not enough IDs through this function!");
                   jda.removeEventListener(machine);
                   return false;
@@ -202,6 +205,7 @@ public class Checks
 
             if (message.equalsIgnoreCase("stop") || message.equalsIgnoreCase("exit"))
             {
+                  channel.sendMessage("I will now abort. Call the command to try again!").queue();
                   jda.removeEventListener(machine);
                   return false;
             }
