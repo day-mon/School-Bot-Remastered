@@ -151,16 +151,16 @@ public class CommandEvent
 
       public void sendMessage(EmbedBuilder embedBuilder, Color color)
       {
-            getChannel().sendMessage(
-                    embedBuilder.setColor(color)
-                            .setTimestamp(Instant.now()).build())
-                    .queue();
+            getTextChannel().sendMessageEmbeds(embedBuilder
+                    .setColor(color)
+                    .setTimestamp(Instant.now())
+                    .build()
+            ).queue();
       }
 
       public <T extends Paginatable> void sendAsNormalPaginator(List<T> list)
       {
             List<MessageEmbed> embeds = new ArrayList<>();
-
 
             for (T obj : list)
             {
@@ -224,8 +224,6 @@ public class CommandEvent
 
             paginator.paginate();
             this.sendSelfDeletingMessage("`Timeout is set to 30 seconds`");
-
-
       }
 
 

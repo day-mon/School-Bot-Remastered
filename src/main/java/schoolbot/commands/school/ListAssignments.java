@@ -1,24 +1,16 @@
 package schoolbot.commands.school;
 
-import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
-import schoolbot.objects.school.Assignment;
+import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
-import schoolbot.util.Embed;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ListAssignments extends Command
 {
@@ -33,11 +25,23 @@ public class ListAssignments extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
+            StateMachineValues values = new StateMachineValues(event);
+            var jda = event.getJDA();
 
-            Member member = event.getMember();
-            MessageChannel channel = event.getChannel();
-            long textChanel = event.getTextChannel().getIdLong();
 
+            if (args.isEmpty())
+            {
+                  Classroom classroom = Checks.messageSentFromClassChannel(event);
+
+                  if (classroom != null)
+                  {
+                        // Class sent from valid channel
+
+                        assignmentCheck(classroom);
+                  }
+            }
+
+            /*
             if (args.isEmpty())
             {
                   if (!member.hasPermission(Permission.ADMINISTRATOR))
@@ -127,6 +131,23 @@ public class ListAssignments extends Command
             else if (args.size() == 1)
             {
 
+            }
+             */
+      }
+
+      private void assignmentCheck(Classroom classroom)
+      {
+            if (!classroom.hasAssignments())
+            {
+
+            }
+      }
+
+      private void eval(CommandEvent event, boolean isAdmin)
+      {
+            if (isAdmin)
+            {
+                  // Admin has
             }
       }
 

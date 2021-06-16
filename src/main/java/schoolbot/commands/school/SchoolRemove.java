@@ -78,7 +78,6 @@ public class SchoolRemove extends Command
             {
                   var channel = event.getChannel();
                   var message = event.getMessage().getContentRaw();
-                  var school = values.getSchool();
 
                   if (!Checks.eventMeetsPrerequisites(event, this, channelId, authorId))
                   {
@@ -98,12 +97,12 @@ public class SchoolRemove extends Command
 
                               values.setSchool(success);
 
-                              channel.sendMessageFormat("Are you sure you want to remove [ ** %s **]", school.getName()).queue();
+                              channel.sendMessageFormat("Are you sure you want to remove [ ** %s **]", success.getName()).queue();
                               state = 2;
                         }
 
                         case 2 -> {
-
+                              var school = values.getSchool();
                               var commandEvent = values.getEvent();
                               if (message.equalsIgnoreCase("yes") || message.equalsIgnoreCase("y"))
                               {

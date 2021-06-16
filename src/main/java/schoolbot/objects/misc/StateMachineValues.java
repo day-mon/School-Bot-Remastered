@@ -27,6 +27,7 @@ public class StateMachineValues
       private Classroom classroom;
       private Professor professor;
       private Assignment assignment;
+      private int state = 1;
 
       public StateMachineValues(CommandEvent event, StateMachine machine)
       {
@@ -182,6 +183,7 @@ public class StateMachineValues
             this.school = school;
       }
 
+
       public List<School> getPittClass()
       {
             return pittClass;
@@ -227,6 +229,21 @@ public class StateMachineValues
 
             }
 
+      }
+
+      public void increaseState()
+      {
+            state += 1;
+      }
+
+      public int getState()
+      {
+            return state;
+      }
+
+      public void setState(int state)
+      {
+            this.state = state;
       }
 
       @SuppressWarnings("unchecked")

@@ -10,10 +10,13 @@ import org.jetbrains.annotations.Nullable;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
+import schoolbot.objects.misc.StateMachine;
+import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
 import schoolbot.util.Embed;
+import schoolbot.util.Processor;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,14 +38,41 @@ public class ClassroomRemove extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
+            var values = new StateMachineValues(event);
+            var jda = event.getJDA();
+
             List<School> schools = event.getGuildSchools()
                     .stream()
                     .filter(school -> !school.getClassroomList().isEmpty())
                     .collect(Collectors.toList());
-            int stateToSwitch = 1;
+            values.setSchoolList(schools);
 
 
-            // bug with class remove maybe.. not sure
+            var schoolSuccess = Processor.processGenericList(values, schools, School.class);
+
+            if (schoolSuccess == 1)
+            {
+                  event.sendMessage("This is the only school available with deletable classes.");
+                  List<Classroom> classrooms = event.getGuildClasses()
+                          .stream()
+                          .filter(classroom -> classroom.getAssignments().isEmpty())
+                          .collect(Collectors.toList());
+                  values.setClassroomList(classrooms);
+
+                  var classSuccess = Processor.processGenericList(values, classrooms, Classroom.class);
+
+                  if (classSuccess == 1)
+                  {
+                        event.sendMessage("Are you sure you want to remove this class?");
+                        values.setState(3);
+                  }
+                  else if (classSuccess == 2)
+                  {
+                        values.setState(3);
+                  }
+
+            }
+
 
             if (schools.isEmpty())
             {
@@ -83,7 +113,7 @@ public class ClassroomRemove extends Command
             }
       }
 
-      public static class ClassroomRemoveStateMachine extends ListenerAdapter
+      public static class ClassroomRemoveStateMachine extends ListenerAdapter implements StateMachine
       {
             private final long channelId, authorId;
             private final CommandEvent commandEvent;
@@ -91,6 +121,8 @@ public class ClassroomRemove extends Command
             private List<Classroom> classroomList;
             private int state;
             private Classroom classroom;
+
+            private StateMachineValues values;
 
             public ClassroomRemoveStateMachine(@NotNull CommandEvent event, @Nullable List<Classroom> classrooms, @NotNull List<School> schools, int stateToSwitchTo)
             {
@@ -111,12 +143,25 @@ public class ClassroomRemove extends Command
                   this.authorId = event.getUser().getIdLong();
             }
 
+            public ClassroomRemoveStateMachine(@NotNull StateMachineValues values)
+            {
+                  this.values = values;
+
+            }
+
 
             @Override
             public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event)
             {
-                  if (event.getAuthor().getIdLong() != authorId) return;
-                  if (event.getChannel().getIdLong() != channelId) return;
+                  var channelId = event.getChannel().getIdLong();
+                  var userId = event.getMessage().getIdLong();
+                  var requirementsMet = Checks.eventMeetsPrerequisites(event, this, channelId, userId);
+
+                  if (!requirementsMet)
+                  {
+                        return;
+                  }
+
 
                   String message = event.getMessage().getContentRaw();
                   MessageChannel channel = event.getChannel();
