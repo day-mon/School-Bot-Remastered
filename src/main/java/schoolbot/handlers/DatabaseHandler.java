@@ -2,7 +2,6 @@ package schoolbot.handlers;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +75,7 @@ public class DatabaseHandler
       {
             try
             {
-                  final var root = schoolbot.util.IOUtils.getJarPath(DatabaseHandler.class).resolve("sql");
+                  final var root = schoolbot.util.IOUtils.getJarFilesystem(DatabaseHandler.class).resolve("sql");
 
                   if (root == null)
                   {
@@ -99,22 +98,14 @@ public class DatabaseHandler
                   for (var file : sqlPaths)
                   {
                         String fileName = file.getFileName().toString();
-                        if (!FilenameUtils.getExtension(fileName).equalsIgnoreCase("sql"))
-                        {
-                              LOGGER.warn("{} is a non-SQL file found in the SQL folder", fileName);
-                              continue;
-                        }
 
-
-                        fileName = fileName.split("\\.")[0];
+                        fileName = fileName.substring(0, fileName.lastIndexOf("."));
                         var sqlTable = DatabaseUtil.class.getResourceAsStream("/sql/" + fileName + ".sql");
 
                         if (sqlTable != null)
                         {
                               getDbConnection().createStatement().execute(IOUtils.toString(sqlTable, StandardCharsets.UTF_8));
                         }
-
-
                   }
             }
             catch (Exception e)
