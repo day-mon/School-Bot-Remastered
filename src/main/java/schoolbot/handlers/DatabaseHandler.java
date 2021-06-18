@@ -12,7 +12,6 @@ import schoolbot.util.DatabaseUtil;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.stream.Collectors;
@@ -77,7 +76,7 @@ public class DatabaseHandler
       {
             try
             {
-                  final var root = Path.of(DatabaseHandler.class.getResource("/sql").toURI());
+                  final var root = schoolbot.util.IOUtils.getJarPath(DatabaseHandler.class).resolve("sql");
 
                   if (root == null)
                   {
@@ -155,6 +154,7 @@ public class DatabaseHandler
       {
             return pool;
       }
+
 }
 
 
