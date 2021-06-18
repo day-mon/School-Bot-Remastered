@@ -7,7 +7,7 @@
 
     <groupId>com.github.damon</groupId>
     <artifactId>schoolbot</artifactId>
-    <version>1.0</version>
+    <version>1.0-ALPHA</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -35,7 +35,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.21</version>
+            <version>42.2.22</version>
         </dependency>
         <dependency>
             <groupId>com.yahoofinance-api</groupId>
@@ -120,31 +120,29 @@
                     <configuration>
                         <source>16</source>
                         <target>16</target>
-                        <compilerArgs>--enable-preview</compilerArgs>
                     </configuration>
                 </plugin>
                 <plugin>
-                    <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.2.4</version>
+                    <artifactId>maven-assembly-plugin</artifactId>
                     <configuration>
-                        <transformers>
-                            <transformer
-                                    implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                <mainClass>src.main.java.schoolbot.Main</mainClass>
-                            </transformer>
-                        </transformers>
-                        <createDependencyReducedPom>false</createDependencyReducedPom>
+                        <outputDirectory/>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                        <archive>
+                            <manifest>
+                                <mainClass>schoolbot.Main</mainClass>
+                            </manifest>
+                        </archive>
                     </configuration>
-                    <executions>
-                        <execution>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>shade</goal>
-                            </goals>
-                        </execution>
-                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
     </build>
 </project>

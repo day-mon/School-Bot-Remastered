@@ -1,6 +1,7 @@
 package schoolbot.objects.misc;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.jetbrains.annotations.Nullable;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.school.Assignment;
@@ -13,10 +14,11 @@ import java.util.stream.Collectors;
 
 public class StateMachineValues
 {
+      private GuildMessageReceivedEvent messageReceivedEvent;
       private final long authorId;
       private final long channelId;
       private final JDA jda;
-      private final StateMachine machine;
+      private StateMachine machine;
       private CommandEvent event;
       private List<School> schoolList;
       private List<School> pittClass;
@@ -69,6 +71,11 @@ public class StateMachineValues
             this.professorList = null;
             this.assignmentList = null;
             this.machine = null;
+      }
+
+      public GuildMessageReceivedEvent getMessageReceivedEvent()
+      {
+            return messageReceivedEvent;
       }
 
       public Professor getProfessor()
@@ -139,6 +146,16 @@ public class StateMachineValues
       public long getChannelId()
       {
             return channelId;
+      }
+
+      public void setMessageReceivedEvent(GuildMessageReceivedEvent messageReceivedEvent)
+      {
+            this.messageReceivedEvent = messageReceivedEvent;
+      }
+
+      public void setMachine(StateMachine machine)
+      {
+            this.machine = machine;
       }
 
       @Nullable
@@ -227,11 +244,13 @@ public class StateMachineValues
                         setAssignment(assignment);
                   }
 
+                  default -> throw new IllegalStateException(String.format("%s is not supported", className));
+
             }
 
       }
 
-      public void increaseState()
+      public void incrementMachineState()
       {
             state += 1;
       }
@@ -249,7 +268,7 @@ public class StateMachineValues
       @SuppressWarnings("unchecked")
       public <T extends Paginatable> void setList(List<T> list)
       {
-            String className = list.get(0).getClass().getName();
+            String className = list.get(0).getClass().getSimpleName();
 
             switch (className)
             {
@@ -272,6 +291,9 @@ public class StateMachineValues
                         var assignment = (List<Assignment>) list;
                         setAssignmentList(assignment);
                   }
+
+                  default -> throw new IllegalStateException(String.format("%s is not supported", className));
+
 
             }
       }

@@ -341,7 +341,6 @@ public class AssignmentAdd extends Command
                                     int hour = Integer.parseInt(time[0]);
                                     int minute = Integer.parseInt(time[1].replaceAll("pm", ""));
 
-                                    // TODO: Fix bug with time  being 12
 
                                     if (hour == 12)
                                     {

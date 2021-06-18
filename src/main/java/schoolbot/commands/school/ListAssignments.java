@@ -37,7 +37,6 @@ public class ListAssignments extends Command
                   {
                         // Class sent from valid channel
 
-                        assignmentCheck(classroom);
                   }
             }
 
@@ -135,13 +134,6 @@ public class ListAssignments extends Command
              */
       }
 
-      private void assignmentCheck(Classroom classroom)
-      {
-            if (!classroom.hasAssignments())
-            {
-
-            }
-      }
 
       private void eval(CommandEvent event, boolean isAdmin)
       {

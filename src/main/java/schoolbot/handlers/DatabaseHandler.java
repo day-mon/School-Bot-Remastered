@@ -10,12 +10,12 @@ import schoolbot.Schoolbot;
 import schoolbot.objects.config.ConfigOption;
 import schoolbot.util.DatabaseUtil;
 
-import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.stream.Collectors;
 
 public class DatabaseHandler
 {
@@ -75,35 +75,38 @@ public class DatabaseHandler
 
       public void initTables()
       {
-            File resourcesFolder = new File("src/main/resources/sql");
-
-            if (!resourcesFolder.exists())
+            try
             {
-                  LOGGER.error("SQL Folder inside resources does not exist.. Try placing a folder in resources named 'sql'");
-                  System.exit(1);
-                  return;
-            }
+                  final var root = Path.of(DatabaseHandler.class.getResource("/sql").toURI());
 
-
-            List<File> files = Arrays.asList(resourcesFolder.listFiles());
-
-            if (files.isEmpty())
-            {
-                  LOGGER.error("There are no SQL Files...");
-                  return;
-            }
-
-            for (var file : files)
-            {
-                  String fileName = file.getName();
-                  if (!FilenameUtils.getExtension(fileName).equalsIgnoreCase("sql"))
+                  if (root == null)
                   {
-                        LOGGER.warn("{} is a non-SQL file found in the SQL folder", fileName);
-                        continue;
+                        LOGGER.error("SQL Folder inside resources does not exist.. Try placing a folder in resources named 'sql'");
+                        System.exit(1);
+                        return;
                   }
 
-                  try
+                  final var sqlPaths = Files.walk(root)
+                          .filter(path -> path.getFileName().toString().endsWith(".sql"))
+                          .collect(Collectors.toList());
+
+
+                  if (sqlPaths.isEmpty())
                   {
+                        LOGGER.error("There are no SQL Files...");
+                        return;
+                  }
+
+                  for (var file : sqlPaths)
+                  {
+                        String fileName = file.getFileName().toString();
+                        if (!FilenameUtils.getExtension(fileName).equalsIgnoreCase("sql"))
+                        {
+                              LOGGER.warn("{} is a non-SQL file found in the SQL folder", fileName);
+                              continue;
+                        }
+
+
                         fileName = fileName.split("\\.")[0];
                         var sqlTable = DatabaseUtil.class.getResourceAsStream("/sql/" + fileName + ".sql");
 
@@ -111,11 +114,13 @@ public class DatabaseHandler
                         {
                               getDbConnection().createStatement().execute(IOUtils.toString(sqlTable, StandardCharsets.UTF_8));
                         }
+
+
                   }
-                  catch (Exception e)
-                  {
-                        LOGGER.error("Error Initializing {}", fileName, e);
-                  }
+            }
+            catch (Exception e)
+            {
+                  LOGGER.error("Error Initializing Database Files", e);
             }
       }
 

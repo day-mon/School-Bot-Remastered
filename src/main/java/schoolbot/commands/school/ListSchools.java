@@ -32,7 +32,10 @@ public class ListSchools extends Command
             // No need for a paginator call if theres only one school tbh..
             else if (schools.size() == 1)
             {
-                  event.sendMessage(schools.get(0).getAsEmbed(event.getSchoolbot()));
+                  var school = schools.get(0);
+                  var schoolbot = event.getSchoolbot();
+
+                  event.sendMessage(school.getAsEmbed(schoolbot));
             }
             else
             {

@@ -44,7 +44,7 @@ public class Processor
        * The event parameter is just so I can grab the schoolbot object and the channel
        * The professor list is the list being passed through for processing so we can check certain conditions
        *
-       * @param values      Values passed through that majarity of state machine use
+       * @param values      Values passed through that majority of state machine use
        * @param genericList List of objects sent in for processing
        */
       public static <T extends Paginatable> int processGenericList(StateMachineValues values, List<T> genericList, Class<?> tClass)
@@ -75,7 +75,6 @@ public class Processor
                   return 2;
             }
       }
-
 
       /**
        * Nullable method

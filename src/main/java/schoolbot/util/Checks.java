@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.misc.StateMachine;
+import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.school.Classroom;
 
 import java.time.LocalDate;
@@ -196,6 +197,51 @@ public class Checks
 
             var sameUser = event.getChannel().getIdLong() == channelId
                            && event.getAuthor().getIdLong() == userId;
+
+
+            if (!sameUser)
+            {
+                  return false;
+            }
+
+            if (message.equalsIgnoreCase("stop") || message.equalsIgnoreCase("exit"))
+            {
+                  channel.sendMessage("I will now abort. Call the command to try again!").queue();
+                  jda.removeEventListener(machine);
+                  return false;
+            }
+
+            return true;
+      }
+
+
+      /**
+       * Returns if the event contains the same user and channel as the base event
+       * The event argument is the event fired when a message is sent in a guild.
+       * The IDs field are expected to be channelIDs and a userID
+       * The machine field is the current state machine that we are checking
+       *
+       * @param event   GuildMessageReceivedEvent anticipated to be respond event
+       * @param machine The state machine that we are using
+       * @param ids     Channel ID, User ID (in that exact order)
+       * @return If the event contains same user and channel as base event false otherwise
+       */
+      public static <S extends StateMachine> boolean eventMeetsPrerequisites(@NotNull StateMachineValues values)
+      {
+            var commandEvent = values.getEvent();
+            var event = values.getMessageReceivedEvent();
+            var jda = values.getJda();
+            var channel = commandEvent.getChannel();
+            var machine = values.getMachine();
+
+
+            long channelId = event.getChannel().getIdLong();
+            long userId = event.getAuthor().getIdLong();
+            String message = values.getMessageReceivedEvent().getMessage().getContentRaw().toLowerCase();
+
+
+            boolean sameUser = commandEvent.getUser().getIdLong() == userId
+                               && commandEvent.getTextChannel().getIdLong() == channelId;
 
 
             if (!sameUser)

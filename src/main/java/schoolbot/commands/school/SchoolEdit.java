@@ -1,18 +1,19 @@
 package schoolbot.commands.school;
 
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.misc.DatabaseDTO;
+import schoolbot.objects.misc.StateMachine;
+import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
 import schoolbot.util.Embed;
+import schoolbot.util.Processor;
 
 import java.util.List;
 
@@ -27,112 +28,83 @@ public class SchoolEdit extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
-            School school;
-            JDA jda = event.getJDA();
-            List<School> schools = event.getGuildSchools();
+            StateMachineValues values = new StateMachineValues(event);
+            var jda = event.getJDA();
+            var schoolResponse = Processor.processGenericList(values, event.getGuildSchools(), School.class);
 
-            if (schools.isEmpty())
+            if (schoolResponse == 0)
             {
-                  Embed.error(event, "** %s ** has no schools in it", event.getGuild().getName());
-            }
-            else if (schools.size() == 1)
-            {
-                  school = schools.get(0);
-                  event.sendMessage("** %s ** has been selected because it is the only school. Would you want to continue?", school.getName());
-                  jda.addEventListener(new SchoolEditStateMachine(event, school));
-
-            }
-            else
-            {
-                  event.sendMessage("Please give me the school you want to edit in page numbers");
-                  event.sendAsPaginatorWithPageNumbers(schools);
-                  jda.addEventListener(new SchoolEditStateMachine(event, schools));
-
+                  return;
             }
 
+            if (schoolResponse == 1)
+            {
+                  event.sendMessage("This school has been selected because it is the only school. Would you want to continue?");
+                  values.setState(2);
+            }
+
+            jda.addEventListener(new SchoolEditStateMachine(values));
       }
 
 
-      public static class SchoolEditStateMachine extends ListenerAdapter
+      public static class SchoolEditStateMachine extends ListenerAdapter implements StateMachine
       {
-            private final long channelID, authorID;
-            private final CommandEvent commandEvent;
-            private int state;
-            private School school;
+
             private String updateColumn = "";
-            private List<School> schoolList;
+            private final StateMachineValues values;
 
-            public SchoolEditStateMachine(CommandEvent event, School school)
+            public SchoolEditStateMachine(StateMachineValues values)
             {
-                  this.channelID = event.getChannel().getIdLong();
-                  this.authorID = event.getUser().getIdLong();
-                  this.commandEvent = event;
-                  this.school = school;
-                  state = 2;
+                  values.setMachine(this);
+                  this.values = values;
             }
 
-            public SchoolEditStateMachine(CommandEvent event, List<School> school)
-            {
-                  this.channelID = event.getChannel().getIdLong();
-                  this.authorID = event.getUser().getIdLong();
-                  this.commandEvent = event;
-                  this.schoolList = school;
-                  state = 1;
-            }
 
 
             @Override
             public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event)
             {
-                  if (event.getAuthor().getIdLong() != authorID) return;
-                  if (event.getChannel().getIdLong() != channelID) return;
+                  values.setMessageReceivedEvent(event);
+                  var requirementsMet = Checks.eventMeetsPrerequisites(values);
+                  var channel = event.getChannel();
+                  var jda = event.getJDA();
+                  int state = values.getState();
 
-                  String message = event.getMessage().getContentRaw();
-                  MessageChannel channel = event.getChannel();
-                  JDA jda = event.getJDA();
-
-
-                  if (message.equalsIgnoreCase("stop") || message.equalsIgnoreCase("exit"))
+                  if (!requirementsMet)
                   {
-                        channel.sendMessage("Okay aborting..").queue();
-                        jda.removeEventListener(this);
                         return;
                   }
+
+
+                  String message = event.getMessage().getContentRaw();
+
 
                   switch (state)
                   {
                         case 1 -> {
-                              if (!Checks.isNumber(message))
+
+                              var validation = Processor.validateMessage(event, values.getSchoolList());
+
+                              if (validation == null)
                               {
-                                    Embed.notANumberError(event, message);
                                     return;
                               }
 
-                              int index = Integer.parseInt(message);
+                              values.setSchool(validation);
 
-                              if (!Checks.between(index, schoolList.size()))
-                              {
-                                    Embed.error(event, "%d is not between 1 - %d. Try again", index, schoolList.size());
-                                    return;
-                              }
-
-                              school = schoolList.get(index - 1);
-
-                              channel.sendMessage(school.getAsEmbed(commandEvent.getSchoolbot())).queue();
-                              channel.sendMessageFormat("** %s ** has been selected, Would you like to continue?", school.getName()).queue();
-                              state = 2;
+                              channel.sendMessageFormat("** %s ** has been selected, Would you like to continue?", validation.getName()).queue();
+                              values.incrementMachineState();
                         }
 
-                        case -1 -> {
+                        case 2 -> {
                               if (!message.equalsIgnoreCase("yes") && !message.equalsIgnoreCase("y") && !message.toLowerCase().contains("yes"))
                               {
                                     channel.sendMessage("Okay aborting...").queue();
                                     jda.removeEventListener(this);
                               }
-                              state = 2;
-                        }
 
-                        case 2 -> {
+                              var school = values.getSchool();
+
                               channel.sendMessageFormat("What attribute of ** %s ** would you like to edit", school.getName()).queue();
                               channel.sendMessage("""
                                         ```
@@ -140,7 +112,8 @@ public class SchoolEdit extends Command
                                       2. School URL
                                       3. Email Suffix
                                       4. Role```""").queue();
-                              state = 3;
+
+                              values.incrementMachineState();
                         }
 
                         case 3 -> {
@@ -152,19 +125,24 @@ public class SchoolEdit extends Command
                                     return;
                               }
 
-                              evaluateChoice(content, event);
+                              evaluateChoice(values);
 
-                              state = 4;
+                              values.incrementMachineState();
                         }
 
-                        case 4 -> evaluateColumn(message, event);
+                        case 4 -> evaluateColumn(values);
 
                   }
             }
 
-            private void evaluateChoice(String content, GuildMessageReceivedEvent event)
+            private void evaluateChoice(StateMachineValues values)
             {
-                  MessageChannel channel = event.getChannel();
+
+                  var channel = values.getMessageReceivedEvent().getChannel();
+                  var school = values.getSchool();
+                  var event = values.getEvent();
+                  String content = values.getMessageReceivedEvent().getMessage().getContentRaw();
+
                   if (content.contains("1") || content.contains("name"))
                   {
 
@@ -197,9 +175,13 @@ public class SchoolEdit extends Command
                   }
             }
 
-            private void evaluateColumn(String message, GuildMessageReceivedEvent event)
+            private void evaluateColumn(StateMachineValues values)
             {
-                  JDA jda = event.getJDA();
+                  var jda = values.getJda();
+                  var event = values.getEvent();
+                  var school = values.getSchool();
+                  String message = values.getMessageReceivedEvent().getMessage().getContentRaw();
+
                   switch (updateColumn)
                   {
                         case "name" -> {
@@ -209,7 +191,7 @@ public class SchoolEdit extends Command
                                     return;
                               }
 
-                              boolean duplicateSchool = commandEvent.schoolExist(message);
+                              boolean duplicateSchool = event.schoolExist(message);
 
                               if (duplicateSchool)
                               {
@@ -217,12 +199,12 @@ public class SchoolEdit extends Command
                                     return;
                               }
 
-                              commandEvent.updateSchool(commandEvent, new DatabaseDTO(school, updateColumn, message));
+                              event.updateSchool(event, new DatabaseDTO(school, updateColumn, message));
                         }
                         case "url" -> // TODO: Add valid url checks..
-                                commandEvent.updateSchool(commandEvent, new DatabaseDTO(school, updateColumn, message));
+                                event.updateSchool(event, new DatabaseDTO(school, updateColumn, message));
                         case "email_suffix" -> // TODO: Add valid email checks...
-                                commandEvent.updateSchool(commandEvent, new DatabaseDTO(school, updateColumn, message));
+                                event.updateSchool(event, new DatabaseDTO(school, updateColumn, message));
                         case "role_id" -> {
                               Message eventMessage = event.getMessage();
 
@@ -248,7 +230,7 @@ public class SchoolEdit extends Command
                                     return;
                               }
 
-                              commandEvent.updateSchool(commandEvent, new DatabaseDTO(school, updateColumn, roleID));
+                              event.updateSchool(event, new DatabaseDTO(school, updateColumn, roleID));
                         }
                         default -> Embed.error(event, "** %s ** is not a valid response", message);
                   }
