@@ -99,7 +99,6 @@ public class DatabaseHandler
                   {
                         String fileName = file.getFileName().toString();
 
-                        fileName = fileName.substring(0, fileName.lastIndexOf("."));
                         var sqlTable = DatabaseUtil.class.getResourceAsStream("/sql/" + fileName + ".sql");
 
                         if (sqlTable != null)

@@ -77,6 +77,47 @@ public class Processor
       }
 
       /**
+       * Returns void
+       * The event parameter is just so I can grab the schoolbot object and the channel
+       * The professor list is the list being passed through for processing so we can check certain conditions
+       *
+       * @param values      Values passed through that majority of state machine use
+       * @param genericList List of objects sent in for processing
+       * @param sendEmbed   Flag on whether or not to send the embed or not
+       */
+      public static <T extends Paginatable> int processGenericList(StateMachineValues values, List<T> genericList, Class<?> tClass, boolean sendEmbed)
+      {
+            var event = values.getEvent();
+
+            int size = genericList.size();
+            var channel = event.getChannel();
+            var schoolbot = event.getSchoolbot();
+
+            if (genericList.isEmpty())
+            {
+                  Embed.error(event, processErrorMessage(tClass, values));
+                  return 0;
+            }
+            else if (size == 1)
+            {
+                  T object = genericList.get(0);
+                  values.setValue(object);
+                  if (sendEmbed)
+                  {
+                        event.sendMessage(object.getAsEmbed(schoolbot));
+                  }
+                  return 1;
+            }
+            else
+            {
+                  event.sendAsPaginatorWithPageNumbers(genericList);
+                  values.setList(genericList);
+                  event.sendMessage("Choose a page number from the list of %s's.", tClass.getSimpleName());
+                  return 2;
+            }
+      }
+
+      /**
        * Nullable method
        * <br>
        * Returns null if there was some sort of error, if not it will return object in respect to the page
@@ -113,6 +154,7 @@ public class Processor
 
             return genericList.get(pageNumber - 1);
       }
+
 
       private static String processErrorMessage(Class<?> tClass, StateMachineValues values)
       {
