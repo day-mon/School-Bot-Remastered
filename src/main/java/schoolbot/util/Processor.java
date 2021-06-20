@@ -155,6 +155,49 @@ public class Processor
             return genericList.get(pageNumber - 1);
       }
 
+      /**
+       * Nullable method
+       * <br>
+       * Returns null if there was some sort of error, if not it will return object in respect to the page
+       * Method Checks the following
+       *
+       * <ul>
+       * <li> If a number is the message that is sent  </li>
+       * <li> Checks if that number is a valid index from the list of options the user has to choose </li>
+       * </ul>
+       *
+       * @param values      StateMachineValues.
+       * @param genericList List full of objects
+       * @param <T>         N/A
+       * @return If message is a number and its a valid index method succeeds otherwise fails
+       */
+      public static <T extends Paginatable> boolean validateMessage(@NotNull StateMachineValues values, @NotNull List<T> genericList)
+      {
+            var event = values.getMessageReceivedEvent();
+            var message = event.getMessage().getContentRaw();
+
+            if (!Checks.isNumber(message))
+            {
+                  Embed.notANumberError(event, message);
+                  return false;
+            }
+
+            int pageNumber = Integer.parseInt(message);
+
+            if (!Checks.between(pageNumber, genericList.size()))
+            {
+                  Embed.error(event, "** %s ** was not a valid entry. Please retry with a valid entry!", message);
+                  return false;
+            }
+
+            var element = genericList.get(pageNumber - 1);
+
+            values.setValue(element);
+            values.incrementMachineState();
+
+            return true;
+      }
+
 
       private static String processErrorMessage(Class<?> tClass, StateMachineValues values)
       {

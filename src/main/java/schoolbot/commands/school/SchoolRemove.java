@@ -48,8 +48,8 @@ public class SchoolRemove extends Command
                   event.sendMessage("This is the only school available to delete would you like to delete it?");
 
                   var school = values.getSchool();
-
-                  event.getJDA().addEventListener(new SchoolRemoveStateMachine(values, 2));
+                  values.setState(2);
+                  event.getJDA().addEventListener(new SchoolRemoveStateMachine(values, ));
             }
             else if (processedList == 2)
             {
@@ -61,7 +61,7 @@ public class SchoolRemove extends Command
       {
             private final long channelId, authorId;
             private final StateMachineValues values;
-            private int state;
+            private final int state;
 
 
             public SchoolRemoveStateMachine(StateMachineValues values, int state)
@@ -84,21 +84,23 @@ public class SchoolRemove extends Command
                         return;
                   }
 
+                  // TOdo: Fix this
+
                   switch (state)
                   {
                         case 1 -> {
                               var schools = values.getSchoolList();
-                              var success = Processor.validateMessage(event, schools);
+                              var success = Processor.validateMessage(values, schools);
 
-                              if (success == null)
+                              if (!success)
                               {
                                     return;
                               }
 
-                              values.setSchool(success);
 
-                              channel.sendMessageFormat("Are you sure you want to remove [ ** %s **]", success.getName()).queue();
-                              state = 2;
+                              var school = values.getSchool();
+                              channel.sendMessageFormat("Are you sure you want to remove [ ** %s **]", school.getName()).queue();
+                              values.incrementMachineState();
                         }
 
                         case 2 -> {

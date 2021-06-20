@@ -6,14 +6,16 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import schoolbot.Schoolbot;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.misc.DatabaseDTO;
+import schoolbot.objects.misc.StateMachine;
+import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
 import schoolbot.util.Embed;
+import schoolbot.util.Processor;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,34 +31,30 @@ public class ProfessorEdit extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
+            StateMachineValues values = new StateMachineValues(event);
             List<School> schools = event.getGuildSchools()
                     .stream()
                     .filter(school -> !school.getProfessorList().isEmpty())
                     .collect(Collectors.toList());
-            School school;
-            Professor professor;
-            Schoolbot schoolbot = event.getSchoolbot();
-            JDA jda = event.getJDA();
+            values.setSchoolList(schools);
+            var jda = event.getJDA();
 
 
-            if (schools.isEmpty())
+            var returnCode = Processor.processGenericList(values, schools, School.class);
+
+            if (returnCode == 0)
             {
-                  Embed.error(event, "** %s ** has no schools with professors to edit", event.getGuild().getName());
+                  return;
             }
-            else if (schools.size() == 1)
+
+            if (returnCode == 1)
             {
-                  school = schools.get(0);
+                  var school = values.getSchool();
+                  var professorReturnCode = Processor.processGenericList(values, school.getProfessorList(), Professor.class);
 
-                  List<Professor> professors = school.getProfessorList();
-
-                  if (professors.isEmpty())
+                  if (professorReturnCode == 1)
                   {
-                        Embed.error(event, "** %s ** has no professors", school.getName());
-                  }
-                  else if (professors.size() == 1)
-                  {
-                        professor = professors.get(0);
-
+                        var professor = values.getProfessor();
                         event.sendMessage("""
                                 ** %s ** is the only professor that is available.. Would you like to continue?
                                 What attribute would you like to edit
@@ -65,76 +63,55 @@ public class ProfessorEdit extends Command
                                          2. Last Name
                                          3. Email Prefix```
                                 """, professor.getFullName());
-                        jda.addEventListener(new ProfessorEditStateMachine(event, professor, 4));
+                        values.setState(4);
                   }
-                  else
+                  else if (professorReturnCode == 2)
                   {
-                        event.sendAsPaginatorWithPageNumbers(professors);
-                        event.sendMessage("Please choose a professor that you choose to edit based off page number");
-                        jda.addEventListener(new ProfessorEditStateMachine(event, professors, schools, 3));
+                        values.setState(3);
                   }
+
             }
-            else
-            {
-                  event.sendMessage("There are multiple schools with editable professors.. Please select the page number of the school you want!");
-                  event.sendAsPaginatorWithPageNumbers(schools);
-                  jda.addEventListener(new ProfessorEditStateMachine(event, null, schools, 1));
-            }
+
+            jda.addEventListener(new ProfessorEditStateMachine(values));
+
       }
 
-      public static class ProfessorEditStateMachine extends ListenerAdapter
+      public static class ProfessorEditStateMachine extends ListenerAdapter implements StateMachine
       {
-            private final long channelID, authorID;
-            private final CommandEvent commandEvent;
-            private int state;
-            private School school;
+
             private String updateColumn = "";
-            private List<School> schoolList;
-            private List<Professor> professors;
-            private Professor professor;
+            private final StateMachineValues values;
 
-            public ProfessorEditStateMachine(CommandEvent event, Professor professor, int stateToGoto)
+            public ProfessorEditStateMachine(StateMachineValues values)
             {
-                  this.channelID = event.getChannel().getIdLong();
-                  this.authorID = event.getUser().getIdLong();
-                  this.commandEvent = event;
-                  this.professor = professor;
-                  this.school = professor.getProfessorsSchool();
-                  state = stateToGoto;
-            }
-
-            public ProfessorEditStateMachine(CommandEvent event, List<Professor> professors, List<School> schools, int stateToGoto)
-            {
-                  this.channelID = event.getChannel().getIdLong();
-                  this.authorID = event.getUser().getIdLong();
-                  this.commandEvent = event;
-                  this.schoolList = schools;
-                  this.professors = professors;
-                  state = stateToGoto;
+                  this.values = values;
             }
 
 
             @Override
             public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event)
             {
-                  if (event.getAuthor().getIdLong() != authorID) return;
-                  if (event.getChannel().getIdLong() != channelID) return;
+                  values.setMessageReceivedEvent(event);
+                  var requirementsMet = Checks.eventMeetsPrerequisites(values);
 
-                  String message = event.getMessage().getContentRaw();
-                  MessageChannel channel = event.getChannel();
-                  JDA jda = event.getJDA();
-
-
-                  if (message.equalsIgnoreCase("stop") || message.equalsIgnoreCase("exit"))
+                  if (!requirementsMet)
                   {
-                        channel.sendMessage("Okay aborting..").queue();
-                        jda.removeEventListener(this);
                         return;
                   }
+
+                  String message = event.getMessage().getContentRaw();
+                  var channel = event.getChannel();
+                  var jda = event.getJDA();
+                  int state = values.getState();
+
+
+                  // TODO: Fix this
 
                   switch (state)
                   {
                         case 1 -> {
+
+                              var success = Processor.validateMessage(event, schoolList);
                               if (!Checks.isNumber(message))
                               {
                                     Embed.notANumberError(event, message);
