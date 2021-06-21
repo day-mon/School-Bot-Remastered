@@ -27,9 +27,9 @@ jobs:
       run: mvn -B clean compile --file pom.xml
       
     - name: Step 4 - List Directory
-    - run: ls -a
+      run: ls -a
     
     - name: Step 5 - Target Folder Peak
-    - run: 
+      run: 
           cd target
           ls -a
