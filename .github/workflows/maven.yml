@@ -31,4 +31,4 @@ jobs:
       run: ls -a
     
     - name: Step 5 - Target Folder Peak
-      run: ls -a target
+      run: ls -a target/classes
