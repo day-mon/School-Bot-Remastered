@@ -31,6 +31,4 @@ jobs:
       run: ls -a
     
     - name: Step 5 - Target Folder Peak
-      run: 
-          cd target
-          ls -a
+      run: ls -a target
