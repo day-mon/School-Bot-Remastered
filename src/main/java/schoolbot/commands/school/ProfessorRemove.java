@@ -155,7 +155,7 @@ public class ProfessorRemove extends Command
                               }
                               else if (professorList.size() == 1)
                               {
-                                    channel.sendMessage(professorList.get(0).getAsEmbed(commandEvent.getSchoolbot())).queue();
+                                    channel.sendMessageEmbeds(professorList.get(0).getAsEmbed(commandEvent.getSchoolbot())).queue();
                                     channel.sendMessage("This is the only professor would you like to delete?").queue();
                                     state = 4;
                               }

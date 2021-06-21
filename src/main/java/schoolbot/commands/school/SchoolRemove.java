@@ -31,6 +31,7 @@ public class SchoolRemove extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
+            var jda = event.getJDA();
 
             StateMachineValues values = new StateMachineValues(event);
             List<School> schools = event.getGuildSchools()
@@ -42,6 +43,10 @@ public class SchoolRemove extends Command
 
             var processedList = Processor.processGenericList(values, schools, School.class);
 
+            if (processedList == 0)
+            {
+                  return;
+            }
 
             if (processedList == 1)
             {
@@ -49,26 +54,22 @@ public class SchoolRemove extends Command
 
                   var school = values.getSchool();
                   values.setState(2);
-                  event.getJDA().addEventListener(new SchoolRemoveStateMachine(values, ));
             }
-            else if (processedList == 2)
-            {
-                  event.getJDA().addEventListener(new SchoolRemoveStateMachine(values, 1));
-            }
+
+            jda.addEventListener(new SchoolRemoveStateMachine(values));
+
       }
 
       public static class SchoolRemoveStateMachine extends ListenerAdapter implements StateMachine
       {
             private final long channelId, authorId;
             private final StateMachineValues values;
-            private final int state;
 
 
-            public SchoolRemoveStateMachine(StateMachineValues values, int state)
+            public SchoolRemoveStateMachine(StateMachineValues values)
             {
                   this.authorId = values.getAuthorId();
                   this.channelId = values.getChannelId();
-                  this.state = state;
                   this.values = values;
             }
 
@@ -84,6 +85,8 @@ public class SchoolRemove extends Command
                         return;
                   }
 
+
+                  int state = values.getState();
                   // TOdo: Fix this
 
                   switch (state)
@@ -100,7 +103,6 @@ public class SchoolRemove extends Command
 
                               var school = values.getSchool();
                               channel.sendMessageFormat("Are you sure you want to remove [ ** %s **]", school.getName()).queue();
-                              values.incrementMachineState();
                         }
 
                         case 2 -> {

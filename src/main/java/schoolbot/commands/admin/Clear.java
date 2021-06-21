@@ -125,7 +125,7 @@ public class Clear extends Command
                                         )).collect(Collectors.toList());
                                 event.getChannel().purgeMessages(filteredDeletedMessages);
                                 return filteredDeletedMessages.size();
-                          }).whenCompleteAsync((messagesTotal, throwable) -> event.getChannel().sendMessage(
+                          }).whenCompleteAsync((messagesTotal, throwable) -> event.getChannel().sendMessageEmbeds(
                           new EmbedBuilder()
                                   .setDescription("Successfully purged `" + messagesTotal + "` messages.")
                                   .setColor(Color.GREEN)

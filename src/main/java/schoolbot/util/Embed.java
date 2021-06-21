@@ -23,7 +23,7 @@ public class Embed
       {
             MessageChannel channel = event.getChannel();
 
-            channel.sendMessage(new EmbedBuilder()
+            channel.sendMessageEmbeds(new EmbedBuilder()
                     .setColor(Color.GREEN)
                     .setDescription(message)
                     .build()).queue();
@@ -33,7 +33,7 @@ public class Embed
       {
             MessageChannel channel = event.getChannel();
 
-            channel.sendMessage(new EmbedBuilder()
+            channel.sendMessageEmbeds(new EmbedBuilder()
                     .setColor(Color.GREEN)
                     .setDescription(Emoji.WHITE_CHECK_MARK.getAsChat() + " " + String.format(message, args))
                     .build()).queue();
@@ -43,7 +43,7 @@ public class Embed
       {
             MessageChannel channel = event.getChannel();
 
-            channel.sendMessage(new EmbedBuilder()
+            channel.sendMessageEmbeds(new EmbedBuilder()
                     .setColor(Color.GREEN)
                     .setDescription(Emoji.WHITE_CHECK_MARK.getAsChat() + " " + String.format(message, args))
                     .build()).queue();
@@ -63,7 +63,7 @@ public class Embed
       {
             MessageChannel channel = event.getChannel();
 
-            channel.sendMessage(new EmbedBuilder()
+            channel.sendMessageEmbeds(new EmbedBuilder()
                     .setColor(Color.RED)
                     .setDescription(Emoji.CROSS_MARK.getAsChat() + " " + message)
                     .build()).queue();
@@ -79,7 +79,7 @@ public class Embed
       {
             MessageChannel channel = event.getChannel();
 
-            channel.sendMessage(new EmbedBuilder()
+            channel.sendMessageEmbeds(new EmbedBuilder()
                     .setColor(Color.RED)
                     .setDescription(Emoji.CROSS_MARK.getAsChat() + " " + String.format(message, args))
                     .build()).queue();
@@ -89,7 +89,7 @@ public class Embed
       {
             var channel = event.getChannel();
 
-            channel.sendMessage(new EmbedBuilder()
+            channel.sendMessageEmbeds(new EmbedBuilder()
                     .setTitle(Emoji.WARNING.getAsChat() + " Warning " + Emoji.WARNING.getAsChat()).setColor(Color.YELLOW)
                     .setDescription(String.format(message, args))
                     .build()).queue();
@@ -99,7 +99,7 @@ public class Embed
       {
             var channel = event.getChannel();
 
-            channel.sendMessage(new EmbedBuilder()
+            channel.sendMessageEmbeds(new EmbedBuilder()
                     .setTitle(Emoji.WARNING.getAsChat() + " Warning " + Emoji.WARNING.getAsChat())
                     .setColor(Color.YELLOW)
                     .setDescription(message)

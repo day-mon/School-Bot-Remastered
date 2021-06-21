@@ -61,7 +61,7 @@ public class UserInfo extends Command
       {
             var user = member.getUser();
 
-            channel.sendMessage(new EmbedBuilder()
+            channel.sendMessageEmbeds(new EmbedBuilder()
                     .setTitle("Information on **" + user.getName() + "** ")
                     .addField("Join date", StringUtils.formatDate(member.getTimeJoined()), false)
                     .addField("Boosting Since", member.getTimeBoosted() == null ? "Not Boosting" : StringUtils.formatDate(member.getTimeBoosted()), false)

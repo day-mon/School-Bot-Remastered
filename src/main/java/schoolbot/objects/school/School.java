@@ -529,7 +529,7 @@ public class School implements Paginatable
             Parser.classTime(event.getSchoolbot(), save, schoolClass);
             this.classroomList.add(schoolClass);
             this.professorList.add(schoolClass.getProfessor());
-            channel.sendMessage(schoolClass.getAsEmbed(event.getSchoolbot())).queue();
+            channel.sendMessageEmbeds(schoolClass.getAsEmbed(event.getSchoolbot())).queue();
 
 
       }

@@ -8,10 +8,12 @@ import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
+import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
 import schoolbot.util.Embed;
+import schoolbot.util.Processor;
 
 import java.util.List;
 
@@ -27,6 +29,7 @@ public class ProfessorAdd extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
+            StateMachineValues values = new StateMachineValues(event);
             List<School> schools = event.getGuildSchools();
 
             if (schools.isEmpty())
@@ -35,103 +38,109 @@ public class ProfessorAdd extends Command
                   return;
             }
             event.sendMessage("To start.. Whats your professors first name:  ");
-            event.getJDA().addEventListener(new ProfessorStateMachine(event, schools));
+            event.getJDA().addEventListener(new ProfessorAddStateMachine(values));
       }
 
 
-      public static class ProfessorStateMachine extends ListenerAdapter
+      public static class ProfessorAddStateMachine extends ListenerAdapter
       {
-            private final long channelId, authorId;
-            private final List<School> schools;
-            private int state = 0;
-            private final Professor professor;
-            private final CommandEvent commandEvent;
-            int schoolID = 0;
+
+            private final StateMachineValues values;
 
 
-            public ProfessorStateMachine(CommandEvent event, List<School> schools)
+            public ProfessorAddStateMachine(StateMachineValues values)
             {
-                  this.schools = schools;
-                  this.channelId = event.getChannel().getIdLong();
-                  this.authorId = event.getUser().getIdLong();
-                  this.commandEvent = event;
-                  professor = new Professor();
+                  this.values = values;
             }
 
             public void onGuildMessageReceived(GuildMessageReceivedEvent event)
             {
-                  if (event.getAuthor().isBot()) return;
-                  if (event.getChannel().getIdLong() != channelId) return;
-                  if (event.getAuthor().getIdLong() != authorId) return;
-                  MessageChannel channel = event.getChannel();
-                  String content = event.getMessage().getContentRaw();
+                  values.setMessageReceivedEvent(event);
+                  var requirementsMet = Checks.eventMeetsPrerequisites(values);
+                  var channel = event.getChannel();
+                  var jda = event.getJDA();
+
+                  String message = event.getMessage().getContentRaw();
+
+
+                  if (!requirementsMet)
+                  {
+                        return;
+                  }
+
+                  int state = values.getState();
 
 
                   switch (state)
                   {
                         case 0 -> {
-                              numCheck(content, channel);
-                              channel.sendMessageFormat("Awesome! Thank you for that your professors first name is ** %s **", content).queue();
-                              professor.setFirstName(content);
+                              values.setProfessor(new Professor());
+                              numCheck(message, channel);
+                              channel.sendMessageFormat("Awesome! Thank you for that your professors first name is ** %s **", message).queue();
+
+
+                              values.getProfessor().setFirstName(message);
+
                               channel.sendMessage("I will now need your professors last name: ").queue();
-                              state = 1;
+                              values.incrementMachineState();
                         }
                         case 1 -> {
-                              numCheck(content, channel);
-                              channel.sendMessageFormat("Thank you again. Your professor last name is ** %s **", content).queue();
-                              professor.setLastName(content);
-                              professor.setFullName(professor.getFirstName() + " " + professor.getLastName());
-                              if (schools.size() == 1)
+                              numCheck(message, channel);
+                              channel.sendMessageFormat("Thank you again. Your professor last name is ** %s **", message).queue();
+
+                              values.getProfessor().setLastName(message);
+                              var schoolList = values.getSchoolList();
+
+
+                              if (schoolList.size() == 1)
                               {
-                                    channel.sendMessageFormat("** %s ** only has one school associated with it. I will automatically assign your professor to  ** %s **", event.getGuild().getName(), schools.get(0).getName()).queue();
-                                    professor.setProfessorsSchool(schools.get(0));
+                                    var school = schoolList.get(0);
+                                    channel.sendMessageFormat("** %s ** only has one school associated with it. I will automatically assign your professor to  ** %s **", event.getGuild().getName(), school.getName()).queue();
+                                    values.getProfessor().setProfessorsSchool(school);
                                     channel.sendMessage("Lastly, enter his email prefix: ").queue();
-                                    state = 3;
+                                    values.setState(3);
                                     break;
                               }
+                              var commandEvent = values.getEvent();
                               channel.sendMessage("Moving on.. I will need you professors school.. Here is a list of all this servers schools! ").queue();
                               commandEvent.sendAsPaginatorWithPageNumbers(commandEvent.getGuildSchools());
 
-                              state = 2;
+                              values.incrementMachineState();
                         }
                         case 2 -> {
-                              channel.sendMessage("Please choose a page number from the page list above..").queue();
-                              if (!Checks.isNumber(content))
+                              var success = Processor.validateMessage(values, values.getSchoolList());
+
+                              if (!success)
                               {
-                                    Embed.error(commandEvent, "You must give me a number!");
-                                    return;
-
-                              }
-                              int index = Integer.parseInt(content) - 1;
-
-
-                              if (!Checks.between(index+1, schools.size()))
-                              {
-                                    Embed.error(event, "** %s ** is not a valid number please choose a number between %d - %d ", content, 1, schools.size());
                                     return;
                               }
 
 
-                              professor.setProfessorsSchool(schools.get(index));
+                              var school = values.getSchool();
+
+                              values.getProfessor().setProfessorsSchool(school);
                               channel.sendMessage("""
                                       Thank you for that! I will now need your professors email suffix
                                       For Ex: **litman**@cs.pitt.edu
                                       """).queue();
-                              state = 3;
 
                         }
                         case 3 -> {
-                              professor.setEmailPrefix(content);
+                              values.getProfessor().setEmailPrefix(message);
                               channel.sendMessage("Thank you.. Inserting all of the info into my database and Adding professor.").queue();
+
+                              var commandEvent = values.getEvent();
+                              var professor = values.getProfessor();
+                              var schoolbot = commandEvent.getSchoolbot();
 
                               if (!commandEvent.addProfessor(commandEvent, professor))
                               {
                                     Embed.error(event, "Could not add Professor %s", professor.getLastName());
                                     return;
                               }
-                              channel.sendMessage(professor.getAsEmbed(commandEvent.getSchoolbot())).queue();
+                              channel.sendMessageEmbeds(professor.getAsEmbed(schoolbot)).queue();
 
-                              event.getJDA().removeEventListener(this);
+                              jda.removeEventListener(this);
                         }
                   }
             }

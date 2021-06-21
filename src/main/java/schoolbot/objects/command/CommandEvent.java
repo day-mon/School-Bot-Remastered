@@ -132,12 +132,12 @@ public class CommandEvent
 
       public void sendMessage(MessageEmbed embed)
       {
-            getChannel().sendMessage(embed).queue();
+            getChannel().sendMessageEmbeds(embed).queue();
       }
 
       public void sendMessage(EmbedBuilder embedBuilder)
       {
-            getChannel().sendMessage(
+            getChannel().sendMessageEmbeds(
                     embedBuilder.setColor(Constants.DEFAULT_EMBED_COLOR)
                             .setTimestamp(Instant.now()).build())
                     .queue();

@@ -1,8 +1,6 @@
 package schoolbot.commands.school;
 
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -111,26 +109,16 @@ public class ProfessorEdit extends Command
                   {
                         case 1 -> {
 
-                              var success = Processor.validateMessage(event, schoolList);
-                              if (!Checks.isNumber(message))
+                              var success = Processor.validateMessage(values, values.getSchoolList());
+
+                              if (!success)
                               {
-                                    Embed.notANumberError(event, message);
                                     return;
                               }
 
-                              int index = Integer.parseInt(message);
-
-                              if (!Checks.between(index, schoolList.size()))
-                              {
-                                    Embed.error(event, "%d is not between 1 - %d. Try again", index, schoolList.size());
-                                    return;
-                              }
-
-                              school = schoolList.get(index - 1);
-                              professors = school.getProfessorList();
+                              var school = values.getSchool();
 
                               channel.sendMessageFormat("** %s ** has been selected, Would you like to continue?", school.getName()).queue();
-                              state = 2;
                         }
 
                         case 2 -> {
@@ -140,36 +128,30 @@ public class ProfessorEdit extends Command
                                     jda.removeEventListener(this);
                               }
 
-                              commandEvent.sendAsPaginatorWithPageNumbers(professors);
+                              var cmdEvent = values.getEvent();
+
+                              cmdEvent.sendAsPaginatorWithPageNumbers(values.getProfessorList());
                               channel.sendMessage("Please give me the page number associated with the professor you want to edit").queue();
 
                               state = 3;
                         }
 
                         case 3 -> {
-                              if (!Checks.isNumber(message))
+
+                              var success = Processor.validateMessage(values, values.getProfessorList());
+
+                              if (!success)
                               {
-                                    Embed.notANumberError(event, message);
                                     return;
                               }
 
-                              int index = Integer.parseInt(message);
-
-                              if (!Checks.between(index, professors.size()))
-                              {
-                                    Embed.error(event, "%d is not between 1 - %d. Try again", index, professors.size());
-                                    return;
-                              }
-
-                              professor = professors.get(index - 1);
-
+                              var professor = values.getProfessor();
                               channel.sendMessageFormat("What attribute of ** %s ** would you like to edit", professor.getFullName()).queue();
                               channel.sendMessage("""
                                       ```1. First Name
                                          2. Last Name
                                          3. Email Prefix```
                                        """).queue();
-                              state = 4;
                         }
 
 
@@ -185,17 +167,17 @@ public class ProfessorEdit extends Command
 
                               evaluateChoice(content, event);
 
-                              state = 5;
+                              values.incrementMachineState();
                         }
 
-                        case 5 -> evaluateColumn(message, event);
+                        case 5 -> evaluateColumn(values);
 
                   }
             }
 
             private void evaluateChoice(String content, GuildMessageReceivedEvent event)
             {
-                  MessageChannel channel = event.getChannel();
+                  var channel = event.getChannel();
                   if (content.contains("1") || content.contains("first"))
                   {
                         updateColumn = "first_name";
@@ -217,9 +199,15 @@ public class ProfessorEdit extends Command
                   }
             }
 
-            private void evaluateColumn(String message, GuildMessageReceivedEvent event)
+            private void evaluateColumn(StateMachineValues values)
             {
-                  JDA jda = event.getJDA();
+                  var jda = values.getJda();
+                  var event = values.getMessageReceivedEvent();
+                  var message = event.getMessage().getContentRaw();
+                  var commandEvent = values.getEvent();
+
+                  var professor = values.getProfessor();
+
                   switch (updateColumn)
                   {
                         case "first_name", "last_name" -> {

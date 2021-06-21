@@ -16,10 +16,6 @@ import java.util.List;
 public class Professor implements Paginatable
 {
 
-      /**
-       *
-       */
-      private static final long serialVersionUID = 3024391926657713863L;
       private List<Classroom> listOfClasses;
       private String email;
       private String emailPrefix;
@@ -105,7 +101,7 @@ public class Professor implements Paginatable
 
       public void setLastName(String lastName)
       {
-            if (this.firstName != null)
+            if (this.firstName != null && !this.firstName.isBlank())
             {
                   this.lastName = lastName;
                   this.fullName = this.firstName + " " + this.lastName;

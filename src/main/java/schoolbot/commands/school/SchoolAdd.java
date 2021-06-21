@@ -241,7 +241,7 @@ public class SchoolAdd extends Command
                   if (addToDbAndCreateRole(embed, schoolbot, cmdEvent))
                   {
                         event.getChannel().sendMessage("School Created").queue();
-                        event.getChannel().sendMessage(embed).queue();
+                        event.getChannel().sendMessageEmbeds(embed).queue();
                   }
                   else
                   {
