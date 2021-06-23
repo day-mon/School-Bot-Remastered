@@ -16,14 +16,13 @@ import java.util.List;
 public class Professor implements Paginatable
 {
 
-      private List<Classroom> listOfClasses;
+      private final List<Classroom> listOfClasses;
       private String email;
       private String emailPrefix;
       // Redundant.. will fix..
       private String firstName;
       private String lastName;
       private String fullName;
-      private int age;
       private int id;
 
 
@@ -32,6 +31,8 @@ public class Professor implements Paginatable
 
       public Professor()
       {
+            this.officeHours = "N/A";
+            listOfClasses = new ArrayList<>();
 
       }
 
@@ -41,6 +42,7 @@ public class Professor implements Paginatable
             this.lastName = lastName;
             this.emailPrefix = emailPrefix;
             this.fullName = firstName + " " + lastName;
+            this.officeHours = "N/A";
             listOfClasses = new ArrayList<>();
       }
 
@@ -66,8 +68,8 @@ public class Professor implements Paginatable
             this.fullName = firstName + " " + lastName;
             this.emailPrefix = lastName.toLowerCase();
             this.professorsSchool = school;
+            this.officeHours = "N/A";
             listOfClasses = new ArrayList<>();
-
       }
 
 
@@ -153,22 +155,6 @@ public class Professor implements Paginatable
 
 
       /**
-       * @return age return the age
-       */
-      public int getAge()
-      {
-            return age;
-      }
-
-      /**
-       * @param age the age to set
-       */
-      public void setAge(int age)
-      {
-            this.age = age;
-      }
-
-      /**
        * @return String return the officeHours
        */
       public String getOfficeHours()
@@ -236,7 +222,7 @@ public class Professor implements Paginatable
             return new EmbedBuilder()
                     .setTitle("Professor " + lastName)
                     .addField("Professor Name", fullName, false)
-                    .addField("Email", email + " \n ***(These are assumed unless set otherwise)*** ", false)
+                    .addField("Email", getEmail() + " \n ***(These are assumed unless set otherwise)*** ", false)
                     .addField("Office Hours", this.officeHours, false)
                     .addField("Classes Taught", String.valueOf(listOfClasses.size()), false)
                     .addField("Professor ID", String.valueOf(this.id), false)

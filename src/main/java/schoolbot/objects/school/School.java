@@ -3,7 +3,9 @@ package schoolbot.objects.school;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.Role;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jsoup.Jsoup;
@@ -315,7 +317,7 @@ public class School implements Paginatable
                           classroom.getSchool()
                   );
 
-                  if (!event.addProfessor(event, prof))
+                  if (!event.addProfessor(prof))
                   {
                         removeSequence(event, classroom);
                         return null;
@@ -351,7 +353,7 @@ public class School implements Paginatable
 
             guild.getRoleById(classroom.getRoleID()).delete().queue();
 
-            event.removeProfessor(event, classroom.getProfessor());
+            event.removeProfessor(classroom.getProfessor());
             event.getGuild().getRoleById(classroom.getRoleID()).delete().queue();
             event.getGuild().getTextChannelById(classroom.getChannelID()).delete().queue();
       }
@@ -385,9 +387,12 @@ public class School implements Paginatable
       {
 
             String save = "";
-            MessageChannel channel = event.getChannel();
             Document document;
-            Guild guild = event.getGuild();
+
+            var guild = event.getGuild();
+            var channel = event.getChannel();
+            var schoolbot = event.getSchoolbot();
+
 
             try
             {
@@ -449,15 +454,15 @@ public class School implements Paginatable
             // Setting classname and identifier
             schoolClass.setClassIdentifier(subjectAndClassNameAndNum);
 
-            Role role = guild.createRole()
+            var role = guild.createRole()
                     .setName(className.toLowerCase().replaceAll("\\s", "-"))
                     .setColor(new Random().nextInt(0xFFFFFF))
                     .complete();
 
             // Makes channel only viewable by the role that was just created
-            TextChannel textChannel = guild.createTextChannel(className)
-                    .addRolePermissionOverride(role.getIdLong(), Permission.ALL_GUILD_PERMISSIONS, 0L)
-                    .addRolePermissionOverride(event.getGuild().getIdLong(), 0L, Permission.ALL_GUILD_PERMISSIONS)
+            var textChannel = guild.createTextChannel(className)
+                    .addPermissionOverride(role, Permission.ALL_CHANNEL_PERMISSIONS, 0L)
+                    .addPermissionOverride(guild.getPublicRole(), 0L, Permission.ALL_CHANNEL_PERMISSIONS)
                     .complete();
 
             schoolClass.setRoleID(role.getIdLong());
@@ -526,10 +531,10 @@ public class School implements Paginatable
                   return;
             }
             schoolClass.setId(classCheck);
-            Parser.classTime(event.getSchoolbot(), save, schoolClass);
+            Parser.classTime(schoolbot, save, schoolClass);
             this.classroomList.add(schoolClass);
             this.professorList.add(schoolClass.getProfessor());
-            channel.sendMessageEmbeds(schoolClass.getAsEmbed(event.getSchoolbot())).queue();
+            channel.sendMessageEmbeds(schoolClass.getAsEmbed(schoolbot)).queue();
 
 
       }

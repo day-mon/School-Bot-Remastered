@@ -26,6 +26,10 @@
             <url>https://m2.dv8tion.net/releases</url>
         </repository>
         <repository>
+            <id>chew-m2</id>
+            <url>https://m2.chew.pro/releases</url>
+        </repository>
+        <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
@@ -53,9 +57,16 @@
             <version>4.3.0_280</version>
         </dependency>
         <dependency>
-            <groupId>com.github.arynxd</groupId>
-            <artifactId>button-pagination</artifactId>
-            <version>master-SNAPSHOT</version>
+            <groupId>com.github.ygimenez</groupId>
+            <artifactId>Pagination-Utils</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>pw.chew</groupId>
+            <artifactId>jda-chewtils</artifactId>
+            <version>1.20.2</version>
+            <scope>compile</scope>
+            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>org.jsoup</groupId>

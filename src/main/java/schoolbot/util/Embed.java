@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import schoolbot.Constants;
 import schoolbot.handlers.CommandCooldownHandler;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.misc.Emoji;
@@ -34,8 +35,9 @@ public class Embed
             MessageChannel channel = event.getChannel();
 
             channel.sendMessageEmbeds(new EmbedBuilder()
+                    .setTitle(Emoji.WHITE_CHECK_MARK.getAsChat() + " Success " + Emoji.WHITE_CHECK_MARK.getAsChat())
                     .setColor(Color.GREEN)
-                    .setDescription(Emoji.WHITE_CHECK_MARK.getAsChat() + " " + String.format(message, args))
+                    .setDescription(String.format(message, args))
                     .build()).queue();
       }
 
@@ -44,16 +46,16 @@ public class Embed
             MessageChannel channel = event.getChannel();
 
             channel.sendMessageEmbeds(new EmbedBuilder()
+                    .setTitle(Emoji.WHITE_CHECK_MARK.getAsChat() + " Success " + Emoji.WHITE_CHECK_MARK.getAsChat())
                     .setColor(Color.GREEN)
-                    .setDescription(Emoji.WHITE_CHECK_MARK.getAsChat() + " " + String.format(message, args))
+                    .setDescription(String.format(message, args))
                     .build()).queue();
       }
 
       public static void error(CommandEvent event, String message)
       {
-
-
             event.sendMessage(new EmbedBuilder()
+                    .setTitle(Emoji.CROSS_MARK.getAsChat() + " Error " + Emoji.CROSS_MARK.getAsChat())
                     .setColor(Color.RED)
                     .setDescription(message)
                     .build());
@@ -64,8 +66,9 @@ public class Embed
             MessageChannel channel = event.getChannel();
 
             channel.sendMessageEmbeds(new EmbedBuilder()
+                    .setTitle(Emoji.CROSS_MARK.getAsChat() + " Error " + Emoji.CROSS_MARK.getAsChat())
                     .setColor(Color.RED)
-                    .setDescription(Emoji.CROSS_MARK.getAsChat() + " " + message)
+                    .setDescription(message)
                     .build()).queue();
       }
 
@@ -80,8 +83,9 @@ public class Embed
             MessageChannel channel = event.getChannel();
 
             channel.sendMessageEmbeds(new EmbedBuilder()
+                    .setTitle(Emoji.CROSS_MARK.getAsChat() + " Error " + Emoji.CROSS_MARK.getAsChat())
                     .setColor(Color.RED)
-                    .setDescription(Emoji.CROSS_MARK.getAsChat() + " " + String.format(message, args))
+                    .setDescription(String.format(message, args))
                     .build()).queue();
       }
 
@@ -110,6 +114,7 @@ public class Embed
       public static void error(CommandEvent event, String message, Object... args)
       {
             event.sendMessage(new EmbedBuilder()
+                    .setTitle(Emoji.CROSS_MARK.getAsChat() + " Error " + Emoji.CROSS_MARK.getAsChat())
                     .setColor(Color.RED)
                     .setDescription(String.format(message, args))
                     .build());
@@ -152,11 +157,13 @@ public class Embed
             );
       }
 
-
-      public static void confirmation(CommandEvent event, String message)
+      public static void information(GuildMessageReceivedEvent event, String message, Object... args)
       {
-            event.sendMessage(new EmbedBuilder()
-                    .setDescription(message));
-
+            event.getChannel().sendMessageEmbeds(new EmbedBuilder()
+                    .setTitle("Important Information")
+                    .setDescription(String.format(message, args))
+                    .setColor(Constants.DEFAULT_EMBED_COLOR)
+                    .build()
+            ).queue();
       }
 }

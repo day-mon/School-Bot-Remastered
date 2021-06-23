@@ -1,17 +1,19 @@
 package schoolbot.commands.school;
 
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.command.CommandFlag;
+import schoolbot.objects.misc.StateMachine;
+import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
 import schoolbot.util.Embed;
+import schoolbot.util.Processor;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,176 +24,164 @@ public class ProfessorRemove extends Command
       {
             super(parent, "Removes a professor from the guild", "[none]", 0);
             addPermissions(Permission.ADMINISTRATOR);
+            addFlags(CommandFlag.STATE_MACHINE_COMMAND);
       }
 
 
       @Override
-      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
+      public void run(@NotNull CommandEvent event, @NotNull List<String> args, @NotNull StateMachineValues values)
       {
-            Member member = event.getMember();
-            MessageChannel channel = event.getChannel();
-
+            var jda = event.getJDA();
             List<School> schoolList = event.getGuildSchools()
                     .stream()
                     .filter(school -> !school.getProfessorList().isEmpty())
                     .collect(Collectors.toList());
+            values.setSchoolList(schoolList);
 
-            if (schoolList.isEmpty())
+            var processedList = Processor.processGenericList(values, schoolList, School.class);
+
+            if (processedList == 0)
             {
-                  Embed.error(event, "[ ** %s ** ] has no schools with deletable professors", event.getGuild().getName());
+                  return;
             }
-            else if (schoolList.size() == 1)
+
+            if (processedList == 1)
             {
-                  Embed.information(event, "** %s ** has been selected because this is the only school with professors", schoolList.get(0).getName());
+                  var school = values.getSchool();
 
-                  List<Professor> professorList = schoolList.get(0).getProfessorList()
-                          .stream()
-                          .filter(professor -> professor.getListOfClasses().isEmpty())
-                          .collect(Collectors.toList());
+                  Embed.information(event, "** %s ** has been selected because it is the only school with professors that are available to delete", school.getName());
 
-                  if (professorList.size() == 1)
+                  var processedProfessorList = Processor.processGenericList(values, values.getProfessorList(), Professor.class);
+
+                  if (processedProfessorList == 1)
                   {
-                        Professor professor = professorList.get(0);
-                        event.sendMessage(professor.getAsEmbed(event.getSchoolbot()));
-                        event.sendMessage("This is the only professor would you like to delete?");
-                        event.getJDA().addEventListener(new ProfessorRemoveStateMachine(event, professor, 4));
-                  }
-                  else
-                  {
-                        event.sendAsPaginatorWithPageNumbers(professorList);
-                        event.sendMessage("Please choose the page number of the professor you would like to remove");
-                        event.getJDA().addEventListener(new ProfessorRemoveStateMachine(event, schoolList, professorList, 3));
-                  }
+                        var professor = values.getProfessor();
 
+                        Embed.information(event, "** %s ** is the only professor available to delete. Are you sure you want to delete them?", professor.getFullName());
+
+                        values.setState(4);
+                  }
+                  else if (processedProfessorList == 2)
+                  {
+                        values.setState(3);
+                  }
             }
-            else
-            {
-                  event.sendAsPaginatorWithPageNumbers(schoolList);
-                  event.sendMessage("Please give me the page number of the school you want to remove the professor from");
-                  event.getJDA().addEventListener(new ProfessorRemoveStateMachine(event, schoolList, null, 1));
-            }
+
+            jda.addEventListener(new ProfessorRemoveStateMachine(values));
+
       }
 
 
-      public static class ProfessorRemoveStateMachine extends ListenerAdapter
+      public static class ProfessorRemoveStateMachine extends ListenerAdapter implements StateMachine
       {
-            private final long authorID, channelID;
-            private final CommandEvent commandEvent;
-            private List<School> schoolList;
-            private Professor professor;
-            private List<Professor> professorList;
-            private int state;
+            private final StateMachineValues values;
 
-
-            public ProfessorRemoveStateMachine(CommandEvent commandEvent, List<School> school, List<Professor> professorList, int state)
+            public ProfessorRemoveStateMachine(@NotNull StateMachineValues values)
             {
-                  this.commandEvent = commandEvent;
-                  this.schoolList = school;
-                  this.professorList = professorList;
-                  this.state = state;
-                  this.channelID = commandEvent.getChannel().getIdLong();
-                  this.authorID = commandEvent.getUser().getIdLong();
-            }
-
-            public ProfessorRemoveStateMachine(CommandEvent commandEvent, Professor professor, int state)
-            {
-                  this.commandEvent = commandEvent;
-                  this.professor = professor;
-                  this.state = state;
-                  this.channelID = commandEvent.getChannel().getIdLong();
-                  this.authorID = commandEvent.getUser().getIdLong();
+                  values.setMachine(this);
+                  this.values = values;
             }
 
 
             @Override
             public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event)
             {
-                  if (event.getAuthor().getIdLong() != authorID) return;
-                  if (event.getChannel().getIdLong() != channelID) return;
+                  values.setMessageReceivedEvent(event);
+                  var requirementsMet = Checks.eventMeetsPrerequisites(values);
+                  var jda = event.getJDA();
+                  var channel = event.getChannel();
+                  var commandEvent = values.getCommandEvent();
 
                   String message = event.getMessage().getContentRaw();
-                  MessageChannel channel = event.getChannel();
 
-                  if (message.equalsIgnoreCase("stop"))
+                  if (!requirementsMet)
                   {
-                        channel.sendMessage("Okay aborting... ").queue();
-                        event.getJDA().removeEventListener(this);
                         return;
                   }
+
+                  int state = values.getState();
 
                   switch (state)
                   {
                         case 1 -> {
-                              if (!Checks.isNumber(message))
+                              var valid = Processor.validateMessage(values, values.getSchoolList());
+
+                              if (!valid)
                               {
-                                    Embed.error(event, "** %s ** is not a number. Try again", message);
                                     return;
                               }
 
-                              int page = Integer.parseInt(message);
+                              var professorList = values.getProfessorList()
+                                      .stream()
+                                      .filter(professor -> professor.getListOfClasses().isEmpty())
+                                      .collect(Collectors.toList());
 
-                              if (!Checks.between(page, schoolList.size()))
+                              values.setProfessorList(professorList);
+
+                              if (professorList.size() == 1)
                               {
-                                    Embed.error(event, "%d is not a number between 1 and %d. Try again", page, schoolList.size());
+                                    var professor = professorList.get(0);
+                                    values.setProfessor(professor);
+                                    channel.sendMessageFormat("** %s ** is the only professor available to delete at this time.. Would you like to delete them?", professor.getFullName()).queue();
+
+                                    values.setState(4);
                                     return;
                               }
 
-                              School school = schoolList.get(page - 1);
-                              this.professorList = school.getProfessorList();
-                              state = 2;
+                              channel.sendMessage("Thank you for that.. Please select from a professor you would like to remove").queue();
+                              commandEvent.sendAsPaginatorWithPageNumbers(professorList);
 
                         }
 
                         case 2 -> {
-
-                              List<Professor> professorList = this.professorList
+                              List<Professor> professorList = values.getProfessorList()
                                       .stream()
                                       .filter(professors -> professors.getListOfClasses().isEmpty())
                                       .collect(Collectors.toList());
-                              if (professorList.isEmpty())
+                              values.setProfessorList(professorList);
+
+                              var listReturnCode = Processor.processGenericList(values, professorList, Professor.class);
+
+                              if (listReturnCode == 0)
                               {
-                                    Embed.error(event, "There are no deletable professors, remove some of their classes first");
-                                    event.getJDA().removeEventListener(this);
+                                    jda.removeEventListener(this);
+                                    return;
                               }
-                              else if (professorList.size() == 1)
+
+                              if (listReturnCode == 1)
                               {
-                                    channel.sendMessageEmbeds(professorList.get(0).getAsEmbed(commandEvent.getSchoolbot())).queue();
-                                    channel.sendMessage("This is the only professor would you like to delete?").queue();
-                                    state = 4;
+                                    var professor = values.getProfessor();
+
+                                    channel.sendMessageFormat("** %s ** is the only professor available to delete at this time.. Would you like to delete them?", professor.getFullName()).queue();
+                                    values.setState(4);
                               }
-                              else
-                              {
-                                    commandEvent.sendAsPaginatorWithPageNumbers(professorList);
-                                    channel.sendMessage("Please choose the page number of the professor you would like to remove").queue();
-                                    state = 3;
-                              }
+
+                              // No need to check the listReturnCode == 2 because processGenericList handles that and increments state
+
+
                         }
 
                         case 3 -> {
-                              if (!Checks.isNumber(message))
+
+                              var valid = Processor.validateMessage(values, values.getProfessorList());
+
+
+                              if (!valid)
                               {
-                                    Embed.error(event, "** %s ** is not a number. Try again", message);
                                     return;
                               }
 
-                              int page = Integer.parseInt(message);
+                              var professor = values.getProfessor();
 
-                              if (!Checks.between(page, schoolList.size()))
-                              {
-                                    Embed.error(event, "%d is not a number between 1 and %d. Try again", page, schoolList.size() + 1);
-                                    return;
-                              }
-
-                              this.professor = professorList.get(page - 1);
                               channel.sendMessageFormat("Are you sure you want to delete Professor %s", professor.getLastName()).queue();
-                              state = 4;
                         }
 
                         case 4 -> {
+                              var professor = values.getProfessor();
                               if (message.equalsIgnoreCase("yes") || message.equalsIgnoreCase("y"))
                               {
-                                    commandEvent.removeProfessor(commandEvent, professor);
-                                    Embed.success(event, "Removed [** %s **] successfully", this.professor.getFullName());
+                                    commandEvent.removeProfessor(professor);
+                                    Embed.success(event, "Removed [** %s **] successfully", professor.getFullName());
                                     event.getJDA().removeEventListener(this);
                               }
                               else if (message.equalsIgnoreCase("no") || message.equalsIgnoreCase("n") || message.equalsIgnoreCase("nah"))
@@ -205,11 +195,7 @@ public class ProfessorRemove extends Command
                               }
                         }
                   }
-
             }
-
-
       }
-
 }
 

@@ -157,6 +157,7 @@ public class Assignment implements Comparable<Assignment>, Paginatable
       public void setClassroom(Classroom classroom)
       {
             this.classroom = classroom;
+            this.professorID = classroom.getProfessorID();
       }
 
       @Override
@@ -216,7 +217,7 @@ public class Assignment implements Comparable<Assignment>, Paginatable
             HOMEWORK("Homework"),
             QUIZ("Quiz"),
             EXAM("Exam"),
-            EXTRA_CREDIT("Exam Credit"),
+            EXTRA_CREDIT("Extra Credit"),
             PAPER("PAPER");
 
             final String assignmentType;

@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.command.CommandFlag;
 import schoolbot.objects.misc.DatabaseDTO;
 import schoolbot.objects.misc.StateMachine;
 import schoolbot.objects.misc.StateMachineValues;
@@ -23,12 +24,12 @@ public class SchoolEdit extends Command
       {
             super(parent, "Edits a school", "[none]", 0);
             addPermissions(Permission.ADMINISTRATOR);
+            addFlags(CommandFlag.STATE_MACHINE_COMMAND);
       }
 
       @Override
-      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
+      public void run(@NotNull CommandEvent event, @NotNull List<String> args, @NotNull StateMachineValues values)
       {
-            StateMachineValues values = new StateMachineValues(event);
             var jda = event.getJDA();
             var schoolResponse = Processor.processGenericList(values, event.getGuildSchools(), School.class);
 
@@ -140,7 +141,7 @@ public class SchoolEdit extends Command
 
                   var channel = values.getMessageReceivedEvent().getChannel();
                   var school = values.getSchool();
-                  var event = values.getEvent();
+                  var event = values.getCommandEvent();
                   String content = values.getMessageReceivedEvent().getMessage().getContentRaw();
 
                   if (content.contains("1") || content.contains("name"))
@@ -178,7 +179,7 @@ public class SchoolEdit extends Command
             private void evaluateColumn(StateMachineValues values)
             {
                   var jda = values.getJda();
-                  var event = values.getEvent();
+                  var event = values.getCommandEvent();
                   var school = values.getSchool();
                   String message = values.getMessageReceivedEvent().getMessage().getContentRaw();
 
@@ -199,12 +200,12 @@ public class SchoolEdit extends Command
                                     return;
                               }
 
-                              event.updateSchool(event, new DatabaseDTO(school, updateColumn, message));
+                              event.updateSchool(new DatabaseDTO(school, updateColumn, message));
                         }
                         case "url" -> // TODO: Add valid url checks..
-                                event.updateSchool(event, new DatabaseDTO(school, updateColumn, message));
+                                event.updateSchool(new DatabaseDTO(school, updateColumn, message));
                         case "email_suffix" -> // TODO: Add valid email checks...
-                                event.updateSchool(event, new DatabaseDTO(school, updateColumn, message));
+                                event.updateSchool(new DatabaseDTO(school, updateColumn, message));
                         case "role_id" -> {
                               Message eventMessage = event.getMessage();
 
@@ -230,7 +231,7 @@ public class SchoolEdit extends Command
                                     return;
                               }
 
-                              event.updateSchool(event, new DatabaseDTO(school, updateColumn, roleID));
+                              event.updateSchool(new DatabaseDTO(school, updateColumn, roleID));
                         }
                         default -> Embed.error(event, "** %s ** is not a valid response", message);
                   }

@@ -22,14 +22,13 @@ public class ProfessorAdd extends Command
       public ProfessorAdd(Command parent)
       {
             super(parent, "Adds a professor to the server list", "[school name] [professor name] [professor email]", 0);
-            addFlags(CommandFlag.DATABASE);
+            addFlags(CommandFlag.DATABASE, CommandFlag.STATE_MACHINE_COMMAND);
       }
 
 
       @Override
-      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
+      public void run(@NotNull CommandEvent event, @NotNull List<String> args, @NotNull StateMachineValues values)
       {
-            StateMachineValues values = new StateMachineValues(event);
             List<School> schools = event.getGuildSchools();
 
             if (schools.isEmpty())
@@ -73,7 +72,8 @@ public class ProfessorAdd extends Command
 
                   switch (state)
                   {
-                        case 0 -> {
+                        case 1 -> {
+                              // Skips last name state
                               values.setProfessor(new Professor());
                               numCheck(message, channel);
                               channel.sendMessageFormat("Awesome! Thank you for that your professors first name is ** %s **", message).queue();
@@ -84,7 +84,7 @@ public class ProfessorAdd extends Command
                               channel.sendMessage("I will now need your professors last name: ").queue();
                               values.incrementMachineState();
                         }
-                        case 1 -> {
+                        case 2 -> {
                               numCheck(message, channel);
                               channel.sendMessageFormat("Thank you again. Your professor last name is ** %s **", message).queue();
 
@@ -101,13 +101,13 @@ public class ProfessorAdd extends Command
                                     values.setState(3);
                                     break;
                               }
-                              var commandEvent = values.getEvent();
+                              var commandEvent = values.getCommandEvent();
                               channel.sendMessage("Moving on.. I will need you professors school.. Here is a list of all this servers schools! ").queue();
                               commandEvent.sendAsPaginatorWithPageNumbers(commandEvent.getGuildSchools());
 
                               values.incrementMachineState();
                         }
-                        case 2 -> {
+                        case 3 -> {
                               var success = Processor.validateMessage(values, values.getSchoolList());
 
                               if (!success)
@@ -125,15 +125,15 @@ public class ProfessorAdd extends Command
                                       """).queue();
 
                         }
-                        case 3 -> {
+                        case 4 -> {
                               values.getProfessor().setEmailPrefix(message);
                               channel.sendMessage("Thank you.. Inserting all of the info into my database and Adding professor.").queue();
 
-                              var commandEvent = values.getEvent();
+                              var commandEvent = values.getCommandEvent();
                               var professor = values.getProfessor();
                               var schoolbot = commandEvent.getSchoolbot();
 
-                              if (!commandEvent.addProfessor(commandEvent, professor))
+                              if (!commandEvent.addProfessor(professor))
                               {
                                     Embed.error(event, "Could not add Professor %s", professor.getLastName());
                                     return;

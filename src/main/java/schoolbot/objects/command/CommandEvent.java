@@ -1,8 +1,8 @@
 package schoolbot.objects.command;
 
 
-import me.arynxd.button_utils.builder.pagination.StandardPaginatorBuilder;
-import me.arynxd.button_utils.pagination.Paginator;
+import com.github.ygimenez.method.Pages;
+import com.github.ygimenez.model.Page;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -160,36 +160,29 @@ public class CommandEvent
 
       public <T extends Paginatable> void sendAsNormalPaginator(List<T> list)
       {
-            List<MessageEmbed> embeds = new ArrayList<>();
+            List<Page> pages = new ArrayList<>();
 
             for (T obj : list)
             {
-                  embeds.add(obj.getAsEmbed(schoolbot));
+                  pages.add(new Page(obj.getAsEmbed(schoolbot)));
             }
 
-            Paginator paginator = new StandardPaginatorBuilder()
-                    .setWaiter(this.getSchoolbot().getEventWaiter())
-                    .setEmbeds(embeds)
-                    .setJDA(event.getJDA())
-                    .setChannel(event.getChannel())
-                    .setPredicate(eve -> event.getMember().getIdLong() == this.getMember().getIdLong())
-                    .build();
-
-            paginator.paginate();
+            getChannel().sendMessageEmbeds(
+                    (MessageEmbed) pages.get(0).getContent()
+            ).queue(success -> Pages.paginate(success, pages));
       }
 
       public void sendAsPaginator(List<MessageEmbed> embeds)
       {
-            Paginator paginator = new StandardPaginatorBuilder()
-                    .setWaiter(this.schoolbot.getEventWaiter())
-                    .setEmbeds(embeds)
-                    .setJDA(this.getJDA())
-                    .setTimeout(60)
-                    .setChannel(event.getChannel())
-                    .setPredicate(event -> event.getMember().getIdLong() == this.getMember().getIdLong())
-                    .build();
-            paginator.paginate();
-            this.sendSelfDeletingMessage("`Timeout is set to 1 minute`");
+            List<Page> pages = new ArrayList<>();
+
+            for (var embed : embeds)
+            {
+                  pages.add(new Page(embed));
+            }
+            getChannel().sendMessageEmbeds(
+                    (MessageEmbed) pages.get(0).getContent()
+            ).queue(success -> Pages.paginate(success, pages));
       }
 
 
@@ -198,7 +191,7 @@ public class CommandEvent
             // This is just in case I call a list with pages when theres only one page...
             if (list.size() == 1)
             {
-                  sendAsNormalPaginator(list);
+                  this.sendMessage(list.get(0).getAsEmbed(schoolbot));
                   return;
             }
 
@@ -214,16 +207,7 @@ public class CommandEvent
             }
 
 
-            Paginator paginator = new StandardPaginatorBuilder()
-                    .setWaiter(schoolbot.getEventWaiter())
-                    .setEmbeds(embeds)
-                    .setJDA(getJDA())
-                    .setChannel(event.getChannel())
-                    .setPredicate(eve -> eve.getMember().getIdLong() == this.getMember().getIdLong())
-                    .build();
-
-            paginator.paginate();
-            this.sendSelfDeletingMessage("`Timeout is set to 30 seconds`");
+            sendAsPaginator(embeds);
       }
 
 
@@ -231,16 +215,8 @@ public class CommandEvent
       {
             List<MessageEmbed> embeds = schoolbot.getWrapperHandler().getProfessorsAsPaginator(this, school);
 
-            Paginator paginator = new StandardPaginatorBuilder()
-                    .setWaiter(this.getSchoolbot().getEventWaiter())
-                    .setEmbeds(embeds)
-                    .setJDA(this.getJDA())
-                    .setTimeout(30)
-                    .setChannel(event.getChannel())
-                    .setPredicate(eve -> eve.getMember().getIdLong() == this.getMember().getIdLong())
-                    .build();
-            paginator.paginate();
-            this.sendSelfDeletingMessage("`Timeout is set to 30 seconds`");
+
+            sendAsPaginator(embeds);
       }
 
 
@@ -269,69 +245,69 @@ public class CommandEvent
             return schoolbot.getWrapperHandler().schoolCheck(this, schoolName);
       }
 
-      public void addSchool(CommandEvent event, School school)
+      public void addSchool(School school)
       {
-            schoolbot.getWrapperHandler().addSchool(event, school);
+            schoolbot.getWrapperHandler().addSchool(this, school);
       }
 
-      public void updateSchool(CommandEvent event, DatabaseDTO schoolUpdateDTO)
+      public void updateSchool(DatabaseDTO schoolUpdateDTO)
       {
-            schoolbot.getWrapperHandler().updateSchool(event, schoolUpdateDTO);
+            schoolbot.getWrapperHandler().updateSchool(this, schoolUpdateDTO);
       }
 
-      public void updateProfessor(CommandEvent event, DatabaseDTO professorUpdate)
+      public void updateProfessor(DatabaseDTO professorUpdate)
       {
-            schoolbot.getWrapperHandler().updateProfessor(event, professorUpdate);
+            schoolbot.getWrapperHandler().updateProfessor(this, professorUpdate);
       }
 
-      public void updateAssignment(CommandEvent event, DatabaseDTO assignmentUpdate)
+      public void updateAssignment(DatabaseDTO assignmentUpdate)
       {
-            schoolbot.getWrapperHandler().updateAssignment(event, assignmentUpdate);
+            schoolbot.getWrapperHandler().updateAssignment(this, assignmentUpdate);
       }
 
-      public void updateClassroom(CommandEvent event, DatabaseDTO classroomUpdateDTO)
+      public void updateClassroom(DatabaseDTO classroomUpdateDTO)
       {
-            schoolbot.getWrapperHandler().updateClassroom(event, classroomUpdateDTO);
+            schoolbot.getWrapperHandler().updateClassroom(this, classroomUpdateDTO);
       }
 
-      public School getSchool(CommandEvent event, String schoolName)
+      public School getSchool(String schoolName)
       {
-            return schoolbot.getWrapperHandler().getSchool(event, schoolName);
+            return schoolbot.getWrapperHandler().getSchool(this, schoolName);
       }
 
-      public void addPittClass(CommandEvent event, Classroom classroom)
+      public void addPittClass(Classroom classroom)
       {
             schoolbot.getWrapperHandler().addPittClass(this, classroom);
       }
 
-      public void removeSchool(CommandEvent event, School school)
+      public void removeSchool(School school)
       {
             schoolbot.getWrapperHandler().removeSchool(this, school);
       }
 
-      public void removeProfessor(CommandEvent event, Professor professor)
+      public void removeProfessor(Professor professor)
       {
-            schoolbot.getWrapperHandler().removeProfessor(event, professor);
+            schoolbot.getWrapperHandler().removeProfessor(this, professor);
       }
 
-      public void removeClass(CommandEvent event, Classroom classroom)
+      public void removeClass(Classroom classroom)
       {
-            schoolbot.getWrapperHandler().removeClassroom(event, classroom);
+            schoolbot.getWrapperHandler().removeClassroom(this, classroom);
       }
 
-      public boolean addProfessor(CommandEvent event, Professor professor)
+      public boolean addProfessor(Professor professor)
       {
-            return schoolbot.getWrapperHandler().addProfessor(event, professor);
+            return schoolbot.getWrapperHandler().addProfessor(this, professor);
       }
 
-      public void addAssignment(CommandEvent event, Assignment assignment)
+      public void addAssignment(Assignment assignment)
       {
-            schoolbot.getWrapperHandler().addAssignment(event, assignment);
+            schoolbot.getWrapperHandler().addAssignment(this, assignment);
       }
 
-      public void removeAssignment(CommandEvent event, Assignment assignment)
+      public void removeAssignment(Assignment assignment)
       {
-            schoolbot.getWrapperHandler().removeAssignment(event, assignment);
+            schoolbot.getWrapperHandler().removeAssignment(this, assignment);
       }
 
       public List<Classroom> getGuildClasses()

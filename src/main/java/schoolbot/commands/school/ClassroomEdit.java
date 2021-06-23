@@ -215,7 +215,7 @@ public class ClassroomEdit extends Command
                               }
 
 
-                              cmdEvent.updateClassroom(cmdEvent, new DatabaseDTO(classroom, updateColumn, message));
+                              cmdEvent.updateClassroom(new DatabaseDTO(classroom, updateColumn, message));
                               Embed.success(event, "Time Successfully changed!");
                               jda.removeEventListener(this);
                         }
@@ -263,7 +263,7 @@ public class ClassroomEdit extends Command
                                             .queue();
                               }
 
-                              cmdEvent.updateClassroom(cmdEvent, new DatabaseDTO(classroom, updateColumn, message));
+                              cmdEvent.updateClassroom(new DatabaseDTO(classroom, updateColumn, message));
                               Embed.success(event, "Name successfully changed to: %s", message);
                               // done
                         }
@@ -279,7 +279,7 @@ public class ClassroomEdit extends Command
 
 
                               Embed.success(event, "Description changed successfully!");
-                              cmdEvent.updateClassroom(cmdEvent, new DatabaseDTO(classroom, updateColumn, message));
+                              cmdEvent.updateClassroom(new DatabaseDTO(classroom, updateColumn, message));
                               // done
                         }
 
@@ -290,7 +290,7 @@ public class ClassroomEdit extends Command
 
                               if (success != null)
                               {
-                                    cmdEvent.updateClassroom(cmdEvent, new DatabaseDTO(classroom, updateColumn, success.getId()));
+                                    cmdEvent.updateClassroom(new DatabaseDTO(classroom, updateColumn, success.getId()));
                                     Embed.success(event, "Professor successfully changed to %s", success.getFullName());
                                     jda.removeEventListener(this);
                               }
@@ -369,7 +369,7 @@ public class ClassroomEdit extends Command
 
                               Embed.success(event, "Class Number successfully changed to: %s", number);
 
-                              cmdEvent.updateClassroom(cmdEvent, new DatabaseDTO(classroom, updateColumn, number));
+                              cmdEvent.updateClassroom(new DatabaseDTO(classroom, updateColumn, number));
                         }
 
                         case "role_id" -> {
@@ -389,7 +389,7 @@ public class ClassroomEdit extends Command
                                                   """, mentionedRoles, role.getAsMention());
                                     }
                                     Embed.success(event, "Role successfully changed to: %s", role.getAsMention());
-                                    cmdEvent.updateClassroom(cmdEvent, new DatabaseDTO(classroom, updateColumn, role.getIdLong()));
+                                    cmdEvent.updateClassroom(new DatabaseDTO(classroom, updateColumn, role.getIdLong()));
                                     break;
                               }
 
@@ -401,7 +401,7 @@ public class ClassroomEdit extends Command
                                             .setColor(new Random().nextInt(0xFFFFFF))
                                             .complete();
                                     Embed.success(event, "Role successfully changed to: %s", role.getAsMention());
-                                    cmdEvent.updateClassroom(cmdEvent, new DatabaseDTO(classroom, updateColumn, role.getIdLong()));
+                                    cmdEvent.updateClassroom(new DatabaseDTO(classroom, updateColumn, role.getIdLong()));
                               }
                         }
 
@@ -422,7 +422,7 @@ public class ClassroomEdit extends Command
                                           Embed.success(event, "Role successfully changed to: %s", textChannel.getAsMention());
 
                                     }
-                                    cmdEvent.updateClassroom(cmdEvent, new DatabaseDTO(classroom, updateColumn, textChannel.getIdLong()));
+                                    cmdEvent.updateClassroom(new DatabaseDTO(classroom, updateColumn, textChannel.getIdLong()));
                                     break;
                               }
 
@@ -449,7 +449,7 @@ public class ClassroomEdit extends Command
                                                   .addRolePermissionOverride(guild.getIdLong(), 0L, Permission.ALL_GUILD_PERMISSIONS)
                                                   .complete();
                                     }
-                                    cmdEvent.updateClassroom(cmdEvent, new DatabaseDTO(classroom, updateColumn, channel.getIdLong()));
+                                    cmdEvent.updateClassroom(new DatabaseDTO(classroom, updateColumn, channel.getIdLong()));
                                     Embed.success(event, "Role successfully changed to: %s", channel.getAsMention());
 
                               }

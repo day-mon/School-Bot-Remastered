@@ -1,5 +1,6 @@
 package schoolbot.util;
 
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -9,6 +10,7 @@ import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.school.Classroom;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Processor
 {
@@ -49,7 +51,7 @@ public class Processor
        */
       public static <T extends Paginatable> int processGenericList(StateMachineValues values, List<T> genericList, Class<?> tClass)
       {
-            var event = values.getEvent();
+            var event = values.getCommandEvent();
 
             int size = genericList.size();
             var channel = event.getChannel();
@@ -87,7 +89,7 @@ public class Processor
        */
       public static <T extends Paginatable> int processGenericList(StateMachineValues values, List<T> genericList, Class<?> tClass, boolean sendEmbed)
       {
-            var event = values.getEvent();
+            var event = values.getCommandEvent();
 
             int size = genericList.size();
             var channel = event.getChannel();
@@ -199,15 +201,38 @@ public class Processor
       }
 
 
+      // Todo: JAVA DOCS
+
+      /**
+       * @param values
+       * @return
+       */
+      public static List<Classroom> processUserRoles(StateMachineValues values)
+      {
+            var member = values.getCommandEvent().getMember();
+            var userRoles = member.getRoles().stream().map(Role::getIdLong).collect(Collectors.toList());
+
+            return values.getCommandEvent().getGuildClasses()
+                    .stream()
+                    .filter(classroom -> classroom.getRoleID() != 0L)
+                    .filter(classroom ->
+                    {
+                          var roleID = classroom.getRoleID();
+
+                          return userRoles.contains(roleID);
+                    }).collect(Collectors.toList());
+      }
+
+
       private static String processErrorMessage(Class<?> tClass, StateMachineValues values)
       {
-            var guild = values.getEvent().getGuild();
+            var guild = values.getCommandEvent().getGuild();
             String className = tClass.getSimpleName();
 
             switch (className)
             {
                   case "School" -> {
-                        return "%s has no schools that following the criteria I am searching for.".formatted(guild.getName());
+                        return "%s has no schools that follow the criteria I am searching for.".formatted(guild.getName());
                   }
 
                   case "Classroom" -> {
@@ -217,7 +242,7 @@ public class Processor
 
                   case "Professor" -> {
                         var school = values.getSchool();
-                        return "** %s ** has no professors".formatted(school.getName());
+                        return "** %s ** has no professors that meet the criteria in which I am searching for.".formatted(school.getName());
                   }
 
                   case "Assignment" -> {

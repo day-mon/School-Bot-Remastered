@@ -128,7 +128,7 @@ public class ProfessorEdit extends Command
                                     jda.removeEventListener(this);
                               }
 
-                              var cmdEvent = values.getEvent();
+                              var cmdEvent = values.getCommandEvent();
 
                               cmdEvent.sendAsPaginatorWithPageNumbers(values.getProfessorList());
                               channel.sendMessage("Please give me the page number associated with the professor you want to edit").queue();
@@ -204,7 +204,7 @@ public class ProfessorEdit extends Command
                   var jda = values.getJda();
                   var event = values.getMessageReceivedEvent();
                   var message = event.getMessage().getContentRaw();
-                  var commandEvent = values.getEvent();
+                  var commandEvent = values.getCommandEvent();
 
                   var professor = values.getProfessor();
 
@@ -216,9 +216,9 @@ public class ProfessorEdit extends Command
                                     Embed.error(event, "Names cannot contain numbers.. Try again");
                                     return;
                               }
-                              commandEvent.updateProfessor(commandEvent, new DatabaseDTO(professor, updateColumn, message));
+                              commandEvent.updateProfessor(new DatabaseDTO(professor, updateColumn, message));
                         }
-                        case "email_prefix" -> commandEvent.updateProfessor(commandEvent, new DatabaseDTO(professor, updateColumn, message));
+                        case "email_prefix" -> commandEvent.updateProfessor(new DatabaseDTO(professor, updateColumn, message));
 
                         default -> {
                               Embed.error(event, "** %s ** is not a valid response", message);

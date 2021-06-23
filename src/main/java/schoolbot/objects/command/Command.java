@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Constants;
 import schoolbot.handlers.CommandCooldownHandler;
+import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.util.Embed;
 
 import java.awt.*;
@@ -64,10 +65,10 @@ public abstract class Command
       }
 
       /**
-       * @param parent        Parent command to the command used in the constructor
-       * @param description   Command description
-       * @param syntax        Language of the command
-       * @param minimalArgs   The minimal arguments the command must follow
+       * @param parent      Parent command to the command used in the constructor
+       * @param description Command description
+       * @param syntax      Language of the command
+       * @param minimalArgs The minimal arguments the command must follow
        */
       protected Command(Command parent, String description, String syntax, int minimalArgs)
       {
@@ -88,7 +89,13 @@ public abstract class Command
       }
 
 
-      public abstract void run(@NotNull CommandEvent event, @NotNull List<String> args);
+      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
+      {
+      }
+
+      public void run(@NotNull CommandEvent event, @NotNull List<String> args, @NotNull StateMachineValues values)
+      {
+      }
 
       /**
        * Returns description of command
@@ -109,7 +116,6 @@ public abstract class Command
       {
             return selfPermissions;
       }
-
 
 
       public List<String> getCalls()
@@ -145,6 +151,11 @@ public abstract class Command
             else if (event.isDeveloper())
             {
                   LOGGER.info("{} executed using args {} by {}", name, event.getArgs(), event.getUser().getName());
+                  if (hasCommandFlags(CommandFlag.STATE_MACHINE_COMMAND))
+                  {
+                        run(event, event.getArgs(), new StateMachineValues(event));
+                        return;
+                  }
                   run(event, event.getArgs());
             }
             else if (!event.memberPermissionCheck(event.getCommand().getCommandPermissions()))
@@ -174,6 +185,12 @@ public abstract class Command
                   }
 
                   LOGGER.info("{} executed using args {} by {}", name, event.getArgs(), event.getUser().getAsMention());
+
+                  if (hasCommandFlags(CommandFlag.STATE_MACHINE_COMMAND))
+                  {
+                        run(event, event.getArgs(), new StateMachineValues(event));
+                        return;
+                  }
                   run(event, event.getArgs());
             }
       }

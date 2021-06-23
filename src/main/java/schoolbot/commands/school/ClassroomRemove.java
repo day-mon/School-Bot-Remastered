@@ -26,15 +26,14 @@ public class ClassroomRemove extends Command
             super(parent, "Removes a class from a school", "[none]", 0);
             addPermissions(Permission.ADMINISTRATOR);
             addSelfPermissions(Permission.MANAGE_ROLES);
-            addFlags(CommandFlag.DATABASE);
+            addFlags(CommandFlag.DATABASE, CommandFlag.STATE_MACHINE_COMMAND);
 
       }
 
 
       @Override
-      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
+      public void run(@NotNull CommandEvent event, @NotNull List<String> args, @NotNull StateMachineValues values)
       {
-            var values = new StateMachineValues(event);
             var jda = event.getJDA();
 
             List<School> schools = event.getGuildSchools()
@@ -131,7 +130,7 @@ public class ClassroomRemove extends Command
 
                               Embed.success(event, "** %s ** has been selected", school.getName());
 
-                              var commandEvent = values.getEvent();
+                              var commandEvent = values.getCommandEvent();
 
                               commandEvent.sendAsPaginatorWithPageNumbers(classroomList);
                               Embed.information(commandEvent, "Please select a page number of the class you want to remove");
@@ -156,12 +155,12 @@ public class ClassroomRemove extends Command
 
                         case 3 -> {
 
-                              var commandEvent = values.getEvent();
+                              var commandEvent = values.getCommandEvent();
                               var classroom = values.getClassroom();
 
                               if (message.equalsIgnoreCase("yes") || message.equalsIgnoreCase("y"))
                               {
-                                    commandEvent.removeClass(commandEvent, values.getClassroom());
+                                    commandEvent.removeClass(values.getClassroom());
                                     Embed.success(event, "Removed [** %s **] successfully", classroom.getName());
                                     event.getJDA().removeEventListener(this);
                               }

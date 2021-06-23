@@ -21,7 +21,7 @@ public class Main
             }
             catch (LoginException e)
             {
-                  MAIN_LOGGER.error("Token is invalid");
+                  MAIN_LOGGER.error("Token is invalid", e);
             }
       }
 }

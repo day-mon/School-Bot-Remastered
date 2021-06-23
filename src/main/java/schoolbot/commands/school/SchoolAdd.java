@@ -55,7 +55,7 @@ public class SchoolAdd extends Command
                     .setName(schoolName)
                     .setColor(new Random().nextInt(0xFFFFFF))
                     .queue(role ->
-                            event.addSchool(event, new School(
+                            event.addSchool(new School(
                                     schoolName,
                                     suffix,
                                     role.getIdLong(),

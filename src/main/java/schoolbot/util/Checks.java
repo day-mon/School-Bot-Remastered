@@ -151,17 +151,59 @@ public class Checks
             long textChanel = event.getTextChannel().getIdLong();
 
 
-            if (classChannels.contains(textChanel))
-            {
-                  // Get class room
+            // Get class room
 
-                  return classroomList
-                          .stream()
-                          .filter(clazzroom -> clazzroom.getChannelID() == textChanel)
-                          .findFirst()
-                          .orElseThrow(() -> new IllegalStateException("Class does not exist"));
+            return classroomList
+                    .stream()
+                    .filter(clazzroom -> clazzroom.getChannelID() == textChanel)
+                    .findFirst()
+                    .orElse(null);
+
+      }
+
+      /**
+       * <ul>
+       * Returns a classroom if found <b>NULL</b> if otherwise.
+       * The values parameter is the StateMachine Values.. (I dont know what else to say tbh)
+       * </ul>
+       *
+       *
+       * <p>
+       * This method takes in values and evaluates if the message that was just sent comes from a channel
+       * that is associated with a class. If it is it will return the classroom and set the classroom in the values.
+       * Otherwise the method will return <b>NULL</b>;
+       * </p>
+       *
+       * @param values StateMachineValues passed through to set classroom if possible
+       * @return Classroom if found, <b>NULL</b> if otherwise
+       */
+      public static Classroom messageSentFromClassChannel(StateMachineValues values)
+      {
+            var commandEvent = values.getCommandEvent();
+            var schoolbot = values.getCommandEvent().getSchoolbot();
+            var classroomList = commandEvent.getGuildClasses();
+
+            List<Long> classChannels = classroomList
+                    .stream()
+                    .map(Classroom::getChannelID)
+                    .collect(Collectors.toList());
+
+            long textChanel = commandEvent.getTextChannel().getIdLong();
+
+
+            var potentialClass = classroomList
+                    .stream()
+                    .filter(clazzroom -> clazzroom.getChannelID() == textChanel)
+                    .findFirst()
+                    .orElse(null);
+
+            if (potentialClass != null)
+            {
+                  values.setClassroom(potentialClass);
             }
-            return null;
+
+            return potentialClass;
+
       }
 
       /**
@@ -217,18 +259,13 @@ public class Checks
 
       /**
        * Returns if the event contains the same user and channel as the base event
-       * The event argument is the event fired when a message is sent in a guild.
-       * The IDs field are expected to be channelIDs and a userID
-       * The machine field is the current state machine that we are checking
        *
-       * @param event   GuildMessageReceivedEvent anticipated to be respond event
-       * @param machine The state machine that we are using
-       * @param ids     Channel ID, User ID (in that exact order)
+       * @param values   GuildMessageReceivedEvent anticipated to be respond event
        * @return If the event contains same user and channel as base event false otherwise
        */
       public static <S extends StateMachine> boolean eventMeetsPrerequisites(@NotNull StateMachineValues values)
       {
-            var commandEvent = values.getEvent();
+            var commandEvent = values.getCommandEvent();
             var event = values.getMessageReceivedEvent();
             var jda = values.getJda();
             var channel = commandEvent.getChannel();
@@ -251,7 +288,7 @@ public class Checks
 
             if (message.equalsIgnoreCase("stop") || message.equalsIgnoreCase("exit"))
             {
-                  channel.sendMessage("I will now abort. Call the command to try again!").queue();
+                  Embed.warn(event, "I will now abort. Call the command to try again!");
                   jda.removeEventListener(machine);
                   return false;
             }

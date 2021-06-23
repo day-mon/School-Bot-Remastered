@@ -24,16 +24,14 @@ public class SchoolRemove extends Command
             super(parent, "Removes a school given the name", "[school name]", 0);
             addPermissions(Permission.ADMINISTRATOR);
             addSelfPermissions(Permission.MANAGE_ROLES, Permission.MANAGE_CHANNEL);
-            addFlags(CommandFlag.DATABASE);
+            addFlags(CommandFlag.STATE_MACHINE_COMMAND);
       }
 
 
       @Override
-      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
+      public void run(@NotNull CommandEvent event, @NotNull List<String> args, @NotNull StateMachineValues values)
       {
             var jda = event.getJDA();
-
-            StateMachineValues values = new StateMachineValues(event);
             List<School> schools = event.getGuildSchools()
                     .stream()
                     .filter(school -> school.getClassroomList().isEmpty())
@@ -62,14 +60,11 @@ public class SchoolRemove extends Command
 
       public static class SchoolRemoveStateMachine extends ListenerAdapter implements StateMachine
       {
-            private final long channelId, authorId;
             private final StateMachineValues values;
 
 
             public SchoolRemoveStateMachine(StateMachineValues values)
             {
-                  this.authorId = values.getAuthorId();
-                  this.channelId = values.getChannelId();
                   this.values = values;
             }
 
@@ -80,7 +75,7 @@ public class SchoolRemove extends Command
                   var channel = event.getChannel();
                   var message = event.getMessage().getContentRaw();
 
-                  if (!Checks.eventMeetsPrerequisites(event, this, channelId, authorId))
+                  if (!Checks.eventMeetsPrerequisites(values))
                   {
                         return;
                   }
@@ -107,10 +102,10 @@ public class SchoolRemove extends Command
 
                         case 2 -> {
                               var school = values.getSchool();
-                              var commandEvent = values.getEvent();
+                              var commandEvent = values.getCommandEvent();
                               if (message.equalsIgnoreCase("yes") || message.equalsIgnoreCase("y"))
                               {
-                                    commandEvent.removeSchool(commandEvent, school);
+                                    commandEvent.removeSchool(school);
                                     Embed.success(event, "Removed [** %s **] successfully", school.getName());
                                     event.getJDA().removeEventListener(this);
                               }

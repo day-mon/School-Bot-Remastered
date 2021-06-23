@@ -11,7 +11,6 @@ import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
 import schoolbot.objects.misc.StateMachine;
 import schoolbot.objects.misc.StateMachineValues;
-import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
 import schoolbot.util.Embed;
@@ -28,28 +27,10 @@ public class ClassroomAdd extends Command
       public ClassroomAdd(Command parent)
       {
             super(parent, "Adds a class given a target school", "[none]", 0);
-            addUsageExample("N/A");
             addSelfPermissions(Permission.MANAGE_ROLES);
             addFlags(CommandFlag.DATABASE);
       }
 
-
-      @Override
-      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
-      {
-            if (args.isEmpty())
-            {
-                  if (event.getGuildSchools().isEmpty())
-                  {
-                        Embed.error(event, "This server has no schools");
-                        return;
-                  }
-
-                  event.sendMessage("Do you attend a University of Pittsburgh Campus ? ");
-                  event.getJDA().addEventListener(new ClassAddStateMachine(event));
-            }
-
-      }
 
       /**
        * Returns true if PeopleSoft is up and functioning if not it return false
@@ -61,7 +42,7 @@ public class ClassroomAdd extends Command
       private static boolean isDown(@NotNull StateMachineValues values)
       {
             var jda = values.getJda();
-            var event = values.getEvent();
+            var event = values.getCommandEvent();
             var machine = values.getMachine();
 
             Connection.Response response;
@@ -88,7 +69,6 @@ public class ClassroomAdd extends Command
             }
             return false;
       }
-
 
       private static int termValidator(String content)
       {
@@ -140,6 +120,31 @@ public class ClassroomAdd extends Command
             return String.valueOf(termCharArr) + " " + term.split("\\s+")[1];
       }
 
+      @Override
+      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
+      {
+            var jda = event.getJDA();
+            var schools = event.getGuildSchools();
+
+
+            if (schools.isEmpty())
+            {
+                  Embed.error(event, "This server has no schools");
+                  return;
+            }
+
+            Embed.information(event, """
+                    I use a Special System for any schools that belong to the **University of Pittsburgh**
+                                        
+                    This is Limited to the: Main Campus, Johnstown Campus, Bradford Campus, and the Titusville Campus
+                                        
+                    So with that being said, to begin. Do you attend any of the University of Pittsburgh Campuses?
+                    """);
+            jda.addEventListener(new ClassAddStateMachine(event));
+
+
+      }
+
       public static class ClassAddStateMachine extends ListenerAdapter implements StateMachine
       {
             private int state = 1;
@@ -158,15 +163,19 @@ public class ClassroomAdd extends Command
                   long authorId = values.getAuthorId();
                   long channelId = values.getChannelId();
 
-                  if (!Checks.eventMeetsPrerequisites(event, this, channelId, authorId))
+                  var requirementsMet = Checks.eventMeetsPrerequisites(values);
+
+                  if (!requirementsMet)
                   {
                         return;
                   }
 
+
                   String message = event.getMessage().getContentRaw();
                   var jda = values.getJda();
                   var channel = event.getChannel();
-                  var commandEvent = values.getEvent();
+                  var commandEvent = values.getCommandEvent();
+                  var guild = event.getGuild();
 
                   // TODO: Put in support for other schools other than pitt classes
 
@@ -174,7 +183,7 @@ public class ClassroomAdd extends Command
                   switch (state)
                   {
                         case 1 -> {
-                              values.setClassroom(new Classroom(event.getGuild().getIdLong()));
+                              values.getClassroom().setGuildID(guild.getIdLong());
 
                               if (message.equalsIgnoreCase("Yes") || message.equalsIgnoreCase("y"))
                               {
@@ -272,7 +281,9 @@ public class ClassroomAdd extends Command
                               values.getClassroom().setTerm(termFixed(message));
                               CLASS_SEARCH_URL += term + "/";
                               channel.sendMessage("""
-                                      What is your class number. `Hint: This can normally be found on your Syllabus, PsMobile or PeopleSoft, or in the link of your class`
+                                      What is your class number.
+                                                                            
+                                      `Hint: This can normally be found on your Syllabus, PsMobile or PeopleSoft, or in the link of your class`
                                       """).queue();
                               state = 4;
                         }
@@ -295,13 +306,22 @@ public class ClassroomAdd extends Command
                               final var school = classroom.getSchool();
 
 
-                              commandEvent.getCommandThreadPool().execute(() -> school.addPittClass(commandEvent, classroom));
+                              commandEvent.getCommandThreadPool().execute(() -> commandEvent.addPittClass(classroom));
 
-                              event.getJDA().removeEventListener(this);
+                              jda.removeEventListener(this);
+                        }
+
+
+                        case 10 -> {
+                              var valid = Processor.validateMessage(values, values.getSchoolList());
+
+                              if (!valid)
+                              {
+                                    return;
+                              }
                         }
 
                   }
-
 
                   // Custom school states
 

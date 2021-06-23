@@ -29,7 +29,7 @@ public class ListClasses extends Command
                   return;
             }
 
-            School school = event.getSchool(event, firstArg);
+            School school = event.getSchool(firstArg);
 
             if (school.getClassroomList().isEmpty())
             {

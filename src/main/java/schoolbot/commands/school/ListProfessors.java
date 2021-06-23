@@ -20,15 +20,13 @@ public class ListProfessors extends Command
       {
             super("", "", 0);
             addCalls("professors", "profs", "lp");
-            addFlags(CommandFlag.DATABASE);
+            addFlags(CommandFlag.STATE_MACHINE_COMMAND);
       }
 
       @Override
-      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
+      public void run(@NotNull CommandEvent event, @NotNull List<String> args, @NotNull StateMachineValues values)
       {
             var jda = event.getJDA();
-
-            StateMachineValues values = new StateMachineValues(event);
             List<School> schools = event.getGuildSchools()
                     .stream()
                     .filter(school -> !school.getProfessorList().isEmpty())
@@ -61,7 +59,7 @@ public class ListProfessors extends Command
             {
                   values.setMessageReceivedEvent(event);
                   var channel = event.getChannel();
-                  var schoolbot = values.getEvent().getSchoolbot();
+                  var schoolbot = values.getCommandEvent().getSchoolbot();
                   var jda = event.getJDA();
                   var requirementsMet = Checks.eventMeetsPrerequisites(values);
 
@@ -71,9 +69,7 @@ public class ListProfessors extends Command
                   }
 
                   var schoolList = values.getSchoolList();
-
                   var validation = Processor.validateMessage(event, schoolList);
-
                   var professorList = validation.getProfessorList();
 
                   if (professorList.size() == 1)
@@ -83,7 +79,7 @@ public class ListProfessors extends Command
                   }
                   else
                   {
-                        var commandEvent = values.getEvent();
+                        var commandEvent = values.getCommandEvent();
                         commandEvent.sendAsPaginatorWithPageNumbers(professorList);
                   }
 

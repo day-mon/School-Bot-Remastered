@@ -43,10 +43,10 @@ public class StateMachineValues
             this.authorId = event.getUser().getIdLong();
             this.channelId = event.getChannel().getIdLong();
             this.jda = event.getJDA();
-            this.school = null;
-            this.classroom = null;
-            this.assignment = null;
-            this.professor = null;
+            this.school = new School();
+            this.classroom = new Classroom();
+            this.assignment = new Assignment();
+            this.professor = new Professor();
             this.professorList = null;
             this.assignmentList = null;
             this.machine = machine;
@@ -64,10 +64,11 @@ public class StateMachineValues
             this.authorId = event.getUser().getIdLong();
             this.channelId = event.getChannel().getIdLong();
             this.jda = event.getJDA();
-            this.school = null;
-            this.classroom = null;
-            this.assignment = null;
-            this.professor = null;
+            this.messageReceivedEvent = getCommandEvent().getEvent();
+            this.school = new School();
+            this.classroom = new Classroom();
+            this.assignment = new Assignment();
+            this.professor = new Professor();
             this.professorList = null;
             this.assignmentList = null;
             this.machine = null;
@@ -88,7 +89,7 @@ public class StateMachineValues
             this.professor = professor;
       }
 
-      public CommandEvent getEvent()
+      public CommandEvent getCommandEvent()
       {
             return event;
       }
@@ -182,6 +183,7 @@ public class StateMachineValues
                   this.school = classroom.getSchool();
             }
             this.classroom = classroom;
+            this.assignmentList = classroom.getAssignments();
       }
 
       public JDA getJda()
@@ -219,35 +221,60 @@ public class StateMachineValues
 
       public <T extends Paginatable> void setValue(T obj)
       {
+            setAllValues(obj);
+      }
+
+      private <T extends Paginatable> void setAllValues(T obj)
+      {
             String className = obj.getClass().getSimpleName();
 
             switch (className)
             {
                   case "School" -> {
                         var school = (School) obj;
+                        setClassroomList(school.getClassroomList());
+                        setProfessorList(school.getProfessorList());
                         setSchool(school);
-                  }
-
-                  case "Professor" -> {
-                        var professor = (Professor) obj;
-                        setProfessor(professor);
                   }
 
                   case "Classroom" -> {
                         var classroom = (Classroom) obj;
-                        setClassroom(classroom);
 
+                        var school = classroom.getSchool();
+
+                        setSchool(school);
+                        setClassroom(classroom);
+                        setProfessorList(school.getProfessorList());
+                        setAssignmentList(classroom.getAssignments());
                   }
 
                   case "Assignment" -> {
                         var assignment = (Assignment) obj;
+                        var school = assignment.getClassroom().getSchool();
+
+                        setSchool(school);
+                        setClassroom(assignment.getClassroom());
                         setAssignment(assignment);
+
+                        setProfessorList(school.getProfessorList());
+                        setClassroomList(school.getClassroomList());
+                  }
+
+                  case "Professor" -> {
+                        var professor = (Professor) obj;
+                        var school = professor.getProfessorsSchool();
+
+                        setSchool(school);
+                        setProfessor(professor);
+
+                        setClassroomList(school.getClassroomList());
+                        setProfessorList(school.getProfessorList());
+
                   }
 
                   default -> throw new IllegalStateException(String.format("%s is not supported", className));
 
             }
-
       }
 
       public void incrementMachineState()

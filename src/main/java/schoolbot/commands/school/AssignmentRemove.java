@@ -228,7 +228,7 @@ public class AssignmentRemove extends Command
                                     return;
                               }
 
-                              classroomList = commandEvent.getSchool(commandEvent, classroom.getSchool().getName()).getClassroomList()
+                              classroomList = commandEvent.getSchool(classroom.getSchool().getName()).getClassroomList()
                                       .stream()
                                       .filter(classroom -> !classroom.getAssignments().isEmpty())
                                       .collect(Collectors.toList());
@@ -322,7 +322,7 @@ public class AssignmentRemove extends Command
                         case 5 -> {
                               if (message.equalsIgnoreCase("yes") || message.equalsIgnoreCase("y"))
                               {
-                                    commandEvent.removeAssignment(commandEvent, assignment);
+                                    commandEvent.removeAssignment(assignment);
                                     Embed.success(event, "Removed [** %s **] successfully", this.assignment.getName());
                                     event.getJDA().removeEventListener(this);
                               }

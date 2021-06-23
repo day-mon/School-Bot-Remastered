@@ -33,13 +33,12 @@ public class BotInfo extends Command
                             .addField("JDA Version:", JDAInfo.VERSION, true)
                             .addBlankField(true)
 
-
                             .addField("Memory Usage:", ((runtime.totalMemory() - runtime.freeMemory()) >> 20) + "MB / " + (runtime.maxMemory() >> 20) + "MB", true)
                             .addField("Thread Count:", String.valueOf(ManagementFactory.getThreadMXBean().getThreadCount()), true)
                             .addBlankField(true)
 
-
                             .addField("Guild Count:", String.valueOf(jda.getGuildCache().size()), true)
+                            .addField("Hostname", System.getProperty("user.name"), true)
                             .addBlankField(true)
                             .build()
             ).queue();

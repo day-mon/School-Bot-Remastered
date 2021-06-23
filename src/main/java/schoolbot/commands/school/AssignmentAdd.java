@@ -1,16 +1,15 @@
 package schoolbot.commands.school;
 
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.command.CommandFlag;
 import schoolbot.objects.misc.Emoji;
+import schoolbot.objects.misc.StateMachine;
+import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.School;
@@ -22,8 +21,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class AssignmentAdd extends Command
@@ -31,223 +30,218 @@ public class AssignmentAdd extends Command
       public AssignmentAdd(Command parent)
       {
             super(parent, "Adds an assignment to the target class", "[none]", 0);
+            addFlags(CommandFlag.STATE_MACHINE_COMMAND);
       }
 
-      @Override
-      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
+      private static void processClassroomList(StateMachineValues values)
       {
-            Member member = event.getMember();
-            MessageChannel channel = event.getChannel();
-            List<School> schools = event.getGuildSchools()
-                    .stream()
-                    .filter(school -> !school.getProfessorList().isEmpty())
-                    .collect(Collectors.toList());
-            Classroom classroom = Checks.messageSentFromClassChannel(event);
 
-            int stateToGoto = 1;
+            var commandEvent = values.getCommandEvent();
+            var classroomList = values.getClassroomList();
 
-            if (classroom != null)
+            var success = Processor.processGenericList(values, classroomList, Classroom.class);
+
+
+            if (success == 1)
             {
-                  event.sendMessage("""
-                          ** %s ** has been selected because it you sent it from this channel
-                          Please give me the name of the assignment!
-                          """, classroom.getName());
-                  stateToGoto = 4;
+                  var classroom1 = classroomList.get(0);
+
+                  Embed.information(commandEvent, """
+                          ** %s ** has been selected because it is the only role I can recognize.
+                                                                
+                          I would like to proceed with the assignment name you would like.
+                                                                
+                          If you would like to exit at any time (including now) please type '**exit**' or '**stop**'
+                                                                
+                          """, classroom1.getName());
+
+                  values.setState(4);
             }
             else
             {
-                  if (member.hasPermission(Permission.ADMINISTRATOR))
+                  values.setState(3);
+            }
+      }
+
+      @Override
+      public void run(@NotNull CommandEvent event, @NotNull List<String> args, @NotNull StateMachineValues values)
+      {
+            var jda = event.getJDA();
+            var channel = event.getChannel();
+
+            List<School> schools = event.getGuildSchools()
+                    .stream()
+                    .filter(school -> !school.getClassroomList().isEmpty())
+                    .collect(Collectors.toList());
+
+            Classroom classroom = Checks.messageSentFromClassChannel(values);
+
+            if (classroom == null)
+            {
+                  var member = event.getMember();
+                  var admin = member.hasPermission(Permission.ADMINISTRATOR);
+
+                  if (admin)
                   {
-                        if (schools.isEmpty())
+                        var processedElement = Processor.processGenericList(values, schools, School.class);
+
+                        if (processedElement == 0)
                         {
-                              Embed.error(event, "This server does not have any school associated with it");
+                              return;
                         }
-                        else if (schools.size() == 1)
+
+                        if (processedElement == 1)
                         {
-                              classroom = new Classroom();
-                              classroom.setSchool(schools.get(0));
-                              channel.sendMessageFormat("** %s ** has been selected because there is only one school in this server", classroom.getSchool().getName()).queue();
-                              event.sendMessage("Would you like to continue?");
-                        }
-                        else
-                        {
-                              event.sendMessage("Please choose the School ID of the school you want to add the assignment to ");
-                              event.sendAsPaginatorWithPageNumbers(schools);
+                              var school = values.getSchool();
+                              var classroomList = school.getClassroomList();
+
+                              event.sendSelfDeletingMessage("** %s ** has been selected. **This message will be deleted in 10 seconds to reduce clutter!**");
+
+                              processClassroomList(values);
                         }
                   }
                   else
                   {
-                        // Not an administrator
+                        // Not an admin
 
-                        List<Long> validRoles = Checks.validRoleCheck(event);
+                        var classroomList = Processor.processUserRoles(values);
 
-                        List<Classroom> classrooms = event.getGuildClasses()
-                                .stream()
-                                .filter(classes -> Collections.frequency(validRoles, classes.getRoleID()) > 1)
-                                .filter(classes -> !classes.getAssignments().isEmpty())
-                                .collect(Collectors.toList());
+                        if (classroomList.isEmpty())
+                        {
+                              Embed.error(event, "You have no association to any classes, and you did not send this message in any channels associated with a class");
+                              return;
+                        }
 
-                        if (classrooms.isEmpty())
-                        {
-                              Embed.error(event, "You do nto have any roles that indicate you attend any classes");
-                        }
-                        else if (classrooms.size() == 1)
-                        {
-                              classroom = classrooms.get(0);
-                              Embed.success(event, "** %s ** has been selected because it is the only role you have", classroom.getName());
-                        }
-                        else
-                        {
-                              event.sendAsPaginatorWithPageNumbers(classrooms);
-                              event.sendMessage("Select a class by page number (%d / %d)", 1, classrooms.size());
-                        }
+                        processClassroomList(values);
                   }
             }
-            event.getJDA().addEventListener(new AssignmentAddStateMachine(event, schools, classroom, stateToGoto));
+
+
+            // Redundant to repeat but youd have to do a lot of scrolling to remember why you are here
+            if (classroom != null)
+            {
+                  Embed.information(event, """
+                          ** %s ** has been selected because it is the only class I can recognize.
+                                                                
+                          I would like to proceed with the assignment name you would like.
+                                                                
+                          If you would like to exit at any time (including now) please type '**exit**' or '**stop**'
+                                                                
+                          """, classroom.getName());
+                  values.setState(4);
+            }
+
+
+            jda.addEventListener(new AssignmentAddStateMachine(values));
       }
 
-
-      public static class AssignmentAddStateMachine extends ListenerAdapter
+      public static class AssignmentAddStateMachine extends ListenerAdapter implements StateMachine
       {
-            private final long channelID, authorID;
-            private int state;
-            private final CommandEvent commandEvent;
-            private final Assignment assignment;
-            private Classroom classroom;
-            private List<Classroom> classroomList;
-            private final List<School> schools;
             private LocalDate date;
+            private final StateMachineValues values;
 
-
-            public AssignmentAddStateMachine(CommandEvent event, List<School> schools, Classroom classroom, int state)
+            public AssignmentAddStateMachine(StateMachineValues values)
             {
-                  this.channelID = event.getChannel().getIdLong();
-                  this.authorID = event.getUser().getIdLong();
-                  this.commandEvent = event;
-                  this.schools = schools;
-                  this.classroom = classroom == null ? new Classroom() : classroom;
-                  this.assignment = new Assignment();
-                  this.state = state;
+                  values.setMachine(this);
+                  this.values = values;
             }
+
 
             @Override
             public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event)
             {
-                  if (event.getAuthor().getIdLong() != authorID) return;
-                  if (event.getChannel().getIdLong() != channelID) return;
+                  values.setMessageReceivedEvent(event);
+                  var requirementsMet = Checks.eventMeetsPrerequisites(values);
 
-                  MessageChannel channel = event.getChannel();
-                  String message = event.getMessage().getContentRaw();
-                  JDA jda = event.getJDA();
-                  Guild guild = event.getGuild();
-
-
-                  if (message.equalsIgnoreCase("stop"))
+                  if (!requirementsMet)
                   {
-                        channel.sendMessage("Aborting...").queue();
-                        jda.removeEventListener(this);
                         return;
                   }
+
+                  var channel = event.getChannel();
+                  var jda = event.getJDA();
+                  var guild = event.getGuild();
+
+                  String message = event.getMessage().getContentRaw();
+
+                  int state = values.getState();
 
                   switch (state)
                   {
                         case 1 -> {
-                              var success = Processor.validateMessage(event, schools);
+                              var schools = values.getSchoolList();
+                              var validMessage = Processor.validateMessage(values, schools);
 
-                              if (success != null)
+                              if (!validMessage)
                               {
-                                    classroom.setSchool(success);
-
-                                    Embed.success(event, "** %s ** successfully selected", classroom.getSchool().getName());
-                                    channel.sendMessage("Would you like to continue?").queue();
-                                    state = 2;
-                              }
-                        }
-
-
-                        case 2 -> {
-                              if (!message.toLowerCase().contains("yes"))
-                              {
-                                    channel.sendMessage("Okay goodbye").queue();
-                                    jda.removeEventListener(this);
                                     return;
                               }
 
-                              classroomList = commandEvent.getSchool(commandEvent, classroom.getSchool().getName()).getClassroomList();
 
-                              if (classroomList.isEmpty())
+                              var school = values.getSchool();
+
+
+                              Embed.success(event, "** %s ** successfully selected", school.getName());
+
+
+                              channel.sendMessageFormat("** %s ** successfully has been selected.. This message will be deleted after 3 seconds to reduce clutter", school.getName()).queueAfter(3, TimeUnit.SECONDS, success ->
                               {
-                                    Embed.error(event, "** %s ** does not have any classes associated with it", guild.getName());
-                                    jda.removeEventListener(this);
-                              }
-                              else if (classroomList.size() == 1)
-                              {
-                                    Embed.success(event, "** %s ** has been selected automatically because you only have one class associated with you!", classroomList.get(0).getName());
-                                    channel.sendMessageFormat("""
-                                            Now that we have all that sorted the fun stuff can start %s
-                                            Im going to start by asking for your assignment name
-                                            """, Emoji.SMILEY_FACE.getAsChat()
-                                    ).queue();
-                                    this.classroom = classroomList.get(0);
-                                    state = 4;
-                              }
+                                    success.delete().queue();
+
+                                    var processedList = Processor.processGenericList(values, school.getClassroomList(), Classroom.class);
+
+                                    processClassroomList(values);
+
+                              });
+
                         }
+
 
                         case 3 -> {
-                              if (!Checks.isNumber(message))
-                              {
-                                    Embed.error(event, "** %s ** is not a valid entry", message);
-                                    return;
-                              }
-
-                              int index = Integer.parseInt(message) - 1;
-
-                              if (!Checks.between(index + 1, classroomList.size()))
-                              {
-                                    Embed.error(event, "** %s ** was not one of the class ids...", message);
-                                    event.getJDA().removeEventListener(this);
-                                    return;
-                              }
-                              this.classroom = classroomList.get(index);
-                              Embed.success(event, "** %s ** has successfully been selected", this.classroom.getName());
+                              var classroomList = values.getClassroomList();
+                              var success = Processor.validateMessage(values, classroomList);
+                              var classroom = values.getClassroom();
+                              Embed.success(event, "** %s ** has successfully been selected", classroom.getName());
                               channel.sendMessageFormat("""
                                               Now that we have all that sorted the fun stuff can start %s
                                               Im going to start by asking for your assignment name
                                               """,
                                       Emoji.SMILEY_FACE.getAsChat()).queue();
-                              state = 4;
                         }
 
                         case 4 -> {
-                              assignment.setProfessorID(this.classroom.getProfessorID());
-                              assignment.setClassroom(this.classroom);
-                              // ??? what am i doing..
-                              assignment.setName(message);
+                              values.setAssignment(new Assignment());
+                              var classroom = values.getClassroom();
 
-                              Embed.success(event, "** %s ** has successfully been added as Assignment name..", assignment.getName());
+                              values.getAssignment().setClassroom(classroom);
+                              values.getAssignment().setName(message);
+
+                              Embed.success(event, "** %s ** has successfully been added as Assignment name..", values.getAssignment().getName());
                               channel.sendMessageFormat("Please give me a small description about the assignment. You can change it later so if you wanna speed through this its fine %s", Emoji.SMILEY_FACE.getAsChat()).queue();
-                              state = 5;
+
+                              values.incrementMachineState();
+
                         }
 
                         case 5 -> {
-                              assignment.setDescription(message);
+                              values.getAssignment().setDescription(message);
+
                               Embed.success(event, "Description has successfully been added as Assignment name..");
                               channel.sendMessage("Okay got it im going to need the point amount for the assignment.. If you don't know just put 'idk' or 0").queue();
-                              state = 6;
+                              values.incrementMachineState();
                         }
 
                         case 6 -> {
                               if (!Checks.isNumber(message) || message.toLowerCase().contains("idk"))
                               {
                                     Embed.error(event, "** %s ** is not a number.. try again!", message);
-                                    state = 6;
                                     return;
                               }
 
                               int points = message.toLowerCase().contains("idk") ? 0 : Integer.parseInt(message);
 
-                              assignment.setPoints(points);
-                              Embed.success(event, "** %d ** has been set as ** %s ** point amount", points, assignment.getName());
+                              values.getAssignment().setPoints(points);
+                              Embed.success(event, "** %d ** has been set as ** %s ** point amount", points, values.getAssignment().getName());
                               channel.sendMessage("""
                                       Now I will need the type of assignment it is
                                       ```
@@ -259,48 +253,53 @@ public class AssignmentAdd extends Command
                                       5. Paper
                                       ```
                                       """).queue();
-                              state = 7;
+                              values.incrementMachineState();
                         }
 
                         case 7 -> {
                               String content = message.toLowerCase();
 
+                              Assignment.AssignmentType type;
 
                               if (message.contains("exam") || message.contains("1"))
                               {
-                                    assignment.setType(Assignment.AssignmentType.EXAM);
+                                    type = Assignment.AssignmentType.EXAM;
                               }
                               else if (message.contains("paper") || message.contains("5"))
                               {
-                                    assignment.setType(Assignment.AssignmentType.PAPER);
+                                    type = Assignment.AssignmentType.PAPER;
                               }
                               else if (message.contains("homework") || message.contains("work") || message.contains("4"))
                               {
-                                    assignment.setType(Assignment.AssignmentType.HOMEWORK);
+                                    type = Assignment.AssignmentType.HOMEWORK;
                               }
                               else if (message.contains("quiz") || message.contains("2"))
                               {
-                                    assignment.setType(Assignment.AssignmentType.QUIZ);
+                                    type = Assignment.AssignmentType.QUIZ;
                               }
                               else if (message.contains("extra") || message.contains("credit") || message.contains("3"))
                               {
-                                    assignment.setType(Assignment.AssignmentType.EXTRA_CREDIT);
+                                    type = Assignment.AssignmentType.EXTRA_CREDIT;
                               }
                               else
                               {
                                     Embed.error(event, "** %s ** is not a valid entry", message);
                                     return;
                               }
-                              Embed.success(event, "** %s ** has been set as your assignment type", assignment.getType().getAssignmentType());
+
+                              values.getAssignment().setType(type);
+
+                              Embed.success(event, "** %s ** has been set as your assignment type", type.getAssignmentType());
                               channel.sendMessage("""
                                       I will need your due date..
                                       Please use the following format: `M/dd/yyyy`
                                       An Example: `2/9/2004`
                                       """).queue();
-                              state = 8;
+                              values.incrementMachineState();
                         }
 
                         case 8 -> {
+                              var classroom = values.getClassroom();
                               if (!Checks.isValidAssignmentDate(message, classroom))
                               {
                                     Embed.error(event, "** %s ** is not a valid date.. Please try again", message);
@@ -315,7 +314,7 @@ public class AssignmentAdd extends Command
                                       Please use the following format: `HH:mm AM/PM`
                                       An Example: `12:30pm` or `8:30am`
                                       """).queue();
-                              state = 9;
+                              values.incrementMachineState();
                         }
 
                         case 9 -> {
@@ -334,7 +333,7 @@ public class AssignmentAdd extends Command
                                     int minute = Integer.parseInt(time[1].replaceAll("am", ""));
 
 
-                                    assignment.setDueDate(LocalDateTime.of(date, LocalTime.of(hour, minute)));
+                                    values.getAssignment().setDueDate(LocalDateTime.of(date, LocalTime.of(hour, minute)));
                               }
                               else
                               {
@@ -347,13 +346,15 @@ public class AssignmentAdd extends Command
                                           hour = -12;
                                     }
 
-                                    assignment.setDueDate(LocalDateTime.of(date, LocalTime.of((hour + 12), minute)));
+                                    values.getAssignment().setDueDate(LocalDateTime.of(date, LocalTime.of((hour + 12), minute)));
                               }
 
-                              commandEvent.addAssignment(commandEvent, assignment);
+                              var commandEvent = values.getCommandEvent();
+                              var assignment = values.getAssignment();
+                              commandEvent.addAssignment(assignment);
 
                               Embed.success(event, "** %s ** has successfully been added to ** %s **", assignment.getName(), assignment.getClassroom().getName());
-                              event.getJDA().removeEventListener(this);
+                              jda.removeEventListener(this);
 
                         }
                   }
