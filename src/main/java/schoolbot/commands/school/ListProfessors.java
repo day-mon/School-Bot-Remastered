@@ -39,6 +39,15 @@ public class ListProfessors extends Command
             {
                   return;
             }
+
+            if (success == 1)
+            {
+                  var professorList = values.getSchool().getProfessorList();
+
+                  event.sendAsPaginatorWithPageNumbers(professorList);
+
+                  return;
+            }
             jda.addEventListener(new ListProfessorStateMachine(values));
 
       }

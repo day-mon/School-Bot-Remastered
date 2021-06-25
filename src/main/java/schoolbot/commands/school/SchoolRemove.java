@@ -72,17 +72,18 @@ public class SchoolRemove extends Command
             @Override
             public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event)
             {
+                  values.setMessageReceivedEvent(event);
                   var channel = event.getChannel();
                   var message = event.getMessage().getContentRaw();
+                  var requirementsMet = Checks.eventMeetsPrerequisites(values);
 
-                  if (!Checks.eventMeetsPrerequisites(values))
+                  if (!requirementsMet)
                   {
                         return;
                   }
 
 
                   int state = values.getState();
-                  // TOdo: Fix this
 
                   switch (state)
                   {

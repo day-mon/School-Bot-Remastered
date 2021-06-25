@@ -62,14 +62,24 @@ public class Checks
 
       public static boolean isValidAssignmentDate(String potDate, Classroom classroom)
       {
-            if (!potDate.contains("/")) return false;
-
             LocalDate ld;
-
             try
             {
 
-                  ld = LocalDate.parse(potDate, DateTimeFormatter.ofPattern("M/d/yyyy"));
+                  if (potDate.equalsIgnoreCase("tomorrow"))
+                  {
+                        ld = LocalDate.now().plusDays(1);
+                  }
+                  else if (potDate.equalsIgnoreCase("today"))
+                  {
+                        ld = LocalDate.now();
+                  }
+                  else
+                  {
+                        ld = LocalDate.parse(potDate, DateTimeFormatter.ofPattern("M/d/yyyy"));
+                  }
+
+
                   return ld.isAfter(LocalDate.now()) || ld.isEqual(LocalDate.now());
                   // return ld.isAfter(classroom.getClassStartDate()) && ld.isBefore(classroom.getClassEndDate()); commented out because other things arent implemented yet
             }
@@ -191,18 +201,12 @@ public class Checks
             long textChanel = commandEvent.getTextChannel().getIdLong();
 
 
-            var potentialClass = classroomList
-                    .stream()
+            return classroomList.stream()
                     .filter(clazzroom -> clazzroom.getChannelID() == textChanel)
-                    .findFirst()
+                    .limit(1)
+                    .peek(values::setClassroom)
+                    .findAny()
                     .orElse(null);
-
-            if (potentialClass != null)
-            {
-                  values.setClassroom(potentialClass);
-            }
-
-            return potentialClass;
 
       }
 

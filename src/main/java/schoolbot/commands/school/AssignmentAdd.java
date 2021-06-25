@@ -318,16 +318,18 @@ public class AssignmentAdd extends Command
                         }
 
                         case 9 -> {
+                              String newMessage = message.toLowerCase();
+
                               if (!Checks.checkValidTime(message))
                               {
                                     Embed.error(event, "** %s ** is not a valid time... try again!", message);
                                     return;
                               }
 
-                              String[] time = message.split(":");
+                              String[] time = newMessage.split(":");
 
 
-                              if (message.toLowerCase().contains("am"))
+                              if (newMessage.contains("am"))
                               {
                                     int hour = Integer.parseInt(time[0]);
                                     int minute = Integer.parseInt(time[1].replaceAll("am", ""));

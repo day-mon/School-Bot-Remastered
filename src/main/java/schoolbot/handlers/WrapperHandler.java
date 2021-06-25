@@ -79,6 +79,15 @@ public class WrapperHandler
             guildWrappers.get(guildID).addPittClass(event, classroom);
       }
 
+      public void addClass(CommandEvent event, Classroom classroom)
+      {
+            long guildID = event.getGuild().getIdLong();
+
+            guildCheck(guildID);
+
+            guildWrappers.get(guildID).addClass(event, classroom);
+      }
+
       public List<Classroom> getClasses(long guildID)
       {
             guildCheck(guildID);
@@ -99,6 +108,13 @@ public class WrapperHandler
       {
             long guildID = event.getGuild().getIdLong();
 
+            guildCheck(guildID);
+
+            guildWrappers.get(guildID).removeAssignment(schoolbot, assignment);
+      }
+
+      public void removeAssignment(long guildID, Assignment assignment)
+      {
             guildCheck(guildID);
 
             guildWrappers.get(guildID).removeAssignment(schoolbot, assignment);

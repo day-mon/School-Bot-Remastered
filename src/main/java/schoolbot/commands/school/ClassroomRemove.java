@@ -162,12 +162,12 @@ public class ClassroomRemove extends Command
                               {
                                     commandEvent.removeClass(values.getClassroom());
                                     Embed.success(event, "Removed [** %s **] successfully", classroom.getName());
-                                    event.getJDA().removeEventListener(this);
+                                    jda.removeEventListener(this);
                               }
                               else if (message.equalsIgnoreCase("no") || message.equalsIgnoreCase("n") || message.equalsIgnoreCase("nah"))
                               {
                                     channel.sendMessage("Okay.. aborting..").queue();
-                                    event.getJDA().removeEventListener(this);
+                                    jda.removeEventListener(this);
                               }
                               else
                               {

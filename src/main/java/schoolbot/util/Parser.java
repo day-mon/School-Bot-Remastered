@@ -1,6 +1,9 @@
 package schoolbot.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
+import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.school.Classroom;
 
 import java.time.DayOfWeek;
@@ -17,6 +20,9 @@ import java.util.stream.Collectors;
 
 public class Parser
 {
+
+      private static final Logger logger = LoggerFactory.getLogger(Parser.class);
+
       public static List<String> args(String stringArgs)
       {
             List<String> args = new ArrayList<>();
@@ -67,10 +73,8 @@ public class Parser
             if (timeLoweCased.isEmpty() || time.isBlank()) return false;
             if (!timeLoweCased.contains(":")) return false;
             if (!timeLoweCased.contains("pm") && !timeLoweCased.contains("am")) return false;
-            // too lazy to do negation rn
-            //  if (!timeLoweCased.contains("am") || !timeLoweCased.contains("pm")); else return false;
-            // too lazy to do negation rn
-            // if (timeLoweCased.contains("Mo") || time.contains("Tu") || time.contains("We") || time.contains("Th") || time.contains("Fr")); else return false;
+            if (!timeLoweCased.contains("mo") && !timeLoweCased.contains("tu") && !timeLoweCased.contains("we") && !timeLoweCased.contains("th") && !timeLoweCased.contains("fr"))
+                  return false;
 
             DatabaseUtil.removeClassReminderByClass(schoolbot, classroom);
 
@@ -114,43 +118,58 @@ public class Parser
             return true;
       }
 
-
-      public static boolean parseClassEditTime(String potTime, Classroom classroom)
+      public static boolean classTime(StateMachineValues values, Map<DayOfWeek, LocalDateTime> localDateTimeMap)
       {
-            Map<DayOfWeek, LocalDateTime> dayz = new HashMap<>();
-            Map<String, DayOfWeek> stringDayOfWeekMap = Map.of(
-                    "Mo", DayOfWeek.MONDAY,
-                    "Tu", DayOfWeek.TUESDAY,
-                    "We", DayOfWeek.WEDNESDAY,
-                    "Th", DayOfWeek.THURSDAY,
-                    "Fr", DayOfWeek.FRIDAY
-            );
-
-            String time = potTime.toLowerCase();
-
-            if (time.isBlank() || time.isBlank()) return false;
-            if (!time.contains(":")) return false;
-            if (!time.contains("am") && !time.contains("pm")) return false;
-            if (!potTime.contains("Mo") && !potTime.contains("Tu") && !potTime.contains("We") && !potTime.contains("Th") && !potTime.contains("Fr"))
-                  return false;
+            var classroom = values.getClassroom();
+            var schoolbot = values.getCommandEvent().getSchoolbot();
 
 
-            String[] initialSplit = potTime.split("\\s+");
-            String days = initialSplit[0];
-            String[] daysSplit = days.split("(?=\\p{Upper})");
+            List<DayOfWeek> dayOfWeekList = new ArrayList<>(localDateTimeMap.keySet())
+                    .stream()
+                    .sorted()
+                    .collect(Collectors.toList());
 
-            for (String day : daysSplit)
+
+            LocalDate ld = classroom.getStartDate().isBefore(LocalDate.now()) ? LocalDate.now() : classroom.getStartDate();
+
+            while (ld.isBefore(classroom.getEndDate()))
             {
-                  if (stringDayOfWeekMap.containsKey(day))
+                  DayOfWeek day = ld.getDayOfWeek();
+                  if (localDateTimeMap.containsKey(day))
                   {
-                        //dayz.put()
+                        LocalTime localTime = localDateTimeMap.get(day).toLocalTime();
+
+                        DatabaseUtil.addClassReminder(schoolbot, LocalDateTime.of(ld, localTime), List.of(60, 30, 10), classroom);
+
+                        if (dayOfWeekList.get(dayOfWeekList.size() - 1) == ld.getDayOfWeek())
+                        {
+                              DayOfWeek beginning = dayOfWeekList.get(0);
+                              ld = ld.with(TemporalAdjusters.next(beginning));
+                        }
+                        else
+                        {
+                              DayOfWeek nextDay = dayOfWeekList
+                                      .stream()
+                                      .filter(dayOfWeek -> dayOfWeek.getValue() > day.getValue())
+                                      .filter(localDateTimeMap::containsKey)
+                                      .findFirst()
+                                      .orElseThrow(() -> new IllegalStateException("I dont know how this happened"));
+                              ld = ld.with(TemporalAdjusters.next(nextDay));
+                        }
+                        continue;
                   }
+                  ld = ld.plusDays(1);
             }
-            return false;
+            return true;
       }
 
-      private static Map<DayOfWeek, LocalDateTime> parseTime(Classroom classroom, String time)
+
+      public static Map<DayOfWeek, LocalDateTime> parseTime(Classroom classroom, String time)
       {
+            if (!timePrerequisites(time))
+            {
+                  return null;
+            }
 
             Map<DayOfWeek, LocalDateTime> s = new HashMap<>();
 
@@ -175,20 +194,31 @@ public class Parser
             String classTime = initialSplit[1].toLowerCase();
             String[] daysSplit = days.split("(?=\\p{Upper})");
 
-            int hour;
-            int minute;
+            if (daysSplit.length == 0) return null;
+
+            int hour = 0;
+            int minute = 0;
 
             String[] classTimeSplit = classTime.split(":");
 
-            if (classTime.toLowerCase().contains("am"))
+            try
             {
-                  hour = Integer.parseInt(classTimeSplit[0]);
-                  minute = Integer.parseInt(classTimeSplit[1].replaceAll("am", ""));
+                  if (classTime.toLowerCase().contains("am"))
+                  {
+                        hour = Integer.parseInt(classTimeSplit[0]);
+                        minute = Integer.parseInt(classTimeSplit[1].replaceAll("am", ""));
+                  }
+                  else
+                  {
+                        hour = Integer.parseInt(classTimeSplit[0]);
+                        minute = Integer.parseInt(classTimeSplit[1].replaceAll("pm", ""));
+                  }
             }
-            else
+            catch (Exception e)
             {
-                  hour = Integer.parseInt(classTimeSplit[0]);
-                  minute = Integer.parseInt(classTimeSplit[1].replaceAll("pm", ""));
+                  logger.error("Error whilst parsing {} or {}", hour, minute);
+                  e.printStackTrace();
+                  return null;
             }
 
             for (String sd : daysSplit)
@@ -199,5 +229,15 @@ public class Parser
                   }
             }
             return s;
+      }
+
+
+      private static boolean timePrerequisites(String time)
+      {
+            String timeLowerCased = time.toLowerCase();
+            if (timeLowerCased.isEmpty() || time.isBlank()) return false;
+            if (!timeLowerCased.contains(":")) return false;
+            if (!timeLowerCased.contains("pm") && !timeLowerCased.contains("am")) return false;
+            return timeLowerCased.contains("mo") || timeLowerCased.contains("tu") || timeLowerCased.contains("we") || timeLowerCased.contains("th") || timeLowerCased.contains("fr");
       }
 }

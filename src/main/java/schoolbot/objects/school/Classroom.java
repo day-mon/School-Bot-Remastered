@@ -30,6 +30,7 @@ public class Classroom implements Paginatable
       private String name;
       private String[] inputClassStartDate;
       private String[] inputClassEndDate;
+      private final List<Assignment> assignments;
       private String classIdentifier;
       private String term;
       private String URL;
@@ -47,10 +48,8 @@ public class Classroom implements Paginatable
 
       private School school;
       private Professor professor;
-
-      private boolean wasAutoFilled;
-
-      private List<Assignment> assignments;
+      private String inputTime;
+      private boolean wasAutoFilled = false;
 
 
       public Classroom()
@@ -78,6 +77,8 @@ public class Classroom implements Paginatable
             this.channelID = channelID;
             this.roleID = roleID;
             this.name = name;
+            assignments = new ArrayList<>();
+
       }
 
       public Classroom(int id, String className)
@@ -360,6 +361,26 @@ public class Classroom implements Paginatable
             return this.school;
       }
 
+      public String getInputTime()
+      {
+            return inputTime;
+      }
+
+      public void setInputTime(String inputTime)
+      {
+            this.inputTime = inputTime;
+      }
+
+      public void setStartDate(LocalDate startDate)
+      {
+            this.startDate = startDate;
+      }
+
+      public void setEndDate(LocalDate endDate)
+      {
+            this.endDate = endDate;
+      }
+
       public void addAssignment(Schoolbot schoolbot, Assignment assignment)
       {
             assignments.add(assignment);
@@ -371,7 +392,7 @@ public class Classroom implements Paginatable
                   return;
             }
             assignment.setId(assignmentID);
-            // Times in minutes to remind (1 day, 1 hour, 30 minutes, 10 minutes)
+            // Times in minutes to remind (1 day, 1 hour, 30 minutes, 10 minutes, and when due)
             DatabaseUtil.addAssignmentReminder(schoolbot, assignment, List.of(1440, 60, 30, 10, 0));
 
       }
@@ -440,6 +461,11 @@ public class Classroom implements Paginatable
       {
             Role role = schoolbot.getJda().getRoleById(this.roleID);
             TextChannel textChannel = schoolbot.getJda().getTextChannelById(this.channelID);
+
+            if (description.length() > Constants.MAX_FIELD_VALUE)
+            {
+                  this.description = "Description too long to display";
+            }
 
             return new EmbedBuilder()
                     .setTitle(this.name + " | (" + this.classIdentifier + ")", URL)

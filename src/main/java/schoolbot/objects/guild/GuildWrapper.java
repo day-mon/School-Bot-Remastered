@@ -305,6 +305,15 @@ public class GuildWrapper
 
       }
 
+      public void addClass(CommandEvent event, Classroom classroom)
+      {
+            School school = classroom.getSchool();
+
+            school.addNormalClass(event, classroom);
+            classrooms.add(classroom);
+
+      }
+
       public boolean addProfessor(Schoolbot schoolbot, Professor professor)
       {
             int id = DatabaseUtil.addProfessor(schoolbot, professor);

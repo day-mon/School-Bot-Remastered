@@ -24,6 +24,7 @@ public class ListAssignments extends Command
             addFlags(CommandFlag.STATE_MACHINE_COMMAND);
       }
 
+
       private static void processAssignmentList(StateMachineValues values)
       {
             var commandEvent = values.getCommandEvent();
@@ -56,9 +57,6 @@ public class ListAssignments extends Command
       {
             var jda = event.getJDA();
 
-
-            // TODO: Add a args check for admins where you can check any class.
-
             Classroom classroom = Checks.messageSentFromClassChannel(values);
 
 
@@ -89,8 +87,6 @@ public class ListAssignments extends Command
 
             if (success == 1)
             {
-                  var classroom1 = classroomList.get(0);
-
                   processAssignmentList(values);
 
                   return;
@@ -100,6 +96,7 @@ public class ListAssignments extends Command
 
 
       }
+
 
       public static class ListAssignmentsStateMachine extends ListenerAdapter
       {

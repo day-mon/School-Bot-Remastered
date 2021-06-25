@@ -217,6 +217,49 @@ public class DatabaseUtil
       }
 
 
+      public static int addNormalClass(CommandEvent event, Classroom clazz)
+      {
+            Schoolbot schoolbot = event.getSchoolbot();
+            try (Connection con = schoolbot.getDatabaseHandler().getDbConnection())
+            {
+                  PreparedStatement statement = con.prepareStatement("""
+                          INSERT INTO public.classes(
+                           professor_id, start_date, end_date, time,
+                           school_id, identifier, term, description, guild_id, name,
+                           role_id, channel_id, autofilled)
+                           
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                                   
+                          returning id
+                          """);
+
+                  statement.setInt(1, clazz.getProfessor().getId());
+                  statement.setDate(2, Date.valueOf(clazz.getStartDate()));
+                  statement.setDate(3, Date.valueOf(clazz.getEndDate()));
+                  statement.setString(4, clazz.getTime());
+                  statement.setInt(5, clazz.getSchool().getID());
+                  statement.setString(6, clazz.getClassIdentifier());
+                  statement.setString(7, clazz.getTerm());
+                  statement.setString(8, clazz.getDescription());
+                  statement.setLong(9, event.getGuild().getIdLong());
+                  statement.setString(10, clazz.getName());
+                  statement.setLong(11, clazz.getRoleID());
+                  statement.setLong(12, clazz.getChannelID());
+                  statement.setBoolean(13, clazz.isAutoFilled());
+                  statement.execute();
+
+
+                  ResultSet resultSet = statement.getResultSet();
+                  resultSet.next();
+                  return resultSet.getInt(1);
+            }
+            catch (Exception e)
+            {
+                  LOGGER.error("Database error", e);
+                  return -1;
+            }
+      }
+
       public static int addClassPitt(CommandEvent event, Classroom clazz)
       {
             Schoolbot schoolbot = event.getSchoolbot();
@@ -264,6 +307,7 @@ public class DatabaseUtil
                   return -1;
             }
       }
+
 
 
       public static int addSchool(CommandEvent event, School school)

@@ -168,6 +168,8 @@ public class Processor
        * <li> Checks if that number is a valid index from the list of options the user has to choose </li>
        * </ul>
        *
+       * At the end of the method the state will be incremented and the value will be set if valid.
+       *
        * @param values      StateMachineValues.
        * @param genericList List full of objects
        * @param <T>         N/A
@@ -201,13 +203,15 @@ public class Processor
       }
 
 
-      // Todo: JAVA DOCS
-
       /**
-       * @param values
-       * @return
+       * This method returns a list of classes that the user is associated with.
+       * <br>
+       * The @param values is just the values of the current machine
+       *
+       * @param values StateMachine values of current machine
+       * @return List of Classes that users roles are associated with
        */
-      public static List<Classroom> processUserRoles(StateMachineValues values)
+      public static List<Classroom> processUserRoles(@NotNull StateMachineValues values)
       {
             var member = values.getCommandEvent().getMember();
             var userRoles = member.getRoles().stream().map(Role::getIdLong).collect(Collectors.toList());

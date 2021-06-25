@@ -280,6 +280,11 @@ public class CommandEvent
             schoolbot.getWrapperHandler().addPittClass(this, classroom);
       }
 
+      public void addClass(Classroom classroom)
+      {
+            schoolbot.getWrapperHandler().addClass(this, classroom);
+      }
+
       public void removeSchool(School school)
       {
             schoolbot.getWrapperHandler().removeSchool(this, school);

@@ -120,6 +120,27 @@ public class School implements Paginatable
             classroomList.add(classroom);
       }
 
+      private static void removeSequence(CommandEvent event, Classroom classroom)
+      {
+            var guild = event.getGuild();
+            var roleID = classroom.getRoleID();
+            var channelID = classroom.getChannelID();
+
+            guild.getRoleById(classroom.getRoleID()).delete().queue();
+
+            event.removeProfessor(classroom.getProfessor());
+            if (roleID != 0)
+            {
+                  guild.getRoleById(classroom.getRoleID()).delete().queue();
+            }
+
+            if (channelID != 0)
+            {
+                  guild.getTextChannelById(classroom.getChannelID()).delete().queue();
+            }
+      }
+
+
       private static int evaluateConstraints(Guild guild, Classroom classroom, Document document)
       {
 
@@ -347,15 +368,42 @@ public class School implements Paginatable
 
       }
 
-      private static void removeSequence(CommandEvent event, Classroom classroom)
+      public void addNormalClass(CommandEvent event, Classroom classroom)
       {
             var guild = event.getGuild();
+            var className = classroom.getName();
+            var channel = event.getChannel();
+            var schoolbot = event.getSchoolbot();
 
-            guild.getRoleById(classroom.getRoleID()).delete().queue();
+            var role = guild.createRole()
+                    .setName(className.toLowerCase().replaceAll("\\s", "-"))
+                    .setColor(new Random().nextInt(0xFFFFFF))
+                    .complete();
 
-            event.removeProfessor(classroom.getProfessor());
-            event.getGuild().getRoleById(classroom.getRoleID()).delete().queue();
-            event.getGuild().getTextChannelById(classroom.getChannelID()).delete().queue();
+            // Makes channel only viewable by the role that was just created
+            var textChannel = guild.createTextChannel(className)
+                    .addPermissionOverride(role, Permission.ALL_CHANNEL_PERMISSIONS, 0L)
+                    .addPermissionOverride(guild.getPublicRole(), 0L, Permission.ALL_CHANNEL_PERMISSIONS)
+                    .complete();
+
+            classroom.setRoleID(role.getIdLong());
+            classroom.setChannelID(textChannel.getIdLong());
+
+            int classCheck = DatabaseUtil.addNormalClass(event, classroom);
+
+            if (classCheck == -1)
+            {
+                  Embed.error(event, "Database failed to add ** %s **", classroom.getName());
+                  removeSequence(event, classroom);
+                  return;
+            }
+
+            classroom.setId(classCheck);
+
+
+            Parser.classTime(schoolbot, classroom.getTime(), classroom);
+            professorList.add(classroom.getProfessor());
+            channel.sendMessageEmbeds(classroom.getAsEmbed(schoolbot)).queue();
       }
 
       public void setClassroomList(List<Classroom> classroomList)
@@ -591,6 +639,12 @@ public class School implements Paginatable
                     .findFirst()
                     .orElse(null);
       }
+
+      public boolean hasProfessors()
+      {
+            return !professorList.isEmpty();
+      }
+
 
       @Override
       public String toString()

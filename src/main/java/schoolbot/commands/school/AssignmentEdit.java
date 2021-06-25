@@ -56,7 +56,13 @@ public class AssignmentEdit extends Command
                         if (classroom.hasAssignments())
                         {
                               classroomList.add(classroom);
-                              schools.add(classroom.getSchool());
+
+                              // probably bad for runtime but just want to make sure I only get specific schools
+
+                              if (!schools.contains(classroom.getSchool()))
+                              {
+                                    schools.add(classroom.getSchool());
+                              }
                         }
                   }
                   school.setClassroomList(classroomList);
@@ -91,21 +97,20 @@ public class AssignmentEdit extends Command
 
       private void evaluateClassroom(@NotNull StateMachineValues values)
       {
-            // TODO: better variable names plz.. too tired.
             var event = values.getCommandEvent();
             var jda = event.getJDA();
             var classroomList = values.getClassroomList();
 
-            var l = Processor.processGenericList(values, classroomList, Classroom.class);
+            var processedClassroomList = Processor.processGenericList(values, classroomList, Classroom.class);
 
-            if (l == 1)
+            if (processedClassroomList == 1)
             {
                   var classroom = values.getClassroom();
                   var assignmentList = values.getAssignmentList();
 
-                  var f = Processor.processGenericList(values, assignmentList, Assignment.class);
+                  var processedAssignmentList = Processor.processGenericList(values, assignmentList, Assignment.class);
 
-                  if (f == 1)
+                  if (processedAssignmentList == 1)
                   {
                         var assignment = values.getAssignment();
 
@@ -121,12 +126,12 @@ public class AssignmentEdit extends Command
                                  """);
                   }
 
-                  else if (f == 2)
+                  else if (processedAssignmentList == 2)
                   {
                         values.setState(3);
                   }
             }
-            else if (l == 2)
+            else if (processedClassroomList == 2)
             {
                   values.setState(2);
             }
@@ -142,6 +147,7 @@ public class AssignmentEdit extends Command
 
             public AssignmentEditStateMachine(@NotNull StateMachineValues values)
             {
+                  values.setMachine(this);
                   this.values = values;
             }
 
@@ -178,8 +184,23 @@ public class AssignmentEdit extends Command
                               }
 
                               var school = values.getSchool();
+                              var classroomList = values.getClassroomList();
 
-                              channel.sendMessageFormat("Now that we have selected ** %s **, I will now need the class you want to the assignment", school.getName()).queue();
+                              if (classroomList.size() == 1)
+                              {
+                                    var classroom = values.getClassroom();
+                                    Embed.information(event, """
+                                            ** %s ** has been automatically chosen because it is the only class room.
+                                                                                        
+                                            Which assignment would you like to edit?
+                                            """);
+                                    var assignmentList = values.getAssignmentList();
+                                    commandEvent.sendAsPaginatorWithPageNumbers(assignmentList);
+                                    values.setState(3);
+                                    return;
+                              }
+
+                              channel.sendMessageFormat("Now that we have selected ** %s, ** I will now need the class you want to the assignment", school.getName()).queue();
                               commandEvent.sendAsPaginatorWithPageNumbers(values.getClassroomList());
 
                         }
@@ -194,7 +215,26 @@ public class AssignmentEdit extends Command
                               }
 
                               var classroom = values.getClassroom();
+                              var assignmentList = values.getAssignmentList();
 
+                              if (assignmentList.size() == 1)
+                              {
+                                    var assignment = assignmentList.get(0);
+                                    Embed.information(event, """
+                                            ** %s ** has been automatically chosen because it is the only valid assignment.
+                                                                                           
+                                            Which attribute would you like to edit?
+                                                                                           
+                                              1. Name
+                                              2. Description
+                                              3. Point Amount
+                                              4. Type
+                                              5. Due Date
+                                              6. Due Time
+                                            """, assignment.getName());
+                                    values.setState(4);
+                                    return;
+                              }
                               channel.sendMessageFormat("Now that we have selected ** %s **, I will now need the assignment you would like to edit", classroom.getName()).queue();
                               commandEvent.sendAsPaginatorWithPageNumbers(values.getAssignmentList());
 
@@ -290,13 +330,17 @@ public class AssignmentEdit extends Command
                               var schoolbot = commandEvent.getSchoolbot();
                               var assignment = values.getAssignment();
 
-                              evaluateUpdate(values);
+                              if (!evaluateUpdate(values))
+                              {
+                                    return;
+                              }
                               commandEvent.sendMessage(assignment.getAsEmbed(schoolbot));
+                              jda.removeEventListener(this);
                         }
                   }
             }
 
-            private void evaluateUpdate(StateMachineValues values)
+            private boolean evaluateUpdate(StateMachineValues values)
             {
                   var event = values.getMessageReceivedEvent();
                   var jda = event.getJDA();
@@ -316,6 +360,7 @@ public class AssignmentEdit extends Command
                               if (!Checks.isNumber(message))
                               {
                                     Embed.notANumberError(event, message);
+                                    return false;
                               }
 
                               int newPoints = Integer.parseInt(message);
@@ -350,7 +395,7 @@ public class AssignmentEdit extends Command
                               else
                               {
                                     Embed.error(event, "** %s ** is not a valid entry", message);
-                                    return;
+                                    return false;
                               }
                               commandEvent.updateAssignment(new DatabaseDTO(assignment, updateColumn, type));
                               commandEvent.sendMessage("Assignment type successfully changed to %s", type.getAssignmentType());
@@ -360,6 +405,7 @@ public class AssignmentEdit extends Command
                               if (!Checks.isValidAssignmentDate(message, assignment.getClassroom()))
                               {
                                     Embed.error(event, "** %s ** is not a valid date", message);
+                                    return false;
                               }
 
 
@@ -378,7 +424,7 @@ public class AssignmentEdit extends Command
                               if (!Checks.checkValidTime(message))
                               {
                                     Embed.error(event, "** %s ** is not a valid time... try again!", message);
-                                    return;
+                                    return false;
                               }
 
                               String[] time = message.split(":");
@@ -396,7 +442,7 @@ public class AssignmentEdit extends Command
                                     {
                                           String formattedTime = localDateTime.format(DateTimeFormatter.ofPattern("M/dd/yyyy @ HH:mm"));
                                           Embed.error(event, "** %s ** is not a valid date.. Try again", formattedTime);
-                                          return;
+                                          return false;
                                     }
 
                               }
@@ -416,7 +462,7 @@ public class AssignmentEdit extends Command
                                     {
                                           String formattedTime = localDateTime.format(DateTimeFormatter.ofPattern("M/dd/yyyy @ HH:mm"));
                                           Embed.error(event, "** %s ** is not a valid date.. Try again", formattedTime);
-                                          return;
+                                          return false;
                                     }
 
                               }
@@ -425,7 +471,7 @@ public class AssignmentEdit extends Command
 
                         }
                   }
-                  jda.removeEventListener(this);
+                  return true;
             }
       }
 }

@@ -126,7 +126,7 @@ public class Professor implements Paginatable
 
       public String getEmail()
       {
-            return email + professorsSchool.getEmailSuffix();
+            return email;
       }
 
       public String getLastName()

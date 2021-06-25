@@ -202,10 +202,7 @@ public class SchoolEdit extends Command
 
                               event.updateSchool(new DatabaseDTO(school, updateColumn, message));
                         }
-                        case "url" -> // TODO: Add valid url checks..
-                                event.updateSchool(new DatabaseDTO(school, updateColumn, message));
-                        case "email_suffix" -> // TODO: Add valid email checks...
-                                event.updateSchool(new DatabaseDTO(school, updateColumn, message));
+                        case "url", "email_suffix" -> event.updateSchool(new DatabaseDTO(school, updateColumn, message));
                         case "role_id" -> {
                               Message eventMessage = event.getMessage();
 

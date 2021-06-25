@@ -53,10 +53,10 @@ public class ReminderHandler
       {
             try
             {
+                  var classroom = assignment.getClassroom();
+                  var channel = schoolbot.getJda().getTextChannelById(classroom.getChannelID());
+                  var role = schoolbot.getJda().getRoleById(classroom.getRoleID());
 
-                  Classroom classroom = assignment.getClassroom();
-                  TextChannel channel = schoolbot.getJda().getTextChannelById(classroom.getChannelID());
-                  Role role = schoolbot.getJda().getRoleById(classroom.getRoleID());
 
                   if (channel == null)
                   {
@@ -64,9 +64,10 @@ public class ReminderHandler
                   }
                   else
                   {
+
                         int due = assignment.getDueDate().minusMinutes(LocalDateTime.now().getMinute()).getMinute();
                         String mention = role != null ? role.getAsMention() : "Students of " + classroom.getName();
-                        String dueMessage = (assignment.getDueDate().minusMinutes(LocalDateTime.now().getMinute()).getMinute() <= 0) ?
+                        String dueMessage = (due <= 0) ?
                                 String.format("%s, ** %s ** is **now due**", mention, assignment.getName())
                                 :
                                 String.format("%s, ** %s ** is due in ** %d ** minutes", mention, assignment.getName(), due);
@@ -88,6 +89,15 @@ public class ReminderHandler
 
                         LOGGER.info("{} has been notified", classroom.getName());
                         channel.sendMessage(dueMessage).queue();
+
+                        if (due <= 0)
+                        {
+                              var guildId = channel.getGuild().getIdLong();
+
+                              schoolbot.getWrapperHandler().removeAssignment(guildId, assignment);
+                              LOGGER.debug("Assignment list size {}", classroom.getAssignments().size());
+                        }
+
                   }
             }
             catch (Exception e)
