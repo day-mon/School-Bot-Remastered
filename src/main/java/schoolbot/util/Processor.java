@@ -5,8 +5,8 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import schoolbot.objects.command.CommandEvent;
-import schoolbot.objects.misc.Paginatable;
 import schoolbot.objects.misc.StateMachineValues;
+import schoolbot.objects.misc.interfaces.Paginatable;
 import schoolbot.objects.school.Classroom;
 
 import java.util.List;

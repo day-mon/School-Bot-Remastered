@@ -11,10 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -78,8 +75,15 @@ public class Parser
 
             DatabaseUtil.removeClassReminderByClass(schoolbot, classroom);
 
-            Map<DayOfWeek, LocalDateTime> stuff = parseTime(classroom, time);
-            List<DayOfWeek> dayOfWeekList = new ArrayList<>(stuff.keySet())
+            Map<DayOfWeek, LocalDateTime> localDateTimeMap = parseTime(classroom, time);
+
+            if (Objects.isNull(localDateTimeMap))
+            {
+                  logger.error("Parse Time method has produced a null pointer exception");
+                  return false;
+            }
+
+            List<DayOfWeek> dayOfWeekList = new ArrayList<>(localDateTimeMap.keySet())
                     .stream()
                     .sorted()
                     .collect(Collectors.toList());
@@ -90,9 +94,9 @@ public class Parser
             while (ld.isBefore(classroom.getEndDate()))
             {
                   DayOfWeek day = ld.getDayOfWeek();
-                  if (stuff.containsKey(day))
+                  if (localDateTimeMap.containsKey(day))
                   {
-                        LocalTime localTime = stuff.get(day).toLocalTime();
+                        LocalTime localTime = localDateTimeMap.get(day).toLocalTime();
 
                         DatabaseUtil.addClassReminder(schoolbot, LocalDateTime.of(ld, localTime), List.of(60, 30, 10), classroom);
 
@@ -106,7 +110,7 @@ public class Parser
                               DayOfWeek nextDay = dayOfWeekList
                                       .stream()
                                       .filter(dayOfWeek -> dayOfWeek.getValue() > day.getValue())
-                                      .filter(stuff::containsKey)
+                                      .filter(localDateTimeMap::containsKey)
                                       .findFirst()
                                       .orElseThrow(() -> new IllegalStateException("I dont know how this happened"));
                               ld = ld.with(TemporalAdjusters.next(nextDay));
@@ -221,11 +225,11 @@ public class Parser
                   return null;
             }
 
-            for (String sd : daysSplit)
+            for (String day : daysSplit)
             {
-                  if (stringDayOfWeekMap.containsKey(sd))
+                  if (stringDayOfWeekMap.containsKey(day))
                   {
-                        s.put(stringDayOfWeekMap.get(sd), LocalDateTime.of(classroom.getStartDate(), LocalTime.of(hour, minute)));
+                        s.put(stringDayOfWeekMap.get(day), LocalDateTime.of(classroom.getStartDate(), LocalTime.of(hour, minute)));
                   }
             }
             return s;

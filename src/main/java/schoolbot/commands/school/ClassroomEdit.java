@@ -10,7 +10,7 @@ import schoolbot.Constants;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.misc.DatabaseDTO;
-import schoolbot.objects.misc.StateMachine;
+import schoolbot.objects.misc.interfaces.StateMachine;
 import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;

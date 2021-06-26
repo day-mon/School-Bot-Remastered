@@ -113,6 +113,7 @@ public class WrapperHandler
             guildWrappers.get(guildID).removeAssignment(schoolbot, assignment);
       }
 
+
       public void removeAssignment(long guildID, Assignment assignment)
       {
             guildCheck(guildID);

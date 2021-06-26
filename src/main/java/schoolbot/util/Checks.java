@@ -7,8 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
 import schoolbot.objects.command.CommandEvent;
-import schoolbot.objects.misc.StateMachine;
 import schoolbot.objects.misc.StateMachineValues;
+import schoolbot.objects.misc.interfaces.StateMachine;
 import schoolbot.objects.school.Classroom;
 
 import java.time.LocalDate;

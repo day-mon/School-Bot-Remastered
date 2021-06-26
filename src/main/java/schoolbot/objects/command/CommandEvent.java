@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import schoolbot.Constants;
 import schoolbot.Schoolbot;
 import schoolbot.objects.misc.DatabaseDTO;
-import schoolbot.objects.misc.Paginatable;
+import schoolbot.objects.misc.interfaces.Paginatable;
 import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.Professor;

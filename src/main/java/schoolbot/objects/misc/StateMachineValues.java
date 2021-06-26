@@ -4,6 +4,8 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.jetbrains.annotations.Nullable;
 import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.misc.interfaces.Paginatable;
+import schoolbot.objects.misc.interfaces.StateMachine;
 import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.Professor;

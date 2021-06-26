@@ -15,7 +15,7 @@ import schoolbot.Constants;
 import schoolbot.Schoolbot;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.misc.Emoji;
-import schoolbot.objects.misc.Paginatable;
+import schoolbot.objects.misc.interfaces.Paginatable;
 import schoolbot.util.DatabaseUtil;
 import schoolbot.util.Embed;
 import schoolbot.util.Parser;

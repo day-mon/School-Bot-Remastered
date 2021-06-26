@@ -7,18 +7,17 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.Constants;
 import schoolbot.Schoolbot;
-import schoolbot.objects.misc.Paginatable;
+import schoolbot.objects.misc.interfaces.Paginatable;
+import schoolbot.objects.misc.interfaces.Remindable;
 import schoolbot.util.DatabaseUtil;
 
 import java.sql.Date;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Classroom implements Paginatable
+public class Classroom implements Paginatable, Remindable
 {
       private String description;
       private String prerequisite;
@@ -30,13 +29,13 @@ public class Classroom implements Paginatable
       private String name;
       private String[] inputClassStartDate;
       private String[] inputClassEndDate;
-      private final List<Assignment> assignments;
+      private List<Assignment> assignments;
       private String classIdentifier;
       private String term;
       private String URL;
 
-      private LocalDate startDate;
-      private LocalDate endDate;
+      private LocalDateTime startDate;
+      private LocalDateTime endDate;
 
       private int number;
       private int creditAmount;
@@ -102,12 +101,19 @@ public class Classroom implements Paginatable
             this.name = className;
             this.classIdentifier = classIdentifier;
             this.term = term;
-            this.startDate = Instant.ofEpochMilli(startDate.getTime())
+
+            var startLocalDate = Instant.ofEpochMilli(startDate.getTime())
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
-            this.endDate = Instant.ofEpochMilli(endDate.getTime())
+
+            this.startDate = LocalDateTime.of(startLocalDate, LocalTime.of(0, 0));
+
+            var endLocalDate = Instant.ofEpochMilli(startDate.getTime())
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
+
+            this.endDate = LocalDateTime.of(endLocalDate, LocalTime.of(0, 0));
+
             this.number = number;
             this.id = id;
             this.roleID = roleID;
@@ -249,14 +255,26 @@ public class Classroom implements Paginatable
 
       public LocalDate getStartDate()
       {
+            return startDate.toLocalDate();
+      }
+
+      public LocalDateTime getStartDateWithTime()
+      {
             return startDate;
       }
 
       public void setStartDate(java.sql.Date startDate)
       {
-            this.startDate = Instant.ofEpochMilli(startDate.getTime())
+            var startDatee = Instant.ofEpochMilli(startDate.getTime())
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
+            ;
+            this.startDate = LocalDateTime.of(startDatee, LocalTime.of(0, 0));
+      }
+
+      public void setStartDate(LocalDateTime localDateTime)
+      {
+            this.startDate = localDateTime;
       }
 
       public boolean isAutoFilled()
@@ -271,14 +289,21 @@ public class Classroom implements Paginatable
 
       public LocalDate getEndDate()
       {
+            return endDate.toLocalDate();
+      }
+
+      public LocalDateTime getEndDateWithTime()
+      {
             return endDate;
       }
 
       public void setEndDate(java.sql.Date endDate)
       {
-            this.endDate = Instant.ofEpochMilli(endDate.getTime())
+
+            var endDatee = Instant.ofEpochMilli(endDate.getTime())
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
+            this.endDate = LocalDateTime.of(endDatee, LocalTime.of(0, 0));
       }
 
       public String getName()
@@ -371,15 +396,6 @@ public class Classroom implements Paginatable
             this.inputTime = inputTime;
       }
 
-      public void setStartDate(LocalDate startDate)
-      {
-            this.startDate = startDate;
-      }
-
-      public void setEndDate(LocalDate endDate)
-      {
-            this.endDate = endDate;
-      }
 
       public void addAssignment(Schoolbot schoolbot, Assignment assignment)
       {

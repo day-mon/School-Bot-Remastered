@@ -11,8 +11,8 @@ import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
 import schoolbot.objects.misc.Emoji;
-import schoolbot.objects.misc.StateMachine;
 import schoolbot.objects.misc.StateMachineValues;
+import schoolbot.objects.misc.interfaces.StateMachine;
 import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
@@ -168,11 +168,7 @@ public class ClassroomAdd extends Command
             @Override
             public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event)
             {
-                  // tODO: fIX YES OR NO ERROR
-
                   values.setMessageReceivedEvent(event);
-                  long authorId = values.getAuthorId();
-                  long channelId = values.getChannelId();
 
                   var requirementsMet = Checks.eventMeetsPrerequisites(values);
 
@@ -222,9 +218,9 @@ public class ClassroomAdd extends Command
                                                   ```
                                                   """, school.getName()).queue();
                                           classroom.setSchool(school);
-                                          state = 3;
+                                          values.setState(3);
                                     }
-                                    else if (success == 2) state = 2;
+                                    else if (success == 2) values.setState(2);
                                     // else case here dont forget
 
 
@@ -295,21 +291,23 @@ public class ClassroomAdd extends Command
                                       Format: <Season> <Year number>
                                       ```
                                       """).queue();
-                              state = 3;
+                              values.setState(2);
                         }
                         case 3 -> {
                               int term = termValidator(message);
                               if (term == -1)
                               {
                                     Embed.error(event, """
-                                            Not a valid term. Aborting..
-                                            Reason for Aborting
-                                            1. **Term is either to old or too far ahead in the future**
-                                            2. **You mistyped the term**
-                                            3. **You did not input a valid season**""");
-                                    jda.removeEventListener(this);
-                                    state = 1;
-                                    break;
+                                             This  is not a valid term.
+                                             Here are some of the reasons why a term can be invalid.
+                                             
+                                             1. Term is to far back in the future or to ahead in the future.
+                                             2. You mistyped the term.
+                                             3. You did not give me a valid season.
+                                             
+                                             Please try again!
+                                            """);
+                                    return;
                               }
                               classroom.setTerm(termFixed(message));
                               CLASS_SEARCH_URL += term + "/";
@@ -318,7 +316,7 @@ public class ClassroomAdd extends Command
                                                                             
                                       `Hint: This can normally be found on your Syllabus, PsMobile or PeopleSoft, or in the link of your class`
                                       """).queue();
-                              state = 4;
+                              values.setState(4);
                         }
                         case 4 -> {
 
@@ -334,8 +332,6 @@ public class ClassroomAdd extends Command
 
                               values.getClassroom().setURL(CLASS_SEARCH_URL);
                               values.getClassroom().setNumber(Integer.parseInt(message));
-
-                              final var school = classroom.getSchool();
 
 
                               commandEvent.getCommandThreadPool().execute(() -> commandEvent.addPittClass(classroom));
@@ -544,6 +540,7 @@ public class ClassroomAdd extends Command
 
             private boolean parseTime(StateMachineValues values)
             {
+                  // TODO: Convert class start date from LocalDate ->  LocalDateTime for the reminders
                   String message = values.getMessageReceivedEvent().getMessage().getContentRaw();
                   var commandEvent = values.getCommandEvent();
                   var classroom = values.getClassroom();

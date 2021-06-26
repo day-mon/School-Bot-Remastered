@@ -7,8 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.misc.DatabaseDTO;
-import schoolbot.objects.misc.StateMachine;
 import schoolbot.objects.misc.StateMachineValues;
+import schoolbot.objects.misc.interfaces.StateMachine;
 import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
@@ -150,8 +150,7 @@ public class ProfessorEdit extends Command
                               channel.sendMessage("""
                                       ```1. First Name
                                          2. Last Name
-                                         3. Email Prefix```
-                                       """).queue();
+                                         3. Email Prefix```""").queue();
                         }
 
 
@@ -165,7 +164,10 @@ public class ProfessorEdit extends Command
                                     return;
                               }
 
-                              evaluateChoice(content, event);
+                              if (!evaluateChoice(values))
+                              {
+                                    return;
+                              }
 
                               values.incrementMachineState();
                         }
@@ -175,9 +177,12 @@ public class ProfessorEdit extends Command
                   }
             }
 
-            private void evaluateChoice(String content, GuildMessageReceivedEvent event)
+            private boolean evaluateChoice(StateMachineValues values)
             {
+                  var event = values.getMessageReceivedEvent();
                   var channel = event.getChannel();
+                  String content = event.getMessage().getContentRaw();
+
                   if (content.contains("1") || content.contains("first"))
                   {
                         updateColumn = "first_name";
@@ -196,7 +201,9 @@ public class ProfessorEdit extends Command
                   else
                   {
                         Embed.error(event, "** %s ** is not a valid entry");
+                        return false;
                   }
+                  return true;
             }
 
             private void evaluateColumn(StateMachineValues values)

@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.misc.DatabaseDTO;
+import schoolbot.objects.misc.Reminder;
 import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.Professor;
@@ -309,7 +310,6 @@ public class DatabaseUtil
       }
 
 
-
       public static int addSchool(CommandEvent event, School school)
       {
             Schoolbot schoolbot = event.getSchoolbot();
@@ -484,6 +484,83 @@ public class DatabaseUtil
                   LOGGER.error("Database error", e);
                   return Collections.emptyList();
             }
+      }
+
+
+      public static List<Reminder> classReminder(Schoolbot schoolbot)
+      {
+            List<Reminder> reminders = new ArrayList<>();
+            try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
+            {
+                  PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM class_reminders WHERE remind_time < now()");
+                  ResultSet resultSet = preparedStatement.executeQuery();
+
+                  while (resultSet.next())
+                  {
+
+                        var reminderId = resultSet.getInt("id");
+                        var classId = resultSet.getInt("class_id");
+                        var clazz = getClassFromID(connection, classId);
+
+                        reminders.add(new Reminder(reminderId, clazz));
+                  }
+
+                  return reminders;
+
+            }
+            catch (Exception e)
+            {
+                  LOGGER.error("Database error has occurred", e);
+                  return Collections.emptyList();
+            }
+      }
+
+      public static void removeReminder(Schoolbot schoolbot, Reminder reminder)
+      {
+            try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
+            {
+                  String reminderType = reminder.obj().getClass().getSimpleName();
+                  String tableName = reminderType.equalsIgnoreCase("Assignment") ?
+                          "assignments_reminder" : "class_reminder";
+                  PreparedStatement statement = connection.prepareStatement(
+                          String.format("delete from %s where id=?", tableName)
+                  );
+
+                  statement.setInt(1, reminder.id());
+                  statement.execute();
+            }
+            catch (Exception e)
+            {
+                  LOGGER.error("Database Error", e);
+            }
+      }
+
+      public static boolean lastReminder(Schoolbot schoolbot, Reminder reminder)
+      {
+            try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
+            {
+                  String reminderType = reminder.obj().getClass().getSimpleName();
+                  var potentialVar = reminderType.equalsIgnoreCase("Assignment")
+                          ? Assignment.class.cast(reminder.obj()) : Classroom.class.cast(reminder.obj());
+
+                  // todo: do this
+
+                  String tableName = reminderType.equalsIgnoreCase("Assignment") ?
+                          "assignments_reminder" : "class_reminder";
+                  PreparedStatement statement = connection.prepareStatement(
+                          String.format("delete from %s where id=?", tableName)
+                  );
+
+                  statement.setInt(1, reminder.id());
+                  statement.execute();
+                  return true;
+            }
+            catch (Exception e)
+            {
+                  LOGGER.error("Database Error", e);
+                  return false;
+            }
+
       }
 
       public static List<Classroom> checkClassRemindTimes(Schoolbot schoolbot)

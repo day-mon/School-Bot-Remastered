@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.Schoolbot;
-import schoolbot.objects.misc.Paginatable;
+import schoolbot.objects.misc.interfaces.Paginatable;
 
 import java.awt.*;
 import java.time.Instant;

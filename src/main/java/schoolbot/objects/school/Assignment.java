@@ -7,7 +7,8 @@ import net.dv8tion.jda.api.entities.Role;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.Constants;
 import schoolbot.Schoolbot;
-import schoolbot.objects.misc.Paginatable;
+import schoolbot.objects.misc.interfaces.Paginatable;
+import schoolbot.objects.misc.interfaces.Remindable;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -16,7 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 
-public class Assignment implements Comparable<Assignment>, Paginatable
+public class Assignment implements Comparable<Assignment>, Paginatable, Remindable
 {
       private String name;
       private String description;

@@ -13,7 +13,7 @@ public class ListElectives extends Command
 
       public ListElectives()
       {
-            super("", "", 0);
+            super("Gives a link of all of the WOKS available at University of Pittsburgh at Johnstown", "[none]", 0);
             addCalls("woks", "listwoks", "electives", "listelectives", "elist");
       }
 
