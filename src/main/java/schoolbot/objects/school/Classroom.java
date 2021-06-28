@@ -10,6 +10,8 @@ import schoolbot.Schoolbot;
 import schoolbot.objects.misc.interfaces.Paginatable;
 import schoolbot.objects.misc.interfaces.Remindable;
 import schoolbot.util.DatabaseUtil;
+import schoolbot.util.Parser;
+import schoolbot.util.StringUtils;
 
 import java.sql.Date;
 import java.time.*;
@@ -71,11 +73,13 @@ public class Classroom implements Paginatable, Remindable
       }
 
 
-      public Classroom(long channelID, long roleID, String name)
+      public Classroom(long channelID, long roleID, String name, Date startDate, Date endDate, String time)
       {
             this.channelID = channelID;
             this.roleID = roleID;
             this.name = name;
+            this.startDate = Parser.parseTimeString(startDate, time);
+            this.endDate = Parser.parseTimeString(endDate, time);
             assignments = new ArrayList<>();
 
       }
@@ -101,19 +105,8 @@ public class Classroom implements Paginatable, Remindable
             this.name = className;
             this.classIdentifier = classIdentifier;
             this.term = term;
-
-            var startLocalDate = Instant.ofEpochMilli(startDate.getTime())
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDate();
-
-            this.startDate = LocalDateTime.of(startLocalDate, LocalTime.of(0, 0));
-
-            var endLocalDate = Instant.ofEpochMilli(startDate.getTime())
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDate();
-
-            this.endDate = LocalDateTime.of(endLocalDate, LocalTime.of(0, 0));
-
+            this.startDate = Parser.parseTimeString(startDate, time);
+            this.endDate = Parser.parseTimeString(endDate, time);
             this.number = number;
             this.id = id;
             this.roleID = roleID;
@@ -488,8 +481,8 @@ public class Classroom implements Paginatable, Remindable
                     .addField("Class number", String.valueOf(this.number), false)
                     .addField("Meeting time", this.getTime(), false)
                     .addField("Description", this.description, false)
-                    .addField("Start Date", this.startDate == null ? Arrays.toString(this.inputClassStartDate) : this.startDate.toString(), false)
-                    .addField("End Date", this.endDate == null ? Arrays.toString(this.inputClassEndDate) : this.endDate.toString(), false)
+                    .addField("Start Date", this.startDate == null ? Arrays.toString(this.inputClassStartDate) : StringUtils.formatDate(this.startDate), false)
+                    .addField("End Date", this.endDate == null ? Arrays.toString(this.inputClassEndDate) : StringUtils.formatDate(this.endDate), false)
                     .addField("Class ID", String.valueOf(this.id), false)
                     .addField("Professor", this.professor.getFullName(), false)
                     .addField("Role", role == null ? "N/A" : role.getAsMention(), false)

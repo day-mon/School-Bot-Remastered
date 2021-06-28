@@ -1,8 +1,6 @@
 package schoolbot.handlers;
 
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.guild.GuildWrapper;
@@ -19,7 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class WrapperHandler
 {
-      private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
       private final ConcurrentHashMap<Long, GuildWrapper> guildWrappers;
       private final Schoolbot schoolbot;
 
@@ -193,6 +190,13 @@ public class WrapperHandler
             guildCheck(guildID);
 
             guildWrappers.get(guildID).removeClassroom(event, classroom);
+      }
+
+      public void removeClassroom(long guildId, Classroom classroom, Schoolbot schoolbot)
+      {
+            guildCheck(guildId);
+
+            guildWrappers.get(guildId).removeClassroom(guildId, classroom, schoolbot);
       }
 
 

@@ -540,7 +540,6 @@ public class ClassroomAdd extends Command
 
             private boolean parseTime(StateMachineValues values)
             {
-                  // TODO: Convert class start date from LocalDate ->  LocalDateTime for the reminders
                   String message = values.getMessageReceivedEvent().getMessage().getContentRaw();
                   var commandEvent = values.getCommandEvent();
                   var classroom = values.getClassroom();

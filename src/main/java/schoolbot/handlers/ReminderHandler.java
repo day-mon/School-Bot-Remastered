@@ -10,7 +10,6 @@ import schoolbot.util.DatabaseUtil;
 import schoolbot.util.StringUtils;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -32,11 +31,15 @@ public class ReminderHandler
 
       public void runAssignmentsReminder()
       {
+
+            // todo: fix this reminders arent working!
+
             reminderExecutor.scheduleAtFixedRate(() ->
             {
                   List<Assignment> assignments = DatabaseUtil.checkRemindTimes(schoolbot);
                   assignments.forEach(this::sendAssignmentAlert);
             }, 0, 10, TimeUnit.SECONDS);
+
       }
 
       public void runClassReminder()
@@ -83,7 +86,7 @@ public class ReminderHandler
 
                   if (overDueCheck)
                   {
-                        dueMessage = String.format("%s, ** %s ** was due at ** %s ** but we could not alert you due to some unfortunate down time. I am working to improve", mention, assignment.getName(), StringUtils.formatDate(assignment.getDueDate()));
+                        dueMessage = String.format("%s, ** %s ** at ** %s ** but we could not alert you due to some unfortunate down time. I am working to improve.", mention, assignment.getName(), StringUtils.formatDate(assignment.getDueDate()));
                   }
 
 
@@ -137,10 +140,10 @@ public class ReminderHandler
                    */
                   boolean overDueCheck = Duration.between(classroom.getStartDateWithTime(), LocalDateTime.now()).getSeconds() > 70;
 
-                  // todo: fix this as well
-
                   if (overDueCheck)
                   {
+                        dueMessage = String.format("%s, ** %s ** was due at ** %s ** but we could not alert you due to some unfortunate down time. I am working to improve", mention, classroom.getName(), StringUtils.formatDate(classroom.getStartDateWithTime()));
+
                   }
 
 
@@ -149,14 +152,15 @@ public class ReminderHandler
 
                   DatabaseUtil.removeReminder(schoolbot, reminder);
 
+                  var lastReminder = DatabaseUtil.lastClassReminder(schoolbot, reminder);
 
-                  var endDate = classroom.getEndDateWithTime();
-                  if (endDate.toLocalDate().isEqual(LocalDate.now()))
+                  if (lastReminder)
                   {
-
-                        var guildId = channel.getGuild().getIdLong();
-
-                        LOGGER.debug("Assignment list size {}", classroom.getAssignments().size());
+                        System.out.println("last one");
+                  }
+                  else
+                  {
+                        System.out.println("not last one");
                   }
 
             }

@@ -6,10 +6,7 @@ import schoolbot.Schoolbot;
 import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.school.Classroom;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -177,13 +174,7 @@ public class Parser
 
             Map<DayOfWeek, LocalDateTime> s = new HashMap<>();
 
-            /*
-              Mo = Monday
-              We = Wednesday
-              Fr = Friday
-              Tu = Tuesday
-              Th = Thursday
-             */
+
             Map<String, DayOfWeek> stringDayOfWeekMap = Map.of(
                     "Mo", DayOfWeek.MONDAY,
                     "Tu", DayOfWeek.TUESDAY,
@@ -233,6 +224,49 @@ public class Parser
                   }
             }
             return s;
+      }
+
+      public static LocalDateTime parseTimeString(Date time, String strTime)
+      {
+            LocalDate localDate = Instant.ofEpochMilli(time.getTime())
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate();
+
+            String[] initialSplit = strTime.split("\\s+");
+            String days = initialSplit[0];
+            String classTime = initialSplit[1].toLowerCase();
+            String[] daysSplit = days.split("(?=\\p{Upper})");
+
+            if (daysSplit.length == 0) return null;
+
+            int hour = 0;
+            int minute = 0;
+
+            String[] classTimeSplit = classTime.split(":");
+
+            try
+            {
+                  if (classTime.toLowerCase().contains("am"))
+                  {
+                        hour = Integer.parseInt(classTimeSplit[0]);
+                        minute = Integer.parseInt(classTimeSplit[1].replaceAll("am", ""));
+                  }
+                  else
+                  {
+                        hour = Integer.parseInt(classTimeSplit[0]);
+                        minute = Integer.parseInt(classTimeSplit[1].replaceAll("pm", ""));
+                  }
+            }
+            catch (Exception e)
+            {
+                  logger.error("Error whilst parsing {} or {}", hour, minute);
+                  e.printStackTrace();
+                  return null;
+            }
+
+
+            return LocalDateTime.of(localDate, LocalTime.of(hour, minute));
+
       }
 
 

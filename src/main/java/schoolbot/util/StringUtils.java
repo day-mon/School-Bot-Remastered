@@ -33,4 +33,5 @@ public class StringUtils
       {
             return new DecimalFormat("#,###.00").format(o);
       }
+
 }

@@ -97,7 +97,7 @@ public class GuildWrapper
 
                   case "email_suffix" -> {
                         String email = (String) schoolUpdateDTO.valueBeingChanged();
-                        schoolList.get(schoolName).setURL(email);
+                        schoolList.get(schoolName).setEmailSuffix(email);
                   }
             }
             DatabaseUtil.updateSchool(schoolUpdateDTO, event.getSchoolbot());
@@ -194,9 +194,7 @@ public class GuildWrapper
       {
             String update = assignmentDTO.updateColumn();
             Assignment assignment = (Assignment) assignmentDTO.objectBeingUpdated();
-            School school = assignment.getClassroom().getSchool();
-            Classroom classroom = assignment.getClassroom();
-            var schoolbot = event.getSchoolbot();
+            var schoolBot = event.getSchoolbot();
 
 
             switch (update)
@@ -242,8 +240,8 @@ public class GuildWrapper
 
                         assignment.setDueDate(ldt);
 
-                        DatabaseUtil.removeAssignmentReminderByAssignment(schoolbot, assignment);
-                        DatabaseUtil.addAssignmentReminder(schoolbot, assignment, List.of(1440, 60, 30, 10, 0));
+                        DatabaseUtil.removeAssignmentReminderByAssignment(schoolBot, assignment);
+                        DatabaseUtil.addAssignmentReminder(schoolBot, assignment, List.of(1440, 60, 30, 10, 0));
 
                   }
             }
@@ -257,7 +255,6 @@ public class GuildWrapper
       {
             String update = databaseDTO.updateColumn();
             Professor professor = (Professor) databaseDTO.objectBeingUpdated();
-            School school = professor.getProfessorsSchool();
             String updatedElement = (String) databaseDTO.valueBeingChanged();
 
             switch (update)
@@ -369,16 +366,46 @@ public class GuildWrapper
             DatabaseUtil.removeClassroom(event, classroom);
       }
 
+      public void removeClassroom(long guildID, Classroom classroom, Schoolbot schoolbot)
+      {
+            var jda = schoolbot.getJda();
+            classroom.getSchool().removeClass(classroom);
+            classrooms.remove(classroom);
+
+            if (classroom.getRoleID() != 0)
+            {
+                  if (jda.getRoleById(classroom.getRoleID()) != null)
+                  {
+                        jda.getRoleById(classroom.getRoleID()).delete().queue(success ->
+                                        LOGGER.info("Successfully deleted role for {}", classroom.getName()),
+                                failure ->
+                                        LOGGER.warn("Could not delete role for {} ", classroom.getName(), failure)
+                        );
+                  }
+            }
+
+            if (classroom.getChannelID() != 0)
+            {
+                  if (jda.getTextChannelById(classroom.getChannelID()) != null)
+                  {
+                        jda.getTextChannelById(classroom.getChannelID()).delete().queue(
+                                success ->
+                                        LOGGER.info("Successfully deleted channel for {}", classroom.getName()),
+                                failure ->
+                                        LOGGER.warn("Could not delete class for {} ", classroom.getName(), failure)
+                        );
+                  }
+            }
+
+
+            DatabaseUtil.removeClassroom(schoolbot, classroom);
+      }
+
       public List<Classroom> getAllClasses()
       {
             return classrooms;
       }
 
-
-      public long getGuildID()
-      {
-            return guildID;
-      }
 
       public boolean containsSchool(String schoolName)
       {
@@ -397,15 +424,11 @@ public class GuildWrapper
 
       public void addAssignment(Schoolbot schoolbot, Assignment assignment)
       {
-            String lowerCaseSchoolName = assignment.getName().toLowerCase();
-
             assignment.getClassroom().addAssignment(schoolbot, assignment);
       }
 
       public void removeAssignment(Schoolbot schoolbot, Assignment assignment)
       {
-            String lowerCaseSchoolName = assignment.getName().toLowerCase();
-
             assignment.getClassroom().removeAssignment(schoolbot, assignment);
       }
 

@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class DatabaseUtil
 {
@@ -396,6 +395,24 @@ public class DatabaseUtil
             }
       }
 
+      public static void removeClassroom(Schoolbot schoolbot, Classroom classroom)
+      {
+            int id = classroom.getId();
+            try (Connection con = schoolbot.getDatabaseHandler().getDbConnection())
+            {
+                  removeClassReminders(con, id);
+                  PreparedStatement statement = con.prepareStatement(
+                          "DELETE FROM classes WHERE id=?"
+                  );
+                  statement.setInt(1, id);
+                  statement.execute();
+            }
+            catch (Exception e)
+            {
+                  LOGGER.error("Database error", e);
+            }
+      }
+
       private static List<School> getSchools(Connection connection, long guildID) throws SQLException
       {
             PreparedStatement ps = connection.prepareStatement("SELECT * FROM schools WHERE guild_id=?");
@@ -521,7 +538,7 @@ public class DatabaseUtil
             {
                   String reminderType = reminder.obj().getClass().getSimpleName();
                   String tableName = reminderType.equalsIgnoreCase("Assignment") ?
-                          "assignments_reminder" : "class_reminder";
+                          "assignments_reminders" : "class_reminders";
                   PreparedStatement statement = connection.prepareStatement(
                           String.format("delete from %s where id=?", tableName)
                   );
@@ -535,25 +552,17 @@ public class DatabaseUtil
             }
       }
 
-      public static boolean lastReminder(Schoolbot schoolbot, Reminder reminder)
+      public static boolean lastClassReminder(Schoolbot schoolbot, Reminder reminder)
       {
             try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
             {
-                  String reminderType = reminder.obj().getClass().getSimpleName();
-                  var potentialVar = reminderType.equalsIgnoreCase("Assignment")
-                          ? Assignment.class.cast(reminder.obj()) : Classroom.class.cast(reminder.obj());
-
-                  // todo: do this
-
-                  String tableName = reminderType.equalsIgnoreCase("Assignment") ?
-                          "assignments_reminder" : "class_reminder";
-                  PreparedStatement statement = connection.prepareStatement(
-                          String.format("delete from %s where id=?", tableName)
-                  );
-
+                  PreparedStatement statement = connection.prepareStatement("delete from class_reminders where id=?");
                   statement.setInt(1, reminder.id());
-                  statement.execute();
-                  return true;
+                  LOGGER.info("{}", reminder.id());
+                  ResultSet resultSet = statement.executeQuery();
+
+
+                  return resultSet.next();
             }
             catch (Exception e)
             {
@@ -641,7 +650,7 @@ public class DatabaseUtil
             {
                   PreparedStatement preparedStatement = connection.prepareStatement("UPDATE assignments SET " + assignmentUpdateDTO.updateColumn() + "= ? WHERE id=?");
                   Assignment assignment = (Assignment) assignmentUpdateDTO.objectBeingUpdated();
-                  if (assignmentUpdateDTO.valueBeingChanged() instanceof Assignment.AssignmentType)
+                  if (assignmentUpdateDTO.valueBeingChanged().getClass() == Assignment.AssignmentType.class)
                   {
                         String type = ((Assignment.AssignmentType) assignmentUpdateDTO.valueBeingChanged()).getAssignmentType();
                         preparedStatement.setString(1, type);
@@ -706,7 +715,11 @@ public class DatabaseUtil
                   classroom = new Classroom(
                           rs.getLong("channel_id"),
                           rs.getLong("role_id"),
-                          rs.getString("name"));
+                          rs.getString("name"),
+                          rs.getDate("start_date"),
+                          rs.getDate("end_date"),
+                          rs.getString("time")
+                  );
             }
             return classroom;
 
@@ -747,9 +760,8 @@ public class DatabaseUtil
                                   school.getProfessorList()
                                           .stream()
                                           .filter(professor -> professor.getId() == professorID)
-                                          .limit(1)
-                                          .collect(Collectors.toList())
-                                          .get(0),
+                                          .findFirst()
+                                          .orElseThrow(() -> new IllegalStateException("Professor some how does not exist. Please check your database to make sure you did not manually edit")),
                                   resultSet.getBoolean("autofilled")
                           )
                   );
