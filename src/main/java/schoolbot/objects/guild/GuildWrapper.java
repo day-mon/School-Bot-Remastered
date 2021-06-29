@@ -21,7 +21,6 @@ import java.util.Map;
 
 public class GuildWrapper
 {
-      private final long guildID;
       private final Map<String, School> schoolList;
       private final List<Classroom> classrooms;
       private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
@@ -29,7 +28,7 @@ public class GuildWrapper
 
       public GuildWrapper(DatabaseUtil.WrapperReturnValue data)
       {
-            this.guildID = data.guildID();
+            long guildID = data.guildID();
             this.schoolList = data.schoolMap();
             this.classrooms = Collections.synchronizedList(data.classrooms());
       }

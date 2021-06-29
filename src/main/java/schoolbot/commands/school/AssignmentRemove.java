@@ -284,7 +284,7 @@ public class AssignmentRemove extends Command
                               {
                                     Assignment assignment = assignmentList.get(0);
 
-                                    channel.sendMessage(assignment.getAsEmbed(commandEvent.getSchoolbot())).queue();
+                                    channel.sendMessageEmbeds(assignment.getAsEmbed(commandEvent.getSchoolbot())).queue();
                                     channel.sendMessageFormat("** %s ** is the only assignment.. Would you like to delete it?", assignment.getName()).queue();
                                     state = 5;
                               }

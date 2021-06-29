@@ -164,7 +164,7 @@ public abstract class Command
             }
             else if (CommandCooldownHandler.isOnCooldown(event.getMember(), this))
             {
-                  Embed.sendInvalidMemberPermissions(event);
+                  Embed.sendIsOnCooldown(event);
             }
 
             else if (!isEnabled())

@@ -19,12 +19,12 @@ import schoolbot.util.Checks;
 import schoolbot.util.Embed;
 import schoolbot.util.Processor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class AssignmentEdit extends Command
@@ -402,14 +402,16 @@ public class AssignmentEdit extends Command
                         }
 
                         case "due_date" -> {
-                              if (!Checks.isValidAssignmentDate(message, assignment.getClassroom()))
+                              var date = Checks.isValidAssignmentDate(values);
+
+                              if (Objects.isNull(date))
                               {
                                     Embed.error(event, "** %s ** is not a valid date", message);
                                     return false;
                               }
 
 
-                              LocalDateTime localDateTime = LocalDateTime.of(LocalDate.parse(message, DateTimeFormatter.ofPattern("M/d/yyyy")), assignment.getDueDate().toLocalTime());
+                              LocalDateTime localDateTime = LocalDateTime.of(date, assignment.getDueDate().toLocalTime());
 
                               commandEvent.updateAssignment(new DatabaseDTO(assignment, updateColumn, localDateTime));
                               commandEvent.sendMessage("Date successfully changed to %s", localDateTime);

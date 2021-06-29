@@ -31,9 +31,6 @@ public class ReminderHandler
 
       public void runAssignmentsReminder()
       {
-
-            // todo: fix this reminders arent working!
-
             reminderExecutor.scheduleAtFixedRate(() ->
             {
                   List<Assignment> assignments = DatabaseUtil.checkRemindTimes(schoolbot);
@@ -129,7 +126,7 @@ public class ReminderHandler
                   String dueMessage = (due <= 0) ?
                           String.format("%s, ** %s ** is **now starting**", mention, classroom.getName())
                           :
-                          String.format("%s, ** %s ** is starts in ** %d ** minutes", mention, classroom.getName(), due);
+                          String.format("%s, ** %s ** is starting in ** %d ** minutes", mention, classroom.getName(), due);
 
                   /*
                    * This will check if the assignment is pass due by one minute and 10 seconds
@@ -143,7 +140,6 @@ public class ReminderHandler
                   if (overDueCheck)
                   {
                         dueMessage = String.format("%s, ** %s ** was due at ** %s ** but we could not alert you due to some unfortunate down time. I am working to improve", mention, classroom.getName(), StringUtils.formatDate(classroom.getStartDateWithTime()));
-
                   }
 
 
@@ -156,11 +152,7 @@ public class ReminderHandler
 
                   if (lastReminder)
                   {
-                        System.out.println("last one");
-                  }
-                  else
-                  {
-                        System.out.println("not last one");
+                        schoolbot.getWrapperHandler().removeClassroom(classroom, schoolbot);
                   }
 
             }

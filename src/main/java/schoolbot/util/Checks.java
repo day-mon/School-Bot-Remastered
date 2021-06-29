@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import schoolbot.Schoolbot;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.misc.interfaces.StateMachine;
@@ -60,34 +59,43 @@ public class Checks
             return (i >= 1 && i <= maxValueInclusive);
       }
 
-      public static boolean isValidAssignmentDate(String potDate, Classroom classroom)
+      public static LocalDate isValidAssignmentDate(StateMachineValues values)
       {
+            var potDate = values.getMessageReceivedEvent().getMessage().getContentRaw();
+            var classroom = values.getClassroom();
             LocalDate ld;
-            try
-            {
 
-                  if (potDate.equalsIgnoreCase("tomorrow"))
-                  {
-                        ld = LocalDate.now().plusDays(1);
-                  }
-                  else if (potDate.equalsIgnoreCase("today"))
-                  {
-                        ld = LocalDate.now();
-                  }
-                  else
+
+            if (potDate.equalsIgnoreCase("tomorrow"))
+            {
+                  ld = LocalDate.now().plusDays(1);
+            }
+            else if (potDate.equalsIgnoreCase("today"))
+            {
+                  ld = LocalDate.now();
+            }
+            else
+            {
+                  try
                   {
                         ld = LocalDate.parse(potDate, DateTimeFormatter.ofPattern("M/d/yyyy"));
                   }
-
-
-                  return ld.isAfter(LocalDate.now()) || ld.isEqual(LocalDate.now());
-                  // return ld.isAfter(classroom.getClassStartDate()) && ld.isBefore(classroom.getClassEndDate()); commented out because other things arent implemented yet
+                  catch (Exception e)
+                  {
+                        LOGGER.error("Error occurred while checking assignment time", e);
+                        return null;
+                  }
             }
-            catch (Exception e)
+
+
+            if (ld.isAfter(classroom.getStartDate()) && ld.isBefore(classroom.getEndDate()))
             {
-                  LOGGER.error("Error has occurred whilst parsing assignment date", e);
-                  return false;
+                  return ld;
             }
+
+            return null;
+
+
       }
 
       public static LocalDate checkValidDate(String potentialDate)
@@ -113,8 +121,9 @@ public class Checks
                     .replaceAll(time.toLowerCase().contains("am") ? "am" : "pm", ""));
       }
 
-      public static LocalDateTime validTime(GuildMessageReceivedEvent event, LocalDate date)
+      public static LocalDateTime validTime(StateMachineValues values, LocalDate date)
       {
+            var event = values.getMessageReceivedEvent();
             String time = event.getMessage().getContentRaw();
 
             if (!time.contains(":")) return null;
@@ -130,34 +139,30 @@ public class Checks
             if (time.toLowerCase().contains("am"))
             {
                   int hour = Integer.parseInt(t[0]);
-                  int minute = Integer.parseInt(t[1].replaceAll("am", ""));
+                  int minute = Integer.parseInt(t[1].toLowerCase().replaceAll("am", ""));
 
-                  return LocalDateTime.of(date, LocalTime.of(hour, minute));
+                  var returnVal = LocalDateTime.of(date, LocalTime.of(hour, minute));
+                  return returnVal.isAfter(LocalDateTime.now()) ? returnVal : null;
             }
             else
             {
                   int hour = Integer.parseInt(t[0]);
-                  int minute = Integer.parseInt(t[1].replaceAll("pm", ""));
+                  int minute = Integer.parseInt(t[1].toLowerCase().replaceAll("pm", ""));
 
                   if (hour == 12)
                   {
-                        return null;
+                        hour = -12;
                   }
 
-                  return LocalDateTime.of(date, LocalTime.of((12 + hour), minute));
+                  var returnVal = LocalDateTime.of(date, LocalTime.of(hour + 12, minute));
+
+                  return returnVal.isAfter(LocalDateTime.now()) ? returnVal : null;
             }
       }
 
       public static Classroom messageSentFromClassChannel(CommandEvent event)
       {
-            Schoolbot schoolbot = event.getSchoolbot();
             List<Classroom> classroomList = event.getGuildClasses();
-
-            List<Long> classChannels = classroomList
-                    .stream()
-                    .map(Classroom::getChannelID)
-                    .collect(Collectors.toList());
-
             long textChanel = event.getTextChannel().getIdLong();
 
 
@@ -264,7 +269,7 @@ public class Checks
       /**
        * Returns if the event contains the same user and channel as the base event
        *
-       * @param values   GuildMessageReceivedEvent anticipated to be respond event
+       * @param values GuildMessageReceivedEvent anticipated to be respond event
        * @return If the event contains same user and channel as base event false otherwise
        */
       public static <S extends StateMachine> boolean eventMeetsPrerequisites(@NotNull StateMachineValues values)

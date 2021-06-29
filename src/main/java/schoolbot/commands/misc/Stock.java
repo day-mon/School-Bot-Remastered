@@ -3,6 +3,7 @@ package schoolbot.commands.misc;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
+import schoolbot.util.Embed;
 
 import java.util.List;
 
@@ -23,6 +24,14 @@ public class Stock extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
-
+            Embed.information(event, """
+                    Hello %s. Thank you for using Schoolbot. 
+                                        
+                    It looks like you  have called the stock command. The stock command has two children
+                    ** quote ** and ** price **. To call them, do the following.
+                                        
+                    [prefix] stock quote AMZ
+                    [prefix] stock price AMZ
+                    """, event.getUser().getAsMention());
       }
 }

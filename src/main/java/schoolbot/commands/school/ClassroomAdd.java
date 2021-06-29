@@ -360,13 +360,10 @@ public class ClassroomAdd extends Command
                         }
 
                         case 11 -> {
-                              String className = message;
-
-
                               boolean duplicateClassNames = commandEvent.getGuildClasses()
                                       .stream()
                                       .map(Classroom::getName)
-                                      .anyMatch(clazzroom -> clazzroom.replaceAll("-", " ").equalsIgnoreCase(className));
+                                      .anyMatch(clazzroom -> clazzroom.replaceAll("-", " ").equalsIgnoreCase(message));
 
                               if (duplicateClassNames)
                               {
@@ -374,7 +371,7 @@ public class ClassroomAdd extends Command
                                     return;
                               }
 
-                              values.getClassroom().setName(className);
+                              values.getClassroom().setName(message);
 
                               var professorList = values.getProfessorList();
 
@@ -488,7 +485,7 @@ public class ClassroomAdd extends Command
                               classroom.setTerm(termFixed(message));
 
                               Embed.information(event, """
-                                      Nice! %s I have successfully applied your identifier.
+                                      Nice! %s I have successfully applied your term.
                                                                             
                                       I will now need your class start and end dates.
                                                                             
@@ -589,6 +586,12 @@ public class ClassroomAdd extends Command
                   catch (Exception e)
                   {
                         Embed.error(commandEvent, "Error parsing End Date. Please try again!");
+                        return false;
+                  }
+
+                  if (endDate.isBefore(startDate))
+                  {
+                        Embed.error(commandEvent, "Your end date cannot be before your start date!");
                         return false;
                   }
 

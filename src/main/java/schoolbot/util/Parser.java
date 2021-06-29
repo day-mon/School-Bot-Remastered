@@ -3,7 +3,6 @@ package schoolbot.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
-import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.school.Classroom;
 
 import java.time.*;
@@ -119,52 +118,6 @@ public class Parser
             return true;
       }
 
-      public static boolean classTime(StateMachineValues values, Map<DayOfWeek, LocalDateTime> localDateTimeMap)
-      {
-            var classroom = values.getClassroom();
-            var schoolbot = values.getCommandEvent().getSchoolbot();
-
-
-            List<DayOfWeek> dayOfWeekList = new ArrayList<>(localDateTimeMap.keySet())
-                    .stream()
-                    .sorted()
-                    .collect(Collectors.toList());
-
-
-            LocalDate ld = classroom.getStartDate().isBefore(LocalDate.now()) ? LocalDate.now() : classroom.getStartDate();
-
-            while (ld.isBefore(classroom.getEndDate()))
-            {
-                  DayOfWeek day = ld.getDayOfWeek();
-                  if (localDateTimeMap.containsKey(day))
-                  {
-                        LocalTime localTime = localDateTimeMap.get(day).toLocalTime();
-
-                        DatabaseUtil.addClassReminder(schoolbot, LocalDateTime.of(ld, localTime), List.of(60, 30, 10), classroom);
-
-                        if (dayOfWeekList.get(dayOfWeekList.size() - 1) == ld.getDayOfWeek())
-                        {
-                              DayOfWeek beginning = dayOfWeekList.get(0);
-                              ld = ld.with(TemporalAdjusters.next(beginning));
-                        }
-                        else
-                        {
-                              DayOfWeek nextDay = dayOfWeekList
-                                      .stream()
-                                      .filter(dayOfWeek -> dayOfWeek.getValue() > day.getValue())
-                                      .filter(localDateTimeMap::containsKey)
-                                      .findFirst()
-                                      .orElseThrow(() -> new IllegalStateException("I dont know how this happened"));
-                              ld = ld.with(TemporalAdjusters.next(nextDay));
-                        }
-                        continue;
-                  }
-                  ld = ld.plusDays(1);
-            }
-            return true;
-      }
-
-
       public static Map<DayOfWeek, LocalDateTime> parseTime(Classroom classroom, String time)
       {
             if (!timePrerequisites(time))
@@ -201,12 +154,12 @@ public class Parser
                   if (classTime.toLowerCase().contains("am"))
                   {
                         hour = Integer.parseInt(classTimeSplit[0]);
-                        minute = Integer.parseInt(classTimeSplit[1].replaceAll("am", ""));
+                        minute = Integer.parseInt(classTimeSplit[1].toLowerCase().replaceAll("am", ""));
                   }
                   else
                   {
-                        hour = Integer.parseInt(classTimeSplit[0]);
-                        minute = Integer.parseInt(classTimeSplit[1].replaceAll("pm", ""));
+                        hour = Integer.parseInt(classTimeSplit[0]) + 12;
+                        minute = Integer.parseInt(classTimeSplit[1].toLowerCase().replaceAll("pm", ""));
                   }
             }
             catch (Exception e)
@@ -253,7 +206,7 @@ public class Parser
                   }
                   else
                   {
-                        hour = Integer.parseInt(classTimeSplit[0]);
+                        hour = Integer.parseInt(classTimeSplit[0]) + 12;
                         minute = Integer.parseInt(classTimeSplit[1].replaceAll("pm", ""));
                   }
             }
@@ -263,10 +216,7 @@ public class Parser
                   e.printStackTrace();
                   return null;
             }
-
-
             return LocalDateTime.of(localDate, LocalTime.of(hour, minute));
-
       }
 
 

@@ -17,9 +17,10 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.handlers.*;
-import schoolbot.listener.MainListener;
+import schoolbot.listener.ChannelListener;
+import schoolbot.listener.MessageListener;
+import schoolbot.listener.RoleListener;
 import schoolbot.objects.config.ConfigOption;
-import schoolbot.objects.info.BotInfo;
 import schoolbot.objects.info.SystemInfo;
 import schoolbot.objects.misc.Emoji;
 
@@ -41,7 +42,6 @@ public class Schoolbot extends ListenerAdapter
       private final Logger LOGGER;
 
       private ReminderHandler reminderHandler;
-      private Paginator paginator;
       private JDA jda;
 
       public Schoolbot()
@@ -76,7 +76,9 @@ public class Schoolbot extends ListenerAdapter
                     )
                     .addEventListeners(
                             this,
-                            new MainListener(this),
+                            new MessageListener(this),
+                            new ChannelListener(this),
+                            new RoleListener(this),
                             eventWaiter)
                     .setActivity(Activity.playing("building..."))
                     .setStatus(OnlineStatus.DO_NOT_DISTURB)
@@ -92,15 +94,15 @@ public class Schoolbot extends ListenerAdapter
             LOGGER.info("Account:           " + event.getJDA().getSelfUser());
             LOGGER.info("Java Version:      " + SystemInfo.getJavaVersion());
             LOGGER.info("JDA Version:       " + JDAInfo.VERSION);
-            LOGGER.info("Schoolbot Version: " + BotInfo.getSchoolbotVersion());
+            LOGGER.info("Schoolbot Version: " + Constants.VERSION);
             LOGGER.info("Operating System:  " + SystemInfo.getOperatingSystem());
-            LOGGER.info("Github Repo:       " + BotInfo.getGithubRepo());
+            LOGGER.info("Github Repo:       " + "https://github.com/tykoooo/School-Bot-Remastered");
             LOGGER.info("Startup Time:      " + Duration.between(getBotStartTime(), LocalDateTime.now()).toMillisPart() + " ms");
 
 
             try
             {
-                  this.paginator = PaginatorBuilder.createPaginator()
+                  Paginator paginator = PaginatorBuilder.createPaginator()
                           .setEmote(Emote.NEXT, Emoji.ARROW_RIGHT.getUnicode())
                           .setEmote(Emote.PREVIOUS, Emoji.ARROW_LEFT.getUnicode())
                           .setEmote(Emote.GOTO_FIRST, Emoji.TRACK_PREVIOUS.getUnicode())
@@ -162,10 +164,5 @@ public class Schoolbot extends ListenerAdapter
       public WrapperHandler getWrapperHandler()
       {
             return wrapperHandler;
-      }
-
-      public ReminderHandler getReminderHandler()
-      {
-            return reminderHandler;
       }
 }

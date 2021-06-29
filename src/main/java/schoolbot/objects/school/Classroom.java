@@ -18,6 +18,7 @@ import java.time.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class Classroom implements Paginatable, Remindable
 {
@@ -261,7 +262,6 @@ public class Classroom implements Paginatable, Remindable
             var startDatee = Instant.ofEpochMilli(startDate.getTime())
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
-            ;
             this.startDate = LocalDateTime.of(startDatee, LocalTime.of(0, 0));
       }
 
@@ -489,5 +489,56 @@ public class Classroom implements Paginatable, Remindable
                     .addField("Text Channel", textChannel == null ? "N/A" : textChannel.getAsMention(), false)
                     .addField("Assignments Pending", String.valueOf(this.assignments.size()), false)
                     .setColor(role == null ? Constants.DEFAULT_EMBED_COLOR : role.getColor());
+      }
+
+      @Override
+      public String toString()
+      {
+            return "Classroom{" +
+                   "description='" + description + '\'' +
+                   ", prerequisite='" + prerequisite + '\'' +
+                   ", instructor='" + instructor + '\'' +
+                   ", time='" + time + '\'' +
+                   ", location='" + location + '\'' +
+                   ", level='" + level + '\'' +
+                   ", room='" + room + '\'' +
+                   ", name='" + name + '\'' +
+                   ", inputClassStartDate=" + Arrays.toString(inputClassStartDate) +
+                   ", inputClassEndDate=" + Arrays.toString(inputClassEndDate) +
+                   ", assignments=" + assignments +
+                   ", classIdentifier='" + classIdentifier + '\'' +
+                   ", term='" + term + '\'' +
+                   ", URL='" + URL + '\'' +
+                   ", startDate=" + startDate +
+                   ", endDate=" + endDate +
+                   ", number=" + number +
+                   ", creditAmount=" + creditAmount +
+                   ", id=" + id +
+                   ", roleID=" + roleID +
+                   ", channelID=" + channelID +
+                   ", guildID=" + guildID +
+                   ", school=" + school +
+                   ", professor=" + professor +
+                   ", inputTime='" + inputTime + '\'' +
+                   ", wasAutoFilled=" + wasAutoFilled +
+                   '}';
+      }
+
+      @Override
+      public boolean equals(Object o)
+      {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Classroom classroom = (Classroom) o;
+            return this.id == classroom.getId();
+      }
+
+      @Override
+      public int hashCode()
+      {
+            int result = Objects.hash(description, prerequisite, instructor, time, location, level, room, name, assignments, term, URL, startDate, endDate, number, creditAmount, id, roleID, channelID, guildID, school, professor, inputTime, wasAutoFilled);
+            result = 31 * result + Arrays.hashCode(inputClassStartDate);
+            result = 31 * result + Arrays.hashCode(inputClassEndDate);
+            return result;
       }
 }

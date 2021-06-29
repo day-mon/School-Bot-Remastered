@@ -115,7 +115,16 @@ public class WrapperHandler
       {
             guildCheck(guildID);
 
-            guildWrappers.get(guildID).removeAssignment(schoolbot, assignment);
+            // This looks like I am doing extra stuff, but the assignment passed in isnt the same object reference variable
+            Assignment newAssign = guildWrappers.get(guildID)
+                    .getAllClasses()
+                    .stream()
+                    .filter(classroom -> classroom.equals(assignment.getClassroom()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("Assignment Exist in Database but not in cache"))
+                    .getAssignmentByID(assignment.getId());
+
+            guildWrappers.get(guildID).removeAssignment(schoolbot, newAssign);
       }
 
       public School getSchool(CommandEvent event, String schoolName)
@@ -192,11 +201,21 @@ public class WrapperHandler
             guildWrappers.get(guildID).removeClassroom(event, classroom);
       }
 
-      public void removeClassroom(long guildId, Classroom classroom, Schoolbot schoolbot)
+      public void removeClassroom(Classroom classroom, Schoolbot schoolbot)
       {
+            var guildId = classroom.getGuildID();
+
+
             guildCheck(guildId);
 
-            guildWrappers.get(guildId).removeClassroom(guildId, classroom, schoolbot);
+            Classroom newClass = guildWrappers.get(guildId)
+                    .getAllClasses()
+                    .stream()
+                    .filter(classroom::equals)
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("Classroom Exist in Database but not in cache"));
+
+            guildWrappers.get(guildId).removeClassroom(guildId, newClass, schoolbot);
       }
 
 

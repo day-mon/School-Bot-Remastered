@@ -145,7 +145,18 @@ public class ProfessorEdit extends Command
                                     return;
                               }
 
+
                               var professor = values.getProfessor();
+
+
+                              if (professor.getFullName().equalsIgnoreCase("staff unknown"))
+                              {
+                                    Embed.error(event, "You cannot edit this professor.. Aborting");
+                                    jda.removeEventListener(this);
+                                    return;
+                              }
+
+
                               channel.sendMessageFormat("What attribute of ** %s ** would you like to edit", professor.getFullName()).queue();
                               channel.sendMessage("""
                                       ```1. First Name
@@ -155,9 +166,6 @@ public class ProfessorEdit extends Command
 
 
                         case 4 -> {
-                              String content = message.toLowerCase().trim();
-
-
                               if (updateColumn.equalsIgnoreCase("N/A"))
                               {
                                     Embed.error(event, "** %s ** is not a valid choice please return again");

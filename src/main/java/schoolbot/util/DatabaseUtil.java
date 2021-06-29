@@ -556,7 +556,7 @@ public class DatabaseUtil
       {
             try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
             {
-                  PreparedStatement statement = connection.prepareStatement("delete from class_reminders where id=?");
+                  PreparedStatement statement = connection.prepareStatement("select from class_reminders where id=?");
                   statement.setInt(1, reminder.id());
                   LOGGER.info("{}", reminder.id());
                   ResultSet resultSet = statement.executeQuery();
@@ -720,6 +720,7 @@ public class DatabaseUtil
                           rs.getDate("end_date"),
                           rs.getString("time")
                   );
+                  classroom.setId(id);
             }
             return classroom;
 

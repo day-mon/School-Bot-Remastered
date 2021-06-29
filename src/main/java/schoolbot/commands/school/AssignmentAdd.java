@@ -17,11 +17,11 @@ import schoolbot.util.Checks;
 import schoolbot.util.Embed;
 import schoolbot.util.Processor;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -294,62 +294,52 @@ public class AssignmentAdd extends Command
                                       I will need your due date..
                                       Please use the following format: `M/dd/yyyy`
                                       An Example: `2/9/2004`
+                                      You can also use phrases like: `Today` or `Tomorrow`
                                       """).queue();
                               values.incrementMachineState();
                         }
 
                         case 8 -> {
-                              var classroom = values.getClassroom();
-                              if (!Checks.isValidAssignmentDate(message, classroom))
+                              date = Checks.isValidAssignmentDate(values);
+
+                              if (Objects.isNull(date))
                               {
-                                    Embed.error(event, "** %s ** is not a valid date.. Please try again", message);
+                                    Embed.error(event, "This date is incorrect. Please try again!");
                                     return;
                               }
 
-                              date = LocalDate.parse(message, DateTimeFormatter.ofPattern("M/d/yyyy"));
 
                               Embed.success(event, "** %s ** successfully set as this assignments due date", date.toString());
                               channel.sendMessage("""
                                       Lastly I will need the time in which your assignment is due
                                       Please use the following format: `HH:mm AM/PM`
                                       An Example: `12:30pm` or `8:30am`
+                                                                            
                                       """).queue();
                               values.incrementMachineState();
                         }
 
                         case 9 -> {
-                              String newMessage = message.toLowerCase();
+                              var time = Checks.validTime(values, date);
 
-                              if (!Checks.checkValidTime(message))
+
+                              if (Objects.isNull(time))
                               {
-                                    Embed.error(event, "** %s ** is not a valid time... try again!", message);
+                                    Embed.error(event, "** %s ** could not be parsed or is before the current time. Try again!", message);
                                     return;
                               }
 
-                              String[] time = newMessage.split(":");
+                              // Just in case number is negative
+                              long duration = Math.abs(Duration.between(time, LocalDateTime.now()).getSeconds());
 
-
-                              if (newMessage.contains("am"))
+                              if (duration <= 300)
                               {
-                                    int hour = Integer.parseInt(time[0]);
-                                    int minute = Integer.parseInt(time[1].replaceAll("am", ""));
-
-
-                                    values.getAssignment().setDueDate(LocalDateTime.of(date, LocalTime.of(hour, minute)));
+                                    Embed.error(event, "That time is too close.. Please try another time");
+                                    return;
                               }
-                              else
-                              {
-                                    int hour = Integer.parseInt(time[0]);
-                                    int minute = Integer.parseInt(time[1].replaceAll("pm", ""));
 
 
-                                    if (hour == 12)
-                                    {
-                                          hour = -12;
-                                    }
-
-                                    values.getAssignment().setDueDate(LocalDateTime.of(date, LocalTime.of((hour + 12), minute)));
-                              }
+                              values.getAssignment().setDueDate(time);
 
                               var commandEvent = values.getCommandEvent();
                               var assignment = values.getAssignment();

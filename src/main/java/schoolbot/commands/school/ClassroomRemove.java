@@ -161,7 +161,7 @@ public class ClassroomRemove extends Command
                               if (message.equalsIgnoreCase("yes") || message.equalsIgnoreCase("y"))
                               {
                                     commandEvent.removeClass(values.getClassroom());
-                                    Embed.success(event, "Removed [** %s **] successfully", classroom.getName());
+                                    Embed.success(commandEvent, "Removed [** %s **] successfully", classroom.getName());
                                     jda.removeEventListener(this);
                               }
                               else if (message.equalsIgnoreCase("no") || message.equalsIgnoreCase("n") || message.equalsIgnoreCase("nah"))
