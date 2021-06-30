@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 public class Embed
 {
-
       public Embed()
       {
       }
@@ -32,24 +31,50 @@ public class Embed
 
       public static void success(GuildMessageReceivedEvent event, String message, Object... args)
       {
-            MessageChannel channel = event.getChannel();
+            var channel = event.getChannel();
 
             channel.sendMessageEmbeds(new EmbedBuilder()
                     .setTitle(Emoji.WHITE_CHECK_MARK.getAsChat() + " Success " + Emoji.WHITE_CHECK_MARK.getAsChat())
                     .setColor(Color.GREEN)
                     .setDescription(String.format(message, args))
-                    .build()).queue();
+                    .build())
+                    .queue(null, failure ->
+                    {
+                          var user = event.getAuthor();
+
+                          user.openPrivateChannel()
+                                  .flatMap(privateMessage -> privateMessage.sendMessageEmbeds(new EmbedBuilder()
+                                          .setTitle(Emoji.WHITE_CHECK_MARK.getAsChat() + " Success " + Emoji.WHITE_CHECK_MARK.getAsChat())
+                                          .setColor(Color.GREEN)
+                                          .setDescription(String.format(message, args))
+                                          .build())).queue();
+                    });
+
+
       }
 
       public static void success(CommandEvent event, String message, Object... args)
       {
-            MessageChannel channel = event.getChannel();
+            var channel = event.getTextChannel();
+
 
             channel.sendMessageEmbeds(new EmbedBuilder()
                     .setTitle(Emoji.WHITE_CHECK_MARK.getAsChat() + " Success " + Emoji.WHITE_CHECK_MARK.getAsChat())
                     .setColor(Color.GREEN)
                     .setDescription(String.format(message, args))
-                    .build()).queue();
+                    .build())
+                    .queue(null, failure ->
+                    {
+                          var user = event.getUser();
+
+                          user.openPrivateChannel()
+                                  .flatMap(privateMessage -> privateMessage.sendMessageEmbeds(new EmbedBuilder()
+                                          .setTitle(Emoji.WHITE_CHECK_MARK.getAsChat() + " Success " + Emoji.WHITE_CHECK_MARK.getAsChat())
+                                          .setColor(Color.GREEN)
+                                          .setDescription(String.format(message, args))
+                                          .build())).queue();
+                    });
+
       }
 
       public static void error(CommandEvent event, String message)
@@ -166,4 +191,5 @@ public class Embed
                     .build()
             ).queue();
       }
+
 }
