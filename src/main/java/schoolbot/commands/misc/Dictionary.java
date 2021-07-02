@@ -10,7 +10,7 @@ import org.jsoup.nodes.Document;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.util.Checks;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 
 import java.awt.*;
 import java.time.LocalDate;
@@ -34,7 +34,7 @@ public class Dictionary extends Command
 
             if (Checks.isNumber(word))
             {
-                  Embed.error(event, "Please input a word not numbers :)");
+                  EmbedUtils.error(event, "Please input a word not numbers :)");
                   return;
             }
 
@@ -48,7 +48,7 @@ public class Dictionary extends Command
             }
             catch (Exception e)
             {
-                  Embed.error(event, "Can not connect to the API or this is not a valid english word");
+                  EmbedUtils.error(event, "Can not connect to the API or this is not a valid english word");
                   return;
             }
 

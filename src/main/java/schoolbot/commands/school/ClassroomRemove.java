@@ -12,7 +12,7 @@ import schoolbot.objects.misc.interfaces.StateMachine;
 import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 import schoolbot.util.Processor;
 
 import java.util.List;
@@ -124,16 +124,16 @@ public class ClassroomRemove extends Command
 
                               if (classroomList.isEmpty())
                               {
-                                    Embed.error(event, "** %s ** has no classes without assignments already assigned", school.getName());
+                                    EmbedUtils.error(event, "** %s ** has no classes without assignments already assigned", school.getName());
                                     jda.removeEventListener(this);
                               }
 
-                              Embed.success(event, "** %s ** has been selected", school.getName());
+                              EmbedUtils.success(event, "** %s ** has been selected", school.getName());
 
                               var commandEvent = values.getCommandEvent();
 
                               commandEvent.sendAsPaginatorWithPageNumbers(classroomList);
-                              Embed.information(commandEvent, "Please select a page number of the class you want to remove");
+                              EmbedUtils.information(commandEvent, "Please select a page number of the class you want to remove");
                               values.incrementMachineState();
                         }
 
@@ -161,7 +161,7 @@ public class ClassroomRemove extends Command
                               if (message.equalsIgnoreCase("yes") || message.equalsIgnoreCase("y"))
                               {
                                     commandEvent.removeClass(values.getClassroom());
-                                    Embed.success(commandEvent, "Removed [** %s **] successfully", classroom.getName());
+                                    EmbedUtils.success(commandEvent, "Removed [** %s **] successfully", classroom.getName());
                                     jda.removeEventListener(this);
                               }
                               else if (message.equalsIgnoreCase("no") || message.equalsIgnoreCase("n") || message.equalsIgnoreCase("nah"))
@@ -171,7 +171,7 @@ public class ClassroomRemove extends Command
                               }
                               else
                               {
-                                    Embed.error(event, "[ ** %s ** ] is not a valid respond.. I will need a **Yes** OR a **No**", message);
+                                    EmbedUtils.error(event, "[ ** %s ** ] is not a valid respond.. I will need a **Yes** OR a **No**", message);
                               }
                         }
                   }

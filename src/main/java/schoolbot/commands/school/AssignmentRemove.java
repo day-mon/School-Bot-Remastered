@@ -1,23 +1,24 @@
 package schoolbot.commands.school;
 
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.command.CommandFlag;
 import schoolbot.objects.misc.Emoji;
+import schoolbot.objects.misc.StateMachineValues;
+import schoolbot.objects.misc.interfaces.StateMachine;
 import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
+import schoolbot.util.Processor;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,156 +30,72 @@ public class AssignmentRemove extends Command
       public AssignmentRemove(Command parent)
       {
             super(parent, "Removes an assignment from a class", "[none]", 0);
+            setCommandPrerequisites("A valid assignment to edit");
+            addFlags(CommandFlag.STATE_MACHINE_COMMAND);
       }
 
 
       @Override
-      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
+      public void run(@NotNull CommandEvent event, @NotNull List<String> args, @NotNull StateMachineValues values)
       {
-            Member member = event.getMember();
-            MessageChannel channel = event.getChannel();
 
-            List<School> schools = event.getGuildSchools()
+            var jda = event.getJDA();
+            var schoolList = values.getSchoolList()
                     .stream()
-                    .filter(school -> !school.getClassroomList().isEmpty())
+                    .filter(School::hasClasses)
                     .collect(Collectors.toList());
-            List<Assignment> assignmentList = Collections.emptyList();
-            Assignment assignment = null;
-            Classroom classroom = Checks.messageSentFromClassChannel(event);
+            var channel = event.getTextChannel();
+            Classroom classroom = Checks.messageSentFromClassChannel(values);
 
-            int stateToGoto = 1;
             if (classroom != null)
             {
-                  event.sendMessage("""
-                          ** %s ** has been selected because it you sent it from this channel
-                          Please give me the name of the assignment!
-                          """, classroom.getName());
+                  EmbedUtils.information(event,
+                          "** %s ** has been selected automatically because the message came from %s", classroom.getName(), channel.getAsMention());
 
-                  assignmentList = classroom.getAssignments();
+                  var processedList = Processor.processGenericList(values, values.getAssignmentList(), Assignment.class);
 
-                  if (assignmentList.isEmpty())
+                  if (processedList == 0)
                   {
-                        Embed.error(event, "** %s ** has no assignments.", classroom.getName());
                         return;
                   }
-                  else if (assignmentList.size() == 1)
-                  {
-                        assignment = assignmentList.get(0);
 
-                        event.sendMessage(assignment.getAsEmbed(event.getSchoolbot()));
-                        event.sendMessage("** %s ** is the only assignment.. Would you like to delete it?", assignment.getName());
-                        stateToGoto = 5;
-                  }
-                  else
+                  if (processedList == 1)
                   {
-                        event.sendAsPaginatorWithPageNumbers(assignmentList);
-                        event.sendMessage("Please select the assignment by page number");
-                        stateToGoto = 4;
+                        var assignment = values.getAssignment();
 
+                        EmbedUtils.information(event, "** %s ** has been selected because it is the only deletable assignment. Would you like to remove it?", assignment.getName());
+                        values.setState(5);
+                        return;
                   }
+
+                  values.setState(5);
+                  jda.addEventListener(new AssignmentRemoveMachine(values));
             }
-            else
-            {
-                  if (member.hasPermission(Permission.ADMINISTRATOR))
-                  {
-                        if (schools.isEmpty())
-                        {
-                              Embed.error(event, "This server does not have any school associated with it!");
-                              return;
-                        }
-                        else if (schools.size() == 1)
-                        {
-                              classroom = new Classroom();
-                              classroom.setSchool(schools.get(0));
-                              event.getChannel().sendMessageFormat("** %s ** has been selected because there is only one school in this server", classroom.getSchool().getName()).queue();
-                              event.getChannel().sendMessage("Would you like to continue?").queue();
-                              stateToGoto = 2;
-                        }
-                        else
-                        {
-                              event.sendMessage("Please choose the School ID of the school you want to add the assignment to ");
-                              event.sendAsPaginatorWithPageNumbers(schools);
-                        }
-                  }
-                  else
-                  {
-                        List<Long> validRoles = Checks.validRoleCheck(event);
 
-                        List<Classroom> classrooms = event.getGuildClasses()
-                                .stream()
-                                .filter(classes -> Collections.frequency(validRoles, classes.getRoleID()) > 1)
-                                .filter(classes -> !classes.getAssignments().isEmpty())
-                                .collect(Collectors.toList());
-
-                        if (classrooms.isEmpty())
-                        {
-                              Embed.error(event, "You do not have any roles that indicate you attend any classes");
-                              return;
-                        }
-                        else if (classrooms.size() == 1)
-                        {
-                              classroom = classrooms.get(0);
-
-                              assignmentList = classroom.getAssignments();
-
-                              if (assignmentList.isEmpty())
-                              {
-                                    Embed.error(event, "** %s ** has no assignments.", classroom.getName());
-                                    return;
-                              }
-                              else if (assignmentList.size() == 1)
-                              {
-                                    assignment = assignmentList.get(0);
-
-                                    event.sendMessage(assignment.getAsEmbed(event.getSchoolbot()));
-                                    event.sendMessage("** %s ** is the only assignment.. Would you like to delete it?", assignment.getName());
-                                    stateToGoto = 1;
-                              }
-                              else
-                              {
-                                    event.sendAsPaginatorWithPageNumbers(assignmentList);
-                                    event.sendMessage("Please select the assignment by page number");
-                              }
-                        }
-                        else
-                        {
-                              event.sendAsPaginatorWithPageNumbers(classrooms);
-                              event.sendMessage("Please choose the page number of the class you want to remove an assignment from");
-                        }
-                  }
-            }
-            event.getJDA().addEventListener(new AssignmentRemoveMachine(event, schools, assignmentList, classroom, assignment, stateToGoto));
       }
 
-      public static class AssignmentRemoveMachine extends ListenerAdapter
+      public static class AssignmentRemoveMachine extends ListenerAdapter implements StateMachine
       {
-            private final CommandEvent commandEvent;
-            private final long authorID, channelID;
-            private final List<School> schools;
-            private List<Classroom> classroomList;
-            private List<Assignment> assignmentList;
-            private School school;
-            private Classroom classroom;
-            private Assignment assignment;
-            private int state;
 
-            public AssignmentRemoveMachine(CommandEvent commandEvent, List<School> schools, List<Assignment> assignmentList, Classroom classroom, Assignment assignment, int state)
+            private final StateMachineValues values;
+
+            public AssignmentRemoveMachine(@NotNull StateMachineValues values)
             {
-                  this.commandEvent = commandEvent;
-                  this.channelID = commandEvent.getChannel().getIdLong();
-                  this.authorID = commandEvent.getUser().getIdLong();
-                  this.state = state;
-                  this.schools = schools;
-                  this.classroom = classroom;
-                  this.assignment = assignment;
-                  this.assignmentList = assignmentList;
+                  values.setMachine(this);
+                  this.values = values;
             }
+
 
             @Override
             public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event)
             {
-                  if (event.getAuthor().getIdLong() != authorID) return;
-                  if (event.getChannel().getIdLong() != channelID) return;
+                  values.setMessageReceivedEvent(event);
+                  var requirementsMet = Checks.eventMeetsPrerequisites(values);
+
+                  if (!requirementsMet)
+                  {
+                        return;
+                  }
 
                   MessageChannel channel = event.getChannel();
                   String message = event.getMessage().getContentRaw();
@@ -186,19 +103,14 @@ public class AssignmentRemove extends Command
                   Guild guild = event.getGuild();
 
 
-                  if (message.equalsIgnoreCase("stop"))
-                  {
-                        channel.sendMessage("Aborting...").queue();
-                        jda.removeEventListener(this);
-                        return;
-                  }
+                  int state = values.getState();
 
                   switch (state)
                   {
                         case 1 -> {
                               if (!Checks.isNumber(message))
                               {
-                                    Embed.error(event, """
+                                    EmbedUtils.error(event, """
                                             ** %s ** is not a number
                                             Please Enter a number
                                             """, message);
@@ -209,12 +121,12 @@ public class AssignmentRemove extends Command
 
                               if (!Checks.between(pageNumber, schools.size()))
                               {
-                                    Embed.error(event, "** %s ** was not one of the school ids...", message);
+                                    EmbedUtils.error(event, "** %s ** was not one of the school ids...", message);
                                     return;
                               }
 
                               classroom.setSchool(schools.get(pageNumber - 1));
-                              Embed.success(event, "** %s ** successfully selected", classroom.getSchool().getName());
+                              EmbedUtils.success(event, "** %s ** successfully selected", classroom.getSchool().getName());
                               channel.sendMessage("Would you like to continue?").queue();
                               state = 2;
                         }
@@ -235,12 +147,12 @@ public class AssignmentRemove extends Command
 
                               if (classroomList.isEmpty())
                               {
-                                    Embed.error(event, "** %s ** does not have any classes associated with it", guild.getName());
+                                    EmbedUtils.error(event, "** %s ** does not have any classes associated with it", guild.getName());
                                     jda.removeEventListener(this);
                               }
                               else if (classroomList.size() == 1)
                               {
-                                    Embed.success(event, "** %s ** has been selected automatically because you only have one class associated with you!", classroomList.get(0).getName());
+                                    EmbedUtils.success(event, "** %s ** has been selected automatically because you only have one class associated with you!", classroomList.get(0).getName());
                                     channel.sendMessageFormat("""
                                                 
                                             """, Emoji.SMILEY_FACE.getAsChat()
@@ -258,7 +170,7 @@ public class AssignmentRemove extends Command
                         case 3 -> {
                               if (!Checks.isNumber(message))
                               {
-                                    Embed.error(event, "** %s ** is not a valid entry", message);
+                                    EmbedUtils.error(event, "** %s ** is not a valid entry", message);
                                     return;
                               }
 
@@ -266,18 +178,18 @@ public class AssignmentRemove extends Command
 
                               if (!Checks.between(index + 1, classroomList.size()))
                               {
-                                    Embed.error(event, "** %s ** was not one of the class ids...", message);
+                                    EmbedUtils.error(event, "** %s ** was not one of the class ids...", message);
                                     event.getJDA().removeEventListener(this);
                                     return;
                               }
                               this.classroom = classroomList.get(index);
 
-                              Embed.success(event, "** %s ** has successfully been selected", this.classroom.getName());
+                              EmbedUtils.success(event, "** %s ** has successfully been selected", this.classroom.getName());
 
                               this.assignmentList = classroom.getAssignments();
                               if (assignmentList.isEmpty())
                               {
-                                    Embed.error(event, "** %s ** has no assignments.", classroom.getName());
+                                    EmbedUtils.error(event, "** %s ** has no assignments.", classroom.getName());
                                     return;
                               }
                               else if (assignmentList.size() == 1)
@@ -299,7 +211,7 @@ public class AssignmentRemove extends Command
                         case 4 -> {
                               if (!Checks.isNumber(message))
                               {
-                                    Embed.error(event, """
+                                    EmbedUtils.error(event, """
                                             ** %s ** is not a number
                                             Please Enter a number
                                             """, message);
@@ -310,7 +222,7 @@ public class AssignmentRemove extends Command
 
                               if (!Checks.between(pageNumber, assignmentList.size()))
                               {
-                                    Embed.error(event, "** %s ** was not one of the assignment page numbers...", message);
+                                    EmbedUtils.error(event, "** %s ** was not one of the assignment page numbers...", message);
                                     return;
                               }
 
@@ -323,7 +235,7 @@ public class AssignmentRemove extends Command
                               if (message.equalsIgnoreCase("yes") || message.equalsIgnoreCase("y"))
                               {
                                     commandEvent.removeAssignment(assignment);
-                                    Embed.success(event, "Removed [** %s **] successfully", this.assignment.getName());
+                                    EmbedUtils.success(event, "Removed [** %s **] successfully", this.assignment.getName());
                                     event.getJDA().removeEventListener(this);
                               }
                               else if (message.equalsIgnoreCase("no") || message.equalsIgnoreCase("n") || message.equalsIgnoreCase("nah"))
@@ -333,7 +245,7 @@ public class AssignmentRemove extends Command
                               }
                               else
                               {
-                                    Embed.error(event, "[ ** %s ** ] is not a valid respond.. I will need a **Yes** OR a **No**", message);
+                                    EmbedUtils.error(event, "[ ** %s ** ] is not a valid respond.. I will need a **Yes** OR a **No**", message);
                               }
                         }
                   }

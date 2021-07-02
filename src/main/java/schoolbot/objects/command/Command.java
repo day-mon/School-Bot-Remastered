@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import schoolbot.Constants;
 import schoolbot.handlers.CommandCooldownHandler;
 import schoolbot.objects.misc.StateMachineValues;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -32,6 +32,7 @@ public abstract class Command
       private String usageExample;
       private final String description;
       private final String syntax;
+      private String commandPrerequisites;
 
       private final int minimalArgs;
 
@@ -62,6 +63,7 @@ public abstract class Command
             this.children = new ArrayList<>();
             this.commandFlags = new ArrayList<>();
             this.usageExample = "N/A";
+            this.commandPrerequisites = "[none]";
       }
 
       /**
@@ -85,7 +87,6 @@ public abstract class Command
             this.commandFlags = new ArrayList<>();
             this.children = new ArrayList<>();
             this.usageExample = "N/A";
-
       }
 
 
@@ -133,24 +134,24 @@ public abstract class Command
             return commandPermissions;
       }
 
-      public String getSyntax()
-      {
-            return syntax;
-      }
 
       public void process(CommandEvent event)
       {
+            var member = event.getMember();
+            var user = member.getUser();
+
+
             if (event.getArgs().size() < minimalArgs)
             {
-                  Embed.error(event, "This minimal amount of args for this command is " + minimalArgs);
+                  EmbedUtils.error(event, "This minimal amount of args for this command is " + minimalArgs);
             }
             else if (!event.selfPermissionCheck(event.getCommand().getSelfPermissions()))
             {
-                  Embed.error(event, "I do not have permissions to do this");
+                  EmbedUtils.error(event, "I do not have permissions to do this");
             }
             else if (event.isDeveloper())
             {
-                  LOGGER.info("{} executed using args {} by {}", name, event.getArgs(), event.getUser().getName());
+                  LOGGER.info("{} executed using args {} by a developer", name, event.getArgs());
                   if (hasCommandFlags(CommandFlag.STATE_MACHINE_COMMAND))
                   {
                         run(event, event.getArgs(), new StateMachineValues(event));
@@ -160,32 +161,27 @@ public abstract class Command
             }
             else if (!event.memberPermissionCheck(event.getCommand().getCommandPermissions()))
             {
-                  Embed.sendInvalidMemberPermissions(event);
+                  EmbedUtils.sendInvalidMemberPermissions(event);
             }
             else if (CommandCooldownHandler.isOnCooldown(event.getMember(), this))
             {
-                  Embed.sendIsOnCooldown(event);
+                  EmbedUtils.sendIsOnCooldown(event);
             }
 
             else if (!isEnabled())
             {
-                  Embed.error(event, "This command is disabled!");
+                  EmbedUtils.error(event, "This command is disabled!");
             }
 
-            else if (event.getUser().isBot())
+            else if (user.isBot())
             {
-                  Embed.error(event, "You are a bot silly goose :P");
+                  EmbedUtils.error(event, "Bots cannot execute commands. Try again from a user account.");
             }
             else
             {
 
-                  if (hasCommandFlags(CommandFlag.INTERNET, CommandFlag.DATABASE))
-                  {
-                        addUserToCooldown(event.getMember());
-                  }
-
                   LOGGER.info("{} executed using args {} by {}", name, event.getArgs(), event.getUser().getAsMention());
-
+                  addUserToCooldown(member);
                   if (hasCommandFlags(CommandFlag.STATE_MACHINE_COMMAND))
                   {
                         run(event, event.getArgs(), new StateMachineValues(event));
@@ -209,6 +205,11 @@ public abstract class Command
       public void addUserToCooldown(Member member)
       {
             CommandCooldownHandler.addCooldown(member, this);
+      }
+
+      public void setCommandPrerequisites(String commandPrerequisites)
+      {
+            this.commandPrerequisites = commandPrerequisites;
       }
 
       public void addCalls(String... calls)
@@ -257,10 +258,12 @@ public abstract class Command
                     .setTitle("Help for **" + this.name + "**")
                     .addField("Description", "`" + this.description + "`", false)
                     .addField("Syntax", "`" + this.syntax + "`", false)
+                    .addField("Command Prerequisites", "This command requires the following \n `" + this.commandPrerequisites + "`", false)
                     .addField("Usage Example",
                             this.usageExample.equalsIgnoreCase("N/A") ?
                                     "`" + this.usageExample + "`" : "`" + Constants.DEFAULT_PREFIX + this.usageExample + "`", false)
                     .addField("Aliases", (this.isChild()) ? String.valueOf(this.parent.getCalls()) : String.valueOf(this.calls), false)
+                    .addField("Permissions Required", String.valueOf(this.commandPermissions), false)
                     .setColor(Color.BLACK)
                     .setFooter("[] = Required | <> = Optional");
       }

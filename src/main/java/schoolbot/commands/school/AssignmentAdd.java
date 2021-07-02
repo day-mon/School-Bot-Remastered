@@ -14,7 +14,7 @@ import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 import schoolbot.util.Processor;
 
 import java.time.Duration;
@@ -29,7 +29,8 @@ public class AssignmentAdd extends Command
 {
       public AssignmentAdd(Command parent)
       {
-            super(parent, "Adds an assignment to the target class", "[none]", 0);
+            super(parent, "This command will add an assignment when given a class during", "[none]", 0);
+            setCommandPrerequisites("A valid class to add the assignment to");
             addFlags(CommandFlag.STATE_MACHINE_COMMAND);
       }
 
@@ -46,7 +47,7 @@ public class AssignmentAdd extends Command
             {
                   var classroom1 = classroomList.get(0);
 
-                  Embed.information(commandEvent, """
+                  EmbedUtils.information(commandEvent, """
                           ** %s ** has been selected because it is the only role I can recognize.
                                                                 
                           I would like to proceed with the assignment name you would like.
@@ -108,7 +109,7 @@ public class AssignmentAdd extends Command
 
                         if (classroomList.isEmpty())
                         {
-                              Embed.error(event, "You have no association to any classes, and you did not send this message in any channels associated with a class");
+                              EmbedUtils.error(event, "You have no association to any classes, and you did not send this message in any channels associated with a class");
                               return;
                         }
 
@@ -120,7 +121,7 @@ public class AssignmentAdd extends Command
             // Redundant to repeat but youd have to do a lot of scrolling to remember why you are here
             if (classroom != null)
             {
-                  Embed.information(event, """
+                  EmbedUtils.information(event, """
                           ** %s ** has been selected because it is the only class I can recognize.
                                                                 
                           I would like to proceed with the assignment name you would like.
@@ -181,7 +182,7 @@ public class AssignmentAdd extends Command
                               var school = values.getSchool();
 
 
-                              Embed.success(event, "** %s ** successfully selected", school.getName());
+                              EmbedUtils.success(event, "** %s ** successfully selected", school.getName());
 
 
                               channel.sendMessageFormat("** %s ** successfully has been selected.. This message will be deleted after 3 seconds to reduce clutter", school.getName()).queueAfter(3, TimeUnit.SECONDS, success ->
@@ -201,7 +202,7 @@ public class AssignmentAdd extends Command
                               var classroomList = values.getClassroomList();
                               var success = Processor.validateMessage(values, classroomList);
                               var classroom = values.getClassroom();
-                              Embed.success(event, "** %s ** has successfully been selected", classroom.getName());
+                              EmbedUtils.success(event, "** %s ** has successfully been selected", classroom.getName());
                               channel.sendMessageFormat("""
                                               Now that we have all that sorted the fun stuff can start %s
                                               Im going to start by asking for your assignment name
@@ -216,7 +217,7 @@ public class AssignmentAdd extends Command
                               values.getAssignment().setClassroom(classroom);
                               values.getAssignment().setName(message);
 
-                              Embed.success(event, "** %s ** has successfully been added as Assignment name..", values.getAssignment().getName());
+                              EmbedUtils.success(event, "** %s ** has successfully been added as Assignment name..", values.getAssignment().getName());
                               channel.sendMessageFormat("Please give me a small description about the assignment. You can change it later so if you wanna speed through this its fine %s", Emoji.SMILEY_FACE.getAsChat()).queue();
 
                               values.incrementMachineState();
@@ -226,7 +227,7 @@ public class AssignmentAdd extends Command
                         case 5 -> {
                               values.getAssignment().setDescription(message);
 
-                              Embed.success(event, "Description has successfully been added as Assignment name..");
+                              EmbedUtils.success(event, "Description has successfully been added as Assignment name..");
                               channel.sendMessage("Okay got it im going to need the point amount for the assignment.. If you don't know just put 'idk' or 0").queue();
                               values.incrementMachineState();
                         }
@@ -234,14 +235,14 @@ public class AssignmentAdd extends Command
                         case 6 -> {
                               if (!Checks.isNumber(message) || message.toLowerCase().contains("idk"))
                               {
-                                    Embed.error(event, "** %s ** is not a number.. try again!", message);
+                                    EmbedUtils.error(event, "** %s ** is not a number.. try again!", message);
                                     return;
                               }
 
                               int points = message.toLowerCase().contains("idk") ? 0 : Integer.parseInt(message);
 
                               values.getAssignment().setPoints(points);
-                              Embed.success(event, "** %d ** has been set as ** %s ** point amount", points, values.getAssignment().getName());
+                              EmbedUtils.success(event, "** %d ** has been set as ** %s ** point amount", points, values.getAssignment().getName());
                               channel.sendMessage("""
                                       Now I will need the type of assignment it is
                                       ```
@@ -283,13 +284,13 @@ public class AssignmentAdd extends Command
                               }
                               else
                               {
-                                    Embed.error(event, "** %s ** is not a valid entry", message);
+                                    EmbedUtils.error(event, "** %s ** is not a valid entry", message);
                                     return;
                               }
 
                               values.getAssignment().setType(type);
 
-                              Embed.success(event, "** %s ** has been set as your assignment type", type.getAssignmentType());
+                              EmbedUtils.success(event, "** %s ** has been set as your assignment type", type.getAssignmentType());
                               channel.sendMessage("""
                                       I will need your due date..
                                       Please use the following format: `M/dd/yyyy`
@@ -304,12 +305,12 @@ public class AssignmentAdd extends Command
 
                               if (Objects.isNull(date))
                               {
-                                    Embed.error(event, "This date is incorrect. Please try again!");
+                                    EmbedUtils.error(event, "This date is incorrect. Please try again!");
                                     return;
                               }
 
 
-                              Embed.success(event, "** %s ** successfully set as this assignments due date", date.toString());
+                              EmbedUtils.success(event, "** %s ** successfully set as this assignments due date", date.toString());
                               channel.sendMessage("""
                                       Lastly I will need the time in which your assignment is due
                                       Please use the following format: `HH:mm AM/PM`
@@ -325,7 +326,7 @@ public class AssignmentAdd extends Command
 
                               if (Objects.isNull(time))
                               {
-                                    Embed.error(event, "** %s ** could not be parsed or is before the current time. Try again!", message);
+                                    EmbedUtils.error(event, "** %s ** could not be parsed or is before the current time. Try again!", message);
                                     return;
                               }
 
@@ -334,7 +335,7 @@ public class AssignmentAdd extends Command
 
                               if (duration <= 300)
                               {
-                                    Embed.error(event, "That time is too close.. Please try another time");
+                                    EmbedUtils.error(event, "That time is too close.. Please try another time");
                                     return;
                               }
 
@@ -345,7 +346,7 @@ public class AssignmentAdd extends Command
                               var assignment = values.getAssignment();
                               commandEvent.addAssignment(assignment);
 
-                              Embed.success(event, "** %s ** has successfully been added to ** %s **", assignment.getName(), assignment.getClassroom().getName());
+                              EmbedUtils.success(event, "** %s ** has successfully been added to ** %s **", assignment.getName(), assignment.getClassroom().getName());
                               jda.removeEventListener(this);
 
                         }

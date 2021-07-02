@@ -16,7 +16,7 @@ import schoolbot.objects.misc.interfaces.StateMachine;
 import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 import schoolbot.util.Parser;
 import schoolbot.util.Processor;
 
@@ -38,32 +38,6 @@ public class ClassroomAdd extends Command
             super(parent, "Adds a by following the prompt", "[none]", 0);
             addSelfPermissions(Permission.MANAGE_ROLES);
             addFlags(CommandFlag.DATABASE);
-      }
-
-
-      @Override
-      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
-      {
-            var jda = event.getJDA();
-            var schools = event.getGuildSchools();
-
-
-            if (schools.isEmpty())
-            {
-                  Embed.error(event, "This server has no schools");
-                  return;
-            }
-
-            Embed.information(event, """
-                    I use a Special System for any schools that belong to the **University of Pittsburgh**
-                                        
-                    This is Limited to the: Main Campus, Johnstown Campus, Bradford Campus, and the Titusville Campus
-                                        
-                    So with that being said, to begin. Do you attend any of the University of Pittsburgh Campuses?
-                    """);
-            jda.addEventListener(new ClassAddStateMachine(event));
-
-
       }
 
 
@@ -90,7 +64,7 @@ public class ClassroomAdd extends Command
             }
             catch (Exception e)
             {
-                  Embed.error(event, "Error while attempting to connect to PeopleSoft");
+                  EmbedUtils.error(event, "Error while attempting to connect to PeopleSoft");
                   jda.removeEventListener(machine);
                   return true;
             }
@@ -98,11 +72,36 @@ public class ClassroomAdd extends Command
 
             if (response.url().toString().equals("https://prd.ps.pitt.edu/Maintenance.html"))
             {
-                  Embed.error(event, "People soft is currently down for maintenance");
+                  EmbedUtils.error(event, "People soft is currently down for maintenance");
                   jda.removeEventListener(machine);
                   return true;
             }
             return false;
+      }
+
+      @Override
+      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
+      {
+            var jda = event.getJDA();
+            var schools = event.getGuildSchools();
+
+
+            if (schools.isEmpty())
+            {
+                  EmbedUtils.error(event, "This server has no schools");
+                  return;
+            }
+
+            EmbedUtils.information(event, """
+                    I use a Special System for any schools that belong to the **University of Pittsburgh**
+                                        
+                    This is Limited to the: Main Campus, Johnstown Campus, Bradford Campus, and the Titusville Campus
+                                        
+                    So with that being said, to begin. Do you attend any of the University of Pittsburgh Campuses?
+                    """);
+            jda.addEventListener(new ClassAddStateMachine(event));
+
+
       }
 
       private static int termValidator(String content)
@@ -235,7 +234,7 @@ public class ClassroomAdd extends Command
 
                                     if (schoolList.isEmpty())
                                     {
-                                          Embed.error(event, "There are no schools with professors with them. Please use professor add to add a professor to the target school.");
+                                          EmbedUtils.error(event, "There are no schools with professors with them. Please use professor add to add a professor to the target school.");
                                           jda.removeEventListener(this);
                                           return;
                                     }
@@ -248,7 +247,7 @@ public class ClassroomAdd extends Command
                                     if (schools == 1)
                                     {
                                           classroom.setSchool(values.getSchool());
-                                          Embed.information(event, """
+                                          EmbedUtils.information(event, """
                                                   This school has been selected because there is only one available
                                                                                                     
                                                   To begin can you give me the class name?
@@ -280,7 +279,7 @@ public class ClassroomAdd extends Command
                               classroom.setSchool(success);
 
 
-                              Embed.success(event, "Successfully set school to %s", success.getName());
+                              EmbedUtils.success(event, "Successfully set school to %s", success.getName());
                               channel.sendMessage("""
                                       I will now need your term. I only understand pitt term like
                                       ```
@@ -297,7 +296,7 @@ public class ClassroomAdd extends Command
                               int term = termValidator(message);
                               if (term == -1)
                               {
-                                    Embed.error(event, """
+                                    EmbedUtils.error(event, """
                                              This  is not a valid term.
                                              Here are some of the reasons why a term can be invalid.
                                              
@@ -323,7 +322,7 @@ public class ClassroomAdd extends Command
 
                               if (!Checks.isNumber(message))
                               {
-                                    Embed.notANumberError(event, message);
+                                    EmbedUtils.notANumberError(event, message);
                                     return;
                               }
 
@@ -352,7 +351,7 @@ public class ClassroomAdd extends Command
 
                               values.getClassroom().setSchool(school);
 
-                              Embed.information(event, """
+                              EmbedUtils.information(event, """
                                       Thank you. Your school choice is %s.
                                                                             
                                       Can you start by giving me the name you would like the class to be called.
@@ -367,7 +366,7 @@ public class ClassroomAdd extends Command
 
                               if (duplicateClassNames)
                               {
-                                    Embed.error(event, "There is a class that already exist with that name. Try again!");
+                                    EmbedUtils.error(event, "There is a class that already exist with that name. Try again!");
                                     return;
                               }
 
@@ -379,7 +378,7 @@ public class ClassroomAdd extends Command
                               {
                                     var professor = professorList.get(0);
                                     classroom.setProfessor(professor);
-                                    Embed.information(event, """
+                                    EmbedUtils.information(event, """
                                             ** %s ** has been chosen because they are the only professor.
                                                                                         
                                             I will now need the description of the class. If you dont want to input one just type **N/A** or whatever you wish.
@@ -404,7 +403,7 @@ public class ClassroomAdd extends Command
 
                               var professor = values.getProfessor();
                               classroom.setProfessor(professor);
-                              Embed.information(event, """
+                              EmbedUtils.information(event, """
                                       ** %s ** has been chosen
                                                                                   
                                       I will now need the description of the class. If you dont want to input one just type **N/A** or whatever you wish.
@@ -414,13 +413,13 @@ public class ClassroomAdd extends Command
                         case 13 -> {
                               if (message.length() > Constants.MAX_FIELD_VALUE)
                               {
-                                    Embed.warn(event, "The message you sent is too long to display in embeds. Would you like to reapply another description?");
+                                    EmbedUtils.warn(event, "The message you sent is too long to display in embeds. Would you like to reapply another description?");
                                     values.setState(14);
                                     classroom.setDescription(message);
                                     return;
                               }
                               classroom.setDescription(message);
-                              Embed.information(event, """
+                              EmbedUtils.information(event, """
                                       Thank you for that. I will now need your class identifier.
                                                                                  
                                       An example of what I am talking about is below:
@@ -438,7 +437,7 @@ public class ClassroomAdd extends Command
                               else if (message.toLowerCase().startsWith("n"))
                               {
                                     values.setState(15);
-                                    Embed.information(event, """
+                                    EmbedUtils.information(event, """
                                             Thank you for that. I will now need your class identifier.
                                                                                        
                                             An example of what I am talking about is below:
@@ -447,7 +446,7 @@ public class ClassroomAdd extends Command
                               }
                               else
                               {
-                                    Embed.error(event, "[ ** %s ** ] is not a valid respond.. I will need a **Yes** OR a **No**", message);
+                                    EmbedUtils.error(event, "[ ** %s ** ] is not a valid respond.. I will need a **Yes** OR a **No**", message);
                               }
                         }
 
@@ -455,13 +454,13 @@ public class ClassroomAdd extends Command
 
                               if (message.length() > 50)
                               {
-                                    Embed.error(event, "That is way too long for a class identifier. Please try again or use a simpler version please.");
+                                    EmbedUtils.error(event, "That is way too long for a class identifier. Please try again or use a simpler version please.");
                                     return;
                               }
 
                               classroom.setClassIdentifier(message);
 
-                              Embed.information(event, """
+                              EmbedUtils.information(event, """
                                       Nice! Now that we have your identifier I would like to have the term your class is in.
                                                                             
                                       As for now I only support Seasonal Terms. Here is the format:
@@ -479,12 +478,12 @@ public class ClassroomAdd extends Command
 
                               if (result == -1)
                               {
-                                    Embed.error(event, "That input was not correct. Please try again");
+                                    EmbedUtils.error(event, "That input was not correct. Please try again");
                                     return;
                               }
                               classroom.setTerm(termFixed(message));
 
-                              Embed.information(event, """
+                              EmbedUtils.information(event, """
                                       Nice! %s I have successfully applied your term.
                                                                             
                                       I will now need your class start and end dates.
@@ -504,7 +503,7 @@ public class ClassroomAdd extends Command
                                     return;
                               }
 
-                              Embed.information(event, """
+                              EmbedUtils.information(event, """
                                       That was easier than I thought! %s. That was Part 1 of 2.
                                                                             
                                       I will now need your class time. Just like the date this will be a little finicky. So please bare with me!
@@ -524,7 +523,7 @@ public class ClassroomAdd extends Command
 
                               classroom.setTime(message);
 
-                              Embed.information(event, "Awesome.. I will now add all of this information to my database.. One moment!");
+                              EmbedUtils.information(event, "Awesome.. I will now add all of this information to my database.. One moment!");
 
                               commandEvent.addClass(classroom);
                               jda.removeEventListener(this);
@@ -545,7 +544,7 @@ public class ClassroomAdd extends Command
 
                   if (localDateTimeMap == null || localDateTimeMap.isEmpty())
                   {
-                        Embed.error(commandEvent, "There was an error while parsing your time!");
+                        EmbedUtils.error(commandEvent, "There was an error while parsing your time!");
                         return false;
                   }
 
@@ -559,7 +558,7 @@ public class ClassroomAdd extends Command
 
                   if (!potentialDate.contains("-"))
                   {
-                        Embed.error(commandEvent, "Invalid Syntax: Missing \"**-**\"");
+                        EmbedUtils.error(commandEvent, "Invalid Syntax: Missing \"**-**\"");
                         return false;
                   }
 
@@ -575,7 +574,7 @@ public class ClassroomAdd extends Command
                   }
                   catch (Exception e)
                   {
-                        Embed.error(commandEvent, "Error parsing Start Date. Please try again!");
+                        EmbedUtils.error(commandEvent, "Error parsing Start Date. Please try again!");
                         return false;
                   }
 
@@ -585,13 +584,13 @@ public class ClassroomAdd extends Command
                   }
                   catch (Exception e)
                   {
-                        Embed.error(commandEvent, "Error parsing End Date. Please try again!");
+                        EmbedUtils.error(commandEvent, "Error parsing End Date. Please try again!");
                         return false;
                   }
 
                   if (endDate.isBefore(startDate))
                   {
-                        Embed.error(commandEvent, "Your end date cannot be before your start date!");
+                        EmbedUtils.error(commandEvent, "Your end date cannot be before your start date!");
                         return false;
                   }
 
@@ -600,7 +599,7 @@ public class ClassroomAdd extends Command
 
                   if (year != 1 && year != 0)
                   {
-                        Embed.error(commandEvent, "That year is too far from the current one.. Please try a more recent date.");
+                        EmbedUtils.error(commandEvent, "That year is too far from the current one.. Please try a more recent date.");
                         return false;
                   }
 
@@ -609,7 +608,7 @@ public class ClassroomAdd extends Command
 
                   if (dateTest != 0 && dateTest != 1)
                   {
-                        Embed.error(commandEvent, "%s is %d years apart from %s. The max is one year apart", startDate, dateTest, endDate);
+                        EmbedUtils.error(commandEvent, "%s is %d years apart from %s. The max is one year apart", startDate, dateTest, endDate);
                         return false;
                   }
 

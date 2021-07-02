@@ -11,7 +11,7 @@ import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.misc.interfaces.StateMachine;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 import schoolbot.util.Processor;
 
 import java.util.List;
@@ -107,7 +107,7 @@ public class SchoolRemove extends Command
                               if (message.equalsIgnoreCase("yes") || message.equalsIgnoreCase("y"))
                               {
                                     commandEvent.removeSchool(school);
-                                    Embed.success(event, "Removed [** %s **] successfully", school.getName());
+                                    EmbedUtils.success(event, "Removed [** %s **] successfully", school.getName());
                                     event.getJDA().removeEventListener(this);
                               }
                               else if (message.equalsIgnoreCase("no") || message.equalsIgnoreCase("n") || message.equalsIgnoreCase("nah"))
@@ -117,7 +117,7 @@ public class SchoolRemove extends Command
                               }
                               else
                               {
-                                    Embed.error(event, "[ ** %s ** ] is not a valid respond.. I will need a **Yes** OR a **No**", message);
+                                    EmbedUtils.error(event, "[ ** %s ** ] is not a valid respond.. I will need a **Yes** OR a **No**", message);
                               }
                         }
                   }

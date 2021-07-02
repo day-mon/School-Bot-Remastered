@@ -13,7 +13,7 @@ import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.misc.interfaces.StateMachine;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 import schoolbot.util.Processor;
 
 import java.util.List;
@@ -122,7 +122,7 @@ public class SchoolEdit extends Command
 
                               if (updateColumn.equalsIgnoreCase("N/A"))
                               {
-                                    Embed.error(event, "** %s ** is not a valid choice please return again");
+                                    EmbedUtils.error(event, "** %s ** is not a valid choice please return again");
                                     return;
                               }
 
@@ -149,7 +149,7 @@ public class SchoolEdit extends Command
 
                         if (school.isPittSchool())
                         {
-                              Embed.error(event, "** %s ** You cannot edit the name of a pitt school", school.getName());
+                              EmbedUtils.error(event, "** %s ** You cannot edit the name of a pitt school", school.getName());
                               return;
                         }
                         updateColumn = "name";
@@ -172,7 +172,7 @@ public class SchoolEdit extends Command
                   }
                   else
                   {
-                        Embed.error(event, "** %s ** is not a valid entry");
+                        EmbedUtils.error(event, "** %s ** is not a valid entry");
                   }
             }
 
@@ -188,7 +188,7 @@ public class SchoolEdit extends Command
                         case "name" -> {
                               if (Checks.isNumber(message))
                               {
-                                    Embed.error(event, "School names cannot contain numbers.. Try again");
+                                    EmbedUtils.error(event, "School names cannot contain numbers.. Try again");
                                     return;
                               }
 
@@ -196,7 +196,7 @@ public class SchoolEdit extends Command
 
                               if (duplicateSchool)
                               {
-                                    Embed.error(event, "** %s ** already exist as a school.. Please try again with a different name");
+                                    EmbedUtils.error(event, "** %s ** already exist as a school.. Please try again with a different name");
                                     return;
                               }
 
@@ -208,7 +208,7 @@ public class SchoolEdit extends Command
 
                               if (eventMessage.getMentionedRoles().isEmpty() && !message.equalsIgnoreCase("0"))
                               {
-                                    Embed.error(event, "You did not mention any roles, Try again!");
+                                    EmbedUtils.error(event, "You did not mention any roles, Try again!");
                                     return;
                               }
 
@@ -216,23 +216,23 @@ public class SchoolEdit extends Command
 
                               if (roleID != 0 && roleID == school.getRoleID())
                               {
-                                    Embed.error(event, "%s, is already %s role", jda.getRoleById(school.getRoleID()).getAsMention(), school.getName());
+                                    EmbedUtils.error(event, "%s, is already %s role", jda.getRoleById(school.getRoleID()).getAsMention(), school.getName());
                                     jda.removeEventListener(this);
                                     return;
                               }
 
                               if (roleID == 0 && school.getRoleID() == 0)
                               {
-                                    Embed.error(event, "%s already has no role.", school.getName());
+                                    EmbedUtils.error(event, "%s already has no role.", school.getName());
                                     jda.removeEventListener(this);
                                     return;
                               }
 
                               event.updateSchool(new DatabaseDTO(school, updateColumn, roleID));
                         }
-                        default -> Embed.error(event, "** %s ** is not a valid response", message);
+                        default -> EmbedUtils.error(event, "** %s ** is not a valid response", message);
                   }
-                  Embed.success(event, "** %s ** has been successfully been updated to ** %s ** ", updateColumn.replace("_", " "), message);
+                  EmbedUtils.success(event, "** %s ** has been successfully been updated to ** %s ** ", updateColumn.replace("_", " "), message);
                   jda.removeEventListener(this);
             }
       }

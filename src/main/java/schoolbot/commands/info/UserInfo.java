@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.entities.Role;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 import schoolbot.util.StringUtils;
 
 import java.awt.*;
@@ -40,13 +40,13 @@ public class UserInfo extends Command
 
                   if (members.isEmpty())
                   {
-                        Embed.error(event, "There are no members mentioned in this message");
+                        EmbedUtils.error(event, "There are no members mentioned in this message");
                         return;
                   }
 
                   if (members.size() > 1)
                   {
-                        Embed.error(event, "Please only mention one member please.");
+                        EmbedUtils.error(event, "Please only mention one member please.");
                         return;
                   }
 

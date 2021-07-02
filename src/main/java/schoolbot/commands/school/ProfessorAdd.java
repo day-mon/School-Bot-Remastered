@@ -13,7 +13,7 @@ import schoolbot.objects.misc.interfaces.StateMachine;
 import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 import schoolbot.util.Processor;
 
 import java.util.List;
@@ -137,7 +137,7 @@ public class ProfessorAdd extends Command
 
                               if (!commandEvent.addProfessor(professor))
                               {
-                                    Embed.error(event, "Could not add Professor %s", professor.getLastName());
+                                    EmbedUtils.error(event, "Could not add Professor %s", professor.getLastName());
                                     return;
                               }
                               channel.sendMessageEmbeds(professor.getAsEmbed(schoolbot)).queue();

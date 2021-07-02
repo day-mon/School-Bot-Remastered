@@ -11,7 +11,7 @@ import org.jsoup.nodes.Document;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 
 import java.awt.*;
 import java.math.BigDecimal;
@@ -54,7 +54,7 @@ public class Laundry extends Command
 
             if (!LAUNDRY_API_CALLS.containsKey(potLaundryName))
             {
-                  Embed.error(event, "Housing doesnt exist");
+                  EmbedUtils.error(event, "Housing doesnt exist");
                   return;
             }
 

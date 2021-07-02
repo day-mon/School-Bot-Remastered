@@ -195,13 +195,7 @@ public class Checks
       public static Classroom messageSentFromClassChannel(StateMachineValues values)
       {
             var commandEvent = values.getCommandEvent();
-            var schoolbot = values.getCommandEvent().getSchoolbot();
             var classroomList = commandEvent.getGuildClasses();
-
-            List<Long> classChannels = classroomList
-                    .stream()
-                    .map(Classroom::getChannelID)
-                    .collect(Collectors.toList());
 
             long textChanel = commandEvent.getTextChannel().getIdLong();
 
@@ -297,7 +291,7 @@ public class Checks
 
             if (message.equalsIgnoreCase("stop") || message.equalsIgnoreCase("exit"))
             {
-                  Embed.warn(event, "I will now abort. Call the command to try again!");
+                  EmbedUtils.warn(event, "I will now abort. Call the command to try again!");
                   jda.removeEventListener(machine);
                   return false;
             }

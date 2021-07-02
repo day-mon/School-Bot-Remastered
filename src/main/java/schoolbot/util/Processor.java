@@ -54,12 +54,11 @@ public class Processor
             var event = values.getCommandEvent();
 
             int size = genericList.size();
-            var channel = event.getChannel();
             var schoolbot = event.getSchoolbot();
 
             if (genericList.isEmpty())
             {
-                  Embed.error(event, processErrorMessage(tClass, values));
+                  EmbedUtils.error(event, processErrorMessage(tClass, values));
                   return 0;
             }
             else if (size == 1)
@@ -97,7 +96,7 @@ public class Processor
 
             if (genericList.isEmpty())
             {
-                  Embed.error(event, processErrorMessage(tClass, values));
+                  EmbedUtils.error(event, processErrorMessage(tClass, values));
                   return 0;
             }
             else if (size == 1)
@@ -142,7 +141,7 @@ public class Processor
 
             if (!Checks.isNumber(message))
             {
-                  Embed.notANumberError(event, message);
+                  EmbedUtils.notANumberError(event, message);
                   return null;
             }
 
@@ -150,7 +149,7 @@ public class Processor
 
             if (!Checks.between(pageNumber, genericList.size()))
             {
-                  Embed.error(event, "** %s ** was not a valid entry. Please retry with a valid entry!", message);
+                  EmbedUtils.error(event, "** %s ** was not a valid entry. Please retry with a valid entry!", message);
                   return null;
             }
 
@@ -182,7 +181,7 @@ public class Processor
 
             if (!Checks.isNumber(message))
             {
-                  Embed.notANumberError(event, message);
+                  EmbedUtils.notANumberError(event, message);
                   return false;
             }
 
@@ -190,7 +189,7 @@ public class Processor
 
             if (!Checks.between(pageNumber, genericList.size()))
             {
-                  Embed.error(event, "** %s ** was not a valid entry. Please retry with a valid entry!", message);
+                  EmbedUtils.error(event, "** %s ** was not a valid entry. Please retry with a valid entry!", message);
                   return false;
             }
 

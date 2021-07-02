@@ -8,7 +8,7 @@ import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
 import schoolbot.util.Checks;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 
 import java.util.List;
 
@@ -55,7 +55,7 @@ public class Google extends Command
             {
                   if (!Checks.isNumber(args.get(1)))
                   {
-                        Embed.error(event, "Not a number");
+                        EmbedUtils.error(event, "Not a number");
                         return;
                   }
                   int num = Integer.parseInt(args.get(1));

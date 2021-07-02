@@ -4,6 +4,8 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import schoolbot.Constants;
 import schoolbot.handlers.CommandCooldownHandler;
 import schoolbot.objects.command.CommandEvent;
@@ -13,9 +15,11 @@ import java.awt.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Embed
+public class EmbedUtils
 {
-      public Embed()
+      private static final Logger LOGGER = LoggerFactory.getLogger(EmbedUtils.class);
+
+      public EmbedUtils()
       {
       }
 
@@ -181,6 +185,25 @@ public class Embed
                     .setDescription(String.format(message, args))
             );
       }
+
+      public static <T extends MessageChannel> void sendTutorial(T channel)
+      {
+            var embedDescription = String.format("""
+                    Thank you for adding Schoolbot to your server!
+                                        
+                                      
+                    """);
+            channel.sendMessageEmbeds(
+                    new EmbedBuilder()
+                            .setTitle("Tutorial")
+                            .setDescription(embedDescription)
+                            .addField("Step 1", "To use wha")
+                            .build()
+            ).queue(null, failure ->
+            {
+            });
+      }
+
 
       public static void information(GuildMessageReceivedEvent event, String message, Object... args)
       {

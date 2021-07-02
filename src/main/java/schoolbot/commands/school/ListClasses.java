@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.school.School;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public class ListClasses extends Command
 
             if (!event.schoolExist(firstArg))
             {
-                  Embed.error(event, "** %s ** does not exist", firstArg);
+                  EmbedUtils.error(event, "** %s ** does not exist", firstArg);
                   return;
             }
 
@@ -33,7 +33,7 @@ public class ListClasses extends Command
 
             if (school.getClassroomList().isEmpty())
             {
-                  Embed.error(event, "** %s ** has no classes", school.getName());
+                  EmbedUtils.error(event, "** %s ** has no classes", school.getName());
                   return;
             }
 

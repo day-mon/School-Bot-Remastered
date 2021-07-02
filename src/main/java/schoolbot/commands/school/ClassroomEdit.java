@@ -64,7 +64,7 @@ public class ClassroomEdit extends Command
             {
                   if (schoolList.isEmpty())
                   {
-                        Embed.error(event, "** %s ** has no classes", guild.getName());
+                        EmbedUtils.error(event, "** %s ** has no classes", guild.getName());
                         return;
                   }
 
@@ -172,7 +172,7 @@ public class ClassroomEdit extends Command
                               school = success;
                               classroomList = school.getClassroomList();
 
-                              Embed.success(event, "** %s ** has successfully been chosen", school.getName());
+                              EmbedUtils.success(event, "** %s ** has successfully been chosen", school.getName());
 
                               state = Processor.processClassList(this.event, classroomList, UPDATE_MENU);
 
@@ -190,7 +190,7 @@ public class ClassroomEdit extends Command
                               classroom = success;
                               school = classroom.getSchool();
 
-                              Embed.success(event, "** %s ** has successfully been chosen", school.getName());
+                              EmbedUtils.success(event, "** %s ** has successfully been chosen", school.getName());
 
                               var channel = event.getChannel();
 
@@ -216,7 +216,7 @@ public class ClassroomEdit extends Command
 
 
                               cmdEvent.updateClassroom(new DatabaseDTO(classroom, updateColumn, message));
-                              Embed.success(event, "Time Successfully changed!");
+                              EmbedUtils.success(event, "Time Successfully changed!");
                               jda.removeEventListener(this);
                         }
                   }
@@ -238,7 +238,7 @@ public class ClassroomEdit extends Command
 
                               if (length >= Constants.MAX_EMBED_TITLE)
                               {
-                                    Embed.error(event, "Your class title was %d characters long. It cannot exceed 256 characters", length);
+                                    EmbedUtils.error(event, "Your class title was %d characters long. It cannot exceed 256 characters", length);
                                     return 4;
                               }
 
@@ -264,7 +264,7 @@ public class ClassroomEdit extends Command
                               }
 
                               cmdEvent.updateClassroom(new DatabaseDTO(classroom, updateColumn, message));
-                              Embed.success(event, "Name successfully changed to: %s", message);
+                              EmbedUtils.success(event, "Name successfully changed to: %s", message);
                               // done
                         }
 
@@ -273,12 +273,12 @@ public class ClassroomEdit extends Command
 
                               if (length >= Constants.MAX_FIELD_VALUE)
                               {
-                                    Embed.error(event, "Your class description was %d characters long. It cannot exceed 1024 characters", length);
+                                    EmbedUtils.error(event, "Your class description was %d characters long. It cannot exceed 1024 characters", length);
                                     return 4;
                               }
 
 
-                              Embed.success(event, "Description changed successfully!");
+                              EmbedUtils.success(event, "Description changed successfully!");
                               cmdEvent.updateClassroom(new DatabaseDTO(classroom, updateColumn, message));
                               // done
                         }
@@ -291,7 +291,7 @@ public class ClassroomEdit extends Command
                               if (success != null)
                               {
                                     cmdEvent.updateClassroom(new DatabaseDTO(classroom, updateColumn, success.getId()));
-                                    Embed.success(event, "Professor successfully changed to %s", success.getFullName());
+                                    EmbedUtils.success(event, "Professor successfully changed to %s", success.getFullName());
                                     jda.removeEventListener(this);
                               }
                               // done
@@ -302,7 +302,7 @@ public class ClassroomEdit extends Command
 
                               if (date == null)
                               {
-                                    Embed.error(event, "** %s ** is not a valid date. Please try again", message);
+                                    EmbedUtils.error(event, "** %s ** is not a valid date. Please try again", message);
                                     return 4;
                               }
 
@@ -312,7 +312,7 @@ public class ClassroomEdit extends Command
 
                                     if (!classroomEndDate.minusYears(1).isBefore(date))
                                     {
-                                          Embed.error(event, """
+                                          EmbedUtils.error(event, """
                                                            ** %s ** is more than a year away. Most are not a year long.
                                                           `If this is the case please contact: damon#9999`
                                                            """,
@@ -326,7 +326,7 @@ public class ClassroomEdit extends Command
 
                                     if (!classroomStartDate.plusYears(1).isAfter(date))
                                     {
-                                          Embed.error(event, """
+                                          EmbedUtils.error(event, """
                                                    ** %s ** is more than a year away. Most are not a year long.
                                                   `If this is the case please contact: damon#9999`
                                                    """, StringUtils.formatDate(date));
@@ -363,11 +363,11 @@ public class ClassroomEdit extends Command
 
                               if (number == -1)
                               {
-                                    Embed.error(event, "** %s ** is not a number. Please try again!", message);
+                                    EmbedUtils.error(event, "** %s ** is not a number. Please try again!", message);
                                     return 4;
                               }
 
-                              Embed.success(event, "Class Number successfully changed to: %s", number);
+                              EmbedUtils.success(event, "Class Number successfully changed to: %s", number);
 
                               cmdEvent.updateClassroom(new DatabaseDTO(classroom, updateColumn, number));
                         }
@@ -383,12 +383,12 @@ public class ClassroomEdit extends Command
                                     var role = msg.getMentionedRoles().get(0);
                                     if (mentionedRoles > 1)
                                     {
-                                          Embed.warn(event, """
+                                          EmbedUtils.warn(event, """
                                                   You have mentioned ** %d ** roles.
                                                   I will use the first one you mentioned, which is %s
                                                   """, mentionedRoles, role.getAsMention());
                                     }
-                                    Embed.success(event, "Role successfully changed to: %s", role.getAsMention());
+                                    EmbedUtils.success(event, "Role successfully changed to: %s", role.getAsMention());
                                     cmdEvent.updateClassroom(new DatabaseDTO(classroom, updateColumn, role.getIdLong()));
                                     break;
                               }
@@ -400,7 +400,7 @@ public class ClassroomEdit extends Command
                                             .setName(className.toLowerCase().replaceAll("\\s", "-"))
                                             .setColor(new Random().nextInt(0xFFFFFF))
                                             .complete();
-                                    Embed.success(event, "Role successfully changed to: %s", role.getAsMention());
+                                    EmbedUtils.success(event, "Role successfully changed to: %s", role.getAsMention());
                                     cmdEvent.updateClassroom(new DatabaseDTO(classroom, updateColumn, role.getIdLong()));
                               }
                         }
@@ -415,11 +415,11 @@ public class ClassroomEdit extends Command
                                     var textChannel = msg.getMentionedChannels().get(0);
                                     if (mentionedChannels > 1)
                                     {
-                                          Embed.warn(event, """
+                                          EmbedUtils.warn(event, """
                                                   You have mentioned ** %d ** channels.
                                                   I will use the first one you mentioned, which is %s
                                                   """, mentionedChannels, textChannel.getAsMention());
-                                          Embed.success(event, "Role successfully changed to: %s", textChannel.getAsMention());
+                                          EmbedUtils.success(event, "Role successfully changed to: %s", textChannel.getAsMention());
 
                                     }
                                     cmdEvent.updateClassroom(new DatabaseDTO(classroom, updateColumn, textChannel.getIdLong()));
@@ -434,7 +434,7 @@ public class ClassroomEdit extends Command
 
                                     if (potentialRole == null)
                                     {
-                                          Embed.warn(event, "This class does not have a role assigned to it. When setting up the channel I will only allow admins to view it.");
+                                          EmbedUtils.warn(event, "This class does not have a role assigned to it. When setting up the channel I will only allow admins to view it.");
 
                                           channel = guild.createTextChannel(className)
                                                   .setName(className)
@@ -450,7 +450,7 @@ public class ClassroomEdit extends Command
                                                   .complete();
                                     }
                                     cmdEvent.updateClassroom(new DatabaseDTO(classroom, updateColumn, channel.getIdLong()));
-                                    Embed.success(event, "Role successfully changed to: %s", channel.getAsMention());
+                                    EmbedUtils.success(event, "Role successfully changed to: %s", channel.getAsMention());
 
                               }
                         }
@@ -464,7 +464,7 @@ public class ClassroomEdit extends Command
                                     return 4;
                               }
 
-                              Embed.success(event, "Time Successfully changed!");
+                              EmbedUtils.success(event, "Time Successfully changed!");
                         }
                   }
                   jda.removeEventListener(this);
@@ -485,7 +485,7 @@ public class ClassroomEdit extends Command
 
                               if (classroom.isAutoFilled())
                               {
-                                    Embed.error(commandEvent, "You cannot edit the name of a class that was auto filled! I will now stop listening for responses.");
+                                    EmbedUtils.error(commandEvent, "You cannot edit the name of a class that was auto filled! I will now stop listening for responses.");
                                     jda.removeEventListener(this);
                                     return 3;
                               }
@@ -501,7 +501,7 @@ public class ClassroomEdit extends Command
                         case "professor", "3" -> {
                               if (classroom.isAutoFilled())
                               {
-                                    Embed.error(commandEvent, "You cannot edit the name of a class that was auto filled! I will now stop listening for responses.");
+                                    EmbedUtils.error(commandEvent, "You cannot edit the name of a class that was auto filled! I will now stop listening for responses.");
                                     jda.removeEventListener(this);
                                     return 3;
                               }
@@ -538,7 +538,7 @@ public class ClassroomEdit extends Command
                         case "start date", "end date", "5", "6" -> {
                               if (classroom.isAutoFilled())
                               {
-                                    Embed.error(commandEvent, "You cannot edit the name of a class that was auto filled! I will now stop listening for responses.");
+                                    EmbedUtils.error(commandEvent, "You cannot edit the name of a class that was auto filled! I will now stop listening for responses.");
                                     jda.removeEventListener(this);
                                     return 3;
                               }
@@ -553,7 +553,7 @@ public class ClassroomEdit extends Command
                         case "number", "7" -> {
                               if (classroom.isAutoFilled())
                               {
-                                    Embed.error(commandEvent, "You cannot edit the name of a class that was auto filled! I will now stop listening for responses.");
+                                    EmbedUtils.error(commandEvent, "You cannot edit the name of a class that was auto filled! I will now stop listening for responses.");
                                     jda.removeEventListener(this);
                                     return 3;
 

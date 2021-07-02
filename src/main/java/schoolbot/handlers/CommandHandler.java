@@ -10,7 +10,7 @@ import schoolbot.Constants;
 import schoolbot.Schoolbot;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 import schoolbot.util.Parser;
 
 import java.lang.reflect.Constructor;
@@ -126,7 +126,7 @@ public class CommandHandler
 
             if (message.contains("”"))
             {
-                  Embed.error(event,
+                  EmbedUtils.error(event,
                           """
                                   We notice you are using the `”` character which means you are on an iPhone..
                                   In order to use the correct quotes hold down on those quotes and find the straight ones

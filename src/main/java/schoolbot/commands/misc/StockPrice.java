@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.util.Checks;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 import schoolbot.util.StringUtils;
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
@@ -28,7 +28,7 @@ public class StockPrice extends Command
 
             if (Checks.isNumber(stockSymbol))
             {
-                  Embed.error(event, "Stock symbols cannot have numbers");
+                  EmbedUtils.error(event, "Stock symbols cannot have numbers");
                   return;
             }
 
@@ -45,7 +45,7 @@ public class StockPrice extends Command
 
             if (stock == null)
             {
-                  Embed.error(event, "** %s ** is not a stock symbol on any stock exchange to my knowledge", stockSymbol);
+                  EmbedUtils.error(event, "** %s ** is not a stock symbol on any stock exchange to my knowledge", stockSymbol);
                   return;
             }
 

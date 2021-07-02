@@ -12,7 +12,7 @@ import schoolbot.objects.misc.interfaces.StateMachine;
 import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 import schoolbot.util.Processor;
 
 import java.util.List;
@@ -152,7 +152,7 @@ public class ProfessorEdit extends Command
 
                               if (professor.getFullName().equalsIgnoreCase("staff unknown"))
                               {
-                                    Embed.error(event, "You cannot edit this professor.. Aborting");
+                                    EmbedUtils.error(event, "You cannot edit this professor.. Aborting");
                                     jda.removeEventListener(this);
                                     return;
                               }
@@ -169,7 +169,7 @@ public class ProfessorEdit extends Command
                         case 4 -> {
                               if (updateColumn.equalsIgnoreCase("N/A"))
                               {
-                                    Embed.error(event, "** %s ** is not a valid choice please return again");
+                                    EmbedUtils.error(event, "** %s ** is not a valid choice please return again");
                                     return;
                               }
 
@@ -209,7 +209,7 @@ public class ProfessorEdit extends Command
                   }
                   else
                   {
-                        Embed.error(event, "** %s ** is not a valid entry");
+                        EmbedUtils.error(event, "** %s ** is not a valid entry");
                         return false;
                   }
                   return true;
@@ -229,7 +229,7 @@ public class ProfessorEdit extends Command
                         case "first_name", "last_name" -> {
                               if (Checks.isNumber(message))
                               {
-                                    Embed.error(event, "Names cannot contain numbers.. Try again");
+                                    EmbedUtils.error(event, "Names cannot contain numbers.. Try again");
                                     return;
                               }
                               commandEvent.updateProfessor(new DatabaseDTO(professor, updateColumn, message));
@@ -237,11 +237,11 @@ public class ProfessorEdit extends Command
                         case "email_prefix" -> commandEvent.updateProfessor(new DatabaseDTO(professor, updateColumn, message));
 
                         default -> {
-                              Embed.error(event, "** %s ** is not a valid response", message);
+                              EmbedUtils.error(event, "** %s ** is not a valid response", message);
                               return;
                         }
                   }
-                  Embed.success(event, "** %s ** has been successfully been updated to ** %s ** ", updateColumn.replace("_", " "), message);
+                  EmbedUtils.success(event, "** %s ** has been successfully been updated to ** %s ** ", updateColumn.replace("_", " "), message);
                   jda.removeEventListener(this);
             }
       }

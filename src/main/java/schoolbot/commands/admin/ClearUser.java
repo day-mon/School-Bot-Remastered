@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.util.Checks;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
@@ -45,7 +45,7 @@ public class ClearUser extends Command
                   case 1 -> {
                         if (message.getMentionedMembers().size() == 0)
                         {
-                              Embed.error(event, "You did not mention anyone");
+                              EmbedUtils.error(event, "You did not mention anyone");
                               return;
                         }
 
@@ -67,7 +67,7 @@ public class ClearUser extends Command
                                 {
                                       if (channelMessageSize == 0)
                                       {
-                                            Embed.error(event, "There were no messages to clear for " + member.getAsMention());
+                                            EmbedUtils.error(event, "There were no messages to clear for " + member.getAsMention());
                                       }
                                       else
                                       {
@@ -81,14 +81,14 @@ public class ClearUser extends Command
                   case 2 -> {
                         if (!Checks.isNumber(args.get(1)))
                         {
-                              Embed.error(event, "[ ** %s ** ] is not a number", args.get(1));
+                              EmbedUtils.error(event, "[ ** %s ** ] is not a number", args.get(1));
                               return;
                         }
 
 
                         if (message.getMentionedMembers().size() == 0)
                         {
-                              Embed.error(event, "You do not mention anyone...");
+                              EmbedUtils.error(event, "You do not mention anyone...");
                               return;
                         }
 
@@ -96,7 +96,7 @@ public class ClearUser extends Command
 
                         if (messagesToRemove > 100)
                         {
-                              Embed.error(event, "You must choose a number between 1-100");
+                              EmbedUtils.error(event, "You must choose a number between 1-100");
                               return;
                         }
 
@@ -118,7 +118,7 @@ public class ClearUser extends Command
                         {
                               if (channelMessageSize == 0)
                               {
-                                    Embed.error(event, "There were no messages to clear for " + member.getAsMention());
+                                    EmbedUtils.error(event, "There were no messages to clear for " + member.getAsMention());
                               }
                               else
                               {

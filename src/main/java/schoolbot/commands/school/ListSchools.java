@@ -5,7 +5,7 @@ import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
 import schoolbot.objects.school.School;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 
 import java.util.List;
 
@@ -27,7 +27,7 @@ public class ListSchools extends Command
 
             if (schools.isEmpty())
             {
-                  Embed.error(event, "No schools!");
+                  EmbedUtils.error(event, "No schools!");
             }
             // No need for a paginator call if theres only one school tbh..
             else if (schools.size() == 1)

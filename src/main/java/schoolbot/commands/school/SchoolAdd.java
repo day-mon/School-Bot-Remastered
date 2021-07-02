@@ -18,7 +18,7 @@ import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -78,7 +78,7 @@ public class SchoolAdd extends Command
 
             if (Checks.isNumber(firstArg))
             {
-                  Embed.error(event, "Your school name cannot contain numbers!");
+                  EmbedUtils.error(event, "Your school name cannot contain numbers!");
                   return;
             }
             Document doc;
@@ -107,7 +107,7 @@ public class SchoolAdd extends Command
 
             if (json.length() > 40)
             {
-                  Embed.error(event, "Your search for ```" + firstArg + "``` contained ***" + json.length() + "*** elements.. Please narrow down your search");
+                  EmbedUtils.error(event, "Your search for ```" + firstArg + "``` contained ***" + json.length() + "*** elements.. Please narrow down your search");
                   return;
             }
 
@@ -115,7 +115,7 @@ public class SchoolAdd extends Command
 
             if (schools.isEmpty())
             {
-                  Embed.error(event, "No schools matching " + firstArg + " found");
+                  EmbedUtils.error(event, "No schools matching " + firstArg + " found");
             }
             else if (schools.size() == 1)
             {
@@ -127,7 +127,7 @@ public class SchoolAdd extends Command
                   }
                   else
                   {
-                        Embed.error(event, " ** %s ** already exist", firstArg);
+                        EmbedUtils.error(event, " ** %s ** already exist", firstArg);
                   }
             }
             else
@@ -245,7 +245,7 @@ public class SchoolAdd extends Command
                   }
                   else
                   {
-                        Embed.error(event, "School already exist");
+                        EmbedUtils.error(event, "School already exist");
                   }
 
                   event.getJDA().removeEventListener(this);

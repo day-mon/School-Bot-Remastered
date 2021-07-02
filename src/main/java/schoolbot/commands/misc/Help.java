@@ -4,7 +4,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +37,7 @@ public class Help extends Command
 
             if (!commands.containsKey(command))
             {
-                  Embed.error(event, "** %s ** is not a command", command);
+                  EmbedUtils.error(event, "** %s ** is not a command", command);
                   return;
             }
 

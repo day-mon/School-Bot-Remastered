@@ -17,7 +17,7 @@ import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.misc.Emoji;
 import schoolbot.objects.misc.interfaces.Paginatable;
 import schoolbot.util.DatabaseUtil;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 import schoolbot.util.Parser;
 
 import java.sql.Date;
@@ -393,7 +393,7 @@ public class School implements Paginatable
 
             if (classCheck == -1)
             {
-                  Embed.error(event, "Database failed to add ** %s **", classroom.getName());
+                  EmbedUtils.error(event, "Database failed to add ** %s **", classroom.getName());
                   removeSequence(event, classroom);
                   return;
             }
@@ -448,7 +448,7 @@ public class School implements Paginatable
             }
             catch (Exception e)
             {
-                  Embed.error(event, "Could not connect to Peoplesoft.. Try again later!");
+                  EmbedUtils.error(event, "Could not connect to Peoplesoft.. Try again later!");
                   e.printStackTrace();
                   return;
             }
@@ -459,23 +459,23 @@ public class School implements Paginatable
             switch (evaluateErrors)
             {
                   case 1 -> {
-                        Embed.error(event, "Cannot create a role because your server is already at capacity");
+                        EmbedUtils.error(event, "Cannot create a role because your server is already at capacity");
                         return;
                   }
                   case 2 -> {
-                        Embed.error(event, "Cannot create text channel because you are at capacity");
+                        EmbedUtils.error(event, "Cannot create text channel because you are at capacity");
                         return;
                   }
                   case 3 -> {
-                        Embed.error(event, "Class information not found.");
+                        EmbedUtils.error(event, "Class information not found.");
                         return;
                   }
                   case 4 -> {
-                        Embed.error(event, "Class name has a name longer than 100 characters.. Please add the class manually");
+                        EmbedUtils.error(event, "Class name has a name longer than 100 characters.. Please add the class manually");
                         return;
                   }
                   case 5 -> {
-                        Embed.error(event, "This class already exist for ** %s **", schoolClass.getSchoolWithoutID().getName());
+                        EmbedUtils.error(event, "This class already exist for ** %s **", schoolClass.getSchoolWithoutID().getName());
                         return;
                   }
 
@@ -557,7 +557,7 @@ public class School implements Paginatable
                               var success = evaluateCampus(schoolClass, textRight);
                               if (!success)
                               {
-                                    Embed.error(event, "");
+                                    EmbedUtils.error(event, "");
                                     removeSequence(event, schoolClass);
                                     return;
                               }
@@ -572,7 +572,7 @@ public class School implements Paginatable
             int classCheck = DatabaseUtil.addClassPitt(event, schoolClass);
             if (classCheck == -1)
             {
-                  Embed.error(event, """
+                  EmbedUtils.error(event, """
                           Database failed to add ** %s **
                           """, schoolClass.getName());
                   removeSequence(event, schoolClass);
@@ -643,6 +643,11 @@ public class School implements Paginatable
       public boolean hasProfessors()
       {
             return !professorList.isEmpty();
+      }
+
+      public boolean hasClasses()
+      {
+            return !classroomList.isEmpty();
       }
 
 

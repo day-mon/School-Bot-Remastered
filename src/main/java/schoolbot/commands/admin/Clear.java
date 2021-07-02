@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.util.Checks;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 
 import java.awt.*;
 import java.time.OffsetDateTime;
@@ -110,8 +110,8 @@ public class Clear extends Command
                   var numCheck = args.get(0);
                   if (!Checks.isNumber(numCheck))
                   {
-                        Embed.error(event, "This is not a number! " +
-                                           "\nUsage: " + this.getUsageExample());
+                        EmbedUtils.error(event, "This is not a number! " +
+                                                "\nUsage: " + this.getUsageExample());
                         return;
                   }
                   int messagesToRemove = Integer.parseInt(numCheck);

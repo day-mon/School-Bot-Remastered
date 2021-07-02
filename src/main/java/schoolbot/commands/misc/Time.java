@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import schoolbot.Constants;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -51,7 +51,7 @@ public class Time extends Command
                         String timeZoneCheck = args.size() <= 3 ? args.get(0).toUpperCase() : args.get(0);
                         if (!timeZones.contains(timeZoneCheck)) //This is good practice
                         {
-                              Embed.error(event, "That is not a valid timezone!");
+                              EmbedUtils.error(event, "That is not a valid timezone!");
                               return;
                         }
 

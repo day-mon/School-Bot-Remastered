@@ -12,7 +12,7 @@ import schoolbot.objects.misc.interfaces.StateMachine;
 import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 import schoolbot.util.Processor;
 
 import java.util.List;
@@ -49,7 +49,7 @@ public class ProfessorRemove extends Command
             {
                   var school = values.getSchool();
 
-                  Embed.information(event, "** %s ** has been selected because it is the only school with professors that are available to delete", school.getName());
+                  EmbedUtils.information(event, "** %s ** has been selected because it is the only school with professors that are available to delete", school.getName());
 
                   var processedProfessorList = Processor.processGenericList(values, values.getProfessorList(), Professor.class);
 
@@ -57,7 +57,7 @@ public class ProfessorRemove extends Command
                   {
                         var professor = values.getProfessor();
 
-                        Embed.information(event, "** %s ** is the only professor available to delete. Are you sure you want to delete them?", professor.getFullName());
+                        EmbedUtils.information(event, "** %s ** is the only professor available to delete. Are you sure you want to delete them?", professor.getFullName());
 
                         values.setState(4);
                   }
@@ -181,7 +181,7 @@ public class ProfessorRemove extends Command
                               if (message.equalsIgnoreCase("yes") || message.equalsIgnoreCase("y"))
                               {
                                     commandEvent.removeProfessor(professor);
-                                    Embed.success(event, "Removed [** %s **] successfully", professor.getFullName());
+                                    EmbedUtils.success(event, "Removed [** %s **] successfully", professor.getFullName());
                                     event.getJDA().removeEventListener(this);
                               }
                               else if (message.equalsIgnoreCase("no") || message.equalsIgnoreCase("n") || message.equalsIgnoreCase("nah"))
@@ -191,7 +191,7 @@ public class ProfessorRemove extends Command
                               }
                               else
                               {
-                                    Embed.error(event, "[ ** %s ** ] is not a valid respond.. I will need a **Yes** OR a **No**", message);
+                                    EmbedUtils.error(event, "[ ** %s ** ] is not a valid respond.. I will need a **Yes** OR a **No**", message);
                               }
                         }
                   }

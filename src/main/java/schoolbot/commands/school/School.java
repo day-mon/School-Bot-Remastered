@@ -3,7 +3,7 @@ package schoolbot.commands.school;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public class School extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
-            Embed.information(event, """
+            EmbedUtils.information(event, """
                     I believe you called this command on accident.. That's okay let me help you!
                     You want to ** add ** a school? Use ** school add **
                     You want to ** edit ** a school? Use ** school edit **

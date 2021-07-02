@@ -16,7 +16,7 @@ import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 import schoolbot.util.Processor;
 
 import java.time.LocalDateTime;
@@ -36,6 +36,7 @@ public class AssignmentEdit extends Command
             super(parent, "Edits an assignment", "[none]", 0);
             addPermissions(Permission.ADMINISTRATOR);
             addFlags(CommandFlag.STATE_MACHINE_COMMAND);
+            setCommandPrerequisites("A valid assignment to edit");
       }
 
 
@@ -189,7 +190,7 @@ public class AssignmentEdit extends Command
                               if (classroomList.size() == 1)
                               {
                                     var classroom = values.getClassroom();
-                                    Embed.information(event, """
+                                    EmbedUtils.information(event, """
                                             ** %s ** has been automatically chosen because it is the only class room.
                                                                                         
                                             Which assignment would you like to edit?
@@ -220,7 +221,7 @@ public class AssignmentEdit extends Command
                               if (assignmentList.size() == 1)
                               {
                                     var assignment = assignmentList.get(0);
-                                    Embed.information(event, """
+                                    EmbedUtils.information(event, """
                                             ** %s ** has been automatically chosen because it is the only valid assignment.
                                                                                            
                                             Which attribute would you like to edit?
@@ -319,7 +320,7 @@ public class AssignmentEdit extends Command
                               }
                               else
                               {
-                                    Embed.error(event, "** %s ** is not a valid response.. Try again please", message);
+                                    EmbedUtils.error(event, "** %s ** is not a valid response.. Try again please", message);
                                     return;
                               }
                               values.incrementMachineState();
@@ -359,7 +360,7 @@ public class AssignmentEdit extends Command
                         case "points_possible" -> {
                               if (!Checks.isNumber(message))
                               {
-                                    Embed.notANumberError(event, message);
+                                    EmbedUtils.notANumberError(event, message);
                                     return false;
                               }
 
@@ -394,7 +395,7 @@ public class AssignmentEdit extends Command
                               }
                               else
                               {
-                                    Embed.error(event, "** %s ** is not a valid entry", message);
+                                    EmbedUtils.error(event, "** %s ** is not a valid entry", message);
                                     return false;
                               }
                               commandEvent.updateAssignment(new DatabaseDTO(assignment, updateColumn, type));
@@ -406,7 +407,7 @@ public class AssignmentEdit extends Command
 
                               if (Objects.isNull(date))
                               {
-                                    Embed.error(event, "** %s ** is not a valid date", message);
+                                    EmbedUtils.error(event, "** %s ** is not a valid date", message);
                                     return false;
                               }
 
@@ -425,7 +426,7 @@ public class AssignmentEdit extends Command
 
                               if (!Checks.checkValidTime(message))
                               {
-                                    Embed.error(event, "** %s ** is not a valid time... try again!", message);
+                                    EmbedUtils.error(event, "** %s ** is not a valid time... try again!", message);
                                     return false;
                               }
 
@@ -443,7 +444,7 @@ public class AssignmentEdit extends Command
                                     if (!localDateTime.isAfter(LocalDateTime.now()))
                                     {
                                           String formattedTime = localDateTime.format(DateTimeFormatter.ofPattern("M/dd/yyyy @ HH:mm"));
-                                          Embed.error(event, "** %s ** is not a valid date.. Try again", formattedTime);
+                                          EmbedUtils.error(event, "** %s ** is not a valid date.. Try again", formattedTime);
                                           return false;
                                     }
 
@@ -463,7 +464,7 @@ public class AssignmentEdit extends Command
                                     if (!localDateTime.isAfter(LocalDateTime.now()))
                                     {
                                           String formattedTime = localDateTime.format(DateTimeFormatter.ofPattern("M/dd/yyyy @ HH:mm"));
-                                          Embed.error(event, "** %s ** is not a valid date.. Try again", formattedTime);
+                                          EmbedUtils.error(event, "** %s ** is not a valid date.. Try again", formattedTime);
                                           return false;
                                     }
 

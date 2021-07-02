@@ -9,7 +9,7 @@ import schoolbot.objects.command.CommandFlag;
 import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.school.Classroom;
 import schoolbot.util.Checks;
-import schoolbot.util.Embed;
+import schoolbot.util.EmbedUtils;
 import schoolbot.util.Processor;
 
 import java.util.List;
@@ -34,7 +34,7 @@ public class ListAssignments extends Command
             {
                   var clazz = values.getClassroom();
 
-                  Embed.error(commandEvent, "There are no assignments for %s", clazz.getName());
+                  EmbedUtils.error(commandEvent, "There are no assignments for %s", clazz.getName());
             }
             else if (assignmentList.size() == 1)
             {
@@ -74,7 +74,7 @@ public class ListAssignments extends Command
 
             if (classroomList.isEmpty())
             {
-                  Embed.error(event, "You have no association to any classes, and you did not send this message in any channels associated with a class");
+                  EmbedUtils.error(event, "You have no association to any classes, and you did not send this message in any channels associated with a class");
                   return;
             }
 
