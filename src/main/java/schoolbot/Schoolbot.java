@@ -88,6 +88,7 @@ public class Schoolbot extends ListenerAdapter
       @Override
       public void onReady(@Nonnull ReadyEvent event)
       {
+
             this.reminderHandler = new ReminderHandler(this);
 
             getJda().getPresence().setPresence(OnlineStatus.ONLINE, Activity.streaming("Prefix: " + Constants.DEFAULT_PREFIX, "https://www.youtube.com/watch?v=Lju6h-C37hE"));

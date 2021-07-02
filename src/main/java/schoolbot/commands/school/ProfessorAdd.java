@@ -9,6 +9,7 @@ import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
 import schoolbot.objects.misc.StateMachineValues;
+import schoolbot.objects.misc.interfaces.StateMachine;
 import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
@@ -21,7 +22,7 @@ public class ProfessorAdd extends Command
 {
       public ProfessorAdd(Command parent)
       {
-            super(parent, "Adds a professor to the server list", "[school name] [professor name] [professor email]", 0);
+            super(parent, "Adds a professor to the server list", "[none]", 0);
             addFlags(CommandFlag.DATABASE, CommandFlag.STATE_MACHINE_COMMAND);
       }
 
@@ -41,7 +42,7 @@ public class ProfessorAdd extends Command
       }
 
 
-      public static class ProfessorAddStateMachine extends ListenerAdapter
+      public static class ProfessorAddStateMachine extends ListenerAdapter implements StateMachine
       {
 
             private final StateMachineValues values;
@@ -49,6 +50,7 @@ public class ProfessorAdd extends Command
 
             public ProfessorAddStateMachine(StateMachineValues values)
             {
+                  values.setMachine(this);
                   this.values = values;
             }
 
@@ -95,10 +97,10 @@ public class ProfessorAdd extends Command
                               if (schoolList.size() == 1)
                               {
                                     var school = schoolList.get(0);
-                                    channel.sendMessageFormat("** %s ** only has one school associated with it. I will automatically assign your professor to  ** %s **", event.getGuild().getName(), school.getName()).queue();
+                                    channel.sendMessageFormat("**%s** only has one school associated with it. I will automatically assign your professor to  **%s**", event.getGuild().getName(), school.getName()).queue();
                                     values.getProfessor().setProfessorsSchool(school);
                                     channel.sendMessage("Lastly, enter his email prefix: ").queue();
-                                    values.setState(3);
+                                    values.setState(4);
                                     break;
                               }
                               var commandEvent = values.getCommandEvent();

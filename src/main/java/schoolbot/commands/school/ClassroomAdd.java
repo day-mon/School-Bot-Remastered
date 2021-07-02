@@ -35,7 +35,7 @@ public class ClassroomAdd extends Command
 
       public ClassroomAdd(Command parent)
       {
-            super(parent, "Adds a class given a target school", "[none]", 0);
+            super(parent, "Adds a by following the prompt", "[none]", 0);
             addSelfPermissions(Permission.MANAGE_ROLES);
             addFlags(CommandFlag.DATABASE);
       }

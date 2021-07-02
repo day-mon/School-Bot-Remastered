@@ -72,12 +72,6 @@ public class Professor implements Paginatable
             listOfClasses = new ArrayList<>();
       }
 
-
-      public void setEmail(String email)
-      {
-            this.email = email;
-      }
-
       public void setFirstName(String firstName)
       {
             if (this.lastName != null)
@@ -126,7 +120,7 @@ public class Professor implements Paginatable
 
       public String getEmail()
       {
-            return email;
+            return emailPrefix + getProfessorsSchool().getEmailSuffix();
       }
 
       public String getLastName()
@@ -138,12 +132,6 @@ public class Professor implements Paginatable
       {
             return fullName;
       }
-
-      public void setFullName(String fullName)
-      {
-            this.fullName = fullName;
-      }
-
 
       /**
        * @return String return the name
@@ -209,8 +197,6 @@ public class Professor implements Paginatable
 
       public MessageEmbed getAsEmbed(@NotNull Schoolbot schoolbot)
       {
-            Role role = schoolbot.getJda().getRoleById(this.professorsSchool.getRoleID());
-
             return getAsEmbedBuilder(schoolbot)
                     .build();
       }

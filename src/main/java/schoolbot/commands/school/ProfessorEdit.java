@@ -82,6 +82,7 @@ public class ProfessorEdit extends Command
 
             public ProfessorEditStateMachine(StateMachineValues values)
             {
+                  values.setMachine(this);
                   this.values = values;
             }
 
