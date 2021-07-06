@@ -63,6 +63,7 @@ public class Clear extends Command
                   }
 
 
+
                   channel.sendMessage(
                           "You are about to delete 100 messages, click the checkmark to continue, click the X to cancel."
                   ).queue(prompt ->
@@ -72,7 +73,7 @@ public class Clear extends Command
 
                         event.getSchoolbot().getEventWaiter().waitForEvent(MessageReactionAddEvent.class,
                                 reactionEvent -> reactionEvent.getMessageIdLong() == prompt.getIdLong()
-                                                 && Objects.equals(reactionEvent.getUser(), author) || Objects.equals(reactionEvent.getUser().getIdLong(), selfUser.getIdLong()),
+                                                 && Objects.equals(reactionEvent.getUser(), author),
 
                                 reactionEvent ->
                                 {

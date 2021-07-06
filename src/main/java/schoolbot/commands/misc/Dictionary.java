@@ -20,8 +20,9 @@ public class Dictionary extends Command
 {
       public Dictionary()
       {
-            super("", "", 1);
+            super("Gives pronunciation (voice & text), definition and part of speech", "[word]", 1);
             addCalls("dictionary", "dict", "define");
+            addUsageExample("define Pneumonoultramicroscopicsilicovolcanoconiosis");
 
       }
 

@@ -1,6 +1,9 @@
 package schoolbot.commands.misc;
 
-import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
+import net.dv8tion.jda.api.interactions.components.selections.SelectionMenu;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
@@ -17,7 +20,6 @@ public class Help extends Command
       {
             super("Helps users with commands", "[command name]", 1);
             addCalls("help");
-
       }
 
 
@@ -33,6 +35,8 @@ public class Help extends Command
       {
             Map<String, Command> commands = event.getSchoolbot().getCommandHandler().getCommands();
             String command = args.get(0);
+            var channel = event.getChannel();
+            var jda = event.getJDA();
 
 
             if (!commands.containsKey(command))
@@ -65,18 +69,51 @@ public class Help extends Command
 
             if (cmd.hasChildren())
             {
-                  List<MessageEmbed> embeds = new ArrayList<>();
-                  cmd.getChildren()
-                          .forEach(commandIt ->
-                                  embeds.add(commandIt.getAsHelpEmbed().build()));
+                  List<SelectOption> selectOptions = new ArrayList<>();
 
-                  event.sendAsPaginator(embeds);
+                  for (Command child : cmd.getChildren())
+                  {
+                        selectOptions.add(SelectOption.of(child.getName(), child.getName()));
+                  }
 
-                  event.sendMessage("This is a parent command please try and specifying your search.. Here are its children `%s`", cmd.getChildren());
+                  SelectionMenu menu = SelectionMenu.create("menu:class")
+                          .setPlaceholder("Choose the command")
+                          .setRequiredRange(1, 1)
+                          .addOptions(selectOptions)
+                          .build();
+
+                  Command finalCmd = cmd;
+
+
+                  channel.sendMessage("You asked for help on a parent command. Please choose one of its children!")
+                          .setActionRows(ActionRow.of(menu))
+                          .queue(message ->
+                          {
+                                var eventWaiter = event.getSchoolbot().getEventWaiter();
+                                eventWaiter.waitForEvent(SelectionMenuEvent.class,
+                                        selectionMenuEvent -> selectionMenuEvent.getMember().getIdLong() == event.getMember().getIdLong() &&
+                                                              event.getChannel().getIdLong() == channel.getIdLong(),
+                                        selectionMenuEvent ->
+                                        {
+                                              var commandChosen = selectionMenuEvent.getValues().get(0);
+                                              for (Command comm : finalCmd.getChildren())
+                                              {
+                                                    var commandName = comm.getName();
+                                                    if (commandName.equals(commandChosen))
+                                                    {
+                                                          message.delete().queue();
+                                                          event.sendMessage(comm.getAsHelpEmbed());
+                                                          return;
+                                                    }
+                                              }
+                                        }
+                                );
+
+                          });
+                  return;
             }
-            else
-            {
-                  event.sendMessage(cmd.getAsHelpEmbed().build());
-            }
+
+            event.sendMessage(cmd.getAsHelpEmbed().build());
+
       }
 }

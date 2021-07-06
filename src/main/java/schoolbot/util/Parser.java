@@ -69,7 +69,7 @@ public class Parser
             if (!timeLoweCased.contains("mo") && !timeLoweCased.contains("tu") && !timeLoweCased.contains("we") && !timeLoweCased.contains("th") && !timeLoweCased.contains("fr"))
                   return false;
 
-            DatabaseUtil.removeClassReminderByClass(schoolbot, classroom);
+            DatabaseUtils.removeClassReminderByClass(schoolbot, classroom);
 
             Map<DayOfWeek, LocalDateTime> localDateTimeMap = parseTime(classroom, time);
 
@@ -94,7 +94,7 @@ public class Parser
                   {
                         LocalTime localTime = localDateTimeMap.get(day).toLocalTime();
 
-                        DatabaseUtil.addClassReminder(schoolbot, LocalDateTime.of(ld, localTime), List.of(60, 30, 10), classroom);
+                        DatabaseUtils.addClassReminder(schoolbot, LocalDateTime.of(ld, localTime), List.of(60, 30, 10), classroom);
 
                         if (dayOfWeekList.get(dayOfWeekList.size() - 1) == ld.getDayOfWeek())
                         {

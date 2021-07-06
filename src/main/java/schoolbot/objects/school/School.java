@@ -16,7 +16,7 @@ import schoolbot.Schoolbot;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.misc.Emoji;
 import schoolbot.objects.misc.interfaces.Paginatable;
-import schoolbot.util.DatabaseUtil;
+import schoolbot.util.DatabaseUtils;
 import schoolbot.util.EmbedUtils;
 import schoolbot.util.Parser;
 
@@ -389,7 +389,7 @@ public class School implements Paginatable
             classroom.setRoleID(role.getIdLong());
             classroom.setChannelID(textChannel.getIdLong());
 
-            int classCheck = DatabaseUtil.addNormalClass(event, classroom);
+            int classCheck = DatabaseUtils.addNormalClass(event, classroom);
 
             if (classCheck == -1)
             {
@@ -569,7 +569,7 @@ public class School implements Paginatable
 
             schoolClass.setWasAutoFilled(true);
 
-            int classCheck = DatabaseUtil.addClassPitt(event, schoolClass);
+            int classCheck = DatabaseUtils.addClassPitt(event, schoolClass);
             if (classCheck == -1)
             {
                   EmbedUtils.error(event, """
@@ -583,8 +583,6 @@ public class School implements Paginatable
             this.classroomList.add(schoolClass);
             this.professorList.add(schoolClass.getProfessor());
             channel.sendMessageEmbeds(schoolClass.getAsEmbed(schoolbot)).queue();
-
-
       }
 
 
@@ -648,6 +646,18 @@ public class School implements Paginatable
       public boolean hasClasses()
       {
             return !classroomList.isEmpty();
+      }
+
+      public boolean hasAssignments()
+      {
+            for (var classroom : classroomList)
+            {
+                  if (classroom.hasAssignments())
+                  {
+                        return true;
+                  }
+            }
+            return false;
       }
 
 

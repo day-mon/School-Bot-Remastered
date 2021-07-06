@@ -87,6 +87,7 @@ public abstract class Command
             this.commandFlags = new ArrayList<>();
             this.children = new ArrayList<>();
             this.usageExample = "N/A";
+            this.commandPrerequisites = "[none]";
       }
 
 
@@ -172,7 +173,6 @@ public abstract class Command
             {
                   EmbedUtils.error(event, "This command is disabled!");
             }
-
             else if (user.isBot())
             {
                   EmbedUtils.error(event, "Bots cannot execute commands. Try again from a user account.");
@@ -190,7 +190,6 @@ public abstract class Command
                   run(event, event.getArgs());
             }
       }
-
 
       private boolean isChild()
       {
@@ -263,7 +262,7 @@ public abstract class Command
                             this.usageExample.equalsIgnoreCase("N/A") ?
                                     "`" + this.usageExample + "`" : "`" + Constants.DEFAULT_PREFIX + this.usageExample + "`", false)
                     .addField("Aliases", (this.isChild()) ? String.valueOf(this.parent.getCalls()) : String.valueOf(this.calls), false)
-                    .addField("Permissions Required", String.valueOf(this.commandPermissions), false)
+                    .addField("Permissions Required", commandPermissions.isEmpty() ? "`[none]`" : commandPrerequisites, false)
                     .setColor(Color.BLACK)
                     .setFooter("[] = Required | <> = Optional");
       }

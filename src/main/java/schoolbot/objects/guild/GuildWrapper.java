@@ -3,6 +3,7 @@ package schoolbot.objects.guild;
 import net.dv8tion.jda.api.entities.Role;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import schoolbot.Constants;
 import schoolbot.Schoolbot;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.misc.DatabaseDTO;
@@ -10,7 +11,7 @@ import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;
-import schoolbot.util.DatabaseUtil;
+import schoolbot.util.DatabaseUtils;
 
 import java.sql.Date;
 import java.time.LocalDateTime;
@@ -21,16 +22,19 @@ import java.util.Map;
 
 public class GuildWrapper
 {
+      private final long guildId;
       private final Map<String, School> schoolList;
       private final List<Classroom> classrooms;
+      private String guildPrefix;
       private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
 
-      public GuildWrapper(DatabaseUtil.WrapperReturnValue data)
+      public GuildWrapper(DatabaseUtils.WrapperReturnValue data)
       {
-            long guildID = data.guildID();
+            this.guildId = data.guildID();
             this.schoolList = data.schoolMap();
             this.classrooms = Collections.synchronizedList(data.classrooms());
+            this.guildPrefix = data.prefix() == null ? Constants.DEFAULT_PREFIX : data.prefix();
       }
 
       /*
@@ -44,7 +48,7 @@ public class GuildWrapper
             String lowerCaseSchoolName = school.getName().toLowerCase();
             if (schoolList.containsKey(lowerCaseSchoolName)) return;
 
-            int id = DatabaseUtil.addSchool(event, school);
+            int id = DatabaseUtils.addSchool(event, school);
             if (id == -1) return;
 
             school.setSchoolID(id);
@@ -99,7 +103,7 @@ public class GuildWrapper
                         schoolList.get(schoolName).setEmailSuffix(email);
                   }
             }
-            DatabaseUtil.updateSchool(schoolUpdateDTO, event.getSchoolbot());
+            DatabaseUtils.updateSchool(schoolUpdateDTO, event.getSchoolbot());
       }
 
       public void updateClassroom(CommandEvent event, DatabaseDTO classroomDTO)
@@ -186,7 +190,7 @@ public class GuildWrapper
                           .getClassroomByID(classId);
 
             }
-            DatabaseUtil.updateClassroom(classroomDTO, schoolbot);
+            DatabaseUtils.updateClassroom(classroomDTO, schoolbot);
       }
 
       public void updateAssignment(CommandEvent event, DatabaseDTO assignmentDTO)
@@ -239,13 +243,13 @@ public class GuildWrapper
 
                         assignment.setDueDate(ldt);
 
-                        DatabaseUtil.removeAssignmentReminderByAssignment(schoolBot, assignment);
-                        DatabaseUtil.addAssignmentReminder(schoolBot, assignment, List.of(1440, 60, 30, 10, 0));
+                        DatabaseUtils.removeAssignmentReminderByAssignment(schoolBot, assignment);
+                        DatabaseUtils.addAssignmentReminder(schoolBot, assignment, List.of(1440, 60, 30, 10, 0));
 
                   }
             }
 
-            DatabaseUtil.updateAssignment(assignmentDTO, event.getSchoolbot());
+            DatabaseUtils.updateAssignment(assignmentDTO, event.getSchoolbot());
 
       }
 
@@ -271,7 +275,7 @@ public class GuildWrapper
                           .setEmailPrefix(updatedElement);
             }
 
-            DatabaseUtil.updateProfessor(databaseDTO, event.getSchoolbot());
+            DatabaseUtils.updateProfessor(databaseDTO, event.getSchoolbot());
       }
 
 
@@ -288,7 +292,7 @@ public class GuildWrapper
                                   LOGGER.warn("Could not delete role for {} ", school.getName(), failure)
                   );
             }
-            DatabaseUtil.removeSchool(schoolbot, school.getName());
+            DatabaseUtils.removeSchool(schoolbot, school.getName());
       }
 
 
@@ -312,7 +316,7 @@ public class GuildWrapper
 
       public boolean addProfessor(Schoolbot schoolbot, Professor professor)
       {
-            int id = DatabaseUtil.addProfessor(schoolbot, professor);
+            int id = DatabaseUtils.addProfessor(schoolbot, professor);
 
             if (id == -1)
             {
@@ -326,7 +330,7 @@ public class GuildWrapper
       public void removeProfessor(Schoolbot schoolbot, Professor professor)
       {
             professor.getProfessorsSchool().removeProfessor(professor);
-            DatabaseUtil.removeProfessor(schoolbot, professor);
+            DatabaseUtils.removeProfessor(schoolbot, professor);
       }
 
       public void removeClassroom(CommandEvent event, Classroom classroom)
@@ -362,7 +366,7 @@ public class GuildWrapper
             }
 
 
-            DatabaseUtil.removeClassroom(event, classroom);
+            DatabaseUtils.removeClassroom(event, classroom);
       }
 
       public void removeClassroom(long guildID, Classroom classroom, Schoolbot schoolbot)
@@ -397,7 +401,7 @@ public class GuildWrapper
             }
 
 
-            DatabaseUtil.removeClassroom(schoolbot, classroom);
+            DatabaseUtils.removeClassroom(schoolbot, classroom);
       }
 
       public List<Classroom> getAllClasses()
@@ -431,6 +435,26 @@ public class GuildWrapper
             assignment.getClassroom().removeAssignment(schoolbot, assignment);
       }
 
+
+      public boolean setGuildPrefix(String newGuildPrefix, CommandEvent event)
+      {
+            var oldPrefix = guildPrefix;
+            this.guildPrefix = newGuildPrefix;
+
+            boolean returnValue = DatabaseUtils.updatePrefix(newGuildPrefix, event);
+
+            if (!returnValue)
+            {
+                  this.guildPrefix = oldPrefix;
+            }
+            return returnValue;
+      }
+
+
+      public String getGuildPrefix()
+      {
+            return guildPrefix;
+      }
 
       public List<School> getSchoolList()
       {

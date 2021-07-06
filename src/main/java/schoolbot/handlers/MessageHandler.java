@@ -7,7 +7,6 @@ import okhttp3.*;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import schoolbot.Constants;
 import schoolbot.Schoolbot;
 
 import java.io.InputStream;
@@ -37,22 +36,31 @@ public class MessageHandler
       public void handle(GuildMessageReceivedEvent event)
       {
             String messageStr = event.getMessage().getContentRaw();
-            User author = event.getAuthor();
-            Message message = event.getMessage();
+            var author = event.getAuthor();
+            var channel = event.getChannel();
+            var message = event.getMessage();
+            var guild = event.getGuild();
+            var prefix = schoolbot.getWrapperHandler().fetchGuildPrefix(guild.getIdLong());
+            var selfUser = event.getJDA().getSelfUser();
 
-
-            if (event.getMessage().getAttachments().size() > 0)
+            if (message.getAttachments().size() > 0)
             {
                   handleFile(event);
+                  return;
             }
 
-            if (!messageStr.startsWith(Constants.DEFAULT_PREFIX))
+            if (isBotMention(event))
+            {
+                  channel.sendMessage("Guild prefix: " + prefix).queue();
+                  return;
+            }
+
+            if (!messageStr.startsWith(prefix))
             {
                   return;
             }
 
-
-            schoolbot.getCommandHandler().handle(event);
+            schoolbot.getCommandHandler().handle(event, prefix);
 
       }
 
@@ -136,6 +144,14 @@ public class MessageHandler
             }
             return url;
       }
+
+      public boolean isBotMention(GuildMessageReceivedEvent event)
+      {
+            var message = event.getMessage().getContentRaw();
+            var selfUser = event.getJDA().getSelfUser();
+            return message.startsWith("<@" + selfUser.getIdLong() + ">") || message.startsWith("<@!" + selfUser.getIdLong() + ">");
+      }
+
 
       public record Triple(CompletableFuture<Message> val1, CompletableFuture<InputStream> val2,
                            CompletableFuture<Void> val3)

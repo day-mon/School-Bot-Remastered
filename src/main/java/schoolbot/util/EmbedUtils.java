@@ -128,6 +128,16 @@ public class EmbedUtils
                     .build()).queue();
       }
 
+      public static void warn(CommandEvent event, String message, Object... args)
+      {
+            var channel = event.getChannel();
+
+            channel.sendMessageEmbeds(new EmbedBuilder()
+                    .setTitle(Emoji.WARNING.getAsChat() + " Warning " + Emoji.WARNING.getAsChat()).setColor(Color.YELLOW)
+                    .setDescription(String.format(message, args))
+                    .build()).queue();
+      }
+
       public static void warn(GuildMessageReceivedEvent event, String message)
       {
             var channel = event.getChannel();
@@ -182,7 +192,7 @@ public class EmbedUtils
       {
             event.sendMessage(new EmbedBuilder()
                     .setTitle("Important Information")
-                    .setDescription(String.format(message, args))
+                    .setDescription(String.format(message, args) + "\n You may use 'exit' or 'stop' at any time to exit this command")
             );
       }
 
@@ -191,16 +201,25 @@ public class EmbedUtils
             var embedDescription = String.format("""
                     Thank you for adding Schoolbot to your server!
                                         
-                                      
-                    """);
+                    To begin: You can call %scommands to see all my commands.
+                                        
+                    Below is a tutorial on how to use the main selling point of the bot. All school commands have a Add, Edit, and Remove implmented for them.       
+                    """, Constants.DEFAULT_PREFIX);
             channel.sendMessageEmbeds(
                     new EmbedBuilder()
                             .setTitle("Tutorial")
                             .setDescription(embedDescription)
-                            .addField("Step 1", "To use wha")
+                            .addField("Step 1", "Call school add and follow the instructions", false)
+                            .addField("Step 2", "You now have a school. You will need a professor for this school. Call professor add to do so, and follow the instructions", false)
+                            .addField("Step 3", """
+                                    Now that you have a Professor. You can use class add. If you attend a University of Pittsburgh Campus I have a special system.
+                                    During this process I will add class reminders, create a role and a text channel
+                                    """, false)
+                            .addField("Step 4", "Now that you have a class. You can call assignment add. This will add reminders and send them in the corresponding channels", false)
                             .build()
             ).queue(null, failure ->
             {
+                  LOGGER.error("Could not send tutorial in any channel", failure);
             });
       }
 

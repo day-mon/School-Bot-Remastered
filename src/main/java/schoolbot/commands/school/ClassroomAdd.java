@@ -564,7 +564,7 @@ public class ClassroomAdd extends Command
 
                   String[] splitDate = potentialDate.replaceAll("\\s+", "").split("-");
 
-                  var format = DateTimeFormatter.ofPattern("M/dd/yyyy");
+                  var format = DateTimeFormatter.ofPattern("M/d/yyyy");
                   LocalDate startDate;
                   LocalDate endDate;
 

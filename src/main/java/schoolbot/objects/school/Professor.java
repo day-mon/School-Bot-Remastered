@@ -33,7 +33,6 @@ public class Professor implements Paginatable
       {
             this.officeHours = "N/A";
             listOfClasses = new ArrayList<>();
-
       }
 
       public Professor(String firstName, String lastName, String emailPrefix)
@@ -46,7 +45,7 @@ public class Professor implements Paginatable
             listOfClasses = new ArrayList<>();
       }
 
-      public Professor(@NotNull String firstName, @NotNull String lastName, @NotNull String emailPrefix, int id, @NotNull School school)
+      public Professor(String firstName, String lastName, School school, String emailPrefix, int id)
       {
             this.firstName = firstName;
             this.lastName = lastName;
@@ -57,8 +56,6 @@ public class Professor implements Paginatable
             this.officeHours = "N/A";
             this.id = id;
             listOfClasses = new ArrayList<>();
-
-
       }
 
       public Professor(String firstName, String lastName, School school)

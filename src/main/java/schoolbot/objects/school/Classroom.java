@@ -9,7 +9,7 @@ import schoolbot.Constants;
 import schoolbot.Schoolbot;
 import schoolbot.objects.misc.interfaces.Paginatable;
 import schoolbot.objects.misc.interfaces.Remindable;
-import schoolbot.util.DatabaseUtil;
+import schoolbot.util.DatabaseUtils;
 import schoolbot.util.Parser;
 import schoolbot.util.StringUtils;
 
@@ -32,7 +32,7 @@ public class Classroom implements Paginatable, Remindable
       private String name;
       private String[] inputClassStartDate;
       private String[] inputClassEndDate;
-      private List<Assignment> assignments;
+      private final List<Assignment> assignments;
       private String classIdentifier;
       private String term;
       private String URL;
@@ -393,7 +393,7 @@ public class Classroom implements Paginatable, Remindable
       public void addAssignment(Schoolbot schoolbot, Assignment assignment)
       {
             assignments.add(assignment);
-            int assignmentID = DatabaseUtil.addAssignment(schoolbot, assignment);
+            int assignmentID = DatabaseUtils.addAssignment(schoolbot, assignment);
 
             if (assignmentID == -1)
             {
@@ -402,14 +402,14 @@ public class Classroom implements Paginatable, Remindable
             }
             assignment.setId(assignmentID);
             // Times in minutes to remind (1 day, 1 hour, 30 minutes, 10 minutes, and when due)
-            DatabaseUtil.addAssignmentReminder(schoolbot, assignment, List.of(1440, 60, 30, 10, 0));
+            DatabaseUtils.addAssignmentReminder(schoolbot, assignment, List.of(1440, 60, 30, 10, 0));
 
       }
 
       public void removeAssignment(Schoolbot schoolbot, Assignment assignment)
       {
             assignments.remove(assignment);
-            DatabaseUtil.removeAssignment(schoolbot, assignment);
+            DatabaseUtils.removeAssignment(schoolbot, assignment);
       }
 
       public void addAssignment(Assignment assignment)

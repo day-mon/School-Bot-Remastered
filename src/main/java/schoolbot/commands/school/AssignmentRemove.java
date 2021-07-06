@@ -1,9 +1,9 @@
 package schoolbot.commands.school;
 
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
@@ -19,8 +19,12 @@ import schoolbot.util.Checks;
 import schoolbot.util.EmbedUtils;
 import schoolbot.util.Processor;
 
+import java.awt.*;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static schoolbot.commands.school.AssignmentRemove.AssignmentRemoveMachine.sendConfirmationMessage;
 
 public class AssignmentRemove extends Command
 {
@@ -40,18 +44,17 @@ public class AssignmentRemove extends Command
       {
 
             var jda = event.getJDA();
+            var memberIsAdmin = event.getMember().hasPermission(Permission.ADMINISTRATOR);
             var schoolList = values.getSchoolList()
                     .stream()
-                    .filter(School::hasClasses)
+                    .filter(School::hasAssignments)
                     .collect(Collectors.toList());
+            values.setSchoolList(schoolList);
             var channel = event.getTextChannel();
             Classroom classroom = Checks.messageSentFromClassChannel(values);
 
             if (classroom != null)
             {
-                  EmbedUtils.information(event,
-                          "** %s ** has been selected automatically because the message came from %s", classroom.getName(), channel.getAsMention());
-
                   var processedList = Processor.processGenericList(values, values.getAssignmentList(), Assignment.class);
 
                   if (processedList == 0)
@@ -59,24 +62,47 @@ public class AssignmentRemove extends Command
                         return;
                   }
 
+                  EmbedUtils.information(event,
+                          "** %s ** has been selected automatically because the message came from %s", classroom.getName(), channel.getAsMention());
+
                   if (processedList == 1)
                   {
-                        var assignment = values.getAssignment();
-
-                        EmbedUtils.information(event, "** %s ** has been selected because it is the only deletable assignment. Would you like to remove it?", assignment.getName());
-                        values.setState(5);
+                        sendConfirmationMessage(values);
                         return;
                   }
 
                   values.setState(5);
                   jda.addEventListener(new AssignmentRemoveMachine(values));
+                  return;
             }
 
+            if (!memberIsAdmin)
+            {
+                  EmbedUtils.error(event, "You must either send this command in a classroom channel or ask an admin to remove the assignment");
+                  return;
+            }
+
+
+            var processedList = Processor.processGenericList(values, schoolList, School.class);
+
+            if (processedList == 0)
+            {
+                  return;
+            }
+
+            if (processedList == 1)
+            {
+                  var school = values.getSchool();
+
+                  EmbedUtils.information(event, "**%s** has been chosen because it is the only school that contains classes with assignments");
+                  values.setState(2);
+            }
+
+            jda.addEventListener(new AssignmentRemoveMachine(values));
       }
 
       public static class AssignmentRemoveMachine extends ListenerAdapter implements StateMachine
       {
-
             private final StateMachineValues values;
 
             public AssignmentRemoveMachine(@NotNull StateMachineValues values)
@@ -85,6 +111,60 @@ public class AssignmentRemove extends Command
                   this.values = values;
             }
 
+            public static void sendConfirmationMessage(StateMachineValues values)
+            {
+
+                  var assignment = values.getAssignment();
+                  var event = values.getCommandEvent();
+                  var channel = values.getCommandEvent().getChannel();
+                  var jda = event.getJDA();
+                  var stateMachine = values.getMachine();
+
+                  channel.sendMessageEmbeds(new EmbedBuilder()
+                          .setTitle("Confirmation")
+                          .setDescription(String.format("Are you sure you would like to delete **%s** | %s", assignment.getName(), Emoji.HOURGLASS.getAsChat()))
+                          .setColor(Color.YELLOW)
+                          .build()
+                  ).queue(prompt ->
+                  {
+
+                        prompt.addReaction(Emoji.CROSS_MARK.getAsReaction()).queue();
+                        prompt.addReaction(Emoji.WHITE_CHECK_MARK.getAsReaction()).queue();
+
+                        var eventWaiter = event.getSchoolbot().getEventWaiter();
+
+                        eventWaiter.waitForEvent(MessageReactionAddEvent.class,
+                                reactionEvent -> reactionEvent.getMessageIdLong() == prompt.getIdLong()
+                                                 && Objects.equals(reactionEvent.getUser(), event.getUser()),
+
+                                messageReactionAddEvent ->
+                                {
+                                      var schoolbot = event.getSchoolbot().getLogger();
+                                      schoolbot.info("Entered Method!");
+                                      var reactionName = messageReactionAddEvent.getReactionEmote().getName();
+                                      if (reactionName.equals(Emoji.WHITE_CHECK_MARK.getAsReaction()))
+                                      {
+                                            event.removeAssignment(assignment);
+                                            EmbedUtils.success(event, "Removed [** %s **] successfully", assignment.getName());
+                                      }
+                                      else if (reactionName.equals(Emoji.CROSS_MARK.getAsReaction()))
+                                      {
+                                            EmbedUtils.error(event, "Okay aborting!");
+                                      }
+                                      else
+                                      {
+                                            EmbedUtils.error(event, "You attempted to add another reaction to the message... Aborting!");
+                                      }
+
+
+                                      if (stateMachine != null)
+                                      {
+                                            jda.removeEventListener(stateMachine);
+                                      }
+
+                                });
+                  });
+            }
 
             @Override
             public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event)
@@ -97,156 +177,87 @@ public class AssignmentRemove extends Command
                         return;
                   }
 
-                  MessageChannel channel = event.getChannel();
-                  String message = event.getMessage().getContentRaw();
-                  JDA jda = event.getJDA();
-                  Guild guild = event.getGuild();
-
+                  var jda = event.getJDA();
+                  var guild = event.getGuild();
+                  var message = event.getMessage().getContentRaw();
+                  var commandEvent = values.getCommandEvent();
+                  var channel = event.getChannel();
 
                   int state = values.getState();
 
                   switch (state)
                   {
                         case 1 -> {
-                              if (!Checks.isNumber(message))
+                              var success = Processor.validateMessage(values, values.getSchoolList());
+
+                              if (!success)
                               {
-                                    EmbedUtils.error(event, """
-                                            ** %s ** is not a number
-                                            Please Enter a number
-                                            """, message);
                                     return;
                               }
 
-                              int pageNumber = Integer.parseInt(message);
+                              var school = values.getSchool();
 
-                              if (!Checks.between(pageNumber, schools.size()))
+                              var classroomList = school.getClassroomList()
+                                      .stream()
+                                      .filter(Classroom::hasAssignments)
+                                      .collect(Collectors.toList());
+
+                              var processedList = Processor.processGenericList(values, classroomList, Classroom.class);
+
+                              if (processedList == 1)
                               {
-                                    EmbedUtils.error(event, "** %s ** was not one of the school ids...", message);
+                                    var classroom = values.getClassroom();
+                                    EmbedUtils.information(event, """
+                                            **%s** has been automatically chosen because it is the only class that has assignments.
+                                            Please give me the page number of the assignment you'd like to remove!
+                                            """);
+                                    commandEvent.sendAsPaginatorWithPageNumbers(values.getAssignmentList());
+                                    values.setState(3);
                                     return;
                               }
 
-                              classroom.setSchool(schools.get(pageNumber - 1));
-                              EmbedUtils.success(event, "** %s ** successfully selected", classroom.getSchool().getName());
-                              channel.sendMessage("Would you like to continue?").queue();
-                              state = 2;
+
+                              EmbedUtils.information(event, "**%s** has been sucessfully been chosen.. Please select a page number based off the class that contanins your assignment!");
+                              commandEvent.sendAsPaginatorWithPageNumbers(classroomList);
+                              values.incrementMachineState();
                         }
 
 
                         case 2 -> {
-                              if (!message.toLowerCase().contains("yes"))
+                              var succcess = Processor.validateMessage(values, values.getClassroomList());
+
+                              if (!succcess)
                               {
-                                    channel.sendMessage("Okay goodbye").queue();
-                                    jda.removeEventListener(this);
                                     return;
                               }
 
-                              classroomList = commandEvent.getSchool(classroom.getSchool().getName()).getClassroomList()
-                                      .stream()
-                                      .filter(classroom -> !classroom.getAssignments().isEmpty())
-                                      .collect(Collectors.toList());
+                              var classroom = values.getClassroom();
+                              var processedList = Processor.processGenericList(values, values.getAssignmentList(), Assignment.class);
 
-                              if (classroomList.isEmpty())
+                              if (processedList == 1)
                               {
-                                    EmbedUtils.error(event, "** %s ** does not have any classes associated with it", guild.getName());
-                                    jda.removeEventListener(this);
+                                    var assignment = values.getAssignment();
+                                    EmbedUtils.information(event, """
+                                            **%s** has been automatically been chosen because it is the only assignment.
+                                            Are you sure you want to remove this assignment (Yes/No)
+                                            """);
+                                    return;
                               }
-                              else if (classroomList.size() == 1)
-                              {
-                                    EmbedUtils.success(event, "** %s ** has been selected automatically because you only have one class associated with you!", classroomList.get(0).getName());
-                                    channel.sendMessageFormat("""
-                                                
-                                            """, Emoji.SMILEY_FACE.getAsChat()
-                                    ).queue();
-                                    this.classroom = classroomList.get(0);
-                                    state = 4;
-                              }
-                              else
-                              {
-                                    commandEvent.sendAsPaginatorWithPageNumbers(classroomList);
-                                    channel.sendMessage("Please give me the page number of the class you want to remove the assignment from").queue();
-                              }
+
+                              EmbedUtils.information(event, "**%s** has been successfully choosen.. Please select the assignment you would wish to remove!");
+                              commandEvent.sendAsPaginatorWithPageNumbers(values.getAssignmentList());
+                              values.incrementMachineState();
                         }
 
                         case 3 -> {
-                              if (!Checks.isNumber(message))
+                              var success = Processor.validateMessage(values, values.getAssignmentList());
+
+                              if (!success)
                               {
-                                    EmbedUtils.error(event, "** %s ** is not a valid entry", message);
                                     return;
                               }
 
-                              int index = Integer.parseInt(message) - 1;
-
-                              if (!Checks.between(index + 1, classroomList.size()))
-                              {
-                                    EmbedUtils.error(event, "** %s ** was not one of the class ids...", message);
-                                    event.getJDA().removeEventListener(this);
-                                    return;
-                              }
-                              this.classroom = classroomList.get(index);
-
-                              EmbedUtils.success(event, "** %s ** has successfully been selected", this.classroom.getName());
-
-                              this.assignmentList = classroom.getAssignments();
-                              if (assignmentList.isEmpty())
-                              {
-                                    EmbedUtils.error(event, "** %s ** has no assignments.", classroom.getName());
-                                    return;
-                              }
-                              else if (assignmentList.size() == 1)
-                              {
-                                    Assignment assignment = assignmentList.get(0);
-
-                                    channel.sendMessageEmbeds(assignment.getAsEmbed(commandEvent.getSchoolbot())).queue();
-                                    channel.sendMessageFormat("** %s ** is the only assignment.. Would you like to delete it?", assignment.getName()).queue();
-                                    state = 5;
-                              }
-                              else
-                              {
-                                    commandEvent.sendAsPaginatorWithPageNumbers(assignmentList);
-                                    channel.sendMessage("Please select the assignment by page number").queue();
-                              }
-                              state = 4;
-                        }
-
-                        case 4 -> {
-                              if (!Checks.isNumber(message))
-                              {
-                                    EmbedUtils.error(event, """
-                                            ** %s ** is not a number
-                                            Please Enter a number
-                                            """, message);
-                                    return;
-                              }
-
-                              int pageNumber = Integer.parseInt(message);
-
-                              if (!Checks.between(pageNumber, assignmentList.size()))
-                              {
-                                    EmbedUtils.error(event, "** %s ** was not one of the assignment page numbers...", message);
-                                    return;
-                              }
-
-                              this.assignment = assignmentList.get(pageNumber - 1);
-                              channel.sendMessageFormat("Are you sure you want to delete ** %s ** ?", this.assignment.getName()).queue();
-                              state = 5;
-                        }
-
-                        case 5 -> {
-                              if (message.equalsIgnoreCase("yes") || message.equalsIgnoreCase("y"))
-                              {
-                                    commandEvent.removeAssignment(assignment);
-                                    EmbedUtils.success(event, "Removed [** %s **] successfully", this.assignment.getName());
-                                    event.getJDA().removeEventListener(this);
-                              }
-                              else if (message.equalsIgnoreCase("no") || message.equalsIgnoreCase("n") || message.equalsIgnoreCase("nah"))
-                              {
-                                    channel.sendMessage("Okay.. aborting..").queue();
-                                    event.getJDA().removeEventListener(this);
-                              }
-                              else
-                              {
-                                    EmbedUtils.error(event, "[ ** %s ** ] is not a valid respond.. I will need a **Yes** OR a **No**", message);
-                              }
+                              sendConfirmationMessage(values);
                         }
                   }
             }

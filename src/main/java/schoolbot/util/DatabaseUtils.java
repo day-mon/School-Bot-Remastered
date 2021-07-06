@@ -19,10 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DatabaseUtil
+public class DatabaseUtils
 {
-      private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseUtil.class);
 
+      private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseUtils.class);
 
       public static int addAssignment(Schoolbot schoolbot, Assignment assignment)
       {
@@ -122,11 +122,13 @@ public class DatabaseUtil
             {
                   removeAllReminders(connection, assignment);
                   removeAssignment(connection, assignment);
+
             }
             catch (Exception e)
             {
                   LOGGER.error("Database error has occurred while removing an assignment", e);
             }
+
       }
 
       public static void removeAssignmentReminderByAssignment(Schoolbot schoolbot, Assignment assignment)
@@ -154,7 +156,7 @@ public class DatabaseUtil
       }
 
 
-      public static WrapperReturnValue getSchools(Schoolbot schoolBot, long guild_id)
+      public static WrapperReturnValue loadGuild(Schoolbot schoolBot, long guild_id)
       {
             Map<String, School> schools = new ConcurrentHashMap<>();
             List<Classroom> classrooms = new ArrayList<>();
@@ -176,13 +178,24 @@ public class DatabaseUtil
                         schools.put(sh.getName().toLowerCase(), sh);
                   }
 
-                  return new WrapperReturnValue(schools, classrooms, guild_id);
+                  var prefix = grabGuildPrefix(connection, guild_id);
+
+
+                  return new WrapperReturnValue(schools, classrooms, guild_id, prefix);
             }
-            catch (SQLException e)
+            catch (Exception e)
             {
                   LOGGER.error("Database error", e);
                   return new WrapperReturnValue();
             }
+      }
+
+      private static String grabGuildPrefix(Connection connection, long guild_id) throws Exception
+      {
+            PreparedStatement statement = connection.prepareStatement("SELECT prefix FROM guild_settings WHERE guild_id=?");
+            statement.setLong(1, guild_id);
+            var resultSet = statement.executeQuery();
+            return resultSet.next() ? resultSet.getString("prefix") : null;
       }
 
 
@@ -401,9 +414,7 @@ public class DatabaseUtil
             try (Connection con = schoolbot.getDatabaseHandler().getDbConnection())
             {
                   removeClassReminders(con, id);
-                  PreparedStatement statement = con.prepareStatement(
-                          "DELETE FROM classes WHERE id=?"
-                  );
+                  PreparedStatement statement = con.prepareStatement("DELETE FROM classes WHERE id=?");
                   statement.setInt(1, id);
                   statement.execute();
             }
@@ -644,6 +655,32 @@ public class DatabaseUtil
             }
       }
 
+      public static boolean updatePrefix(String prefix, CommandEvent event)
+      {
+            var schoolbot = event.getSchoolbot();
+            var guildId = event.getGuild().getIdLong();
+            try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
+            {
+
+                  PreparedStatement statement = connection.prepareStatement("""
+                          INSERT INTO guild_settings (guild_id, prefix)
+                          VALUES (?, ?) ON CONFLICT (guild_id)
+                          DO UPDATE SET prefix=?;
+                           """);
+                  statement.setLong(1, guildId);
+                  statement.setString(2, prefix);
+                  statement.setString(3, prefix);
+                  statement.execute();
+                  return true;
+            }
+            catch (Exception e)
+            {
+                  LOGGER.error("Database Error", e);
+                  return false;
+            }
+      }
+
+
       public static void updateAssignment(DatabaseDTO assignmentUpdateDTO, Schoolbot schoolbot)
       {
             try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
@@ -784,10 +821,9 @@ public class DatabaseUtil
                   school.addProfessor(new Professor(
                           rs2.getString("first_name"),
                           rs2.getString("last_name"),
+                          school,
                           rs2.getString("email_prefix"),
-                          rs2.getInt("id"),
-                          school
-
+                          rs2.getInt("id")
                   ));
             }
       }
@@ -814,12 +850,50 @@ public class DatabaseUtil
             }
       }
 
+      private static void removeGuildSettings(Connection connection, long guildId) throws Exception
+      {
+            PreparedStatement statement = connection.prepareStatement("DELETE FROM guild_settings WHERE guild_id=?");
+            statement.setLong(1, guildId);
+            statement.execute();
+      }
 
-      public static record WrapperReturnValue(Map<String, School> schoolMap, List<Classroom> classrooms, long guildID)
+      public static boolean removeAllGuildOccurrences(Schoolbot schoolbot, long guildId)
+      {
+
+            try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
+            {
+                  var schoolList = schoolbot.getWrapperHandler().getSchools(guildId);
+
+                  for (School school : schoolList)
+                  {
+                        for (Classroom classroom : school.getClassroomList())
+                        {
+                              for (Assignment assignment : classroom.getAssignments())
+                              {
+                                    removeAssignment(schoolbot, assignment);
+                              }
+                              removeClassroom(schoolbot, classroom);
+                        }
+                        removeSchool(schoolbot, school.getName());
+                  }
+                  removeGuildSettings(connection, guildId);
+                  schoolbot.getWrapperHandler().removeGuildFromCache(guildId);
+                  return true;
+            }
+            catch (Exception e)
+            {
+                  LOGGER.error("Database error", e);
+                  return false;
+            }
+      }
+
+
+      public static record WrapperReturnValue(Map<String, School> schoolMap, List<Classroom> classrooms, long guildID,
+                                              String prefix)
       {
             public WrapperReturnValue()
             {
-                  this(Collections.emptyMap(), Collections.emptyList(), 0L);
+                  this(Collections.emptyMap(), Collections.emptyList(), 0L, null);
             }
 
       }

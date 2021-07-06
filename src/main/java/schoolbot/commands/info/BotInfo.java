@@ -38,7 +38,7 @@ public class BotInfo extends Command
                             .addBlankField(true)
 
                             .addField("Guild Count:", String.valueOf(jda.getGuildCache().size()), true)
-                            .addField("Hostname", System.getProperty("user.name"), true)
+                            .addField("Guild Prefix:", event.getGuildPrefix(), true)
                             .addBlankField(true)
                             .build()
             ).queue();

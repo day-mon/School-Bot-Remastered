@@ -140,7 +140,7 @@ public class CommandEvent
             getChannel().sendMessageEmbeds(
                     embedBuilder.setColor(Constants.DEFAULT_EMBED_COLOR)
                             .setTimestamp(Instant.now()).build())
-                    .queue();
+                    .queue(null, failure -> LOGGER.error("Failure whilst sending Embed"));
       }
 
       public void sendMessage(String message, Object... args)
@@ -155,7 +155,8 @@ public class CommandEvent
                     .setColor(color)
                     .setTimestamp(Instant.now())
                     .build()
-            ).queue();
+            ).queue(null, failure -> LOGGER.error("Failure whilst sending Embed"));
+
       }
 
       public <T extends Paginatable> void sendAsNormalPaginator(List<T> list)
@@ -214,7 +215,6 @@ public class CommandEvent
       public void getProfessorsAsPaginator(School school)
       {
             List<MessageEmbed> embeds = schoolbot.getWrapperHandler().getProfessorsAsPaginator(this, school);
-
 
             sendAsPaginator(embeds);
       }
@@ -325,5 +325,17 @@ public class CommandEvent
             return event.getAuthor().getIdLong() == Constants.GENIUS_OWNER_ID;
       }
 
+
+      public String getGuildPrefix()
+      {
+            var guildId = event.getGuild().getIdLong();
+            return schoolbot.getWrapperHandler().fetchGuildPrefix(guildId);
+      }
+
+      public boolean assignPrefix(String prefix)
+      {
+            var guildId = event.getGuild().getIdLong();
+            return schoolbot.getWrapperHandler().assignGuildPrefix(this, prefix);
+      }
 
 }

@@ -52,7 +52,6 @@ public class Processor
       public static <T extends Paginatable> int processGenericList(StateMachineValues values, List<T> genericList, Class<?> tClass)
       {
             var event = values.getCommandEvent();
-
             int size = genericList.size();
             var schoolbot = event.getSchoolbot();
 

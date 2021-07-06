@@ -9,7 +9,7 @@ import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;
-import schoolbot.util.DatabaseUtil;
+import schoolbot.util.DatabaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +41,12 @@ public class WrapperHandler
 
             guildCheck(guildID);
             return guildWrappers.get(guildID).getSchoolList();
+      }
+
+      public List<School> getSchools(long guildId)
+      {
+            guildCheck(guildId);
+            return guildWrappers.get(guildId).getSchoolList();
       }
 
       public List<Classroom> getGuildsClasses(CommandEvent event)
@@ -125,6 +131,11 @@ public class WrapperHandler
                     .getAssignmentByID(assignment.getId());
 
             guildWrappers.get(guildID).removeAssignment(schoolbot, newAssign);
+      }
+
+      public void removeGuildFromCache(long guildId)
+      {
+            guildWrappers.remove(guildId);
       }
 
       public School getSchool(CommandEvent event, String schoolName)
@@ -244,7 +255,22 @@ public class WrapperHandler
 
             guildWrappers.computeIfAbsent(
                     guildID,
-                    (x) -> new GuildWrapper(DatabaseUtil.getSchools(schoolbot, x))
+                    (x) -> new GuildWrapper(DatabaseUtils.loadGuild(schoolbot, x))
             );
+      }
+
+      public String fetchGuildPrefix(long guildId)
+      {
+            guildCheck(guildId);
+
+            return guildWrappers.get(guildId).getGuildPrefix();
+      }
+
+      public boolean assignGuildPrefix(CommandEvent event, String prefix)
+      {
+            var guildId = event.getGuild().getIdLong();
+            guildCheck(guildId);
+
+            return guildWrappers.get(guildId).setGuildPrefix(prefix, event);
       }
 }

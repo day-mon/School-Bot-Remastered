@@ -6,7 +6,6 @@ import io.github.classgraph.ScanResult;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import schoolbot.Constants;
 import schoolbot.Schoolbot;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
@@ -89,17 +88,17 @@ public class CommandHandler
       }
 
 
-      public void handle(GuildMessageReceivedEvent event)
+      public void handle(GuildMessageReceivedEvent event, String prefix)
       {
 
             String message = event.getMessage().getContentRaw();
 
-            if (!message.startsWith(Constants.DEFAULT_PREFIX))
+            if (!message.startsWith(prefix))
             {
                   return;
             }
 
-            message = message.substring(Constants.DEFAULT_PREFIX.length());
+            message = message.substring(prefix.length());
 
 
             List<String> filteredArgs = Parser.args(message)
@@ -115,7 +114,7 @@ public class CommandHandler
 
             String alias = filteredArgs.get(0).toLowerCase();
 
-            if (alias.isBlank() || alias.startsWith(Constants.DEFAULT_PREFIX))
+            if (alias.isBlank() || alias.startsWith(prefix))
             {
                   return;
             }

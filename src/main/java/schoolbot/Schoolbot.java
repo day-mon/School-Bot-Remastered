@@ -17,9 +17,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.handlers.*;
-import schoolbot.listener.ChannelListener;
-import schoolbot.listener.MessageListener;
-import schoolbot.listener.RoleListener;
+import schoolbot.listener.*;
 import schoolbot.objects.config.ConfigOption;
 import schoolbot.objects.info.SystemInfo;
 import schoolbot.objects.misc.Emoji;
@@ -61,14 +59,11 @@ public class Schoolbot extends ListenerAdapter
             this.jda = JDABuilder.createDefault
                     (
                             configHandler.getString(ConfigOption.TOKEN),
-                            GatewayIntent.GUILD_MEMBERS,
-                            GatewayIntent.GUILD_EMOJIS,
-
                             GatewayIntent.DIRECT_MESSAGES,
                             GatewayIntent.DIRECT_MESSAGE_REACTIONS,
 
                             GatewayIntent.GUILD_MEMBERS,
-
+                            GatewayIntent.GUILD_EMOJIS,
                             GatewayIntent.GUILD_MESSAGES,
                             GatewayIntent.GUILD_MESSAGE_REACTIONS,
                             GatewayIntent.GUILD_VOICE_STATES
@@ -79,6 +74,9 @@ public class Schoolbot extends ListenerAdapter
                             new MessageListener(this),
                             new ChannelListener(this),
                             new RoleListener(this),
+                            new SelfLeaveListener(this),
+                            new SelfJoinListener(),
+                            new DebugListner(),
                             eventWaiter)
                     .setActivity(Activity.playing("building..."))
                     .setStatus(OnlineStatus.DO_NOT_DISTURB)

@@ -23,7 +23,7 @@ public class ClearUser extends Command
 
       public ClearUser(Command parent)
       {
-            super(parent, "", "", 1);
+            super(parent, "Clears messages of a target user", "[user mention] <amount of messages>", 1);
 
             addPermissions(Permission.ADMINISTRATOR);
             addSelfPermissions(Permission.MESSAGE_MANAGE);

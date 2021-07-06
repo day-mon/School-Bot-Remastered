@@ -22,20 +22,20 @@ public class SelfJoinListener extends ListenerAdapter
             var guild = event.getGuild();
             var channel = guild.getSystemChannel() == null ?
                     guild.getDefaultChannel() : guild.getSystemChannel();
+
+
             if (channel == null)
             {
+
                   guild.retrieveOwner().queue(owner ->
                   {
-                        if (owner == null)
-                        {
-                              LOGGER.warn("{} is ownerless and has no default or system channels. I cannot alert.", guild.getName());
-                              return;
-                        }
-
                         var ownerUser = owner.getUser();
 
-                        ownerUser.openPrivateChannel().flatMap(EmbedUtils::sendTutorial).queue();
-                  });
+                        ownerUser.openPrivateChannel().queue(EmbedUtils::sendTutorial);
+                  }, failure -> LOGGER.error("Error has occurred whilst retrieving owner", failure));
+                  return;
             }
+
+            EmbedUtils.sendTutorial(channel);
       }
 }

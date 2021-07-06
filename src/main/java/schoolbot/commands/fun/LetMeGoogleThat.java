@@ -12,7 +12,7 @@ public class LetMeGoogleThat extends Command
 
       public LetMeGoogleThat()
       {
-            super("", "", 1);
+            super("Sends LetMeGoogleThat link given target args", "[search results]", 1);
             addCalls("lmgtfy", "googlepls", "plsgoogle");
       }
 

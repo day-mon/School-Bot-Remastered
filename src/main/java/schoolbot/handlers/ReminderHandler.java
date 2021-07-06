@@ -6,7 +6,7 @@ import schoolbot.Schoolbot;
 import schoolbot.objects.misc.Reminder;
 import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
-import schoolbot.util.DatabaseUtil;
+import schoolbot.util.DatabaseUtils;
 import schoolbot.util.StringUtils;
 
 import java.time.Duration;
@@ -33,7 +33,7 @@ public class ReminderHandler
       {
             reminderExecutor.scheduleAtFixedRate(() ->
             {
-                  List<Assignment> assignments = DatabaseUtil.checkRemindTimes(schoolbot);
+                  List<Assignment> assignments = DatabaseUtils.checkRemindTimes(schoolbot);
                   assignments.forEach(this::sendAssignmentAlert);
             }, 0, 10, TimeUnit.SECONDS);
 
@@ -43,7 +43,7 @@ public class ReminderHandler
       {
             reminderExecutor.scheduleAtFixedRate(() ->
             {
-                  List<Reminder> reminderList = DatabaseUtil.classReminder(schoolbot);
+                  List<Reminder> reminderList = DatabaseUtils.classReminder(schoolbot);
                   reminderList.forEach(this::sendClassroomAlert);
             }, 0, 10, TimeUnit.SECONDS);
       }
@@ -146,9 +146,9 @@ public class ReminderHandler
                   LOGGER.info("{} has been notified", classroom.getName());
                   channel.sendMessage(dueMessage).queue();
 
-                  DatabaseUtil.removeReminder(schoolbot, reminder);
+                  DatabaseUtils.removeReminder(schoolbot, reminder);
 
-                  var lastReminder = DatabaseUtil.lastClassReminder(schoolbot, reminder);
+                  var lastReminder = DatabaseUtils.lastClassReminder(schoolbot, reminder);
 
                   if (lastReminder)
                   {

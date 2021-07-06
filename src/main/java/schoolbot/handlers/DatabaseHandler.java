@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
 import schoolbot.objects.config.ConfigOption;
-import schoolbot.util.DatabaseUtil;
+import schoolbot.util.DatabaseUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -99,7 +99,7 @@ public class DatabaseHandler
                   {
                         String fileName = file.getFileName().toString();
 
-                        var sqlTable = DatabaseUtil.class.getResourceAsStream("/sql/" + fileName + ".sql");
+                        var sqlTable = DatabaseUtils.class.getResourceAsStream("/sql/" + fileName + ".sql");
 
                         if (sqlTable != null)
                         {
