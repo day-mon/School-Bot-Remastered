@@ -76,7 +76,6 @@ public class Schoolbot extends ListenerAdapter
                             new RoleListener(this),
                             new SelfLeaveListener(this),
                             new SelfJoinListener(),
-                            new DebugListner(),
                             eventWaiter)
                     .setActivity(Activity.playing("building..."))
                     .setStatus(OnlineStatus.DO_NOT_DISTURB)
