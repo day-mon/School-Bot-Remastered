@@ -25,6 +25,8 @@ public class Checks
 {
       private static final Logger LOGGER = LoggerFactory.getLogger(Checks.class);
 
+      private Checks() {};
+
       public static boolean isNumber(String number)
       {
             return number.matches("-?\\d+(\\.\\d+)?");
@@ -36,7 +38,7 @@ public class Checks
             {
                   return Integer.parseInt(number);
             }
-            catch (Exception e)
+            catch (NumberFormatException e)
             {
                   return -1;
             }
@@ -80,7 +82,7 @@ public class Checks
                   {
                         ld = LocalDate.parse(potDate, DateTimeFormatter.ofPattern("M/d/yyyy"));
                   }
-                  catch (Exception e)
+                  catch (RuntimeException e)
                   {
                         LOGGER.error("Error occurred while checking assignment time", e);
                         return null;
@@ -105,7 +107,7 @@ public class Checks
             {
                   return LocalDate.parse(potentialDate, DateTimeFormatter.ofPattern("M/d/yyyy"));
             }
-            catch (Exception e)
+            catch (RuntimeException e)
             {
                   return null;
             }
@@ -271,7 +273,6 @@ public class Checks
             var commandEvent = values.getCommandEvent();
             var event = values.getMessageReceivedEvent();
             var jda = values.getJda();
-            var channel = commandEvent.getChannel();
             var machine = values.getMachine();
 
 

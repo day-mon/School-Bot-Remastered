@@ -9,9 +9,11 @@ import java.nio.file.Path;
 public class IOUtils
 {
 
+      private IOUtils() {}
+
       public static String getFileExtension(Path path)
       {
-            return path.toString().substring(path.toString().lastIndexOf(".") + 1);
+            return path.toString().substring(path.toString().lastIndexOf('.') + 1);
       }
 
       public static Path getJarPath(Class<?> classs)

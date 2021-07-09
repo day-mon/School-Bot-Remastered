@@ -36,14 +36,12 @@ public class MessageHandler
       public void handle(GuildMessageReceivedEvent event)
       {
             String messageStr = event.getMessage().getContentRaw();
-            var author = event.getAuthor();
             var channel = event.getChannel();
             var message = event.getMessage();
             var guild = event.getGuild();
             var prefix = schoolbot.getWrapperHandler().fetchGuildPrefix(guild.getIdLong());
-            var selfUser = event.getJDA().getSelfUser();
 
-            if (message.getAttachments().size() > 0)
+            if (!message.getAttachments().isEmpty())
             {
                   handleFile(event);
                   return;
@@ -66,8 +64,7 @@ public class MessageHandler
 
       private void handleFile(GuildMessageReceivedEvent event)
       {
-            User author = event.getAuthor();
-            Message message = event.getMessage();
+            var message = event.getMessage();
             List<Message.Attachment> attachments = message.getAttachments();
 
 
@@ -153,7 +150,7 @@ public class MessageHandler
       }
 
 
-      public record Triple(CompletableFuture<Message> val1, CompletableFuture<InputStream> val2,
+      private record Triple(CompletableFuture<Message> val1, CompletableFuture<InputStream> val2,
                            CompletableFuture<Void> val3)
       {
       }

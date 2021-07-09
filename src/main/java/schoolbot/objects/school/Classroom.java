@@ -265,9 +265,16 @@ public class Classroom implements Paginatable, Remindable
             this.startDate = LocalDateTime.of(startDatee, LocalTime.of(0, 0));
       }
 
+
       public void setStartDate(LocalDateTime localDateTime)
       {
             this.startDate = localDateTime;
+      }
+
+      public void setTime(LocalTime time)
+      {
+            this.startDate = startDate.toLocalDate().atTime(time);
+            this.endDate = endDate.toLocalDate().atTime(time);
       }
 
       public boolean isAutoFilled()
@@ -341,7 +348,7 @@ public class Classroom implements Paginatable, Remindable
 
       public int getSchoolID()
       {
-            return getSchool().getID();
+            return school.getID();
       }
 
       public String getTerm()
@@ -445,8 +452,6 @@ public class Classroom implements Paginatable, Remindable
 
       public MessageEmbed getAsEmbed(@NotNull Schoolbot schoolbot)
       {
-            Role role = schoolbot.getJda().getRoleById(this.roleID);
-
             return getAsEmbedBuilder(schoolbot)
                     .build();
       }
@@ -479,7 +484,7 @@ public class Classroom implements Paginatable, Remindable
             return new EmbedBuilder()
                     .setTitle(this.name + " | (" + this.classIdentifier + ")", URL)
                     .addField("Class number", String.valueOf(this.number), false)
-                    .addField("Meeting time", this.getTime(), false)
+                    .addField("Meeting time", this.time, false)
                     .addField("Description", this.description, false)
                     .addField("Start Date", this.startDate == null ? Arrays.toString(this.inputClassStartDate) : StringUtils.formatDate(this.startDate), false)
                     .addField("End Date", this.endDate == null ? Arrays.toString(this.inputClassEndDate) : StringUtils.formatDate(this.endDate), false)
@@ -530,7 +535,7 @@ public class Classroom implements Paginatable, Remindable
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Classroom classroom = (Classroom) o;
-            return this.id == classroom.getId();
+            return this.id == classroom.id;
       }
 
       @Override

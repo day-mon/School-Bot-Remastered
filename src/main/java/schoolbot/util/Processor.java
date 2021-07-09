@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 
 public class Processor
 {
+      private Processor() {}
+
       /**
        * Returns the next state the state machine should goto
        * The Event field is just so I can use the channel
@@ -90,7 +92,6 @@ public class Processor
             var event = values.getCommandEvent();
 
             int size = genericList.size();
-            var channel = event.getChannel();
             var schoolbot = event.getSchoolbot();
 
             if (genericList.isEmpty())

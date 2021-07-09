@@ -88,14 +88,14 @@ public class Schoolbot extends ListenerAdapter
 
             this.reminderHandler = new ReminderHandler(this);
 
-            getJda().getPresence().setPresence(OnlineStatus.ONLINE, Activity.streaming("Prefix: " + Constants.DEFAULT_PREFIX, "https://www.youtube.com/watch?v=Lju6h-C37hE"));
+            jda.getPresence().setPresence(OnlineStatus.ONLINE, Activity.streaming("Prefix: " + Constants.DEFAULT_PREFIX, "https://www.youtube.com/watch?v=Lju6h-C37hE"));
             LOGGER.info("Account:           " + event.getJDA().getSelfUser());
             LOGGER.info("Java Version:      " + SystemInfo.getJavaVersion());
             LOGGER.info("JDA Version:       " + JDAInfo.VERSION);
             LOGGER.info("Schoolbot Version: " + Constants.VERSION);
             LOGGER.info("Operating System:  " + SystemInfo.getOperatingSystem());
             LOGGER.info("Github Repo:       " + "https://github.com/tykoooo/School-Bot-Remastered");
-            LOGGER.info("Startup Time:      " + Duration.between(getBotStartTime(), LocalDateTime.now()).toMillisPart() + " ms");
+            LOGGER.info("Startup Time:      " + Duration.between(botStartTime, LocalDateTime.now()).toMillisPart() + " ms");
 
 
             try

@@ -165,7 +165,7 @@ public class Assignment implements Comparable<Assignment>, Paginatable, Remindab
       public boolean equals(Object o)
       {
             if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (null == o || getClass() != o.getClass()) return false;
             Assignment that = (Assignment) o;
             return points == that.points && professorID == that.professorID && id == that.id && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(dueDate, that.dueDate) && type == that.type;
       }
@@ -221,7 +221,7 @@ public class Assignment implements Comparable<Assignment>, Paginatable, Remindab
             EXTRA_CREDIT("Extra Credit"),
             PAPER("PAPER");
 
-            final String assignmentType;
+            private String assignmentType;
 
             AssignmentType(String assignmentType)
             {

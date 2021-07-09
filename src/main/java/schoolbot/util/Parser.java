@@ -16,6 +16,8 @@ public class Parser
 
       private static final Logger logger = LoggerFactory.getLogger(Parser.class);
 
+      private Parser() {}
+
       public static List<String> args(String stringArgs)
       {
             List<String> args = new ArrayList<>();
@@ -27,25 +29,27 @@ public class Parser
             int quoteCount = 0;
             StringBuilder tempString = new StringBuilder();
 
-            for (int i = 0; i < splitArgs.length; i++)
+            var length = splitArgs.length;
+
+            for (int i = 0; i < length; i++)
             {
-                  if (splitArgs[i].contains("\"") || splitArgs[i].contains("”"))
+                  if (splitArgs[i].contains("'") || splitArgs[i].contains("”"))
                   {
                         quoteCount++;
                         int temp = i;
 
-                        while (temp != splitArgs.length && quoteCount != 2)
+                        while (temp != length && quoteCount != 2)
                         {
                               tempString.append(splitArgs[i]).append(" ");
                               if (i + 1 != splitArgs.length) i++;
                               else break;
-                              if (i != temp && splitArgs[i].contains("\"") || splitArgs[i].contains("”"))
+                              if (i != temp && splitArgs[i].contains("'") || splitArgs[i].contains("”"))
                               {
                                     quoteCount++;
                                     tempString.append(splitArgs[i]);
                               }
                         }
-                        tempString = new StringBuilder(tempString.toString().trim().replaceAll("\"", ""));
+                        tempString = new StringBuilder(tempString.toString().trim().replaceAll("'", ""));
                         args.add(tempString.toString());
                         quoteCount = 0;
                         tempString = new StringBuilder();
@@ -94,7 +98,7 @@ public class Parser
                   {
                         LocalTime localTime = localDateTimeMap.get(day).toLocalTime();
 
-                        DatabaseUtils.addClassReminder(schoolbot, LocalDateTime.of(ld, localTime), List.of(60, 30, 10), classroom);
+                        DatabaseUtils.addClassReminder(schoolbot, LocalDateTime.of(ld, localTime), List.of(60, 30, 10, 0), classroom);
 
                         if (dayOfWeekList.get(dayOfWeekList.size() - 1) == ld.getDayOfWeek())
                         {
@@ -125,7 +129,7 @@ public class Parser
                   return null;
             }
 
-            Map<DayOfWeek, LocalDateTime> s = new HashMap<>();
+            Map<DayOfWeek, LocalDateTime> localDateTimeMap = new EnumMap<>(DayOfWeek.class);
 
 
             Map<String, DayOfWeek> stringDayOfWeekMap = Map.of(
@@ -133,7 +137,9 @@ public class Parser
                     "Tu", DayOfWeek.TUESDAY,
                     "We", DayOfWeek.WEDNESDAY,
                     "Th", DayOfWeek.THURSDAY,
-                    "Fr", DayOfWeek.FRIDAY
+                    "Thr", DayOfWeek.THURSDAY,
+                    "Fr", DayOfWeek.FRIDAY,
+                    "Fri", DayOfWeek.FRIDAY
             );
 
 
@@ -159,13 +165,18 @@ public class Parser
                   else
                   {
                         hour = Integer.parseInt(classTimeSplit[0]) + 12;
+
+                        if (hour == 24)
+                        {
+                              hour = 12;
+                        }
+
                         minute = Integer.parseInt(classTimeSplit[1].toLowerCase().replaceAll("pm", ""));
                   }
             }
             catch (Exception e)
             {
-                  logger.error("Error whilst parsing {} or {}", hour, minute);
-                  e.printStackTrace();
+                  logger.error("Error whilst parsing {} or {}", hour, minute, e);
                   return null;
             }
 
@@ -173,10 +184,10 @@ public class Parser
             {
                   if (stringDayOfWeekMap.containsKey(day))
                   {
-                        s.put(stringDayOfWeekMap.get(day), LocalDateTime.of(classroom.getStartDate(), LocalTime.of(hour, minute)));
+                        localDateTimeMap.put(stringDayOfWeekMap.get(day), LocalDateTime.of(classroom.getStartDate(), LocalTime.of(hour, minute)));
                   }
             }
-            return s;
+            return localDateTimeMap;
       }
 
       public static LocalDateTime parseTimeString(Date time, String strTime)
@@ -207,13 +218,17 @@ public class Parser
                   else
                   {
                         hour = Integer.parseInt(classTimeSplit[0]) + 12;
+
+                        if (hour == 24)
+                        {
+                              hour = 12;
+                        }
                         minute = Integer.parseInt(classTimeSplit[1].replaceAll("pm", ""));
                   }
             }
             catch (Exception e)
             {
-                  logger.error("Error whilst parsing {} or {}", hour, minute);
-                  e.printStackTrace();
+                  logger.error("Error whilst parsing {} or {}", hour, minute, e);
                   return null;
             }
             return LocalDateTime.of(localDate, LocalTime.of(hour, minute));

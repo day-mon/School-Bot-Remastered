@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
 
 public class StringUtils
 {
-      public StringUtils()
+      private StringUtils()
       {
 
       }

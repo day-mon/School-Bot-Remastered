@@ -45,9 +45,7 @@ public class Clear extends Command
 
                   var channel = event.getChannel();
                   var message = event.getMessage();
-                  var member = event.getMember();
                   var author = event.getUser();
-                  var selfUser = event.getJDA().getSelfUser();
 
                   message.delete().queue();
 

@@ -36,7 +36,6 @@ public class Help extends Command
             Map<String, Command> commands = event.getSchoolbot().getCommandHandler().getCommands();
             String command = args.get(0);
             var channel = event.getChannel();
-            var jda = event.getJDA();
 
 
             if (!commands.containsKey(command))

@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 public class CommandHandler
 {
-      private final String COMMANDS_PACKAGE = "schoolbot.commands";
+      private static final String COMMANDS_PACKAGE = "schoolbot.commands";
       private final Logger CMD_HANDLER_LOGGER = LoggerFactory.getLogger(this.getClass());
 
       private final ClassGraph classGraph = new ClassGraph().acceptPackages(COMMANDS_PACKAGE);

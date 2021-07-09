@@ -62,8 +62,6 @@ public class ListAssignments extends Command
 
             if (classroom != null)
             {
-                  var assignmentList = values.getAssignmentList();
-
                   processAssignmentList(values);
 
                   return;
@@ -98,11 +96,9 @@ public class ListAssignments extends Command
       }
 
 
-      public static class ListAssignmentsStateMachine extends ListenerAdapter
+      private static class ListAssignmentsStateMachine extends ListenerAdapter
       {
-
             private final StateMachineValues values;
-
 
             public ListAssignmentsStateMachine(StateMachineValues values)
             {

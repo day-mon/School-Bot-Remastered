@@ -48,13 +48,13 @@ public class SchoolEdit extends Command
       }
 
 
-      public static class SchoolEditStateMachine extends ListenerAdapter implements StateMachine
+      private static class SchoolEditStateMachine extends ListenerAdapter implements StateMachine
       {
 
             private String updateColumn = "";
             private final StateMachineValues values;
 
-            public SchoolEditStateMachine(StateMachineValues values)
+            private SchoolEditStateMachine(StateMachineValues values)
             {
                   values.setMachine(this);
                   this.values = values;
@@ -118,8 +118,6 @@ public class SchoolEdit extends Command
                         }
 
                         case 3 -> {
-                              String content = message.toLowerCase().trim();
-
                               if (updateColumn.equalsIgnoreCase("N/A"))
                               {
                                     EmbedUtils.error(event, "** %s ** is not a valid choice please return again");

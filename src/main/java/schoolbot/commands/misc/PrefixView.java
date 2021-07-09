@@ -19,7 +19,6 @@ public class PrefixView extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
-            var guild = event.getGuild();
             var user = event.getUser();
             var prefix = event.getGuildPrefix().equals(Constants.DEFAULT_PREFIX) ? "No Custom Prefix Set" : event.getGuildPrefix();
 

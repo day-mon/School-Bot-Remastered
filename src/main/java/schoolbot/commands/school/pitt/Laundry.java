@@ -21,8 +21,8 @@ import java.util.Map;
 
 public class Laundry extends Command
 {
-      private final static String BASE_URL = "https://www.laundryview.com/api/currentRoomData?school_desc_key=4590&location=";
-      private final static Map<String, String> LAUNDRY_API_CALLS = Map.ofEntries(
+      private static final String BASE_URL = "https://www.laundryview.com/api/currentRoomData?school_desc_key=4590&location=";
+      private static final Map<String, String> LAUNDRY_API_CALLS = Map.ofEntries(
               Map.entry("HICKORY", "5813396"),
               Map.entry("BRIAR", "581339005"),
               Map.entry("BUCKHORN", "5813393"),
@@ -86,7 +86,9 @@ public class Laundry extends Command
             ArrayList<MessageEmbed> embeds = new ArrayList<>();
 
 
-            for (int i = 0; i < jsonArray.length(); i++)
+            var length = jsonArray.length();
+
+            for (int i = 0; i < length; i++)
             {
                   JSONObject ele = jsonArray.getJSONObject(i);
                   String typeString = ele.get("type").toString();

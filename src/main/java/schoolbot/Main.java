@@ -11,7 +11,7 @@ public class Main
 {
       public static void main(String[] args)
       {
-            Schoolbot bot = new Schoolbot();
+            final Schoolbot bot = new Schoolbot();
             final Logger MAIN_LOGGER = LoggerFactory.getLogger(Main.class);
 
             try

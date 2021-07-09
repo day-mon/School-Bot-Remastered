@@ -40,7 +40,7 @@ public class SchoolAdd extends Command
 
       }
 
-      private static boolean addToDbAndCreateRole(MessageEmbed embed, Schoolbot schoolbot, CommandEvent event)
+      private static boolean addToDbAndCreateRole(MessageEmbed embed, CommandEvent event)
       {
             String schoolName = embed.getTitle();
 
@@ -72,9 +72,6 @@ public class SchoolAdd extends Command
 
 
             var channel = event.getChannel();
-            var user = event.getUser();
-            var guild = event.getGuild();
-            var schoolbot = event.getSchoolbot();
 
             if (Checks.isNumber(firstArg))
             {
@@ -120,7 +117,7 @@ public class SchoolAdd extends Command
             else if (schools.size() == 1)
             {
                   MessageEmbed embed = schools.get(1);
-                  if (addToDbAndCreateRole(embed, schoolbot, event))
+                  if (addToDbAndCreateRole(embed, event))
                   {
                         event.sendMessage("School Created");
                         event.sendMessage(embed);
@@ -143,8 +140,9 @@ public class SchoolAdd extends Command
       private Map<Integer, MessageEmbed> evalSchools(JSONArray jsonArray)
       {
             HashMap<Integer, MessageEmbed> em = new HashMap<>();
+            var length = jsonArray.length();
 
-            for (int i = 0; i < jsonArray.length(); i++)
+            for (int i = 0; i < length; i++)
             {
 
                   JSONObject elementsWithinArray = jsonArray.getJSONObject(i);
@@ -154,27 +152,33 @@ public class SchoolAdd extends Command
 
                   JSONArray webPagesArray = elementsWithinArray.getJSONArray("web_pages");
                   StringBuilder webPagesUrls = new StringBuilder();
-                  for (int j = 0; j < webPagesArray.length(); j++)
+
+                  var webPagesLength = webPagesArray.length();
+
+                  for (int j = 0; j < webPagesLength; j++)
                   {
                         webPagesUrls.append(webPagesArray.getString(j)).append("\n");
                   }
                   JSONArray schoolDomainsElements = elementsWithinArray.getJSONArray("domains");
                   StringBuilder schoolDomains = new StringBuilder();
-                  for (int k = 0; k < schoolDomainsElements.length(); k++)
+
+                  var schoolDomainsLength = schoolDomains.length();
+
+                  for (int k = 0; k < schoolDomainsLength; k++)
                   {
 
                         String schoolDomain = schoolDomainsElements.getString(k);
                         if (schoolDomain.contains("edu"))
                         {
                               String[] splitDomain = schoolDomain.split("\\.");
-                              for (int s = 0; s < splitDomain.length; s++)
+                              var splitDomainLength = splitDomain.length;
+                              for (int s = 0; s < splitDomainLength; s++)
                               {
                                     if (splitDomain[s].equals("edu"))
                                     {
                                           schoolDomains.append("@").append(splitDomain[s - 1]).append(".edu").append("\n");
                                           break;
                                     }
-
                               }
                         }
                   }
@@ -196,17 +200,16 @@ public class SchoolAdd extends Command
             return em;
       }
 
-      public static class SchoolStateMachine extends ListenerAdapter
+      private static class SchoolStateMachine extends ListenerAdapter
       {
             private final long channelID, authorID;
             private final Map<Integer, MessageEmbed> schools;
             private final Schoolbot schoolbot;
             private final CommandEvent cmdEvent;
 
-            private final int state = 0;
 
 
-            public SchoolStateMachine(@NotNull CommandEvent event, @NotNull Map<Integer, MessageEmbed> schools)
+            private SchoolStateMachine(@NotNull CommandEvent event, @NotNull Map<Integer, MessageEmbed> schools)
             {
                   this.cmdEvent = event;
                   this.authorID = event.getUser().getIdLong();
@@ -227,8 +230,6 @@ public class SchoolAdd extends Command
                   int schoolChoice = Integer.parseInt(event.getMessage().getContentRaw());
                   MessageEmbed embed = schools.get(schoolChoice);
 
-                  var guild = event.getGuild();
-
 
                   if (event.getMessage().getContentRaw().equalsIgnoreCase("stop"))
                   {
@@ -238,7 +239,7 @@ public class SchoolAdd extends Command
                   }
 
 
-                  if (addToDbAndCreateRole(embed, schoolbot, cmdEvent))
+                  if (addToDbAndCreateRole(embed, cmdEvent))
                   {
                         event.getChannel().sendMessage("School Created").queue();
                         event.getChannel().sendMessageEmbeds(embed).queue();
@@ -250,6 +251,6 @@ public class SchoolAdd extends Command
 
                   event.getJDA().removeEventListener(this);
             }
-      } // end
+      }
 }
 

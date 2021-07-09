@@ -13,12 +13,6 @@ public class CommandCooldownHandler
 
       private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
-      public CommandCooldownHandler()
-      {
-
-      }
-
-
       /**
        * Used for thread safety.
        */
@@ -79,7 +73,7 @@ public class CommandCooldownHandler
       }
 
 
-      public record CooledCommand(Member member, Command command)
+      private record CooledCommand(Member member, Command command)
       {
       }
 

@@ -2,11 +2,6 @@ package schoolbot.objects.info;
 
 public class SystemInfo
 {
-      public SystemInfo()
-      {
-
-      }
-
       public static String getJavaVersion()
       {
             return String.format("%s by %s", System.getProperty("java.version"), System.getProperty("java.vendor"));

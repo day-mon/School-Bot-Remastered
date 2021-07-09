@@ -261,7 +261,7 @@ public abstract class Command
                     .addField("Usage Example",
                             this.usageExample.equalsIgnoreCase("N/A") ?
                                     "`" + this.usageExample + "`" : "`" + Constants.DEFAULT_PREFIX + this.usageExample + "`", false)
-                    .addField("Aliases", (this.isChild()) ? String.valueOf(this.parent.getCalls()) : String.valueOf(this.calls), false)
+                    .addField("Aliases", (this.isChild()) ? String.valueOf(this.parent.calls) : String.valueOf(this.calls), false)
                     .addField("Permissions Required", commandPermissions.isEmpty() ? "`[none]`" : commandPrerequisites, false)
                     .setColor(Color.BLACK)
                     .setFooter("[] = Required | <> = Optional");
@@ -280,7 +280,7 @@ public abstract class Command
 
       public boolean hasChildren()
       {
-            return !getChildren().isEmpty();
+            return !children.isEmpty();
       }
 
       public boolean hasCommandFlags(CommandFlag... flags)

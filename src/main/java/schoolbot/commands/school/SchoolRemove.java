@@ -49,8 +49,6 @@ public class SchoolRemove extends Command
             if (processedList == 1)
             {
                   event.sendMessage("This is the only school available to delete would you like to delete it?");
-
-                  var school = values.getSchool();
                   values.setState(2);
             }
 
@@ -58,12 +56,12 @@ public class SchoolRemove extends Command
 
       }
 
-      public static class SchoolRemoveStateMachine extends ListenerAdapter implements StateMachine
+      private static class SchoolRemoveStateMachine extends ListenerAdapter implements StateMachine
       {
             private final StateMachineValues values;
 
 
-            public SchoolRemoveStateMachine(StateMachineValues values)
+            private SchoolRemoveStateMachine(StateMachineValues values)
             {
                   this.values = values;
             }

@@ -66,7 +66,7 @@ public class StateMachineValues
             this.authorId = event.getUser().getIdLong();
             this.channelId = event.getChannel().getIdLong();
             this.jda = event.getJDA();
-            this.messageReceivedEvent = getCommandEvent().getEvent();
+            this.messageReceivedEvent = this.event.getEvent();
             this.school = new School();
             this.classroom = new Classroom();
             this.assignment = new Assignment();
@@ -234,9 +234,9 @@ public class StateMachineValues
             {
                   case "School" -> {
                         var school = (School) obj;
-                        setClassroomList(school.getClassroomList());
-                        setProfessorList(school.getProfessorList());
-                        setSchool(school);
+                        classroomList = school.getClassroomList();
+                        professorList = school.getProfessorList();
+                        this.school = school;
                   }
 
                   case "Classroom" -> {
@@ -244,33 +244,33 @@ public class StateMachineValues
 
                         var school = classroom.getSchool();
 
-                        setSchool(school);
-                        setClassroom(classroom);
-                        setProfessorList(school.getProfessorList());
-                        setAssignmentList(classroom.getAssignments());
+                        this.school = school;
+                        this.classroom = classroom;
+                        this.professorList = school.getProfessorList();
+                        this.assignmentList = classroom.getAssignments();
                   }
 
                   case "Assignment" -> {
                         var assignment = (Assignment) obj;
                         var school = assignment.getClassroom().getSchool();
 
-                        setSchool(school);
+                        this.school = school;
                         setClassroom(assignment.getClassroom());
-                        setAssignment(assignment);
+                        this.assignment = assignment;
 
-                        setProfessorList(school.getProfessorList());
-                        setClassroomList(school.getClassroomList());
+                        professorList = school.getProfessorList();
+                        classroomList = school.getClassroomList();
                   }
 
                   case "Professor" -> {
                         var professor = (Professor) obj;
                         var school = professor.getProfessorsSchool();
 
-                        setSchool(school);
-                        setProfessor(professor);
+                        this.school = school;
+                        this.professor = professor;
 
-                        setClassroomList(school.getClassroomList());
-                        setProfessorList(school.getProfessorList());
+                        classroomList = school.getClassroomList();
+                        professorList = school.getProfessorList();
 
                   }
 
@@ -303,22 +303,22 @@ public class StateMachineValues
             {
                   case "School" -> {
                         var school = (List<School>) list;
-                        setSchoolList(school);
+                        schoolList = school;
                   }
 
                   case "Professor" -> {
                         var professor = (List<Professor>) list;
-                        setProfessorList(professor);
+                        professorList = professor;
                   }
 
                   case "Classroom" -> {
                         var classroom = (List<Classroom>) list;
-                        setClassroomList(classroom);
+                        classroomList = classroom;
                   }
 
                   case "Assignment" -> {
                         var assignment = (List<Assignment>) list;
-                        setAssignmentList(assignment);
+                        assignmentList = assignment;
                   }
 
                   default -> throw new IllegalStateException(String.format("%s is not supported", className));

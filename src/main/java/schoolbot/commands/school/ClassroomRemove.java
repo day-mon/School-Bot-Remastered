@@ -38,7 +38,7 @@ public class ClassroomRemove extends Command
 
             List<School> schools = event.getGuildSchools()
                     .stream()
-                    .filter(school -> !school.getClassroomList().isEmpty())
+                    .filter(School::hasClasses)
                     .collect(Collectors.toList());
             values.setSchoolList(schools);
 
@@ -78,7 +78,7 @@ public class ClassroomRemove extends Command
 
       }
 
-      public static class ClassroomRemoveStateMachine extends ListenerAdapter implements StateMachine
+      private static class ClassroomRemoveStateMachine extends ListenerAdapter implements StateMachine
       {
             private final StateMachineValues values;
 
@@ -111,7 +111,12 @@ public class ClassroomRemove extends Command
                   switch (state)
                   {
                         case 1 -> {
-                              var success = Processor.processGenericList(values, values.getSchoolList(), School.class);
+                              var success = Processor.validateMessage(values, values.getSchoolList());
+
+                              if (!success)
+                              {
+                                    return;
+                              }
 
                               var classroomList = values.getSchool()
                                       .getClassroomList()
@@ -119,22 +124,29 @@ public class ClassroomRemove extends Command
                                       .filter(clazzroom -> !clazzroom.hasAssignments())
                                       .collect(Collectors.toList());
 
+                              var processedList = Processor.processGenericList(values, classroomList, Classroom.class);
+
+                              if (processedList == 0)
+                              {
+                                    jda.removeEventListener(this);
+                                    return;
+                              }
+
+                              if (processedList == 1)
+                              {
+                                    var classroom = values.getClassroom();
+
+                                    EmbedUtils.information(event, "%s is the only class available to delete. Would you like to delete this class?", classroom.getName());
+                                    values.setState(4);
+                                    return;
+                              }
+
+
                               var school = values.getSchool();
 
 
-                              if (classroomList.isEmpty())
-                              {
-                                    EmbedUtils.error(event, "** %s ** has no classes without assignments already assigned", school.getName());
-                                    jda.removeEventListener(this);
-                              }
-
                               EmbedUtils.success(event, "** %s ** has been selected", school.getName());
 
-                              var commandEvent = values.getCommandEvent();
-
-                              commandEvent.sendAsPaginatorWithPageNumbers(classroomList);
-                              EmbedUtils.information(commandEvent, "Please select a page number of the class you want to remove");
-                              values.incrementMachineState();
                         }
 
 

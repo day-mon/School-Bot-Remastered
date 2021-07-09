@@ -1,5 +1,6 @@
 package schoolbot.handlers;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
@@ -49,6 +50,8 @@ public class ReminderHandler
       }
 
 
+      // TODO: Fix one minute delay and remind on class creation alert spam
+
       private void sendAssignmentAlert(Assignment assignment)
       {
             try
@@ -57,20 +60,19 @@ public class ReminderHandler
                   var channel = schoolbot.getJda().getTextChannelById(classroom.getChannelID());
                   var role = schoolbot.getJda().getRoleById(classroom.getRoleID());
 
-
                   if (channel == null)
                   {
                         LOGGER.error("{} has no channel ID", assignment.getName());
                         return;
                   }
 
+                  var due = Duration.between(LocalDateTime.now(), assignment.getDueDate()).toMinutes();
 
-                  int due = assignment.getDueDate().minusMinutes(LocalDateTime.now().getMinute()).getMinute();
                   String mention = role != null ? role.getAsMention() : "Students of " + classroom.getName();
                   String dueMessage = (due <= 0) ?
                           String.format("%s, ** %s ** is **now due**", mention, assignment.getName())
                           :
-                          String.format("%s, ** %s ** is due in ** %d ** minutes", mention, assignment.getName(), due);
+                          String.format("%s, ** %s ** is due in ** %d ** minutes", mention, assignment.getName(), due+1);
 
                   /*
                    * This will check if the assignment is pass due by one minute and 10 seconds
@@ -112,6 +114,7 @@ public class ReminderHandler
             try
             {
                   var classroom = (Classroom) reminder.obj();
+                  var due = Duration.between(LocalDateTime.now(), classroom.getStartDateWithTime()).toMinutes() ;
                   var channel = schoolbot.getJda().getTextChannelById(classroom.getChannelID());
                   var role = schoolbot.getJda().getRoleById(classroom.getRoleID());
 
@@ -121,12 +124,15 @@ public class ReminderHandler
                         return;
                   }
 
-                  int due = classroom.getStartDateWithTime().minusMinutes(LocalDateTime.now().getMinute()).getMinute();
+
                   String mention = role != null ? role.getAsMention() : "Students of " + classroom.getName();
                   String dueMessage = (due <= 0) ?
                           String.format("%s, ** %s ** is **now starting**", mention, classroom.getName())
                           :
-                          String.format("%s, ** %s ** is starting in ** %d ** minutes", mention, classroom.getName(), due);
+                          String.format("%s, ** %s ** is starting in ** %d ** minutes", mention, classroom.getName(), due+1);
+
+                  LOGGER.info("Due time: {} min", classroom.getStartDateWithTime().minusMinutes(LocalDateTime.now().getMinute()));
+
 
                   /*
                    * This will check if the assignment is pass due by one minute and 10 seconds

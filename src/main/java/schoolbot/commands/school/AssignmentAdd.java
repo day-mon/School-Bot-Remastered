@@ -56,11 +56,11 @@ public class AssignmentAdd extends Command
                                                                 
                           """, classroom1.getName());
 
-                  values.setState(4);
+                  values.setState(3);
             }
             else
             {
-                  values.setState(3);
+                  values.setState(2);
             }
       }
 
@@ -93,10 +93,7 @@ public class AssignmentAdd extends Command
 
                         if (processedElement == 1)
                         {
-                              var school = values.getSchool();
-                              var classroomList = school.getClassroomList();
-
-                              event.sendSelfDeletingMessage("** %s ** has been selected. **This message will be deleted in 10 seconds to reduce clutter!**");
+                              event.sendSelfDeletingMessage(String.format("** %s ** has been selected. **This message will be deleted in 10 seconds to reduce clutter!**", classroom.getName()));
 
                               processClassroomList(values);
                         }
@@ -136,12 +133,12 @@ public class AssignmentAdd extends Command
             jda.addEventListener(new AssignmentAddStateMachine(values));
       }
 
-      public static class AssignmentAddStateMachine extends ListenerAdapter implements StateMachine
+      private static class AssignmentAddStateMachine extends ListenerAdapter implements StateMachine
       {
             private LocalDate date;
             private final StateMachineValues values;
 
-            public AssignmentAddStateMachine(StateMachineValues values)
+            private AssignmentAddStateMachine(StateMachineValues values)
             {
                   values.setMachine(this);
                   this.values = values;
@@ -161,7 +158,6 @@ public class AssignmentAdd extends Command
 
                   var channel = event.getChannel();
                   var jda = event.getJDA();
-                  var guild = event.getGuild();
 
                   String message = event.getMessage().getContentRaw();
 
@@ -179,6 +175,8 @@ public class AssignmentAdd extends Command
                               }
 
 
+                              //todo: goes from state 1 -> 3?
+
                               var school = values.getSchool();
 
 
@@ -189,8 +187,6 @@ public class AssignmentAdd extends Command
                               {
                                     success.delete().queue();
 
-                                    var processedList = Processor.processGenericList(values, school.getClassroomList(), Classroom.class);
-
                                     processClassroomList(values);
 
                               });
@@ -198,9 +194,15 @@ public class AssignmentAdd extends Command
                         }
 
 
-                        case 3 -> {
+                        case 2 -> {
                               var classroomList = values.getClassroomList();
                               var success = Processor.validateMessage(values, classroomList);
+
+                              if (!success)
+                              {
+                                    return;
+                              }
+
                               var classroom = values.getClassroom();
                               EmbedUtils.success(event, "** %s ** has successfully been selected", classroom.getName());
                               channel.sendMessageFormat("""
@@ -210,8 +212,7 @@ public class AssignmentAdd extends Command
                                       Emoji.SMILEY_FACE.getAsChat()).queue();
                         }
 
-                        case 4 -> {
-                              values.setAssignment(new Assignment());
+                        case 3 -> {
                               var classroom = values.getClassroom();
 
                               values.getAssignment().setClassroom(classroom);
@@ -224,7 +225,7 @@ public class AssignmentAdd extends Command
 
                         }
 
-                        case 5 -> {
+                        case 4 -> {
                               values.getAssignment().setDescription(message);
 
                               EmbedUtils.success(event, "Description has successfully been added as Assignment name..");
@@ -232,7 +233,7 @@ public class AssignmentAdd extends Command
                               values.incrementMachineState();
                         }
 
-                        case 6 -> {
+                        case 5 -> {
                               if (!Checks.isNumber(message) || message.toLowerCase().contains("idk"))
                               {
                                     EmbedUtils.error(event, "** %s ** is not a number.. try again!", message);
@@ -257,12 +258,12 @@ public class AssignmentAdd extends Command
                               values.incrementMachineState();
                         }
 
-                        case 7 -> {
+                        case 6 -> {
                               String content = message.toLowerCase();
 
                               Assignment.AssignmentType type;
 
-                              if (message.contains("exam") || message.contains("1"))
+                              if (content.contains("exam") || content.contains("1"))
                               {
                                     type = Assignment.AssignmentType.EXAM;
                               }
@@ -300,7 +301,7 @@ public class AssignmentAdd extends Command
                               values.incrementMachineState();
                         }
 
-                        case 8 -> {
+                        case 7 -> {
                               date = Checks.isValidAssignmentDate(values);
 
                               if (Objects.isNull(date))
@@ -320,7 +321,7 @@ public class AssignmentAdd extends Command
                               values.incrementMachineState();
                         }
 
-                        case 9 -> {
+                        case 8 -> {
                               var time = Checks.validTime(values, date);
 
 

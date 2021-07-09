@@ -8,16 +8,20 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Constants;
 import schoolbot.Schoolbot;
 import schoolbot.objects.misc.DatabaseDTO;
+import schoolbot.objects.misc.Emoji;
 import schoolbot.objects.misc.interfaces.Paginatable;
 import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;
+import schoolbot.util.DatabaseUtils;
+import schoolbot.util.EmbedUtils;
 
 import java.awt.*;
 import java.time.Instant;
@@ -25,10 +29,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class CommandEvent
 {
-      Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+      private Logger LOGGER = LoggerFactory.getLogger(this.getClass());
       private final GuildMessageReceivedEvent event;
       private final Schoolbot schoolbot;
       private final Command command;
@@ -334,7 +340,6 @@ public class CommandEvent
 
       public boolean assignPrefix(String prefix)
       {
-            var guildId = event.getGuild().getIdLong();
             return schoolbot.getWrapperHandler().assignGuildPrefix(this, prefix);
       }
 

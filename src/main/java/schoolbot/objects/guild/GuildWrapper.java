@@ -31,10 +31,10 @@ public class GuildWrapper
 
       public GuildWrapper(DatabaseUtils.WrapperReturnValue data)
       {
-            this.guildId = data.guildID();
-            this.schoolList = data.schoolMap();
-            this.classrooms = Collections.synchronizedList(data.classrooms());
-            this.guildPrefix = data.prefix() == null ? Constants.DEFAULT_PREFIX : data.prefix();
+            guildId = data.guildID();
+            schoolList = data.schoolMap();
+            classrooms = Collections.synchronizedList(data.classrooms());
+            guildPrefix = data.prefix() == null ? Constants.DEFAULT_PREFIX : data.prefix();
       }
 
       /*

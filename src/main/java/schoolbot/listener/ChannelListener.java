@@ -31,7 +31,6 @@ public class ChannelListener extends ListenerAdapter
                     .queue(channelDelete ->
                     {
                           var channelDeleteUser = channelDelete.get(0).getUser();
-                          var textChannel = event.getChannel();
 
 
                           if (selfUser.getIdLong() == channelDeleteUser.getIdLong())

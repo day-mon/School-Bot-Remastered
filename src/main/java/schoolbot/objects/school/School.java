@@ -269,8 +269,6 @@ public class School implements Paginatable
 
       public MessageEmbed getAsEmbed(@NotNull Schoolbot schoolbot)
       {
-            Role role = schoolbot.getJda().getRoleById(this.roleID);
-
             return getAsEmbedBuilder(schoolbot)
                     .build();
       }
@@ -402,6 +400,7 @@ public class School implements Paginatable
 
 
             Parser.classTime(schoolbot, classroom.getTime(), classroom);
+            classroomList.add(classroom);
             professorList.add(classroom.getProfessor());
             channel.sendMessageEmbeds(classroom.getAsEmbed(schoolbot)).queue();
       }
@@ -516,8 +515,9 @@ public class School implements Paginatable
             schoolClass.setRoleID(role.getIdLong());
             schoolClass.setChannelID(textChannel.getIdLong());
 
+            var elementSize = elementsRight.size() - 1;
 
-            for (int left = 1, right = 2; right <= elementsRight.size() - 1; left++, right++)
+            for (int left = 1, right = 2; right <= elementSize; left++, right++)
             {
 
                   // Gotta check if the current tag w e are on is a div because if its not we are not on something we wanna scrape.

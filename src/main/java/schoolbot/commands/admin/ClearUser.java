@@ -43,7 +43,7 @@ public class ClearUser extends Command
             switch (argCount)
             {
                   case 1 -> {
-                        if (message.getMentionedMembers().size() == 0)
+                        if (message.getMentionedMembers().isEmpty())
                         {
                               EmbedUtils.error(event, "You did not mention anyone");
                               return;
@@ -86,7 +86,7 @@ public class ClearUser extends Command
                         }
 
 
-                        if (message.getMentionedMembers().size() == 0)
+                        if (message.getMentionedMembers().isEmpty())
                         {
                               EmbedUtils.error(event, "You do not mention anyone...");
                               return;

@@ -11,11 +11,6 @@ public class SelfJoinListener extends ListenerAdapter
 {
       private static final Logger LOGGER = LoggerFactory.getLogger(SelfJoinListener.class);
 
-      public SelfJoinListener()
-      {
-
-      }
-
       @Override
       public void onGuildJoin(@NotNull GuildJoinEvent event)
       {

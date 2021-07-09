@@ -107,7 +107,7 @@ public class Professor implements Paginatable
 
       public int getSchoolId()
       {
-            return getProfessorsSchool().getID();
+            return professorsSchool.getID();
       }
 
       public String getEmailPrefix()
@@ -117,7 +117,7 @@ public class Professor implements Paginatable
 
       public String getEmail()
       {
-            return emailPrefix + getProfessorsSchool().getEmailSuffix();
+            return emailPrefix + professorsSchool.getEmailSuffix();
       }
 
       public String getLastName()

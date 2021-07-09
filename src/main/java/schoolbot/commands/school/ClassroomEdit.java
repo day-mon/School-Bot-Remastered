@@ -56,7 +56,6 @@ public class ClassroomEdit extends Command
 
             var jda = event.getJDA();
             var guild = event.getGuild();
-            var channel = event.getChannel();
 
             Classroom classroom = Checks.messageSentFromClassChannel(event);
 
@@ -128,15 +127,6 @@ public class ClassroomEdit extends Command
                   this.authorId = event.getUser().getIdLong();
             }
 
-
-            public ClassroomEditStateMachine(CommandEvent event, School school, int state)
-            {
-                  this.school = school;
-                  this.state = state;
-                  this.event = event;
-                  this.channelId = event.getChannel().getIdLong();
-                  this.authorId = event.getUser().getIdLong();
-            }
 
             public ClassroomEditStateMachine(CommandEvent event, Classroom classroom, int state)
             {
@@ -506,9 +496,6 @@ public class ClassroomEdit extends Command
                                     return 3;
                               }
 
-                              var school = classroom.getSchool();
-
-
                               updateColumn = "professor_id";
                         }
                         case "time", "4" -> {
@@ -600,7 +587,7 @@ public class ClassroomEdit extends Command
                   }
                   return 4;
             }
-      } // end class
+      }
 
 
 }

@@ -9,6 +9,7 @@ import schoolbot.objects.command.CommandEvent;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import java.awt.*;
 import java.util.List;
 
@@ -52,7 +53,7 @@ public class Eval extends Command
             {
                   out = SCRIPT_ENGINE.eval(imports + code);
             }
-            catch (Exception exception)
+            catch (ScriptException exception)
             {
                   out = exception.getMessage();
                   status = "Error found";

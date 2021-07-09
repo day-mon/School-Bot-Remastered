@@ -240,9 +240,6 @@ public class WrapperHandler
             List<Professor> professorList = getProfessors(event, school.getName().toLowerCase());
             List<MessageEmbed> embeds = new ArrayList<>();
 
-
-            int i = 1;
-
             for (Professor professor : professorList)
             {
                   embeds.add(professor.getAsEmbed(schoolbot));

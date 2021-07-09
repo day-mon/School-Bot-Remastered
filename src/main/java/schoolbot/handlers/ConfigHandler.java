@@ -3,10 +3,7 @@ package schoolbot.handlers;
 import schoolbot.Schoolbot;
 import schoolbot.objects.config.ConfigOption;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +30,7 @@ public class ConfigHandler
             {
                   CONFIG_FOLDER.mkdir();
             }
-            catch (Exception e)
+            catch (RuntimeException e)
             {
                   schoolbot.getLogger().error("CONFIG FOLDER COULD NOT BE CREATED");
                   System.exit(1);
@@ -46,7 +43,7 @@ public class ConfigHandler
             {
                   CONFIG_FILE.createNewFile();
             }
-            catch (Exception e)
+            catch (IOException e)
             {
                   schoolbot.getLogger().error("CONFIG FILE COULD NOT BE CREATED");
                   System.exit(1);
@@ -125,11 +122,9 @@ public class ConfigHandler
                   fileWriter.write(stringBuilder.toString());
                   fileWriter.flush();
             }
-            catch (Exception exception)
+            catch (IOException exception)
             {
                   schoolbot.getLogger().error("CONFIG ERROR HAS OCCURRED", exception);
-
-                  exception.printStackTrace();
             }
       }
 

@@ -74,13 +74,13 @@ public class ProfessorEdit extends Command
 
       }
 
-      public static class ProfessorEditStateMachine extends ListenerAdapter implements StateMachine
+      private static class ProfessorEditStateMachine extends ListenerAdapter implements StateMachine
       {
 
             private String updateColumn = "";
             private final StateMachineValues values;
 
-            public ProfessorEditStateMachine(StateMachineValues values)
+            private ProfessorEditStateMachine(StateMachineValues values)
             {
                   values.setMachine(this);
                   this.values = values;

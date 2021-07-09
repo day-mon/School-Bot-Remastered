@@ -11,6 +11,7 @@ import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;
 
+import javax.xml.crypto.Data;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -22,7 +23,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DatabaseUtils
 {
 
+
       private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseUtils.class);
+
+      private DatabaseUtils() {};
 
       public static int addAssignment(Schoolbot schoolbot, Assignment assignment)
       {
@@ -190,7 +194,7 @@ public class DatabaseUtils
             }
       }
 
-      private static String grabGuildPrefix(Connection connection, long guild_id) throws Exception
+      private static String grabGuildPrefix(Connection connection, long guild_id) throws SQLException
       {
             PreparedStatement statement = connection.prepareStatement("SELECT prefix FROM guild_settings WHERE guild_id=?");
             statement.setLong(1, guild_id);
@@ -567,9 +571,8 @@ public class DatabaseUtils
       {
             try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
             {
-                  PreparedStatement statement = connection.prepareStatement("select from class_reminders where id=?");
+                  PreparedStatement statement = connection.prepareStatement("SELECT FROM class_reminders WHERE id=?");
                   statement.setInt(1, reminder.id());
-                  LOGGER.info("{}", reminder.id());
                   ResultSet resultSet = statement.executeQuery();
 
 
@@ -581,30 +584,6 @@ public class DatabaseUtils
                   return false;
             }
 
-      }
-
-      public static List<Classroom> checkClassRemindTimes(Schoolbot schoolbot)
-      {
-            List<Classroom> classroomList = new ArrayList<>();
-            try (Connection connection = schoolbot.getDatabaseHandler().getDbConnection())
-            {
-                  PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM class_reminders WHERE remind_time < now()");
-                  ResultSet resultSet = preparedStatement.executeQuery();
-
-                  while (resultSet.next())
-                  {
-                        int classID = resultSet.getInt("class_id");
-                        int id = resultSet.getInt("id");
-                        classroomList.add(getClassFromID(connection, classID));
-                        removeReminder(connection, id);
-                  }
-                  return classroomList;
-            }
-            catch (Exception e)
-            {
-                  LOGGER.error("Database error", e);
-                  return Collections.emptyList();
-            }
       }
 
       public static void updateSchool(DatabaseDTO schoolUpdateDTO, Schoolbot schoolbot)
@@ -850,7 +829,7 @@ public class DatabaseUtils
             }
       }
 
-      private static void removeGuildSettings(Connection connection, long guildId) throws Exception
+      private static void removeGuildSettings(Connection connection, long guildId) throws SQLException
       {
             PreparedStatement statement = connection.prepareStatement("DELETE FROM guild_settings WHERE guild_id=?");
             statement.setLong(1, guildId);
@@ -864,15 +843,20 @@ public class DatabaseUtils
             {
                   var schoolList = schoolbot.getWrapperHandler().getSchools(guildId);
 
-                  for (School school : schoolList)
+                  for (var school : schoolList)
                   {
-                        for (Classroom classroom : school.getClassroomList())
+                        for (var classroom : school.getClassroomList())
                         {
-                              for (Assignment assignment : classroom.getAssignments())
+                              for (var assignment : classroom.getAssignments())
                               {
                                     removeAssignment(schoolbot, assignment);
                               }
                               removeClassroom(schoolbot, classroom);
+                        }
+
+                        for (var professor : school.getProfessorList())
+                        {
+                              removeProfessor(schoolbot, professor);
                         }
                         removeSchool(schoolbot, school.getName());
                   }

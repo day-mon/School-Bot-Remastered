@@ -25,7 +25,7 @@ public class Time extends Command
             List<String> timeZones = Arrays.asList(TimeZone.getAvailableIDs());
 
 
-            if (args.size() == 0)
+            if (args.isEmpty())
             {
                   event.sendMessage(new EmbedBuilder()
                           .setDescription(new SimpleDateFormat().format(new Date()))

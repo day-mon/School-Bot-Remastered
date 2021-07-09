@@ -52,7 +52,7 @@ public class ListProfessors extends Command
 
       }
 
-      public static class ListProfessorStateMachine extends ListenerAdapter
+      private static class ListProfessorStateMachine extends ListenerAdapter
       {
 
             private final StateMachineValues values;

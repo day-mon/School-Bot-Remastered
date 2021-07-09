@@ -23,14 +23,13 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class AssignmentEdit extends Command
 {
-      Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-
       public AssignmentEdit(Command parent)
       {
             super(parent, "Edits an assignment", "[none]", 0);
@@ -106,7 +105,6 @@ public class AssignmentEdit extends Command
 
             if (processedClassroomList == 1)
             {
-                  var classroom = values.getClassroom();
                   var assignmentList = values.getAssignmentList();
 
                   var processedAssignmentList = Processor.processGenericList(values, assignmentList, Assignment.class);
@@ -141,7 +139,7 @@ public class AssignmentEdit extends Command
       }
 
 
-      public static class AssignmentEditStateMachine extends ListenerAdapter implements StateMachine
+      private static class AssignmentEditStateMachine extends ListenerAdapter implements StateMachine
       {
             private String updateColumn;
             private final StateMachineValues values;
@@ -168,7 +166,6 @@ public class AssignmentEdit extends Command
 
                   var channel = event.getChannel();
                   var jda = event.getJDA();
-                  var guild = event.getGuild();
                   var commandEvent = values.getCommandEvent();
 
                   int state = values.getState();
@@ -194,7 +191,7 @@ public class AssignmentEdit extends Command
                                             ** %s ** has been automatically chosen because it is the only class room.
                                                                                         
                                             Which assignment would you like to edit?
-                                            """);
+                                            """, classroom.getName());
                                     var assignmentList = values.getAssignmentList();
                                     commandEvent.sendAsPaginatorWithPageNumbers(assignmentList);
                                     values.setState(3);
@@ -344,7 +341,6 @@ public class AssignmentEdit extends Command
             private boolean evaluateUpdate(StateMachineValues values)
             {
                   var event = values.getMessageReceivedEvent();
-                  var jda = event.getJDA();
                   var commandEvent = values.getCommandEvent();
                   var assignment = values.getAssignment();
                   var message = event.getMessage().getContentRaw();
@@ -420,7 +416,7 @@ public class AssignmentEdit extends Command
                         }
 
                         case "due_datet" -> {
-                              updateColumn = updateColumn.substring(0, updateColumn.lastIndexOf("t"));
+                              updateColumn = updateColumn.substring(0, updateColumn.lastIndexOf('t'));
 
                               LocalDateTime localDateTime;
 

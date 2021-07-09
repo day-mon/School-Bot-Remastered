@@ -75,7 +75,7 @@ public class DatabaseHandler
       {
             try
             {
-                  final var root = schoolbot.util.IOUtils.getJarFilesystem(DatabaseHandler.class).resolve("sql");
+                 final var root = schoolbot.util.IOUtils.getJarFilesystem(DatabaseHandler.class).resolve("sql");
 
                   if (root == null)
                   {

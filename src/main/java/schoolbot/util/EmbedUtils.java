@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Constants;
@@ -19,7 +20,7 @@ public class EmbedUtils
 {
       private static final Logger LOGGER = LoggerFactory.getLogger(EmbedUtils.class);
 
-      public EmbedUtils()
+      private EmbedUtils()
       {
       }
 
@@ -203,7 +204,7 @@ public class EmbedUtils
                                         
                     To begin: You can call %scommands to see all my commands.
                                         
-                    Below is a tutorial on how to use the main selling point of the bot. All school commands have a Add, Edit, and Remove implmented for them.       
+                    Below is a tutorial on how to use the main selling point of the bot. All school commands have a Add, Edit, and Remove implmented for them.
                     """, Constants.DEFAULT_PREFIX);
             channel.sendMessageEmbeds(
                     new EmbedBuilder()
@@ -218,9 +219,7 @@ public class EmbedUtils
                             .addField("Step 4", "Now that you have a class. You can call assignment add. This will add reminders and send them in the corresponding channels", false)
                             .build()
             ).queue(null, failure ->
-            {
-                  LOGGER.error("Could not send tutorial in any channel", failure);
-            });
+                    LOGGER.error("Could not send tutorial in any channel", failure));
       }
 
 

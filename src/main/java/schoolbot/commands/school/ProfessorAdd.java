@@ -42,13 +42,12 @@ public class ProfessorAdd extends Command
       }
 
 
-      public static class ProfessorAddStateMachine extends ListenerAdapter implements StateMachine
+      private static class ProfessorAddStateMachine extends ListenerAdapter implements StateMachine
       {
-
             private final StateMachineValues values;
 
 
-            public ProfessorAddStateMachine(StateMachineValues values)
+            private ProfessorAddStateMachine(StateMachineValues values)
             {
                   values.setMachine(this);
                   this.values = values;

@@ -20,6 +20,7 @@ import schoolbot.util.EmbedUtils;
 import schoolbot.util.Parser;
 import schoolbot.util.Processor;
 
+import java.io.IOException;
 import java.sql.Date;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -62,7 +63,7 @@ public class ClassroomAdd extends Command
                           .execute();
 
             }
-            catch (Exception e)
+            catch (IOException e)
             {
                   EmbedUtils.error(event, "Error while attempting to connect to PeopleSoft");
                   jda.removeEventListener(machine);
@@ -139,7 +140,9 @@ public class ClassroomAdd extends Command
       {
             char[] termCharArr = term.split("\\s")[0].toCharArray();
 
-            for (int i = 0; i < termCharArr.length; i++)
+            var length = termCharArr.length;
+
+            for (int i = 0; i < length; i++)
             {
                   if (i == 0)
                   {
@@ -154,7 +157,7 @@ public class ClassroomAdd extends Command
             return String.valueOf(termCharArr) + " " + term.split("\\s+")[1];
       }
 
-      public static class ClassAddStateMachine extends ListenerAdapter implements StateMachine
+      private static class ClassAddStateMachine extends ListenerAdapter implements StateMachine
       {
             private String CLASS_SEARCH_URL = "https://psmobile.pitt.edu/app/catalog/classsection/UPITT/";
             private final StateMachineValues values;
@@ -527,10 +530,7 @@ public class ClassroomAdd extends Command
 
                               commandEvent.addClass(classroom);
                               jda.removeEventListener(this);
-
                         }
-
-
                   }
             }
 
@@ -547,6 +547,15 @@ public class ClassroomAdd extends Command
                         EmbedUtils.error(commandEvent, "There was an error while parsing your time!");
                         return false;
                   }
+
+                  LocalDateTime localTime = (LocalDateTime) localDateTimeMap.values().toArray()[0];
+
+                  var time = localTime.toLocalTime();
+
+                  values.getClassroom().setTime(time);
+
+
+
 
                   return true;
             }
@@ -572,7 +581,7 @@ public class ClassroomAdd extends Command
                   {
                         startDate = LocalDate.parse(splitDate[0], format);
                   }
-                  catch (Exception e)
+                  catch (RuntimeException e)
                   {
                         EmbedUtils.error(commandEvent, "Error parsing Start Date. Please try again!");
                         return false;
@@ -582,7 +591,7 @@ public class ClassroomAdd extends Command
                   {
                         endDate = LocalDate.parse(splitDate[1], format);
                   }
-                  catch (Exception e)
+                  catch (RuntimeException e)
                   {
                         EmbedUtils.error(commandEvent, "Error parsing End Date. Please try again!");
                         return false;

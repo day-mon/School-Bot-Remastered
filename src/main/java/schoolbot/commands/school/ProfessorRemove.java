@@ -72,11 +72,11 @@ public class ProfessorRemove extends Command
       }
 
 
-      public static class ProfessorRemoveStateMachine extends ListenerAdapter implements StateMachine
+      private static class ProfessorRemoveStateMachine extends ListenerAdapter implements StateMachine
       {
             private final StateMachineValues values;
 
-            public ProfessorRemoveStateMachine(@NotNull StateMachineValues values)
+            private ProfessorRemoveStateMachine(@NotNull StateMachineValues values)
             {
                   values.setMachine(this);
                   this.values = values;
