@@ -335,7 +335,6 @@ public class ClassroomAdd extends Command
                               values.getClassroom().setURL(CLASS_SEARCH_URL);
                               values.getClassroom().setNumber(Integer.parseInt(message));
 
-
                               commandEvent.getCommandThreadPool().execute(() -> commandEvent.addPittClass(classroom));
 
                               jda.removeEventListener(this);

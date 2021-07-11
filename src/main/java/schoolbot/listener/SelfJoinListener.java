@@ -15,8 +15,8 @@ public class SelfJoinListener extends ListenerAdapter
       public void onGuildJoin(@NotNull GuildJoinEvent event)
       {
             var guild = event.getGuild();
-            var channel = guild.getSystemChannel() == null ?
-                    guild.getDefaultChannel() : guild.getSystemChannel();
+            var channel = guild.getDefaultChannel() == null ?
+                    guild.getSystemChannel() : guild.getDefaultChannel();
 
 
             if (channel == null)

@@ -97,6 +97,7 @@ public class Parser
                   if (localDateTimeMap.containsKey(day))
                   {
                         LocalTime localTime = localDateTimeMap.get(day).toLocalTime();
+                        classroom.setTime(localTime);
 
                         DatabaseUtils.addClassReminder(schoolbot, LocalDateTime.of(ld, localTime), List.of(60, 30, 10, 0), classroom);
 

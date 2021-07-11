@@ -27,6 +27,7 @@ public class ByeBye extends Command
             addCalls("byebye", "bye", "bai");
             addPermissions(Permission.ADMINISTRATOR);
             addSelfPermissions(Permission.MANAGE_ROLES, Permission.MANAGE_PERMISSIONS);
+            setCommandPrerequisites("Be owner of server");
       }
 
       @Override
@@ -34,6 +35,16 @@ public class ByeBye extends Command
       {
             var eventWaiter = event.getSchoolbot().getEventWaiter();
             var channel = event.getChannel();
+
+            var ownerId = event.getGuild().getOwnerIdLong();
+            var memberId = event.getMember().getIdLong();
+
+            if (ownerId != memberId)
+            {
+                  EmbedUtils.error(event, "You are not an owner. You need to be an owner to call this command");
+                  return;
+            }
+
 
             channel.sendMessageFormat("Hello %s.. calling this command means you will remove everything I created as well as me leaving the server. Are you sure you want to do this?", event.getUser().getAsMention())
                     .queue(reactionAdd ->

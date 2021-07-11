@@ -10,6 +10,7 @@ import schoolbot.objects.command.CommandEvent;
 import schoolbot.util.Checks;
 import schoolbot.util.EmbedUtils;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -57,7 +58,7 @@ public class ClearUser extends Command
                                 {
                                       List<Message> channelMessages = messages.stream()
                                               .filter(deleteAbleMessages -> Objects.equals(deleteAbleMessages.getMember(), member))
-                                              .filter(deleteAbleMessages -> deleteAbleMessages.getTimeCreated().isAfter(OffsetDateTime.now().minus(24, ChronoUnit.HOURS)))
+                                              .filter(deleteAbleMessages -> Duration.between(message.getTimeCreated(), deleteAbleMessages.getTimeCreated()).toHours() < 24)
                                               .limit(26)
                                               .collect(Collectors.toList());
                                       channel.purgeMessages(channelMessages);
@@ -109,7 +110,7 @@ public class ClearUser extends Command
                                       List<Message> channelMessages = messages
                                               .stream()
                                               .filter(deleteAbleMessages -> Objects.equals(deleteAbleMessages.getMember(), member))
-                                              .filter(deleteAbleMessages -> deleteAbleMessages.getTimeCreated().isAfter(OffsetDateTime.now().minus(24, ChronoUnit.HOURS)))
+                                              .filter(deleteAbleMessages -> Duration.between(message.getTimeCreated(), deleteAbleMessages.getTimeCreated()).toHours() < 24)
                                               .limit(messagesToRemove + 1)
                                               .collect(Collectors.toList());
                                       channel.purgeMessages(channelMessages);

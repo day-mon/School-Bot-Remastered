@@ -191,14 +191,11 @@ public abstract class Command
             }
       }
 
+      public boolean isParent() {return this.parent == null && hasChildren();}
+
       private boolean isChild()
       {
             return this.parent != null;
-      }
-
-      public void addCooldown(long cooldown)
-      {
-            this.cooldown = cooldown;
       }
 
       public void addUserToCooldown(Member member)
@@ -239,11 +236,6 @@ public abstract class Command
       public void addUsageExample(String usage)
       {
             this.usageExample = usage;
-      }
-
-      public int getMinimalArgs()
-      {
-            return minimalArgs;
       }
 
       public String getUsageExample()
@@ -293,22 +285,6 @@ public abstract class Command
                   }
             }
             return false;
-      }
-
-
-      /**
-       * Set this command to be enabled or disabled.
-       *
-       * @param enabled {@code true} for enabled or {@code false} for disabled.
-       */
-      public void setEnabled(boolean enabled)
-      {
-            this.enabled = enabled;
-      }
-
-      public void setCooldown(long cooldown)
-      {
-            this.cooldown = cooldown;
       }
 
       /**

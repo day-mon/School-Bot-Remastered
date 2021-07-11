@@ -41,6 +41,7 @@ public class CommandHandler
       {
 
             Map<String, Command> commandMap = new LinkedHashMap<>();
+            int uniqueCommands = 0;
 
             try (ScanResult result = classGraph.scan())
             {
@@ -64,12 +65,14 @@ public class CommandHandler
 
                         if (!(instance instanceof Command command))
                         {
-                              CMD_HANDLER_LOGGER.warn("{} is a non command class found in the commands package", cls.getSimpleName());
+                              CMD_HANDLER_LOGGER.warn("[{}] is a non command class found in the commands package it can be found in [{}]", cls.getSimpleName(), cls.getPackageName());
                               continue;
                         }
 
 
+
                         commandMap.put(command.getName(), command);
+                        uniqueCommands++;
 
                         for (String aliases : command.getCalls())
                         {
@@ -79,11 +82,11 @@ public class CommandHandler
             }
             catch (Exception e)
             {
-                  CMD_HANDLER_LOGGER.error("Exception occurred.. Exiting in one second", e);
+                  CMD_HANDLER_LOGGER.error("Error occurred whilst loading commands, exiting.", e);
                   System.exit(1);
             }
 
-            CMD_HANDLER_LOGGER.info("[ {} ] commands have been successfully loaded!", commandMap.size());
+            CMD_HANDLER_LOGGER.info("[{}] commands have been successfully loaded!", uniqueCommands);
             return commandMap;
       }
 
@@ -148,7 +151,8 @@ public class CommandHandler
             // If someone sends a parent command or doesnt have any children
             if (!com.hasChildren() || filteredArgs.isEmpty())
             {
-                  executor.execute(() -> com.process(commandEvent));
+                  //executor.execute(() -> com.process(commandEvent));
+                  com.process(commandEvent);
                   return;
             }
 
@@ -165,6 +169,14 @@ public class CommandHandler
       public Map<String, Command> getCommands()
       {
             return commands;
+      }
+
+      public List<Command> getFilteredCommands()
+      {
+            return commands.values().stream()
+                    .distinct()
+                    .collect(Collectors.toList());
+
       }
 
 

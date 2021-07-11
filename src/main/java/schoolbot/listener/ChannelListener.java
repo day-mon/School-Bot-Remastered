@@ -1,5 +1,6 @@
 package schoolbot.listener;
 
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.audit.ActionType;
 import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -24,6 +25,13 @@ public class ChannelListener extends ListenerAdapter
             var jda = event.getJDA();
             var selfUser = jda.getSelfUser();
             var guild = event.getGuild();
+            var perms = event.getGuild().getSelfMember().hasPermission(Permission.VIEW_AUDIT_LOGS);
+
+            if (!perms)
+            {
+                  LOGGER.error("Self user does not have permissions to view audit logs to attempt to alert user about channel deletion if it occured");
+                  return;
+            }
 
             guild.retrieveAuditLogs()
                     .type(ActionType.CHANNEL_DELETE)
@@ -69,6 +77,6 @@ public class ChannelListener extends ListenerAdapter
                                         LOGGER.warn("{} is owner-less.. Nothing I can do to alert", event.getGuild().getName());
                                   });
 
-                    });
+                    }, faulure -> LOGGER.info("Could not retrieve audit logs."));
       }
 }

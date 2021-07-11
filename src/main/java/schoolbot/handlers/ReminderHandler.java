@@ -50,7 +50,6 @@ public class ReminderHandler
       }
 
 
-      // TODO: Fix one minute delay and remind on class creation alert spam
 
       private void sendAssignmentAlert(Assignment assignment)
       {

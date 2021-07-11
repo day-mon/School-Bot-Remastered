@@ -557,7 +557,8 @@ public class School implements Paginatable
                               var success = evaluateCampus(schoolClass, textRight);
                               if (!success)
                               {
-                                    EmbedUtils.error(event, "");
+                                    //todo: fix
+                                    EmbedUtils.error(event, "You said you goto a certain campus and that campus isnt the campus one this class is for");
                                     removeSequence(event, schoolClass);
                                     return;
                               }

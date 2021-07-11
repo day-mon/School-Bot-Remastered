@@ -200,11 +200,13 @@ public class EmbedUtils
       public static <T extends MessageChannel> void sendTutorial(T channel)
       {
             var embedDescription = String.format("""
-                    Thank you for adding Schoolbot to your server!
+                    Thank you for adding Schoolbot to your server! 
                                         
                     To begin: You can call %scommands to see all my commands.
                                         
                     Below is a tutorial on how to use the main selling point of the bot. All school commands have a Add, Edit, and Remove implmented for them.
+                    
+                    If you have any questions about any of these commands you can simple call help <command name>
                     """, Constants.DEFAULT_PREFIX);
             channel.sendMessageEmbeds(
                     new EmbedBuilder()

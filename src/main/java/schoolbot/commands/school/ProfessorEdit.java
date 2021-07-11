@@ -104,8 +104,6 @@ public class ProfessorEdit extends Command
                   int state = values.getState();
 
 
-                  // TODO: Fix this
-
                   switch (state)
                   {
                         case 1 -> {

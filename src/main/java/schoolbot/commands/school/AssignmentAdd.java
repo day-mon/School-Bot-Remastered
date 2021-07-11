@@ -1,6 +1,7 @@
 package schoolbot.commands.school;
 
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -36,6 +37,7 @@ public class AssignmentAdd extends Command
 
       private static void processClassroomList(StateMachineValues values)
       {
+
 
             var commandEvent = values.getCommandEvent();
             var classroomList = values.getClassroomList();
@@ -174,8 +176,6 @@ public class AssignmentAdd extends Command
                                     return;
                               }
 
-
-                              //todo: goes from state 1 -> 3?
 
                               var school = values.getSchool();
 
