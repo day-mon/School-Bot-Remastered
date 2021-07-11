@@ -28,7 +28,8 @@ import java.util.Random;
 
 public class SchoolAdd extends Command
 {
-      private static final String BACKUP_API_URL = "http://universities.hipolabs.com/search?name=";
+      private static final String API_URL = "https://schoolapi.schoolbot.dev/search?name=";
+      private final static String BACKUP_API_URL = "http://universities.hipolabs.com/search?name=";
 
       public SchoolAdd(Command parent)
       {
@@ -81,7 +82,7 @@ public class SchoolAdd extends Command
             Document doc;
             try
             {
-                  doc = Jsoup.connect(BACKUP_API_URL + firstArg)
+                  doc = Jsoup.connect(API_URL + firstArg)
                           .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
                           .referrer("https://www.google.com")
                           .ignoreContentType(true)
