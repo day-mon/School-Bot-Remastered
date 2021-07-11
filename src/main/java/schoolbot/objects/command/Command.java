@@ -94,12 +94,10 @@ public abstract class Command
 
 
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
-      {
-      }
+      { }
 
       public void run(@NotNull CommandEvent event, @NotNull List<String> args, @NotNull StateMachineValues values)
-      {
-      }
+      { }
 
       /**
        * Returns description of command
@@ -125,6 +123,14 @@ public abstract class Command
       public void setCategory(CommandCategory category)
       {
             this.category = category;
+
+            if (isParent())
+            {
+                  for (var child : children)
+                  {
+                        child.setCategory(category);
+                  }
+            }
       }
 
       public CommandCategory getCategory()
@@ -252,6 +258,7 @@ public abstract class Command
       public void addChildren(Command... children)
       {
             this.children.addAll(List.of(children));
+
       }
 
       public void addFlags(CommandFlag... flags)

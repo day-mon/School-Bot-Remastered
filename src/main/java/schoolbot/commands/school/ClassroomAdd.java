@@ -281,6 +281,7 @@ public class ClassroomAdd extends Command
 
                               classroom.setSchool(success);
 
+                              // todo: fix bug where you can add duplicate professors
 
                               EmbedUtils.success(event, "Successfully set school to %s", success.getName());
                               channel.sendMessage("""

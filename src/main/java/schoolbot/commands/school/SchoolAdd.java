@@ -192,7 +192,7 @@ public class SchoolAdd extends Command
                           .addField("Country", country, false)
                           .addField("School #", String.valueOf(i + 1), false)
                           .setColor(Constants.DEFAULT_EMBED_COLOR)
-                          .setFooter("Big thanks to https://github.com/Hipo/university-domains-list-api")
+                          .setFooter(String.format("Page %d/%d", i+1, length))
                           .setTimestamp(Instant.now())
                           .build()
                   );
@@ -205,7 +205,6 @@ public class SchoolAdd extends Command
       {
             private final long channelID, authorID;
             private final Map<Integer, MessageEmbed> schools;
-            private final Schoolbot schoolbot;
             private final CommandEvent cmdEvent;
 
 
@@ -216,7 +215,6 @@ public class SchoolAdd extends Command
                   this.authorID = event.getUser().getIdLong();
                   this.channelID = event.getChannel().getIdLong();
                   this.schools = schools;
-                  this.schoolbot = event.getSchoolbot();
             }
 
             @Override

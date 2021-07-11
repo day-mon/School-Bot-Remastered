@@ -401,7 +401,14 @@ public class School implements Paginatable
 
             Parser.classTime(schoolbot, classroom.getTime(), classroom);
             classroomList.add(classroom);
-            professorList.add(classroom.getProfessor());
+
+            var professor = classroom.getProfessor();
+
+            if (!professorList.contains(professor))
+            {
+                  professorList.add(classroom.getProfessor());
+
+            }
             channel.sendMessageEmbeds(classroom.getAsEmbed(schoolbot)).queue();
       }
 
@@ -582,6 +589,14 @@ public class School implements Paginatable
             schoolClass.setId(classCheck);
             Parser.classTime(schoolbot, save, schoolClass);
             this.classroomList.add(schoolClass);
+
+            var professor = schoolClass.getProfessor();
+
+            if (!professorList.contains(professor))
+            {
+                  professorList.add(professor);
+            }
+
             this.professorList.add(schoolClass.getProfessor());
             channel.sendMessageEmbeds(schoolClass.getAsEmbed(schoolbot)).queue();
       }
