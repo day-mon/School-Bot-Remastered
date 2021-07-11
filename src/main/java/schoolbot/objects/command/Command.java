@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Constants;
 import schoolbot.handlers.CommandCooldownHandler;
+import schoolbot.objects.misc.Emoji;
 import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.util.EmbedUtils;
 
@@ -29,6 +30,7 @@ public abstract class Command
       private boolean enabled;
 
       private final String name;
+      private CommandCategory category;
       private String usageExample;
       private final String description;
       private final String syntax;
@@ -120,6 +122,16 @@ public abstract class Command
       }
 
 
+      public void setCategory(CommandCategory category)
+      {
+            this.category = category;
+      }
+
+      public CommandCategory getCategory()
+      {
+            return category;
+      }
+
       public List<String> getCalls()
       {
             return this.calls;
@@ -168,7 +180,18 @@ public abstract class Command
             {
                   EmbedUtils.sendIsOnCooldown(event);
             }
+            else if (hasCommandFlags(CommandFlag.DEV))
+            {
+                  if (!event.isDeveloper())
+                  {
+                        EmbedUtils.error(event, "You are not a developer!");
+                        return;
+                  }
 
+                  LOGGER.info("{} executed using args {} by a developer", name, event.getArgs());
+                  run(event, event.getArgs());
+
+            }
             else if (!isEnabled())
             {
                   EmbedUtils.error(event, "This command is disabled!");
@@ -191,7 +214,10 @@ public abstract class Command
             }
       }
 
-      public boolean isParent() {return this.parent == null && hasChildren();}
+      public boolean isParent()
+      {
+            return this.parent == null && hasChildren();
+      }
 
       private boolean isChild()
       {
@@ -249,6 +275,7 @@ public abstract class Command
                     .setTitle("Help for **" + this.name + "**")
                     .addField("Description", "`" + this.description + "`", false)
                     .addField("Syntax", "`" + this.syntax + "`", false)
+                    .addField("Category", "`" + this.category.getName() + "`", false)
                     .addField("Command Prerequisites", "This command requires the following \n `" + this.commandPrerequisites + "`", false)
                     .addField("Usage Example",
                             this.usageExample.equalsIgnoreCase("N/A") ?

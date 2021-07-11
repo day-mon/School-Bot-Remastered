@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
 import schoolbot.objects.command.Command;
+import schoolbot.objects.command.CommandCategory;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.util.EmbedUtils;
 import schoolbot.util.Parser;
@@ -70,9 +71,10 @@ public class CommandHandler
                         }
 
 
-
                         commandMap.put(command.getName(), command);
                         uniqueCommands++;
+
+                        command.setCategory(getCommandCategory(command));
 
                         for (String aliases : command.getCalls())
                         {
@@ -88,6 +90,24 @@ public class CommandHandler
 
             CMD_HANDLER_LOGGER.info("[{}] commands have been successfully loaded!", uniqueCommands);
             return commandMap;
+      }
+
+      private CommandCategory getCommandCategory(Command command)
+      {
+            var cmd = command.getClass().getPackageName().split("\\.")[2];
+
+            return switch (cmd)
+                    {
+                          case "admin" -> CommandCategory.ADMIN;
+                          case "dev" -> CommandCategory.DEV;
+                          case "fun" -> CommandCategory.FUN;
+                          case "info" -> CommandCategory.INFO;
+                          case "misc" -> CommandCategory.MISC;
+                          case "school" -> CommandCategory.SCHOOL;
+                          default -> CommandCategory.UNKNOWN;
+                    };
+
+
       }
 
 

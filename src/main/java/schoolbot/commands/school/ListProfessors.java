@@ -18,7 +18,7 @@ public class ListProfessors extends Command
 {
       public ListProfessors()
       {
-            super("", "", 0);
+            super("Lists professors when a school is selected", "[none]", 0);
             addCalls("professors", "profs", "lp");
             addFlags(CommandFlag.STATE_MACHINE_COMMAND);
       }

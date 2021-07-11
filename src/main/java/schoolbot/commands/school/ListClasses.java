@@ -12,7 +12,7 @@ public class ListClasses extends Command
 {
       public ListClasses()
       {
-            super("", "", 1);
+            super("List classes for given a target university", "[school name]", 1);
             addCalls("classes", "classlist");
             addUsageExample("classes \" University of Pittsburgh \"");
       }

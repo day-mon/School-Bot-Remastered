@@ -14,7 +14,7 @@ public class Ping extends Command
 {
       public Ping()
       {
-            super("", "", 0);
+            super("Checks ping of the bot", "[none]", 0);
             addCalls("ping");
       }
 

@@ -1,41 +1,43 @@
 package schoolbot.objects.misc;
 
+import java.util.List;
+
 public enum Emoji
 {
-      WHITE_CHECK_MARK(":white_check_mark:", "\u2705", false),
-      CROSS_MARK(":x:", "\u274C", false),
-      RECYCLE(":recycle:", "\u267B", false),
-      TRACK_NEXT(":track_next:", "\u23ED", false),
-      TRACK_PREVIOUS(":track_previous", "\u23EE", false),
-      SMILEY_FACE(":slight_smile:", "\u1F642", false),
-      ARROW_LEFT(":arrow_left:", "\u2B05", false),
-      ARROW_RIGHT("arrow_right:", "\u27A1", false),
-      BOOKS(":books: ", "\u1F4DA", false),
-      RED_CIRCLE(":red_circle:", "\uF534", true),
-      BLUE_CIRCLE(":blue_circle:", "\uF535", true),
-      ORANGE_CIRCLE(":orange_circle:", "\uF7E0", true),
-      WHITE_CIRCLE(":white_circle:", "\u26AA", true),
-      PURPLE_CIRCLE(":purple_circle:", "\u26AA", true),
-      BLACK_CIRCLE(":black_circle:", "\u26AB", true),
-      HOURGLASS(":hourglass:", "\u231B", false),
-      STOPWATCH(":stopwatch:", "\u23F1", false),
-      WARNING(":warning:", "\u26A0", false);
+      WHITE_CHECK_MARK(":white_check_mark:", "\u2705"),
+      CROSS_MARK(":x:", "\u274C"),
+      RECYCLE(":recycle:", "\u267B"),
+      TRACK_NEXT(":track_next:", "\u23ED"),
+      TRACK_PREVIOUS(":track_previous", "\u23EE"),
+      SMILEY_FACE(":slight_smile:", "\u1F642"),
+      ARROW_LEFT(":arrow_left:", "\u2B05"),
+      ARROW_RIGHT("arrow_right:", "\u27A1" ),
+      BOOKS(":books: ", "\u1F4DA" ),
+      RED_CIRCLE(":red_circle:", "\uF534" ),
+      BLUE_CIRCLE(":blue_circle:", "\uF535" ),
+      ORANGE_CIRCLE(":orange_circle:", "\uF7E0" ),
+      WHITE_CIRCLE(":white_circle:", "\u26AA" ),
+      PURPLE_CIRCLE(":purple_circle:", "\u26AA" ),
+      BLACK_CIRCLE(":black_circle:", "\u26AB" ),
+      HOURGLASS(":hourglass:", "\u231B" ),
+      STOPWATCH(":stopwatch:", "\u23F1" ),
+      WARNING(":warning:", "\u26A0" ),
+      A(":a:", "\uF170" ),
+      LAPTOP(":computer:", "\uF4BB"),
+      TOOLS(":tools:", "\uF6E0"),
+      FERRIS_WHEEL(":ferris_wheel:", "\uF3A1"),
+      MAN_SHRUG(":man_shrugging:", "\uD83E\uDD37\u200D\u2642\uFE0F");
 
 
       private final String emote;
       private final String unicode;
       private final boolean animated;
-      // This can probably lead to confusion so let me clarify. When I mean pagniateReactable I mean if an emote is marked as <b> true </b>
-      // It will be able to be listed on a paginator if you wanted to vote and use emojis as options
-      private final boolean paginateReactable;
 
-
-      Emoji(String emote, String unicode, boolean reactable)
+      Emoji(String emote, String unicode)
       {
             this.emote = emote;
             this.unicode = unicode;
             this.animated = false;
-            this.paginateReactable = reactable;
       }
 
       public String getUnicode()
@@ -52,9 +54,15 @@ public enum Emoji
             return this.unicode;
       }
 
-      public boolean isPaginateReactable()
+      public List<Emoji> getReactables()
       {
-            return paginateReactable;
+            return List.of(
+                    RED_CIRCLE,
+                    BLUE_CIRCLE,
+                    BLACK_CIRCLE,
+                    ORANGE_CIRCLE,
+                    PURPLE_CIRCLE
+            );
       }
 
       /**

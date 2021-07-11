@@ -7,7 +7,7 @@
 
     <groupId>com.github.damon</groupId>
     <artifactId>schoolbot</artifactId>
-    <version>1.0-ALPHA</version>
+    <version>1.0.1-ALPHA</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

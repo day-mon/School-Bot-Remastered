@@ -4,5 +4,6 @@ public enum CommandFlag
 {
       INTERNET,
       DATABASE,
-      STATE_MACHINE_COMMAND
+      STATE_MACHINE_COMMAND,
+      DEV
 }

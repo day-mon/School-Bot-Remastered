@@ -1,4 +1,4 @@
-package schoolbot.commands.admin;
+package schoolbot.commands.dev;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import schoolbot.handlers.CommandCooldownHandler;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
+import schoolbot.objects.command.CommandFlag;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -24,7 +25,7 @@ public class Eval extends Command
       public Eval()
       {
             super("Evaluates Java code.", "[code]", 1);
-            addPermissions(Permission.ADMINISTRATOR);
+            addFlags(CommandFlag.DEV);
             addCalls("eval", "evaluate", "code");
       }
 
