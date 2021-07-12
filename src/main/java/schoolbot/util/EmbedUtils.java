@@ -2,12 +2,14 @@ package schoolbot.util;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Constants;
+import schoolbot.Schoolbot;
 import schoolbot.handlers.CommandCooldownHandler;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.misc.Emoji;
@@ -197,28 +199,32 @@ public class EmbedUtils
             );
       }
 
-      public static <T extends MessageChannel> void sendTutorial(T channel)
+      public static <T extends MessageChannel> void sendTutorial(T channel, Schoolbot schoolbot, Guild guild)
       {
+
+            var prefix = schoolbot.getWrapperHandler().fetchGuildPrefix(guild.getIdLong());
+
             var embedDescription = String.format("""
-                    Thank you for adding Schoolbot to your server! 
+                    Thank you for adding Schoolbot to your server!
                                         
                     To begin: You can call %scommands to see all my commands.
                                         
-                    Below is a tutorial on how to use the main selling point of the bot. All school commands have a Add, Edit, and Remove implmented for them.
-                    
-                    If you have any questions about any of these commands you can simple call help <command name>
-                    """, Constants.DEFAULT_PREFIX);
+                    Below is a tutorial on how to use the main selling point of the bot. All school commands have a Add, Edit, and Remove implemented for them.
+                    z
+                    If you have any questions about any of these commands you can simple call %1$shelp <command name> also, if you do not know the bots prefix for your guild you can mention it!
+                    """, prefix);
             channel.sendMessageEmbeds(
                     new EmbedBuilder()
                             .setTitle("Tutorial")
                             .setDescription(embedDescription)
-                            .addField("Step 1", "Call school add and follow the instructions", false)
-                            .addField("Step 2", "You now have a school. You will need a professor for this school. Call professor add to do so, and follow the instructions", false)
-                            .addField("Step 3", """
-                                    Now that you have a Professor. You can use class add. If you attend a University of Pittsburgh Campus I have a special system.
+                            .addField("Step 1", "Use " + prefix +"school add and read all of the instructions", false)
+                            .addField("Step 2", "You now have a school. You will need a " + prefix + "professor for this school. Call professor add to do so, and follow the instructions. If you goto a University of Pittsburgh School you can bypass this step!", false)
+                            .addField("Step 3", String.format("""
+                                    Now that you have a Professor. You can use %sclass add. If you attend a University of Pittsburgh Campus I have a special system.
                                     During this process I will add class reminders, create a role and a text channel
-                                    """, false)
-                            .addField("Step 4", "Now that you have a class. You can call assignment add. This will add reminders and send them in the corresponding channels", false)
+                                    """, prefix), false)
+                            .addField("Step 4", "Now that you have a class. You can call "+prefix+"assignment add. This will add reminders and send them in the corresponding channels", false)
+                            .addField("Final Remarks", "Now when you have done all of those steps. To add additional schools, classes, professors, and assignments the process is the same! If you need help again you can just call "+prefix+"tutorial again!", false)
                             .build()
             ).queue(null, failure ->
                     LOGGER.error("Could not send tutorial in any channel", failure));

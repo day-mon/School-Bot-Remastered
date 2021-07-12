@@ -14,7 +14,9 @@ import java.util.stream.Collectors;
 
 public class Processor
 {
-      private Processor() {}
+      private Processor()
+      {
+      }
 
       /**
        * Returns the next state the state machine should goto
@@ -85,9 +87,8 @@ public class Processor
        *
        * @param values      Values passed through that majority of state machine use
        * @param genericList List of objects sent in for processing
-       * @param sendEmbed   Flag on whether or not to send the embed or not
        */
-      public static <T extends Paginatable> int processGenericList(StateMachineValues values, List<T> genericList, Class<?> tClass, boolean sendEmbed)
+      public static <T extends Paginatable> int processGenericListWithSendingList(StateMachineValues values, List<T> genericList, Class<?> tClass)
       {
             var event = values.getCommandEvent();
 
@@ -103,10 +104,6 @@ public class Processor
             {
                   T object = genericList.get(0);
                   values.setValue(object);
-                  if (sendEmbed)
-                  {
-                        event.sendMessage(object.getAsEmbed(schoolbot));
-                  }
                   return 1;
             }
             else
@@ -114,6 +111,40 @@ public class Processor
                   event.sendAsPaginatorWithPageNumbers(genericList);
                   values.setList(genericList);
                   event.sendMessage("Choose a page number from the list of %s's.", tClass.getSimpleName());
+                  return 2;
+            }
+      }
+
+      /**
+       * Returns void
+       * The event parameter is just so I can grab the schoolbot object and the channel
+       * The professor list is the list being passed through for processing so we can check certain conditions
+       *
+       * @param values      Values passed through that majority of state machine use
+       * @param genericList List of objects sent in for processing
+       */
+      public static <T extends Paginatable> int processGenericListWithoutMessageSend(StateMachineValues values, List<T> genericList, Class<?> tClass)
+      {
+            var event = values.getCommandEvent();
+
+            int size = genericList.size();
+            var schoolbot = event.getSchoolbot();
+
+            if (genericList.isEmpty())
+            {
+                  EmbedUtils.error(event, processErrorMessage(tClass, values));
+                  return 0;
+            }
+            else if (size == 1)
+            {
+                  T object = genericList.get(0);
+                  values.setValue(object);
+                  return 1;
+            }
+            else
+            {
+                  event.sendAsPaginatorWithPageNumbers(genericList);
+                  values.setList(genericList);
                   return 2;
             }
       }
@@ -166,7 +197,7 @@ public class Processor
        * <li> If a number is the message that is sent  </li>
        * <li> Checks if that number is a valid index from the list of options the user has to choose </li>
        * </ul>
-       *
+       * <p>
        * At the end of the method the state will be incremented and the value will be set if valid.
        *
        * @param values      StateMachineValues.

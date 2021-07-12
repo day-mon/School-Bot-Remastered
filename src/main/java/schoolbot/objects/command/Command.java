@@ -94,10 +94,12 @@ public abstract class Command
 
 
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
-      { }
+      {
+      }
 
       public void run(@NotNull CommandEvent event, @NotNull List<String> args, @NotNull StateMachineValues values)
-      { }
+      {
+      }
 
       /**
        * Returns description of command
@@ -162,7 +164,10 @@ public abstract class Command
 
             if (event.getArgs().size() < minimalArgs)
             {
-                  EmbedUtils.error(event, "This minimal amount of args for this command is " + minimalArgs);
+                  EmbedUtils.error(event, """
+                          This command requires at-least %d argument(s)
+                          Usage Example: %s
+                          """, minimalArgs, usageExample);
             }
             else if (!event.selfPermissionCheck(event.getCommand().getSelfPermissions()))
             {
@@ -276,19 +281,19 @@ public abstract class Command
             return usageExample;
       }
 
-      public EmbedBuilder getAsHelpEmbed()
+      public EmbedBuilder getAsHelpEmbed(String prefix)
       {
             return new EmbedBuilder()
                     .setTitle("Help for **" + this.name + "**")
                     .addField("Description", "`" + this.description + "`", false)
                     .addField("Syntax", "`" + this.syntax + "`", false)
                     .addField("Category", "`" + this.category.getName() + "`", false)
-                    .addField("Command Prerequisites", "This command requires the following \n `" + this.commandPrerequisites + "`", false)
+                    .addField("Command Prerequisites", "`"+ this.commandPrerequisites + "`", false)
                     .addField("Usage Example",
                             this.usageExample.equalsIgnoreCase("N/A") ?
-                                    "`" + this.usageExample + "`" : "`" + Constants.DEFAULT_PREFIX + this.usageExample + "`", false)
+                                    "`" + this.usageExample + "`" : "`" + prefix + this.usageExample + "`", false)
                     .addField("Aliases", (this.isChild()) ? String.valueOf(this.parent.calls) : String.valueOf(this.calls), false)
-                    .addField("Permissions Required", commandPermissions.isEmpty() ? "`[none]`" : commandPrerequisites, false)
+                    .addField("Permissions Required", commandPermissions.isEmpty() ? "`[none]`" : String.valueOf(commandPermissions), false)
                     .setColor(Color.BLACK)
                     .setFooter("[] = Required | <> = Optional");
       }

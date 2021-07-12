@@ -29,12 +29,12 @@ import java.util.Random;
 public class SchoolAdd extends Command
 {
       private static final String API_URL = "https://schoolapi.schoolbot.dev/search?name=";
-      private final static String BACKUP_API_URL = "http://universities.hipolabs.com/search?name=";
+      private static final String BACKUP_API_URL = "http://universities.hipolabs.com/search?name=";
 
       public SchoolAdd(Command parent)
       {
             super(parent, "Adds a school to the server", "[school name]", 1);
-            addUsageExample("school add \"University of Pittsburgh\"");
+            addUsageExample("school add 'University of Pittsburgh'");
             addPermissions(Permission.ADMINISTRATOR);
             addSelfPermissions(Permission.MANAGE_ROLES, Permission.MANAGE_CHANNEL);
             addFlags(CommandFlag.DATABASE);
@@ -163,7 +163,7 @@ public class SchoolAdd extends Command
                   JSONArray schoolDomainsElements = elementsWithinArray.getJSONArray("domains");
                   StringBuilder schoolDomains = new StringBuilder();
 
-                  var schoolDomainsLength = schoolDomains.length();
+                  var schoolDomainsLength = schoolDomainsElements.length();
 
                   for (int k = 0; k < schoolDomainsLength; k++)
                   {

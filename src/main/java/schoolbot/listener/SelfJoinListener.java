@@ -1,15 +1,23 @@
 package schoolbot.listener;
 
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import schoolbot.Schoolbot;
 import schoolbot.util.EmbedUtils;
 
 public class SelfJoinListener extends ListenerAdapter
 {
-      private static final Logger LOGGER = LoggerFactory.getLogger(SelfJoinListener.class);
+      private final Logger LOGGER = LoggerFactory.getLogger(SelfJoinListener.class);
+      private final Schoolbot schoolbot;
+
+      public SelfJoinListener(Schoolbot schoolbot)
+      {
+            this.schoolbot = schoolbot;
+      }
 
       @Override
       public void onGuildJoin(@NotNull GuildJoinEvent event)
@@ -26,11 +34,11 @@ public class SelfJoinListener extends ListenerAdapter
                   {
                         var ownerUser = owner.getUser();
 
-                        ownerUser.openPrivateChannel().queue(EmbedUtils::sendTutorial);
+                        ownerUser.openPrivateChannel().queue(privateChannel -> EmbedUtils.sendTutorial(privateChannel, schoolbot, guild));
                   }, failure -> LOGGER.error("Error has occurred whilst retrieving owner", failure));
                   return;
             }
 
-            EmbedUtils.sendTutorial(channel);
+            EmbedUtils.sendTutorial(channel, schoolbot, guild);
       }
 }

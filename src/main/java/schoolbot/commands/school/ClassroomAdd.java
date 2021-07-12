@@ -294,7 +294,7 @@ public class ClassroomAdd extends Command
                                       Format: <Season> <Year number>
                                       ```
                                       """).queue();
-                              values.setState(2);
+                              values.incrementMachineState();
                         }
                         case 3 -> {
                               int term = termValidator(message);
@@ -319,11 +319,9 @@ public class ClassroomAdd extends Command
                                                                             
                                       `Hint: This can normally be found on your Syllabus, PsMobile or PeopleSoft, or in the link of your class`
                                       """).queue();
-                              values.setState(4);
+                              values.incrementMachineState();
                         }
                         case 4 -> {
-
-
                               if (!Checks.isNumber(message))
                               {
                                     EmbedUtils.notANumberError(event, message);

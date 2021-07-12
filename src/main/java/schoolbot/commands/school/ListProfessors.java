@@ -33,7 +33,7 @@ public class ListProfessors extends Command
                     .collect(Collectors.toList());
             values.setSchoolList(schools);
 
-            var success = Processor.processGenericList(values, schools, School.class, false);
+            var success = Processor.processGenericListWithSendingList(values, schools, School.class);
 
             if (success == 0)
             {

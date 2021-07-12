@@ -76,7 +76,7 @@ public class ListAssignments extends Command
                   return;
             }
 
-            var success = Processor.processGenericList(values, classroomList, Classroom.class, false);
+            var success = Processor.processGenericList(values, classroomList, Classroom.class);
 
             if (success == 0)
             {

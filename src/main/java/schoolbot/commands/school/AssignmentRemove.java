@@ -111,7 +111,7 @@ public class AssignmentRemove extends Command
 
             channel.sendMessageEmbeds(new EmbedBuilder()
                     .setTitle("Confirmation")
-                    .setDescription(String.format("Are you sure you would like to delete **%s** | %s", assignment.getName(), Emoji.HOURGLASS.getAsChat()))
+                    .setDescription(String.format("Are you sure you would like to delete **%s**?", assignment.getName()))
                     .setColor(Color.YELLOW)
                     .build()
             ).queue(prompt ->
@@ -128,8 +128,6 @@ public class AssignmentRemove extends Command
 
                           messageReactionAddEvent ->
                           {
-                                var schoolbot = event.getSchoolbot().getLogger();
-                                schoolbot.info("Entered Method!");
                                 var reactionName = messageReactionAddEvent.getReactionEmote().getName();
                                 if (reactionName.equals(Emoji.WHITE_CHECK_MARK.getAsReaction()))
                                 {

@@ -137,7 +137,7 @@ public class ClassroomRemove extends Command
                                     var classroom = values.getClassroom();
 
                                     EmbedUtils.information(event, "%s is the only class available to delete. Would you like to delete this class?", classroom.getName());
-                                    values.setState(4);
+                                    values.setState(3);
                                     return;
                               }
 

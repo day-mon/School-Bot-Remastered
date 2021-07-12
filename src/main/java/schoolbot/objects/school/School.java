@@ -20,12 +20,14 @@ import schoolbot.util.DatabaseUtils;
 import schoolbot.util.EmbedUtils;
 import schoolbot.util.Parser;
 
+import java.io.IOException;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 
 public class School implements Paginatable
@@ -237,11 +239,6 @@ public class School implements Paginatable
       }
 
 
-      public int getClassesSize()
-      {
-            return classroomList.size();
-      }
-
       public String getURL()
       {
             return URL;
@@ -315,14 +312,12 @@ public class School implements Paginatable
 
                           return firstAndLast.equalsIgnoreCase(text);
                     })
-                    .findFirst().map(professor ->
-            {
+                    .findFirst().map(professor -> {
                   classroom.setInstructor(text);
                   classroom.setProfessor(professor);
                   return professor;
 
-            }).orElseGet(() ->
-            {
+                 }).orElseGet(() -> {
                   event.getChannel().sendMessage("This professor has not been found in my database for this server... adding him now!").queue();
                   int length = text.split("\\s+").length;
 
@@ -402,14 +397,11 @@ public class School implements Paginatable
             Parser.classTime(schoolbot, classroom.getTime(), classroom);
             classroomList.add(classroom);
 
-            var professor = classroom.getProfessor();
+            professorCheck(classroom);
 
-            if (!professorList.contains(professor))
-            {
-                  professorList.add(classroom.getProfessor());
-
-            }
-            channel.sendMessageEmbeds(classroom.getAsEmbed(schoolbot)).queue();
+            channel.sendMessageEmbeds(classroom.getAsEmbed(schoolbot))
+                    .append("Class creation completed successfully")
+                    .queue();
       }
 
       public void setClassroomList(List<Classroom> classroomList)
@@ -452,10 +444,9 @@ public class School implements Paginatable
             {
                   document = Jsoup.connect(schoolClass.getURL()).get();
             }
-            catch (Exception e)
+            catch (IOException e)
             {
                   EmbedUtils.error(event, "Could not connect to Peoplesoft.. Try again later!");
-                  e.printStackTrace();
                   return;
             }
 
@@ -561,11 +552,17 @@ public class School implements Paginatable
                         case "Room" -> schoolClass.setRoom(textRight);
                         case "Location" -> schoolClass.setLocation(textRight);
                         case "Campus" -> {
+
                               var success = evaluateCampus(schoolClass, textRight);
                               if (!success)
                               {
-                                    //todo: fix
-                                    EmbedUtils.error(event, "You said you goto a certain campus and that campus isnt the campus one this class is for");
+                                    var campus = textRight.split("\\s+")[0];
+                                    int length = schoolClass.getSchool().getName().split("\\s").length;
+                                    String classCampus = schoolClass.getSchool().getName().split("\\s+")[length - 1];
+
+                                    EmbedUtils.error(event, "You said you goto %s campus but this class takes place on the %s campus", campus, classCampus);
+
+
                                     removeSequence(event, schoolClass);
                                     return;
                               }
@@ -578,34 +575,40 @@ public class School implements Paginatable
             schoolClass.setWasAutoFilled(true);
 
             int classCheck = DatabaseUtils.addClassPitt(event, schoolClass);
+
             if (classCheck == -1)
             {
-                  EmbedUtils.error(event, """
-                          Database failed to add ** %s **
-                          """, schoolClass.getName());
+                  EmbedUtils.error(event, "Database failed to add ** %s **", schoolClass.getName());
                   removeSequence(event, schoolClass);
                   return;
             }
+
             schoolClass.setId(classCheck);
             Parser.classTime(schoolbot, save, schoolClass);
             this.classroomList.add(schoolClass);
 
+            professorCheck(schoolClass);
+
+            channel.sendMessageEmbeds(schoolClass.getAsEmbed(schoolbot))
+                    .append("Class creation completed successfully")
+                    .queue();
+      }
+
+      private void professorCheck(Classroom schoolClass)
+      {
             var professor = schoolClass.getProfessor();
 
-            if (!professorList.contains(professor))
+            var professorExist = professorList.stream()
+                    .map(professor1 -> professor1.getFullName().toLowerCase())
+                    .collect(Collectors.toList())
+                    .contains(professor.getFullName());
+
+            if (!professorExist)
             {
-                  professorList.add(professor);
+                  addProfessor(professor);
             }
-
-            this.professorList.add(schoolClass.getProfessor());
-            channel.sendMessageEmbeds(schoolClass.getAsEmbed(schoolbot)).queue();
       }
 
-
-      public void setPittSchool(boolean pittSchool)
-      {
-            isPittSchool = pittSchool;
-      }
 
       public int getID()
       {

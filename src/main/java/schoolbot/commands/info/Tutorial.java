@@ -18,6 +18,6 @@ public class Tutorial extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
-            EmbedUtils.sendTutorial(event.getChannel());
+            EmbedUtils.sendTutorial(event.getChannel(), event.getSchoolbot(), event.getGuild());
       }
 }

@@ -1,7 +1,6 @@
 package schoolbot.commands.school;
 
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -70,7 +69,6 @@ public class AssignmentAdd extends Command
       public void run(@NotNull CommandEvent event, @NotNull List<String> args, @NotNull StateMachineValues values)
       {
             var jda = event.getJDA();
-            var channel = event.getChannel();
 
             List<School> schools = event.getGuildSchools()
                     .stream()
@@ -120,6 +118,7 @@ public class AssignmentAdd extends Command
             // Redundant to repeat but youd have to do a lot of scrolling to remember why you are here
             if (classroom != null)
             {
+                  values.getAssignment().setClassroom(classroom);
                   EmbedUtils.information(event, """
                           ** %s ** has been selected because it is the only class I can recognize.
                                                                 
@@ -128,7 +127,7 @@ public class AssignmentAdd extends Command
                           If you would like to exit at any time (including now) please type '**exit**' or '**stop**'
                                                                 
                           """, classroom.getName());
-                  values.setState(4);
+                  values.setState(3);
             }
 
 
@@ -213,9 +212,6 @@ public class AssignmentAdd extends Command
                         }
 
                         case 3 -> {
-                              var classroom = values.getClassroom();
-
-                              values.getAssignment().setClassroom(classroom);
                               values.getAssignment().setName(message);
 
                               EmbedUtils.success(event, "** %s ** has successfully been added as Assignment name..", values.getAssignment().getName());
@@ -306,7 +302,15 @@ public class AssignmentAdd extends Command
 
                               if (Objects.isNull(date))
                               {
-                                    EmbedUtils.error(event, "This date is incorrect. Please try again!");
+                                    EmbedUtils.error(event, """
+                                            This date is incorrect.. Here could be some of the reasons
+                                            Reason #1: The date you choose is before or after the classes start or end date
+                                            Reason #2: Incorrect parsing. Look at the instructions
+                                            Reason #3: You are trying to break it on purpose
+                                            
+                                            Try again!
+                                            """);
+
                                     return;
                               }
 
@@ -327,7 +331,15 @@ public class AssignmentAdd extends Command
 
                               if (Objects.isNull(time))
                               {
-                                    EmbedUtils.error(event, "** %s ** could not be parsed or is before the current time. Try again!", message);
+                                    EmbedUtils.error(event, """
+                                            **%s** could not be parsed. Here are some of the reasons!
+                                            Reason #1: You didnt follow the natural time schema
+                                            Reason #2: You did not have am or pm
+                                            Reason #3: Your time was the before the current time
+                                            Reason #4: Your trying to do it on purpose
+                                            
+                                            Try again!
+                                            """, message);
                                     return;
                               }
 
@@ -336,7 +348,7 @@ public class AssignmentAdd extends Command
 
                               if (duration <= 300)
                               {
-                                    EmbedUtils.error(event, "That time is too close.. Please try another time");
+                                    EmbedUtils.error(event, "Please choose a different time that is not >= 5 minutes away.");
                                     return;
                               }
 
@@ -347,7 +359,7 @@ public class AssignmentAdd extends Command
                               var assignment = values.getAssignment();
                               commandEvent.addAssignment(assignment);
 
-                              EmbedUtils.success(event, "** %s ** has successfully been added to ** %s **", assignment.getName(), assignment.getClassroom().getName());
+                              EmbedUtils.success(event, "**%s** has successfully been added to **%s**", assignment.getName(), assignment.getClassroom().getName());
                               jda.removeEventListener(this);
 
                         }

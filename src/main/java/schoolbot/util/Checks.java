@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.misc.interfaces.StateMachine;
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -25,7 +27,9 @@ public class Checks
 {
       private static final Logger LOGGER = LoggerFactory.getLogger(Checks.class);
 
-      private Checks() {};
+      private Checks()
+      {
+      }
 
       public static boolean isNumber(String number)
       {
@@ -44,10 +48,6 @@ public class Checks
             }
       }
 
-      public static boolean allMatchesNumber(String message)
-      {
-            return message.chars().allMatch(Character::isDigit);
-      }
 
       public static boolean isValidEmail(String potentialEmail)
       {
@@ -90,7 +90,7 @@ public class Checks
             }
 
 
-            if (ld.isAfter(classroom.getStartDate()) && ld.isBefore(classroom.getEndDate()))
+            if ((ld.isEqual(classroom.getEndDate()) || ld.isEqual(classroom.getStartDate()) || (ld.isAfter(classroom.getStartDate()) && ld.isBefore(classroom.getEndDate()))))
             {
                   return ld;
             }
@@ -268,7 +268,7 @@ public class Checks
        * @param values GuildMessageReceivedEvent anticipated to be respond event
        * @return If the event contains same user and channel as base event false otherwise
        */
-      public static <S extends StateMachine> boolean eventMeetsPrerequisites(@NotNull StateMachineValues values)
+      public static boolean eventMeetsPrerequisites(@NotNull StateMachineValues values)
       {
             var commandEvent = values.getCommandEvent();
             var event = values.getMessageReceivedEvent();

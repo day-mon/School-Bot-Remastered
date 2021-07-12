@@ -26,7 +26,7 @@ public class Clear extends Command
 
       public Clear()
       {
-            super("Clears messages in the text channel that the command was executed in if a number is not specified it will delete the last 25 messages", "<number>", 0);
+            super("Clears messages in the text channel that the command was executed in if a number is not specified it will delete the last 25 messages", "[number]", 0);
             addCalls("purge", "clean", "clear");
             addPermissions(Permission.ADMINISTRATOR);
             addSelfPermissions(Permission.MESSAGE_MANAGE);

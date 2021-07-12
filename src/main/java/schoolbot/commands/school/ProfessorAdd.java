@@ -10,7 +10,6 @@ import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
 import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.misc.interfaces.StateMachine;
-import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
 import schoolbot.util.EmbedUtils;
@@ -60,6 +59,7 @@ public class ProfessorAdd extends Command
                   var channel = event.getChannel();
                   var jda = event.getJDA();
 
+
                   String message = event.getMessage().getContentRaw();
 
 
@@ -74,8 +74,6 @@ public class ProfessorAdd extends Command
                   switch (state)
                   {
                         case 1 -> {
-                              // Skips last name state
-                              values.setProfessor(new Professor());
                               numCheck(message, channel);
                               channel.sendMessageFormat("Awesome! Thank you for that your professors first name is ** %s **", message).queue();
 
@@ -88,24 +86,21 @@ public class ProfessorAdd extends Command
                         case 2 -> {
                               numCheck(message, channel);
                               channel.sendMessageFormat("Thank you again. Your professor last name is ** %s **", message).queue();
-
                               values.getProfessor().setLastName(message);
-                              var schoolList = values.getSchoolList();
 
+                              var processedList = Processor.processGenericListWithoutMessageSend(values, values.getSchoolList(), School.class);
 
-                              if (schoolList.size() == 1)
+                              if (processedList == 1)
                               {
-                                    var school = schoolList.get(0);
-                                    channel.sendMessageFormat("**%s** only has one school associated with it. I will automatically assign your professor to  **%s**", event.getGuild().getName(), school.getName()).queue();
-                                    values.getProfessor().setProfessorsSchool(school);
-                                    channel.sendMessage("Lastly, enter his email prefix: ").queue();
+                                    channel.sendMessageFormat("**%s** only has one school associated with it. I will automatically assign your professor to  **%s**", event.getGuild().getName(), values.getSchool().getName()).queue();
+                                    values.getProfessor().setProfessorsSchool(values.getSchool());
+                                    channel.sendMessageFormat("Lastly enter Professor %s's email prefix \n Ex: **jones**@pitt.edu", values.getProfessor().getFirstName()).queue();
                                     values.setState(4);
                                     break;
                               }
-                              var commandEvent = values.getCommandEvent();
-                              channel.sendMessage("Moving on.. I will need you professors school.. Here is a list of all this servers schools! ").queue();
-                              commandEvent.sendAsPaginatorWithPageNumbers(commandEvent.getGuildSchools());
 
+
+                              values.getCommandEvent().sendSelfDeletingMessage("Each professor needs a school. So choose a school from the corresponding pages!");
                               values.incrementMachineState();
                         }
                         case 3 -> {
@@ -121,8 +116,8 @@ public class ProfessorAdd extends Command
 
                               values.getProfessor().setProfessorsSchool(school);
                               channel.sendMessage("""
-                                      Thank you for that! I will now need your professors email suffix
-                                      For Ex: **litman**@cs.pitt.edu
+                                      Thank you for your professors school! I will now need their email prefix!
+                                      For Ex: **jones**@pitt.edu
                                       """).queue();
 
                         }
@@ -139,7 +134,10 @@ public class ProfessorAdd extends Command
                                     EmbedUtils.error(event, "Could not add Professor %s", professor.getLastName());
                                     return;
                               }
-                              channel.sendMessageEmbeds(professor.getAsEmbed(schoolbot)).queue();
+                              channel.sendMessageEmbeds(professor.getAsEmbed(schoolbot))
+                                      .append("Professor successfully added to ")
+                                      .append(event.getGuild().getName())
+                                      .queue();
 
                               jda.removeEventListener(this);
                         }
