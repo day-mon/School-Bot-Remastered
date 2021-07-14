@@ -181,6 +181,16 @@ public class CommandEvent
 
       public void sendAsPaginator(List<MessageEmbed> embeds)
       {
+
+            if (embeds.size() == 1)
+            {
+                  var embed = embeds.get(0);
+
+                  getChannel().sendMessageEmbeds(embed).queue();
+
+                  return;
+            }
+
             List<Page> pages = new ArrayList<>();
 
             for (var embed : embeds)

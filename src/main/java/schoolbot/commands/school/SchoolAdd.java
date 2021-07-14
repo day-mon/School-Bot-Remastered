@@ -49,7 +49,7 @@ public class SchoolAdd extends Command
 
             String url = embed.getFields().get(0).getValue();
             String suffix = embed.getFields().get(1).getValue();
-            Guild guild = event.getGuild();
+            var guild = event.getGuild();
 
 
             guild.createRole()
@@ -240,8 +240,9 @@ public class SchoolAdd extends Command
 
                   if (addToDbAndCreateRole(embed, cmdEvent))
                   {
-                        event.getChannel().sendMessage("School Created").queue();
-                        event.getChannel().sendMessageEmbeds(embed).queue();
+                        event.getChannel().sendMessageEmbeds(embed)
+                                .append("School Created")
+                                .queue();
                   }
                   else
                   {

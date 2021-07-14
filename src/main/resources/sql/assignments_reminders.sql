@@ -1,6 +1,6 @@
 create table if not exists assignments_reminders
 (
-    id              serial    not null
+    id              bigserial    not null
         constraint assignments_reminders_pkey
             primary key,
     "assignment_Id" integer   not null

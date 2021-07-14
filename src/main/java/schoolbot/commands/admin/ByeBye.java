@@ -13,9 +13,6 @@ import schoolbot.util.DatabaseUtils;
 import schoolbot.util.EmbedUtils;
 
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class ByeBye extends Command
 {
@@ -27,7 +24,7 @@ public class ByeBye extends Command
             addCalls("byebye", "bye", "bai");
             addPermissions(Permission.ADMINISTRATOR);
             addSelfPermissions(Permission.MANAGE_ROLES, Permission.MANAGE_PERMISSIONS);
-            setCommandPrerequisites("Be owner of server");
+            addCommandPrerequisites("Be owner of server");
       }
 
       @Override
@@ -72,8 +69,7 @@ public class ByeBye extends Command
                                               removeAllChannels(event);
                                               DatabaseUtils.removeAllGuildOccurrences(event.getSchoolbot(), event.getGuild().getIdLong());
 
-                                              channel.sendMessage("Goodbye!").queue();
-                                              event.getGuild().leave().queue();
+                                              channel.sendMessage("Goodbye!").queue(__ -> event.getGuild().leave().queue());
                                         }
                                   });
                     });
@@ -88,13 +84,18 @@ public class ByeBye extends Command
                     {
                           var jda = event.getJDA();
 
-                          jda.getTextChannelById(textChannel).delete().queue(null,
-                                  channelRemovalFailure -> LOGGER.error("Cannot delete a TextChannel in the removal process. The TextChannel ID is {}", textChannel, channelRemovalFailure));
+                          var channel = jda.getTextChannelById(textChannel);
+
+                          if (channel != null)
+                          {
+                                channel.delete().queue(null,
+                                        channelRemovalFailure -> LOGGER.error("Cannot delete a TextChannel in the removal process. The TextChannel ID is {}", textChannel, channelRemovalFailure));
+                          }
 
                     });
       }
 
-      private final void removeAllRoles(CommandEvent event)
+      private void removeAllRoles(CommandEvent event)
       {
             event.getGuildClasses()
                     .stream()
@@ -103,8 +104,14 @@ public class ByeBye extends Command
                     {
                           var jda = event.getJDA();
 
-                          jda.getRoleById(roleId).delete().queue(null,
-                                  roleRemovalFailure -> LOGGER.error("Cannot delete a Role in the removal process. The Role ID is {}", roleId, roleRemovalFailure));
+                          var role = jda.getRoleById(roleId);
+
+                          if (role != null)
+                          {
+                                role.delete().queue(null,
+                                        roleRemovalFailure -> LOGGER.error("Cannot delete a Role in the removal process. The Role ID is {}", roleId, roleRemovalFailure));
+                          }
+
 
                     });
 

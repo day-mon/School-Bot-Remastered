@@ -20,6 +20,7 @@ import schoolbot.util.EmbedUtils;
 import schoolbot.util.Processor;
 
 import java.awt.*;
+import java.sql.Array;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -33,7 +34,7 @@ public class AssignmentRemove extends Command
       public AssignmentRemove(Command parent)
       {
             super(parent, "Removes an assignment from a class", "[none]", 0);
-            setCommandPrerequisites("A valid assignment to edit");
+            addCommandPrerequisites("A valid assignment to edit");
             addFlags(CommandFlag.STATE_MACHINE_COMMAND);
       }
 
@@ -102,7 +103,6 @@ public class AssignmentRemove extends Command
 
       public static void sendConfirmationMessage(StateMachineValues values)
       {
-
             var assignment = values.getAssignment();
             var event = values.getCommandEvent();
             var channel = values.getCommandEvent().getChannel();
@@ -222,9 +222,9 @@ public class AssignmentRemove extends Command
 
 
                         case 2 -> {
-                              var succcess = Processor.validateMessage(values, values.getClassroomList());
+                              var success = Processor.validateMessage(values, values.getClassroomList());
 
-                              if (!succcess)
+                              if (!success)
                               {
                                     return;
                               }

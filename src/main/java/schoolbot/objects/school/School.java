@@ -493,7 +493,7 @@ public class School implements Paginatable
 
             // Parsing the subject and the class number
             String subject = identifier[0];
-            String classNameNum = identifier[identifier.length - 1];
+            String classNameNum = identifier[1];
             String subjectAndClassNameAndNum = subject + " " + classNameNum;
 
             // Setting classname and identifier

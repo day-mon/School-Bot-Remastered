@@ -32,7 +32,7 @@ public class AssignmentEdit extends Command
             super(parent, "Edits an assignment", "[none]", 0);
             addPermissions(Permission.ADMINISTRATOR);
             addFlags(CommandFlag.STATE_MACHINE_COMMAND);
-            setCommandPrerequisites("A valid assignment to edit");
+            addCommandPrerequisites("A valid assignment to edit");
       }
 
 

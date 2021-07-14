@@ -30,7 +30,7 @@ public class AssignmentAdd extends Command
       public AssignmentAdd(Command parent)
       {
             super(parent, "This command will add an assignment when given a class during", "[none]", 0);
-            setCommandPrerequisites("A valid class to add the assignment to");
+            addCommandPrerequisites("A valid class to add the assignment to");
             addFlags(CommandFlag.STATE_MACHINE_COMMAND);
       }
 

@@ -240,7 +240,7 @@ public abstract class Command
             CommandCooldownHandler.addCooldown(member, this);
       }
 
-      public void setCommandPrerequisites(String commandPrerequisites)
+      public void addCommandPrerequisites(String commandPrerequisites)
       {
             this.commandPrerequisites = commandPrerequisites;
       }

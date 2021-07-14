@@ -1,4 +1,4 @@
-package schoolbot.commands.misc;
+package schoolbot.commands.info;
 
 import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -25,6 +25,7 @@ public class Help extends Command
       {
             super("Helps users with commands", "[command name]", 1);
             addCalls("help");
+            addUsageExample("help commands");
       }
 
 
