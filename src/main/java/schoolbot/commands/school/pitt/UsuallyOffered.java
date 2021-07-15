@@ -91,7 +91,6 @@ public class UsuallyOffered extends Command
 
                   if (identifier.equalsIgnoreCase(firstArg))
                   {
-
                         var className = ele.getElementsByClass("section-body").get(1).text();
                         var offering = ele.getElementsByClass("section-body").get(2).text();
 

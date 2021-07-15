@@ -39,7 +39,7 @@ public class Schoolbot extends ListenerAdapter
       private final WrapperHandler wrapperHandler;
       private final Logger LOGGER;
 
-      private ReminderHandler reminderHandler;
+      private ScheduleHandler scheduleHandler;
       private JDA jda;
 
       public Schoolbot()
@@ -86,7 +86,7 @@ public class Schoolbot extends ListenerAdapter
       public void onReady(@Nonnull ReadyEvent event)
       {
 
-            this.reminderHandler = new ReminderHandler(this);
+            this.scheduleHandler = new ScheduleHandler(this);
 
             jda.getPresence().setPresence(OnlineStatus.ONLINE, Activity.streaming("Prefix: " + Constants.DEFAULT_PREFIX, "https://www.youtube.com/watch?v=Lju6h-C37hE"));
             LOGGER.info("Account:           " + event.getJDA().getSelfUser());

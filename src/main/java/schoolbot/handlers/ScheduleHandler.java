@@ -1,6 +1,8 @@
 package schoolbot.handlers;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.entities.Activity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
@@ -13,21 +15,23 @@ import schoolbot.util.StringUtils;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class ReminderHandler
+public class ScheduleHandler
 {
-      private static final ScheduledExecutorService reminderExecutor = Executors.newScheduledThreadPool(10, runnable -> new Thread(runnable, "SchoolBot Reminder-Thread"));
+      private static final ScheduledExecutorService reminderExecutor = Executors.newScheduledThreadPool(10, runnable -> new Thread(runnable, "SchoolBot Scheduler-Thread"));
       private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
       private final Schoolbot schoolbot;
 
-      public ReminderHandler(Schoolbot schoolbot)
+      public ScheduleHandler(Schoolbot schoolbot)
       {
             this.schoolbot = schoolbot;
             runAssignmentsReminder();
             runClassReminder();
+            runStatusSwitcher();
       }
 
       public void runAssignmentsReminder()
@@ -49,6 +53,20 @@ public class ReminderHandler
             }, 0, 10, TimeUnit.SECONDS);
       }
 
+      public void runStatusSwitcher()
+      {
+            var jda = schoolbot.getJda();
+
+            List<Activity> activityList = List.of(
+                    Activity.watching("mark sleep"),
+                    Activity.listening("blitiski gaslighting us"),
+                    Activity.streaming("warner growing", "https://www.youtube.com/watch?v=PLOPygVcaVE"),
+                    Activity.streaming("chakara balancing seminar", "https://www.youtube.com/watch?v=vqklftk89Nw")
+            );
+
+            reminderExecutor.scheduleAtFixedRate(() ->
+                    jda.getPresence().setPresence(OnlineStatus.ONLINE, activityList.get(new Random().nextInt(activityList.size()))), 0, 30, TimeUnit.SECONDS);
+      }
 
 
       private void sendAssignmentAlert(Assignment assignment)
@@ -71,7 +89,7 @@ public class ReminderHandler
                   String dueMessage = (due <= 0) ?
                           String.format("%s, ** %s ** is **now due**", mention, assignment.getName())
                           :
-                          String.format("%s, ** %s ** is due in ** %d ** minutes", mention, assignment.getName(), due+1);
+                          String.format("%s, ** %s ** is due in ** %d ** minutes", mention, assignment.getName(), due + 1);
 
                   /*
                    * This will check if the assignment is pass due by one minute and 10 seconds
@@ -113,7 +131,7 @@ public class ReminderHandler
             try
             {
                   var classroom = (Classroom) reminder.obj();
-                  var due = Duration.between(LocalDateTime.now(), classroom.getStartDateWithTime()).toMinutes() ;
+                  var due = Duration.between(LocalDateTime.now(), classroom.getStartDateWithTime()).toMinutes();
                   var channel = schoolbot.getJda().getTextChannelById(classroom.getChannelID());
                   var role = schoolbot.getJda().getRoleById(classroom.getRoleID());
 
@@ -128,7 +146,7 @@ public class ReminderHandler
                   String dueMessage = (due <= 0) ?
                           String.format("%s, ** %s ** is **now starting**", mention, classroom.getName())
                           :
-                          String.format("%s, ** %s ** is starting in ** %d ** minutes", mention, classroom.getName(), due+1);
+                          String.format("%s, ** %s ** is starting in ** %d ** minutes", mention, classroom.getName(), due + 1);
 
                   LOGGER.info("Due time: {} min", classroom.getStartDateWithTime().minusMinutes(LocalDateTime.now().getMinute()));
 

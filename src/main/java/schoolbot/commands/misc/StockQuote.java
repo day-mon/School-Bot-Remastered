@@ -52,7 +52,7 @@ public class StockQuote extends Command
             yahoofinance.quotes.stock.StockQuote stockQuote = stock.getQuote();
 
             event.sendMessage(new EmbedBuilder()
-                    .setTitle("Quote")
+                    .setTitle(stockQuote.getSymbol() + " Quote")
                     .addField("Company Name", stock.getName(), false)
                     .addField("Symbol", stock.getSymbol(), false)
                     .addField("Exchange", stock.getStockExchange(), false)
