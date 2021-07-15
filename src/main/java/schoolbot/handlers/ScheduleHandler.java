@@ -65,7 +65,7 @@ public class ScheduleHandler
             );
 
             reminderExecutor.scheduleAtFixedRate(() ->
-                    jda.getPresence().setPresence(OnlineStatus.ONLINE, activityList.get(new Random().nextInt(activityList.size()))), 0, 30, TimeUnit.SECONDS);
+                    jda.getPresence().setPresence(OnlineStatus.ONLINE, activityList.get(new Random().nextInt(activityList.size()))), 0, 5, TimeUnit.MINUTES);
       }
 
 
