@@ -1,4 +1,4 @@
-package schoolbot.listener;
+package schoolbot.listeners;
 
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;

@@ -171,8 +171,8 @@ public class CommandHandler
             // If someone sends a parent command or doesnt have any children
             if (!com.hasChildren() || filteredArgs.isEmpty())
             {
-                  //executor.execute(() -> com.process(commandEvent));
-                  com.process(commandEvent);
+                  executor.execute(() -> com.process(commandEvent));
+                  //com.process(commandEvent);
                   return;
             }
 

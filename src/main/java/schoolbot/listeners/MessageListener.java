@@ -1,4 +1,4 @@
-package schoolbot.listener;
+package schoolbot.listeners;
 
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;

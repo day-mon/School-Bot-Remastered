@@ -1,8 +1,10 @@
 package schoolbot.commands.school;
 
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
@@ -79,6 +81,7 @@ public class ProfessorEdit extends Command
 
             private String updateColumn = "";
             private final StateMachineValues values;
+            private boolean selectionEventGoneThrough = false;
 
             private ProfessorEditStateMachine(StateMachineValues values)
             {
@@ -132,12 +135,20 @@ public class ProfessorEdit extends Command
                               cmdEvent.sendAsPaginatorWithPageNumbers(values.getProfessorList());
                               channel.sendMessage("Please give me the page number associated with the professor you want to edit").queue();
 
-                              state = 3;
+                              values.incrementMachineState();
+
                         }
 
                         case 3 -> {
 
+                              if (selectionEventGoneThrough)
+                              {
+                                    EmbedUtils.warn(event, "You need to select an option from the selection menu!");
+                                    return;
+                              }
+
                               var success = Processor.validateMessage(values, values.getProfessorList());
+                              values.setState(3);
 
                               if (!success)
                               {
@@ -156,62 +167,56 @@ public class ProfessorEdit extends Command
                               }
 
 
-                              channel.sendMessageFormat("What attribute of ** %s ** would you like to edit", professor.getFullName()).queue();
-                              channel.sendMessage("""
-                                      ```1. First Name
-                                         2. Last Name
-                                         3. Email Prefix```""").queue();
+                              var commandEvent = values.getCommandEvent();
+
+
+                              List<SelectOption> selectOptions = List.of(
+                                      SelectOption.of("First Name", "firstName"),
+                                      SelectOption.of("Last Name", "lastName"),
+                                      SelectOption.of("Email Prefix", "emailPrefix")
+                              );
+
+                              commandEvent.sendMenu(String.format("Which attribute of %s would you like to edit", professor.getFullName()), selectOptions);
+
+
+                              selectionEventGoneThrough = true;
+
+                              var eventWaiter = commandEvent.getSchoolbot().getEventWaiter();
+
+                              eventWaiter.waitForEvent(SelectionMenuEvent.class, selectionMenuEvent -> event.getMember().getIdLong() == selectionMenuEvent.getMember().getIdLong()
+                                                                                                       && selectionMenuEvent.getChannel().getIdLong() == event.getChannel().getIdLong(),
+                                      selectionMenuEvent ->
+                                      {
+                                            var updateChosen = selectionMenuEvent.getValues().get(0);
+
+                                            switch (updateChosen)
+                                            {
+                                                  case "firstName" -> {
+                                                        updateColumn = "first_name";
+                                                        channel.sendMessage("Please send me the new first name you would like for this professor").queue();
+                                                  }
+
+                                                  case "lastName" -> {
+                                                        updateColumn = "last_name";
+                                                        channel.sendMessage("Please send me the new last name you would like for this professor").queue();
+                                                  }
+
+                                                  case "emailPrefix" -> {
+                                                        updateColumn = "email_prefix";
+                                                        channel.sendMessage("Give me the email prefix you would like for this professor").queue();
+                                                  }
+                                            }
+
+                                            values.incrementMachineState();
+                                      });
                         }
 
-
-                        case 4 -> {
-                              if (updateColumn.equalsIgnoreCase("N/A"))
-                              {
-                                    EmbedUtils.error(event, "** %s ** is not a valid choice please return again");
-                                    return;
-                              }
-
-                              if (!evaluateChoice(values))
-                              {
-                                    return;
-                              }
-
-                              values.incrementMachineState();
-                        }
-
-                        case 5 -> evaluateColumn(values);
+                        case 4 -> evaluateColumn(values);
 
                   }
             }
 
-            private boolean evaluateChoice(StateMachineValues values)
-            {
-                  var event = values.getMessageReceivedEvent();
-                  var channel = event.getChannel();
-                  String content = event.getMessage().getContentRaw();
 
-                  if (content.contains("1") || content.contains("first"))
-                  {
-                        updateColumn = "first_name";
-                        channel.sendMessage("Please send me the new first name you would like for this professor").queue();
-                  }
-                  else if (content.contains("last") || content.contains("2"))
-                  {
-                        updateColumn = "last_name";
-                        channel.sendMessage("Please send me the new last name you would like for this professor").queue();
-                  }
-                  else if (content.contains("prefix") || content.contains("email") || content.contains("3"))
-                  {
-                        updateColumn = "email_suffix";
-                        channel.sendMessage("Give me the email prefix you would like for this professor").queue();
-                  }
-                  else
-                  {
-                        EmbedUtils.error(event, "** %s ** is not a valid entry");
-                        return false;
-                  }
-                  return true;
-            }
 
             private void evaluateColumn(StateMachineValues values)
             {
@@ -235,7 +240,7 @@ public class ProfessorEdit extends Command
                         case "email_prefix" -> commandEvent.updateProfessor(new DatabaseDTO(professor, updateColumn, message));
 
                         default -> {
-                              EmbedUtils.error(event, "** %s ** is not a valid response", message);
+                              EmbedUtils.error(event, "**%s** is not a valid response", message);
                               return;
                         }
                   }

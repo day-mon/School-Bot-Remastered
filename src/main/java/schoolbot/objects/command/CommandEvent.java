@@ -5,10 +5,14 @@ import com.github.ygimenez.method.Pages;
 import com.github.ygimenez.model.Page;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
+import net.dv8tion.jda.api.interactions.components.selections.SelectionMenu;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Constants;
@@ -228,11 +232,18 @@ public class CommandEvent
       }
 
 
-      public void getProfessorsAsPaginator(School school)
+      public void sendMenu(String placeHolder, List<SelectOption> selectOptions)
       {
-            List<MessageEmbed> embeds = schoolbot.getWrapperHandler().getProfessorsAsPaginator(this, school);
+            SelectionMenu menu = SelectionMenu.create("menu:class")
+                    .setPlaceholder(placeHolder)
+                    .setRequiredRange(1, 1)
+                    .addOptions(selectOptions)
+                    .build();
 
-            sendAsPaginator(embeds);
+
+            getChannel().sendMessage("Please select a option from the menu")
+                    .setActionRows(ActionRow.of(menu))
+                    .queue();
       }
 
 

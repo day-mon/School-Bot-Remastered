@@ -17,7 +17,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.handlers.*;
-import schoolbot.listener.*;
+import schoolbot.listeners.*;
 import schoolbot.objects.config.ConfigOption;
 import schoolbot.objects.info.SystemInfo;
 import schoolbot.objects.misc.Emoji;
@@ -88,8 +88,7 @@ public class Schoolbot extends ListenerAdapter
 
             this.scheduleHandler = new ScheduleHandler(this);
 
-            jda.getPresence().setPresence(OnlineStatus.ONLINE, Activity.streaming("Prefix: " + Constants.DEFAULT_PREFIX, "https://www.youtube.com/watch?v=Lju6h-C37hE"));
-            LOGGER.info("Account:           " + event.getJDA().getSelfUser());
+            LOGGER.info("Account:           " + jda.getSelfUser());
             LOGGER.info("Java Version:      " + SystemInfo.getJavaVersion());
             LOGGER.info("JDA Version:       " + JDAInfo.VERSION);
             LOGGER.info("Schoolbot Version: " + Constants.VERSION);
