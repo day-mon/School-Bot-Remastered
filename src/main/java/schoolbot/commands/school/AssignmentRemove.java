@@ -20,7 +20,6 @@ import schoolbot.util.EmbedUtils;
 import schoolbot.util.Processor;
 
 import java.awt.*;
-import java.sql.Array;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -42,7 +41,7 @@ public class AssignmentRemove extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args, @NotNull StateMachineValues values)
       {
-
+//todo fix this
             var jda = event.getJDA();
             var memberIsAdmin = event.getMember().hasPermission(Permission.ADMINISTRATOR);
             var schoolList = values.getSchoolList()
@@ -71,7 +70,7 @@ public class AssignmentRemove extends Command
                         return;
                   }
 
-                  values.setState(5);
+                  values.setState(3);
                   jda.addEventListener(new AssignmentRemoveMachine(values));
                   return;
             }
