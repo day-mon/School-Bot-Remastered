@@ -3,6 +3,7 @@ package schoolbot.commands.school;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
@@ -24,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static schoolbot.commands.school.AssignmentEdit.AssignmentEditStateMachine.sendMenu;
 
 public class AssignmentEdit extends Command
 {
@@ -47,15 +50,11 @@ public class AssignmentEdit extends Command
             for (School school : schoolList)
             {
                   List<Classroom> classroomList = new ArrayList<>();
-
                   for (Classroom classroom : school.getClassroomList())
                   {
                         if (classroom.hasAssignments())
                         {
                               classroomList.add(classroom);
-
-                              // probably bad for runtime but just want to make sure I only get specific schools
-
                               if (!schools.contains(classroom.getSchool()))
                               {
                                     schools.add(classroom.getSchool());
@@ -103,23 +102,12 @@ public class AssignmentEdit extends Command
             if (processedClassroomList == 1)
             {
                   var assignmentList = values.getAssignmentList();
-
                   var processedAssignmentList = Processor.processGenericList(values, assignmentList, Assignment.class);
 
                   if (processedAssignmentList == 1)
                   {
-                        var assignment = values.getAssignment();
-
-                        event.sendMessage("** %s ** has been chosen its the only assignment. What would you like to edit?", assignment.getName());
-                        event.sendMessage("""
-                                ```
-                                1. Name
-                                2. Description
-                                3. Point Amount
-                                4. Type
-                                5. Due Date
-                                6. Due Time```
-                                 """);
+                        values.setState(4);
+                        sendMenu(String.format("%s is the only assignment. What would you like to edit", values.getAssignment().getName()), values);
                   }
 
                   else if (processedAssignmentList == 2)
@@ -136,10 +124,10 @@ public class AssignmentEdit extends Command
       }
 
 
-      private static class AssignmentEditStateMachine extends ListenerAdapter implements StateMachine
+      static class AssignmentEditStateMachine extends ListenerAdapter implements StateMachine
       {
-            private String updateColumn;
             private final StateMachineValues values;
+            private static boolean selectionMenuOccured = false;
 
             public AssignmentEditStateMachine(@NotNull StateMachineValues values)
             {
@@ -158,8 +146,6 @@ public class AssignmentEdit extends Command
                   {
                         return;
                   }
-
-                  String message = event.getMessage().getContentRaw();
 
                   var channel = event.getChannel();
                   var jda = event.getJDA();
@@ -214,20 +200,7 @@ public class AssignmentEdit extends Command
 
                               if (assignmentList.size() == 1)
                               {
-                                    var assignment = assignmentList.get(0);
-                                    EmbedUtils.information(event, """
-                                            ** %s ** has been automatically chosen because it is the only valid assignment.
-                                                                                           
-                                            Which attribute would you like to edit?
-                                                                                           
-                                              1. Name
-                                              2. Description
-                                              3. Point Amount
-                                              4. Type
-                                              5. Due Date
-                                              6. Due Time
-                                            """, assignment.getName());
-                                    values.setState(4);
+                                    sendMenu(String.format("** %s ** has been automatically chosen because it is the only valid assignment. What would you like to edit", values.getAssignment().getName()), values);
                                     return;
                               }
                               channel.sendMessageFormat("Now that we have selected ** %s **, I will now need the assignment you would like to edit", classroom.getName()).queue();
@@ -246,82 +219,11 @@ public class AssignmentEdit extends Command
 
 
                               var assignment = values.getAssignment();
+                              sendMenu(String.format("What attribute of %s would you like to edit", assignment.getName()), values);
 
-                              channel.sendMessageFormat("What attribute of ** %s ** would you like to edit", assignment.getName()).queue();
-                              channel.sendMessage("""
-                                      ```
-                                         1. Name
-                                         2. Description
-                                         3. Point Amount
-                                         4. Type
-                                         5. Due Date
-                                         6. Due Time```
-                                       """).queue();
                         }
 
                         case 4 -> {
-                              String content = message.toLowerCase();
-
-                              if (content.equals("name") || content.equals("1"))
-                              {
-                                    updateColumn = "name";
-                                    channel.sendMessageFormat("Please give me an updated name of the assignment").queue();
-
-                              }
-                              else if (content.equals("description") || content.equals("2"))
-                              {
-                                    updateColumn = "description";
-                                    channel.sendMessageFormat("Please give me an updated description of the assignment").queue();
-                              }
-                              else if (content.contains("point") || content.contains("amount") || content.equals("3"))
-                              {
-                                    updateColumn = "points_possible";
-                                    channel.sendMessageFormat("Please give me an updated point amount of the assignment").queue();
-
-                              }
-                              else if (content.contains("4") || content.contains("type"))
-                              {
-                                    updateColumn = "type";
-                                    channel.sendMessage("""
-                                            Now I will need the type of assignment it is
-                                            ```
-                                            Valid Answers
-                                            1. Exam
-                                            2. Quiz
-                                            3. Extra Credit
-                                            4. Homework
-                                            5. Paper
-                                            ```
-                                            """).queue();
-                              }
-                              else if (content.equals("5") || content.contains("date"))
-                              {
-                                    updateColumn = "due_date";
-                                    channel.sendMessage("""
-                                            Please give me the updated due date
-                                            Please use the following format: `M/dd/yyyy`
-                                            An Example: `2/9/2004`
-                                            """).queue();
-                              }
-                              else if (content.equals("6") || content.contains("time"))
-                              {
-                                    updateColumn = "due_datet";
-                                    channel.sendMessage("""
-                                            Please give me the updated due time
-                                            Please use the following format: `HH:mm AM/PM`
-                                            An Example: `12:30pm` or `8:30am`
-                                            """).queue();
-                              }
-                              else
-                              {
-                                    EmbedUtils.error(event, "** %s ** is not a valid response.. Try again please", message);
-                                    return;
-                              }
-                              values.incrementMachineState();
-
-                        }
-
-                        case 5 -> {
                               var schoolbot = commandEvent.getSchoolbot();
                               var assignment = values.getAssignment();
 
@@ -329,11 +231,14 @@ public class AssignmentEdit extends Command
                               {
                                     return;
                               }
-                              commandEvent.sendMessage(assignment.getAsEmbed(schoolbot));
+                              channel.sendMessageEmbeds(assignment.getAsEmbed(schoolbot))
+                                      .append("Assignment successfully edited!")
+                                      .queue();
                               jda.removeEventListener(this);
                         }
                   }
             }
+
 
             private boolean evaluateUpdate(StateMachineValues values)
             {
@@ -341,6 +246,7 @@ public class AssignmentEdit extends Command
                   var commandEvent = values.getCommandEvent();
                   var assignment = values.getAssignment();
                   var message = event.getMessage().getContentRaw();
+                  var updateColumn = values.getUpdateColumn();
 
                   switch (updateColumn)
                   {
@@ -362,37 +268,6 @@ public class AssignmentEdit extends Command
                               commandEvent.updateAssignment(new DatabaseDTO(assignment, updateColumn, newPoints));
                               commandEvent.sendMessage("Points successfully changed to %d", newPoints);
 
-                        }
-
-                        case "type" -> {
-                              Assignment.AssignmentType type;
-                              if (message.contains("exam") || message.contains("1"))
-                              {
-                                    type = Assignment.AssignmentType.EXAM;
-                              }
-                              else if (message.contains("paper") || message.contains("5"))
-                              {
-                                    type = Assignment.AssignmentType.PAPER;
-                              }
-                              else if (message.contains("homework") || message.contains("work") || message.contains("4"))
-                              {
-                                    type = Assignment.AssignmentType.HOMEWORK;
-                              }
-                              else if (message.contains("quiz") || message.contains("2"))
-                              {
-                                    type = Assignment.AssignmentType.QUIZ;
-                              }
-                              else if (message.contains("extra") || message.contains("credit") || message.contains("3"))
-                              {
-                                    type = Assignment.AssignmentType.EXTRA_CREDIT;
-                              }
-                              else
-                              {
-                                    EmbedUtils.error(event, "** %s ** is not a valid entry", message);
-                                    return false;
-                              }
-                              commandEvent.updateAssignment(new DatabaseDTO(assignment, updateColumn, type));
-                              commandEvent.sendMessage("Assignment type successfully changed to %s", type.getAssignmentType());
                         }
 
                         case "due_date" -> {
@@ -468,6 +343,103 @@ public class AssignmentEdit extends Command
                         }
                   }
                   return true;
+            }
+
+
+            public static void sendMenu(String placeHolder, StateMachineValues values)
+            {
+                  var assignment = values.getAssignmentList().get(0);
+                  var commandEvent = values.getCommandEvent();
+                  var channel = values.getCommandEvent().getChannel();
+
+                  List<SelectOption> selectOptionList = List.of(
+                          SelectOption.of("Name", "name"),
+                          SelectOption.of("Description", "description"),
+                          SelectOption.of("Point Amount", "pointAmount"),
+                          SelectOption.of("Type", "type"),
+                          SelectOption.of("Due Date", "dueDate"),
+                          SelectOption.of("Due Time", "dueTime")
+                  );
+
+                  commandEvent.sendMenuAndAwait(placeHolder, selectOptionList,
+                          (selectionMenuEvent) ->
+                          {
+                                var elementChosen = selectionMenuEvent.getValues().get(0);
+
+                                switch (elementChosen)
+                                {
+                                      case "name" -> {
+                                            values.setUpdateColumn("name");
+                                            channel.sendMessageFormat("Please give me an updated name of the assignment").queue();
+                                      }
+
+                                      case "description" -> {
+                                            values.setUpdateColumn("description");
+                                            channel.sendMessageFormat("Please give me an updated description of the assignment").queue();
+                                      }
+
+                                      case "pointAmount" -> {
+                                            values.setUpdateColumn("points_possible");
+                                            channel.sendMessageFormat("Please give me an updated point amount of the assignment").queue();
+                                      }
+
+                                      case "type" -> {
+                                            if (values.getMachine() != null)
+                                                  values.getJda().removeEventListener(values.getMachine());
+
+                                            values.setUpdateColumn("type");
+                                            List<SelectOption> selectOptions = List.of(
+                                                    SelectOption.of("Exam", "exam"),
+                                                    SelectOption.of("Quiz", "quiz"),
+                                                    SelectOption.of("Extra Credit", "extra_credit"),
+                                                    SelectOption.of("Homework", "homework"),
+                                                    SelectOption.of("Paper", "paper")
+                                            );
+
+
+                                            commandEvent.sendMenuAndAwait("Please choose your assignment type", selectOptions, (selectionMenuEvent1) ->
+                                            {
+                                                  var elementChosen1 = selectionMenuEvent1.getValues().get(0);
+
+
+                                                  switch (elementChosen1)
+                                                  {
+                                                        case "exam" -> values.getAssignment().setType(Assignment.AssignmentType.EXAM);
+                                                        case "extra_credit" -> values.getAssignment().setType(Assignment.AssignmentType.EXTRA_CREDIT);
+                                                        case "homework" -> values.getAssignment().setType(Assignment.AssignmentType.HOMEWORK);
+                                                        case "quiz" -> values.getAssignment().setType(Assignment.AssignmentType.QUIZ);
+                                                        case "paper" -> values.getAssignment().setType(Assignment.AssignmentType.PAPER);
+                                                  }
+
+                                                  var assignmentType = values.getAssignment().getType();
+                                                  commandEvent.updateAssignment(new DatabaseDTO(assignment, values.getUpdateColumn(), assignmentType));
+                                                  channel.sendMessageEmbeds(assignment.getAsEmbed(commandEvent.getSchoolbot()))
+                                                          .appendFormat("**%s** type has successfully been changed to %s", assignment.getName(), assignmentType.getAssignmentType())
+                                                          .queue();
+                                            });
+
+                                      }
+
+                                      case "dueDate" -> {
+                                            values.setUpdateColumn("due_date");
+                                            channel.sendMessage("""
+                                                    Please give me the updated due date
+                                                    Please use the following format: `M/dd/yyyy`
+                                                    An Example: `2/9/2004`
+                                                    """).queue();
+                                      }
+
+                                      case "dueTime" -> {
+                                            values.setUpdateColumn("due_datet");
+                                            channel.sendMessage("""
+                                                    Please give me the updated due time
+                                                    Please use the following format: `HH:mm AM/PM`
+                                                    An Example: `12:30pm` or `8:30am`
+                                                    """).queue();
+                                      }
+                                }
+                                values.setState(4);
+                          });
             }
       }
 }

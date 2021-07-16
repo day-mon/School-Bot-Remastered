@@ -111,8 +111,6 @@ public class ByeBye extends Command
                                 role.delete().queue(null,
                                         roleRemovalFailure -> LOGGER.error("Cannot delete a Role in the removal process. The Role ID is {}", roleId, roleRemovalFailure));
                           }
-
-
                     });
 
 

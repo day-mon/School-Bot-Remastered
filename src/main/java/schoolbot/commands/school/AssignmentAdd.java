@@ -230,9 +230,9 @@ public class AssignmentAdd extends Command
                         }
 
                         case 5 -> {
-                              if (!Checks.isNumber(message) || message.toLowerCase().contains("idk"))
+                              if (!Checks.isNumber(message))
                               {
-                                    EmbedUtils.error(event, "** %s ** is not a number.. try again!", message);
+                                    EmbedUtils.error(event, "**%s** is not a number.. try again!", message);
                                     return;
                               }
 

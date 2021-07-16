@@ -5,11 +5,10 @@ import com.github.ygimenez.method.Pages;
 import com.github.ygimenez.model.Page;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.interactions.components.selections.SelectionMenu;
@@ -18,14 +17,11 @@ import org.slf4j.LoggerFactory;
 import schoolbot.Constants;
 import schoolbot.Schoolbot;
 import schoolbot.objects.misc.DatabaseDTO;
-import schoolbot.objects.misc.Emoji;
 import schoolbot.objects.misc.interfaces.Paginatable;
 import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;
-import schoolbot.util.DatabaseUtils;
-import schoolbot.util.EmbedUtils;
 
 import java.awt.*;
 import java.time.Instant;
@@ -34,7 +30,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class CommandEvent
 {
@@ -232,7 +227,7 @@ public class CommandEvent
       }
 
 
-      public void sendMenu(String placeHolder, List<SelectOption> selectOptions)
+      public void sendMenuAndAwait(String placeHolder, List<SelectOption> selectOptions, Consumer<SelectionMenuEvent> consumer)
       {
             SelectionMenu menu = SelectionMenu.create("menu:class")
                     .setPlaceholder(placeHolder)
@@ -243,7 +238,13 @@ public class CommandEvent
 
             getChannel().sendMessage("Please select a option from the menu")
                     .setActionRows(ActionRow.of(menu))
-                    .queue();
+                    .queue(message ->
+                    {
+                          var eventWaiter = schoolbot.getEventWaiter();
+
+                          eventWaiter.waitForEvent(SelectionMenuEvent.class, selectionMenuEvent -> selectionMenuEvent.getMessage().getIdLong() == message.getIdLong() && selectionMenuEvent.getChannel().getIdLong() == getChannel().getIdLong()
+                                                                                                   && selectionMenuEvent.getMember().getIdLong() == this.getMember().getIdLong(), consumer);
+                    });
       }
 
 

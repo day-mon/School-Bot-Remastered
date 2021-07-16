@@ -17,7 +17,6 @@ import java.awt.*;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -61,7 +60,6 @@ public class Clear extends Command
                   }
 
 
-
                   channel.sendMessage(
                           "You are about to delete 100 messages, click the checkmark to continue, click the X to cancel."
                   ).queue(prompt ->
@@ -71,7 +69,7 @@ public class Clear extends Command
 
                         event.getSchoolbot().getEventWaiter().waitForEvent(MessageReactionAddEvent.class,
                                 reactionEvent -> reactionEvent.getMessageIdLong() == prompt.getIdLong()
-                                                 && Objects.equals(reactionEvent.getUser(), author),
+                                                 && event.getMember().getIdLong() == reactionEvent.getMember().getIdLong(),
 
                                 reactionEvent ->
                                 {
@@ -96,11 +94,11 @@ public class Clear extends Command
                                             default -> channel.sendMessage("You did not select one of the available options.").queue();
                                       }
                                 }, 15, TimeUnit.SECONDS, () ->
-                        {
-                              prompt.delete().queue();
+                                {
+                                      prompt.delete().queue();
 
-                              channel.sendMessage("You did not respond in time.").queue();
-                        });
+                                      channel.sendMessage("You did not respond in time.").queue();
+                                });
                   });
 
             }

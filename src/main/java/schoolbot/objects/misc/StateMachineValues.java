@@ -19,6 +19,7 @@ public class StateMachineValues
       private GuildMessageReceivedEvent messageReceivedEvent;
       private final long authorId;
       private final long channelId;
+      private String updateColumn;
       private final JDA jda;
       private StateMachine machine;
       private CommandEvent event;
@@ -52,6 +53,7 @@ public class StateMachineValues
             this.professorList = null;
             this.assignmentList = null;
             this.machine = machine;
+
       }
 
       public StateMachineValues(CommandEvent event)
@@ -116,10 +118,6 @@ public class StateMachineValues
             return assignmentList;
       }
 
-      public void setAssignmentList(List<Assignment> assignmentList)
-      {
-            this.assignmentList = assignmentList;
-      }
 
       public List<Professor> getProfessorList()
       {
@@ -139,16 +137,6 @@ public class StateMachineValues
       public void setClassroomList(List<Classroom> classroomList)
       {
             this.classroomList = classroomList;
-      }
-
-      public long getAuthorId()
-      {
-            return authorId;
-      }
-
-      public long getChannelId()
-      {
-            return channelId;
       }
 
       public void setMessageReceivedEvent(GuildMessageReceivedEvent messageReceivedEvent)
@@ -292,6 +280,16 @@ public class StateMachineValues
       public void setState(int state)
       {
             this.state = state;
+      }
+
+      public String getUpdateColumn()
+      {
+            return updateColumn;
+      }
+
+      public void setUpdateColumn(String updateColumn)
+      {
+            this.updateColumn = updateColumn;
       }
 
       @SuppressWarnings("unchecked")

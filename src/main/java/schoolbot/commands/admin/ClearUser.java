@@ -11,8 +11,6 @@ import schoolbot.util.Checks;
 import schoolbot.util.EmbedUtils;
 
 import java.time.Duration;
-import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +23,6 @@ public class ClearUser extends Command
       public ClearUser(Command parent)
       {
             super(parent, "Clears messages of a target user", "[user mention] <amount of messages>", 1);
-
             addPermissions(Permission.ADMINISTRATOR);
             addSelfPermissions(Permission.MESSAGE_MANAGE);
       }

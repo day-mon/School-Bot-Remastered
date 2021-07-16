@@ -10,7 +10,6 @@ public class StringUtils
 {
       private StringUtils()
       {
-
       }
 
       public static String formatDate(OffsetDateTime dateTime)

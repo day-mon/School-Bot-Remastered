@@ -1,7 +1,6 @@
 package schoolbot.commands.school;
 
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
@@ -176,39 +175,34 @@ public class ProfessorEdit extends Command
                                       SelectOption.of("Email Prefix", "emailPrefix")
                               );
 
-                              commandEvent.sendMenu(String.format("Which attribute of %s would you like to edit", professor.getFullName()), selectOptions);
-
-
                               selectionEventGoneThrough = true;
 
-                              var eventWaiter = commandEvent.getSchoolbot().getEventWaiter();
 
-                              eventWaiter.waitForEvent(SelectionMenuEvent.class, selectionMenuEvent -> event.getMember().getIdLong() == selectionMenuEvent.getMember().getIdLong()
-                                                                                                       && selectionMenuEvent.getChannel().getIdLong() == event.getChannel().getIdLong(),
-                                      selectionMenuEvent ->
-                                      {
-                                            var updateChosen = selectionMenuEvent.getValues().get(0);
+                              commandEvent.sendMenuAndAwait(String.format("Which attribute of %s would you like to edit", professor.getFullName()), selectOptions, (selectionMenuEvent) ->
+                              {
+                                    var updateChosen = selectionMenuEvent.getValues().get(0);
 
-                                            switch (updateChosen)
-                                            {
-                                                  case "firstName" -> {
-                                                        updateColumn = "first_name";
-                                                        channel.sendMessage("Please send me the new first name you would like for this professor").queue();
-                                                  }
+                                    switch (updateChosen)
+                                    {
+                                          case "firstName" -> {
+                                                updateColumn = "first_name";
+                                                channel.sendMessage("Please send me the new first name you would like for this professor").queue();
+                                          }
 
-                                                  case "lastName" -> {
-                                                        updateColumn = "last_name";
-                                                        channel.sendMessage("Please send me the new last name you would like for this professor").queue();
-                                                  }
+                                          case "lastName" -> {
+                                                updateColumn = "last_name";
+                                                channel.sendMessage("Please send me the new last name you would like for this professor").queue();
+                                          }
 
-                                                  case "emailPrefix" -> {
-                                                        updateColumn = "email_prefix";
-                                                        channel.sendMessage("Give me the email prefix you would like for this professor").queue();
-                                                  }
-                                            }
+                                          case "emailPrefix" -> {
+                                                updateColumn = "email_prefix";
+                                                channel.sendMessage("Give me the email prefix you would like for this professor").queue();
+                                          }
+                                    }
 
-                                            values.incrementMachineState();
-                                      });
+                                    values.incrementMachineState();
+                              });
+
                         }
 
                         case 4 -> evaluateColumn(values);
