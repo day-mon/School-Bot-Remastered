@@ -41,7 +41,6 @@ public class AssignmentRemove extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args, @NotNull StateMachineValues values)
       {
-//todo fix this
             var jda = event.getJDA();
             var memberIsAdmin = event.getMember().hasPermission(Permission.ADMINISTRATOR);
             var schoolList = values.getSchoolList()

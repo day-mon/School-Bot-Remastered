@@ -4,6 +4,8 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.exceptions.ErrorHandler;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
@@ -58,21 +60,31 @@ public class ClearUser extends Command
                                               .filter(deleteAbleMessages -> Duration.between(message.getTimeCreated(), deleteAbleMessages.getTimeCreated()).toHours() < 24)
                                               .limit(26)
                                               .collect(Collectors.toList());
-                                      channel.purgeMessages(channelMessages);
-                                      return channelMessages.size();
+                                      var newList = channelMessages.subList(1, channelMessages.size());
+
+                                      event.getChannel().purgeMessages(newList);
+
+                                      return newList.size();
                                 })
                                 .whenCompleteAsync((channelMessageSize, throwable) ->
                                 {
+
+                                      if (throwable != null)
+                                      {
+                                            EmbedUtils.error(event, "Error has occurred whilst trying to delete messages for " + member.getAsMention());
+                                            return;
+                                      }
+
                                       if (channelMessageSize == 0)
                                       {
                                             EmbedUtils.error(event, "There were no messages to clear for " + member.getAsMention());
+                                            return;
                                       }
-                                      else
-                                      {
-                                            channel.sendMessage(
-                                                    "Successfully purged `" + channelMessageSize + "` messages.")
-                                                    .queue(botMessage -> botMessage.delete().queueAfter(5, TimeUnit.SECONDS));
-                                      }
+
+
+                                      channel.sendMessage(
+                                              "Successfully purged `" + channelMessageSize + "` messages.")
+                                              .queue(botMessage -> botMessage.delete().queueAfter(5, TimeUnit.SECONDS, null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MEMBER)));
                                 });
                   }
 
@@ -92,12 +104,11 @@ public class ClearUser extends Command
 
                         int messagesToRemove = Integer.parseInt(args.get(1));
 
-                        if (messagesToRemove > 100)
+                        if (messagesToRemove > 100 || messagesToRemove <= 0)
                         {
                               EmbedUtils.error(event, "You must choose a number between 1-100");
                               return;
                         }
-
 
                         Member member = message.getMentionedMembers().get(0);
                         channel.getIterableHistory()
@@ -110,20 +121,30 @@ public class ClearUser extends Command
                                               .filter(deleteAbleMessages -> Duration.between(message.getTimeCreated(), deleteAbleMessages.getTimeCreated()).toHours() < 24)
                                               .limit(messagesToRemove + 1)
                                               .collect(Collectors.toList());
-                                      channel.purgeMessages(channelMessages);
-                                      return channelMessages.size();
+
+                                      var newList = channelMessages.subList(1, channelMessages.size());
+
+                                      event.getChannel().purgeMessages(newList);
+
+                                      return newList.size();
                                 }).whenCompleteAsync((channelMessageSize, throwable) ->
                         {
+
+                              if (throwable != null)
+                              {
+                                    EmbedUtils.error(event, "Error has occurred whilst trying to delete messages for " + member.getAsMention());
+                                    return;
+                              }
+
                               if (channelMessageSize == 0)
                               {
                                     EmbedUtils.error(event, "There were no messages to clear for " + member.getAsMention());
+                                    return;
                               }
-                              else
-                              {
-                                    channel.sendMessage(
-                                            "Successfully purged `" + channelMessageSize + "` messages.")
-                                            .queue(botMessage -> botMessage.delete().queueAfter(5, TimeUnit.SECONDS));
-                              }
+
+                              channel.sendMessage("Successfully purged `" + channelMessageSize + "` messages.")
+                                      .queue(botMessage -> botMessage.delete().queueAfter(5, TimeUnit.SECONDS, null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE)));
+
                         });
                   }
             }

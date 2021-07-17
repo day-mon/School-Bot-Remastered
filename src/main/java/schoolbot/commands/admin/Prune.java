@@ -2,10 +2,13 @@ package schoolbot.commands.admin;
 
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.exceptions.ErrorHandler;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.misc.Emoji;
+import schoolbot.util.EmbedUtils;
 
 import java.time.Duration;
 import java.util.List;
@@ -43,9 +46,24 @@ public class Prune extends Command
 
                           return messagesToDelete.size();
                     })
-                    .whenCompleteAsync((messageTotal, throwable) -> event.getChannel().sendMessage(
-                            Emoji.RECYCLE.getAsChat() + " Successfully purged `" + messageTotal + "` messages"
-                    ).queue(botMessage -> botMessage.delete().queueAfter(5, TimeUnit.SECONDS)));
+                    .whenCompleteAsync((messageTotal, throwable) ->
+                    {
+                          if (throwable != null)
+                          {
+                                EmbedUtils.error(event, "Error has occurred whilst trying to delete messages");
+                                return;
+                          }
+
+                          if (messageTotal == 0)
+                          {
+                                EmbedUtils.error(event, "There are no valid messages to prune");
+                                return;
+                          }
+
+                          event.getChannel().sendMessage(
+                                  Emoji.RECYCLE.getAsChat() + " Successfully purged `" + messageTotal + "` messages"
+                          ).queue(botMessage -> botMessage.delete().queueAfter(5, TimeUnit.SECONDS, null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MEMBER)));
+                    });
 
       }
 }

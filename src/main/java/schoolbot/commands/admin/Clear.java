@@ -7,6 +7,8 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
+import net.dv8tion.jda.api.exceptions.ErrorHandler;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
@@ -41,7 +43,6 @@ public class Clear extends Command
       {
             if (args.isEmpty())
             {
-
                   var channel = event.getChannel();
                   var message = event.getMessage();
                   var author = event.getUser();
@@ -84,12 +85,29 @@ public class Clear extends Command
                                                                           OffsetDateTime.now().plus(2, ChronoUnit.WEEKS)
                                                                   )).collect(Collectors.toList());
 
-                                                          channel.purgeMessages(deletableMessages);
+                                                          var newList = deletableMessages.subList(1, deletableMessages.size());
 
-                                                          return deletableMessages.size();
-                                                    }).whenCompleteAsync((messagesTotal, throwable) -> channel.sendMessage(
-                                                            "Successfully purged `" + messagesTotal + "` messages."
-                                                    ).queue(botMessage -> botMessage.delete().queueAfter(5, TimeUnit.SECONDS)));
+                                                          channel.purgeMessages(newList);
+
+                                                          return newList.size();
+                                                    }).whenCompleteAsync((messagesTotal, throwable) ->
+                                                    {
+
+                                                          if (throwable != null)
+                                                          {
+                                                                EmbedUtils.error(event, "Error occurred while trying to remove messages");
+                                                                return;
+                                                          }
+
+                                                          if (messagesTotal == 0)
+                                                          {
+                                                                EmbedUtils.error(event, "There are no messages to clear");
+                                                                return;
+                                                          }
+
+                                                          channel.sendMessage("Successfully purged `" + messagesTotal + "` messages.")
+                                                                  .queue(botMessage -> botMessage.delete().queueAfter(5, TimeUnit.SECONDS, null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE)));
+                                                    });
                                             case "\u274E" -> channel.sendMessage("Operation was successfully cancelled.").queue();
                                             default -> channel.sendMessage("You did not select one of the available options.").queue();
                                       }
@@ -100,7 +118,6 @@ public class Clear extends Command
                                       channel.sendMessage("You did not respond in time.").queue();
                                 });
                   });
-
             }
             else
             {
@@ -113,20 +130,42 @@ public class Clear extends Command
                   }
                   int messagesToRemove = Integer.parseInt(numCheck);
                   event.getChannel().getIterableHistory()
-                          .takeAsync(messagesToRemove)
+                          .takeAsync(messagesToRemove + 1)
                           .thenApplyAsync(channelMessages ->
                           {
                                 List<Message> filteredDeletedMessages = channelMessages.stream()
                                         .filter(messages -> messages.getTimeCreated().isBefore(
                                                 OffsetDateTime.now().plus(2, ChronoUnit.WEEKS)
                                         )).collect(Collectors.toList());
-                                event.getChannel().purgeMessages(filteredDeletedMessages);
-                                return filteredDeletedMessages.size();
-                          }).whenCompleteAsync((messagesTotal, throwable) -> event.getChannel().sendMessageEmbeds(
-                          new EmbedBuilder()
-                                  .setDescription("Successfully purged `" + messagesTotal + "` messages.")
-                                  .setColor(Color.GREEN)
-                                  .build()).queue(botMessage -> botMessage.delete().queueAfter(5, TimeUnit.SECONDS)));
+
+
+                                var newList = filteredDeletedMessages.subList(1, filteredDeletedMessages.size());
+
+                                event.getChannel().purgeMessages(newList);
+
+                                return newList.size();
+                          }).whenCompleteAsync((messagesTotal, throwable) ->
+                  {
+
+                        if (throwable != null)
+                        {
+                              EmbedUtils.error(event, "Error occurred while trying to remove messages");
+                              return;
+                        }
+
+                        if (messagesTotal == 0)
+                        {
+                              EmbedUtils.error(event, "There are no messages to clear");
+                              return;
+                        }
+
+                        event.getChannel().sendMessageEmbeds(
+                                new EmbedBuilder()
+                                        .setDescription("Successfully purged `" + messagesTotal + "` messages.")
+                                        .setColor(Color.GREEN)
+                                        .build()).queue(botMessage -> botMessage.delete().queueAfter(5, TimeUnit.SECONDS, null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE)));
+
+                  });
             }
       }
 }
