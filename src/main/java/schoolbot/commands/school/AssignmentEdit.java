@@ -17,6 +17,7 @@ import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
 import schoolbot.util.EmbedUtils;
 import schoolbot.util.Processor;
+import schoolbot.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -127,7 +128,7 @@ public class AssignmentEdit extends Command
       static class AssignmentEditStateMachine extends ListenerAdapter implements StateMachine
       {
             private final StateMachineValues values;
-            private static boolean selectionMenuOccured = false;
+            private static final boolean selectionMenuOccured = false;
 
             public AssignmentEditStateMachine(@NotNull StateMachineValues values)
             {
@@ -283,7 +284,7 @@ public class AssignmentEdit extends Command
                               LocalDateTime localDateTime = LocalDateTime.of(date, assignment.getDueDate().toLocalTime());
 
                               commandEvent.updateAssignment(new DatabaseDTO(assignment, updateColumn, localDateTime));
-                              commandEvent.sendMessage("Date successfully changed to %s", localDateTime);
+                              commandEvent.sendMessage("Date successfully changed to %s", StringUtils.formatDate(localDateTime));
 
                         }
 

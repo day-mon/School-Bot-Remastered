@@ -62,7 +62,7 @@ public class Prune extends Command
 
                           event.getChannel().sendMessage(
                                   Emoji.RECYCLE.getAsChat() + " Successfully purged `" + messageTotal + "` messages"
-                          ).queue(botMessage -> botMessage.delete().queueAfter(5, TimeUnit.SECONDS, null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MEMBER)));
+                          ).queue(botMessage -> botMessage.delete().queueAfter(5, TimeUnit.SECONDS, null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE)));
                     });
 
       }
