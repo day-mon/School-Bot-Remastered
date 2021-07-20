@@ -169,14 +169,17 @@ public class CommandHandler
             // If someone sends a parent command or doesnt have any children
             if (!com.hasChildren() || filteredArgs.isEmpty())
             {
-                  try
+                  executor.submit(() ->
                   {
-                        executor.submit(() -> com.process(commandEvent));
-                  }
-                  catch (Exception e)
-                  {
-                        CMD_HANDLER_LOGGER.error("Error occurred in {}", com.getName(), e);
-                  }
+                        try
+                        {
+                              com.process(commandEvent);
+                        }
+                        catch (Exception e)
+                        {
+                              CMD_HANDLER_LOGGER.error("Error occurred in {}", com.getName(), e);
+                        }
+                  });
                   return;
             }
 
@@ -186,27 +189,30 @@ public class CommandHandler
                     .findFirst()
                     .ifPresentOrElse(
                             child ->
-                            {
-                                  try
-                                  {
-                                        executor.submit(() -> child.process(new CommandEvent(event, child, filteredArgs.subList(1, filteredArgs.size()), schoolbot, executor)));
-                                  }
-                                  catch (Exception e)
-                                  {
-                                        CMD_HANDLER_LOGGER.error("Error occurred in {}", com.getName(), e);
-                                  }
-                            },
+                                    executor.submit(() ->
+                                    {
+                                          try
+                                          {
+                                                executor.submit(() -> child.process(new CommandEvent(event, child, filteredArgs.subList(1, filteredArgs.size()), schoolbot, executor)));
+                                          }
+                                          catch (Exception e)
+                                          {
+                                                CMD_HANDLER_LOGGER.error("Error occurred in {}", com.getName(), e);
+                                          }
+                                    }),
                             () ->
-                            {
-                                  try
-                                  {
-                                        executor.execute(() -> com.process(commandEvent));
-                                  }
-                                  catch (Exception e)
-                                  {
-                                        CMD_HANDLER_LOGGER.error("Error occurred in {}", com.getName(), e);
-                                  }
-                            }
+                                    executor.submit(() ->
+                                    {
+                                          try
+                                          {
+                                                executor.submit(() -> com.process(commandEvent));
+
+                                          }
+                                          catch (Exception e)
+                                          {
+                                                CMD_HANDLER_LOGGER.error("Error occurred in {}", com.getName(), e);
+                                          }
+                                    })
                     );
       }
 

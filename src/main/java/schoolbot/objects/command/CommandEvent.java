@@ -204,6 +204,7 @@ public class CommandEvent
 
       public <T extends Paginatable> void sendAsPaginatorWithPageNumbers(List<T> list)
       {
+
             // This is just in case I call a list with pages when theres only one page...
             if (list.size() == 1)
             {
