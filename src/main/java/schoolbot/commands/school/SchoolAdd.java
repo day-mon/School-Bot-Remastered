@@ -2,7 +2,6 @@ package schoolbot.commands.school;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -12,7 +11,6 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import schoolbot.Constants;
-import schoolbot.Schoolbot;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
@@ -145,7 +143,6 @@ public class SchoolAdd extends Command
 
             for (int i = 0; i < length; i++)
             {
-
                   JSONObject elementsWithinArray = jsonArray.getJSONObject(i);
 
                   String schoolName = elementsWithinArray.getString("name");

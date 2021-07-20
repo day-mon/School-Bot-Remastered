@@ -1,7 +1,6 @@
 package schoolbot.commands.admin;
 
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +29,6 @@ public class ByeBye extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
-            var eventWaiter = event.getSchoolbot().getEventWaiter();
             var channel = event.getChannel();
 
             var ownerId = event.getGuild().getOwnerIdLong();
@@ -43,36 +41,24 @@ public class ByeBye extends Command
             }
 
 
-            channel.sendMessageFormat("Hello %s.. calling this command means you will remove everything I created as well as me leaving the server. Are you sure you want to do this?", event.getUser().getAsMention())
-                    .queue(reactionAdd ->
-                    {
-                          reactionAdd.addReaction(Emoji.WHITE_CHECK_MARK.getAsReaction()).queue();
-                          reactionAdd.addReaction(Emoji.CROSS_MARK.getAsReaction()).queue();
+            EmbedUtils.confirmation(event, String.format("Hello %s.. calling this command means you will remove everything I created as well as me leaving the server. Are you sure you want to do this?", event.getUser().getAsMention()), (messageReactionAddEvent) ->
+            {
+                  var reactionEmote = messageReactionAddEvent.getReactionEmote().getName();
 
-                          eventWaiter.waitForEvent(MessageReactionAddEvent.class,
-                                  messageReactionAddEvent ->
-                                          messageReactionAddEvent.getMessageIdLong() == reactionAdd.getIdLong()
-                                          && messageReactionAddEvent.getUserIdLong() == event.getUser().getIdLong()
-                                          && (messageReactionAddEvent.getReaction().getReactionEmote().getName().equals(Emoji.WHITE_CHECK_MARK.getUnicode())
-                                              || messageReactionAddEvent.getReaction().getReactionEmote().getName().equals(Emoji.CROSS_MARK.getUnicode())),
-                                  messageReactionAddEvent ->
-                                  {
-                                        var reactionEmote = messageReactionAddEvent.getReactionEmote().getName();
+                  if (reactionEmote.equals(Emoji.CROSS_MARK.getUnicode()))
+                  {
+                        EmbedUtils.information(event, "Okay.. exiting!");
+                  }
+                  else if (reactionEmote.equals(Emoji.WHITE_CHECK_MARK.getUnicode()))
+                  {
+                        removeAllRoles(event);
+                        removeAllChannels(event);
+                        DatabaseUtils.removeAllGuildOccurrences(event.getSchoolbot(), event.getGuild().getIdLong());
 
-                                        if (reactionEmote.equals(Emoji.CROSS_MARK.getUnicode()))
-                                        {
-                                              EmbedUtils.information(event, "Okay.. exiting!");
-                                        }
-                                        else if (reactionEmote.equals(Emoji.WHITE_CHECK_MARK.getUnicode()))
-                                        {
-                                              removeAllRoles(event);
-                                              removeAllChannels(event);
-                                              DatabaseUtils.removeAllGuildOccurrences(event.getSchoolbot(), event.getGuild().getIdLong());
+                        channel.sendMessage("Goodbye!").queue(__ -> event.getGuild().leave().queue());
+                  }
+            });
 
-                                              channel.sendMessage("Goodbye!").queue(__ -> event.getGuild().leave().queue());
-                                        }
-                                  });
-                    });
       }
 
       private void removeAllChannels(CommandEvent event)

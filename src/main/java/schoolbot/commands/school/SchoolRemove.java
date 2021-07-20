@@ -1,14 +1,13 @@
 package schoolbot.commands.school;
 
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
+import schoolbot.objects.misc.Emoji;
 import schoolbot.objects.misc.StateMachineValues;
-import schoolbot.objects.misc.interfaces.StateMachine;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
 import schoolbot.util.EmbedUtils;
@@ -21,7 +20,7 @@ public class SchoolRemove extends Command
 {
       public SchoolRemove(Command parent)
       {
-            super(parent, "Removes a school given the name", "[school name]", 0);
+            super(parent, "Removes a school", "<none>", 0);
             addPermissions(Permission.ADMINISTRATOR);
             addSelfPermissions(Permission.MANAGE_ROLES, Permission.MANAGE_CHANNEL);
             addFlags(CommandFlag.STATE_MACHINE_COMMAND);
@@ -48,77 +47,54 @@ public class SchoolRemove extends Command
 
             if (processedList == 1)
             {
-                  event.sendMessage("This is the only school available to delete would you like to delete it?");
-                  values.setState(2);
+                  var school = values.getSchool();
+                  EmbedUtils.confirmation(values.getCommandEvent(), "Are you sure you want to remove **%s**", (messageReactionAddEvent) ->
+                  {
+                        var reactionEmote = messageReactionAddEvent.getReactionEmote().getName();
+
+                        if (reactionEmote.equals(Emoji.CROSS_MARK.getUnicode()))
+                        {
+                              event.sendMessage("Okay.. aborting..");
+                        }
+                        else if (reactionEmote.equals(Emoji.WHITE_CHECK_MARK.getUnicode()))
+                        {
+                              values.getCommandEvent().removeSchool(school);
+                              EmbedUtils.success(event, "Removed [** %s **] successfully", school.getName());
+                        }
+                  }, school.getName());
             }
 
-            jda.addEventListener(new SchoolRemoveStateMachine(values));
-
-      }
-
-      private static class SchoolRemoveStateMachine extends ListenerAdapter implements StateMachine
-      {
-            private final StateMachineValues values;
-
-
-            private SchoolRemoveStateMachine(StateMachineValues values)
+            if (processedList == 2)
             {
-                  this.values = values;
-            }
+                  var eventWaiter = event.getSchoolbot().getEventWaiter();
 
+                  eventWaiter.waitForEvent(MessageReceivedEvent.class,
+                          messageReceivedEvent -> messageReceivedEvent.getChannel().getIdLong() == event.getChannel().getIdLong()
+                                                  && messageReceivedEvent.getMember().getIdLong() == event.getMember().getIdLong()
+                                                  && messageReceivedEvent.getMessage().getContentRaw().chars().allMatch(Character::isDigit)
+                                                  && Checks.between(Integer.parseInt(messageReceivedEvent.getMessage().getContentRaw()), schools.size()),
+                          onEvent ->
+                          {
+                                var school = schools.get(Integer.parseInt(onEvent.getMessage().getContentRaw()));
+                                var channel = onEvent.getChannel();
 
-            @Override
-            public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event)
-            {
-                  values.setMessageReceivedEvent(event);
-                  var channel = event.getChannel();
-                  var message = event.getMessage().getContentRaw();
-                  var requirementsMet = Checks.eventMeetsPrerequisites(values);
+                                EmbedUtils.confirmation(values.getCommandEvent(), "Are you sure you want to remove **%s**", (messageReactionAddEvent) ->
+                                {
+                                      var reactionEmote = messageReactionAddEvent.getReactionEmote().getName();
 
-                  if (!requirementsMet)
-                  {
-                        return;
-                  }
-
-
-                  int state = values.getState();
-
-                  switch (state)
-                  {
-                        case 1 -> {
-                              var schools = values.getSchoolList();
-                              var success = Processor.validateMessage(values, schools);
-
-                              if (!success)
-                              {
-                                    return;
-                              }
-
-
-                              var school = values.getSchool();
-                              channel.sendMessageFormat("Are you sure you want to remove [ ** %s **]", school.getName()).queue();
-                        }
-
-                        case 2 -> {
-                              var school = values.getSchool();
-                              var commandEvent = values.getCommandEvent();
-                              if (message.equalsIgnoreCase("yes") || message.equalsIgnoreCase("y"))
-                              {
-                                    commandEvent.removeSchool(school);
-                                    EmbedUtils.success(event, "Removed [** %s **] successfully", school.getName());
-                                    event.getJDA().removeEventListener(this);
-                              }
-                              else if (message.equalsIgnoreCase("no") || message.equalsIgnoreCase("n") || message.equalsIgnoreCase("nah"))
-                              {
-                                    channel.sendMessage("Okay.. aborting..").queue();
-                                    event.getJDA().removeEventListener(this);
-                              }
-                              else
-                              {
-                                    EmbedUtils.error(event, "[ ** %s ** ] is not a valid respond.. I will need a **Yes** OR a **No**", message);
-                              }
-                        }
-                  }
+                                      if (reactionEmote.equals(Emoji.CROSS_MARK.getUnicode()))
+                                      {
+                                            channel.sendMessage("Okay.. aborting..").queue();
+                                            jda.removeEventListener(this);
+                                      }
+                                      else if (reactionEmote.equals(Emoji.WHITE_CHECK_MARK.getUnicode()))
+                                      {
+                                            values.getCommandEvent().removeSchool(school);
+                                            EmbedUtils.success(event, "Removed [** %s **] successfully", school.getName());
+                                            jda.removeEventListener(this);
+                                      }
+                                }, school.getName());
+                          });
             }
       }
 }

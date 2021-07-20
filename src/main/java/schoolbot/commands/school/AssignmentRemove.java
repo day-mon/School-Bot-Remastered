@@ -1,9 +1,7 @@
 package schoolbot.commands.school;
 
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
@@ -19,9 +17,7 @@ import schoolbot.util.Checks;
 import schoolbot.util.EmbedUtils;
 import schoolbot.util.Processor;
 
-import java.awt.*;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -103,51 +99,31 @@ public class AssignmentRemove extends Command
       {
             var assignment = values.getAssignment();
             var event = values.getCommandEvent();
-            var channel = values.getCommandEvent().getChannel();
             var jda = event.getJDA();
             var stateMachine = values.getMachine();
 
-            channel.sendMessageEmbeds(new EmbedBuilder()
-                    .setTitle("Confirmation")
-                    .setDescription(String.format("Are you sure you would like to delete **%s**?", assignment.getName()))
-                    .setColor(Color.YELLOW)
-                    .build()
-            ).queue(prompt ->
+            EmbedUtils.confirmation(event, String.format("Are you sure you would like to delete **%s**?", assignment.getName()), (messageReactionAddEvent) ->
             {
-
-                  prompt.addReaction(Emoji.CROSS_MARK.getAsReaction()).queue();
-                  prompt.addReaction(Emoji.WHITE_CHECK_MARK.getAsReaction()).queue();
-
-                  var eventWaiter = event.getSchoolbot().getEventWaiter();
-
-                  eventWaiter.waitForEvent(MessageReactionAddEvent.class,
-                          reactionEvent -> reactionEvent.getMessageIdLong() == prompt.getIdLong()
-                                           && Objects.equals(reactionEvent.getUser(), event.getUser()),
-
-                          messageReactionAddEvent ->
-                          {
-                                var reactionName = messageReactionAddEvent.getReactionEmote().getName();
-                                if (reactionName.equals(Emoji.WHITE_CHECK_MARK.getAsReaction()))
-                                {
-                                      event.removeAssignment(assignment);
-                                      EmbedUtils.success(event, "Removed [** %s **] successfully", assignment.getName());
-                                }
-                                else if (reactionName.equals(Emoji.CROSS_MARK.getAsReaction()))
-                                {
-                                      EmbedUtils.error(event, "Okay aborting!");
-                                }
-                                else
-                                {
-                                      EmbedUtils.error(event, "You attempted to add another reaction to the message... Aborting!");
-                                }
+                  var reactionName = messageReactionAddEvent.getReactionEmote().getName();
+                  if (reactionName.equals(Emoji.WHITE_CHECK_MARK.getAsReaction()))
+                  {
+                        event.removeAssignment(assignment);
+                        EmbedUtils.success(event, "Removed [** %s **] successfully", assignment.getName());
+                  }
+                  else if (reactionName.equals(Emoji.CROSS_MARK.getAsReaction()))
+                  {
+                        EmbedUtils.error(event, "Okay aborting!");
+                  }
+                  else
+                  {
+                        EmbedUtils.error(event, "You attempted to add another reaction to the message... Aborting!");
+                  }
 
 
-                                if (stateMachine != null)
-                                {
-                                      jda.removeEventListener(stateMachine);
-                                }
-
-                          });
+                  if (stateMachine != null)
+                  {
+                        jda.removeEventListener(stateMachine);
+                  }
             });
       }
 
@@ -160,7 +136,6 @@ public class AssignmentRemove extends Command
                   values.setMachine(this);
                   this.values = values;
             }
-
 
 
             @Override
