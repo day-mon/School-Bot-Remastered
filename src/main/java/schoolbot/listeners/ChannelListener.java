@@ -29,7 +29,7 @@ public class ChannelListener extends ListenerAdapter
 
             if (!perms)
             {
-                  LOGGER.error("Self user does not have permissions to view audit logs to attempt to alert user about channel deletion if it occured");
+                  LOGGER.error("Self user does not have permissions to view audit logs to attempt to alert user about channel deletion if it occurred");
                   return;
             }
 
@@ -77,6 +77,6 @@ public class ChannelListener extends ListenerAdapter
                                         LOGGER.warn("{} is owner-less.. Nothing I can do to alert", event.getGuild().getName());
                                   });
 
-                    }, faulure -> LOGGER.info("Could not retrieve audit logs."));
+                    }, failure -> LOGGER.info("Could not retrieve audit logs."));
       }
 }

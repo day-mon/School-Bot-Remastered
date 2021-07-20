@@ -106,7 +106,11 @@ public class Clear extends Command
                                                           }
 
                                                           channel.sendMessage("Successfully purged `" + messagesTotal + "` messages.")
-                                                                  .queue(botMessage -> botMessage.delete().queueAfter(5, TimeUnit.SECONDS, null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE)));
+                                                                  .queue(botMessage ->
+                                                                  {
+                                                                        botMessage.delete().queueAfter(5, TimeUnit.SECONDS, null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
+                                                                        prompt.delete().queue();
+                                                                  });
                                                     });
                                             case "\u274E" -> channel.sendMessage("Operation was successfully cancelled.").queue();
                                             default -> channel.sendMessage("You did not select one of the available options.").queue();

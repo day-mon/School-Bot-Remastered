@@ -7,16 +7,11 @@ import net.dv8tion.jda.api.interactions.components.selections.SelectionMenu;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
-import schoolbot.util.Checks;
 import schoolbot.util.EmbedUtils;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class Help extends Command
 {
@@ -42,7 +37,7 @@ public class Help extends Command
             Map<String, Command> commands = event.getSchoolbot().getCommandHandler().getCommands();
             String command = args.get(0);
             var channel = event.getChannel();
-            var preifx = event.getSchoolbot().getWrapperHandler().fetchGuildPrefix(event.getGuild().getIdLong());
+            var prefix = event.getSchoolbot().getWrapperHandler().fetchGuildPrefix(event.getGuild().getIdLong());
 
 
             if (!commands.containsKey(command))
@@ -119,7 +114,7 @@ public class Help extends Command
                                               if (commandChosen.equals(finalCmd.getName()))
                                               {
                                                     message.delete().queue();
-                                                    event.sendMessage(finalCmd.getAsHelpEmbed(preifx));
+                                                    event.sendMessage(finalCmd.getAsHelpEmbed(prefix));
                                                     return;
                                               }
 
@@ -131,7 +126,7 @@ public class Help extends Command
                                                     if (commandName.equals(commandChosen))
                                                     {
                                                           message.delete().queue();
-                                                          event.sendMessage(comm.getAsHelpEmbed(preifx));
+                                                          event.sendMessage(comm.getAsHelpEmbed(prefix));
                                                           return;
                                                     }
                                               }
@@ -140,7 +135,7 @@ public class Help extends Command
                   return;
             }
 
-            event.sendMessage(cmd.getAsHelpEmbed(preifx).build());
+            event.sendMessage(cmd.getAsHelpEmbed(prefix).build());
 
       }
 }

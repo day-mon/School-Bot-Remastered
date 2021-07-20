@@ -75,7 +75,9 @@ public class SchoolRemove extends Command
                                                   && Checks.between(Integer.parseInt(messageReceivedEvent.getMessage().getContentRaw()), schools.size()),
                           onEvent ->
                           {
-                                var school = schools.get(Integer.parseInt(onEvent.getMessage().getContentRaw()));
+                                var index = Integer.parseInt(onEvent.getMessage().getContentRaw()) - 1;
+
+                                var school = schools.get(index);
                                 var channel = onEvent.getChannel();
 
                                 EmbedUtils.confirmation(values.getCommandEvent(), "Are you sure you want to remove **%s**", (messageReactionAddEvent) ->
@@ -85,13 +87,11 @@ public class SchoolRemove extends Command
                                       if (reactionEmote.equals(Emoji.CROSS_MARK.getUnicode()))
                                       {
                                             channel.sendMessage("Okay.. aborting..").queue();
-                                            jda.removeEventListener(this);
                                       }
                                       else if (reactionEmote.equals(Emoji.WHITE_CHECK_MARK.getUnicode()))
                                       {
                                             values.getCommandEvent().removeSchool(school);
                                             EmbedUtils.success(event, "Removed [** %s **] successfully", school.getName());
-                                            jda.removeEventListener(this);
                                       }
                                 }, school.getName());
                           });

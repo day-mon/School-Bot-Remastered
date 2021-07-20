@@ -11,7 +11,6 @@ import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;
 
-import javax.xml.crypto.Data;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -26,7 +25,9 @@ public class DatabaseUtils
 
       private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseUtils.class);
 
-      private DatabaseUtils() {};
+      private DatabaseUtils()
+      {
+      }
 
       public static int addAssignment(Schoolbot schoolbot, Assignment assignment)
       {

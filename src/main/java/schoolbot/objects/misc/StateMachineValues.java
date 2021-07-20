@@ -299,25 +299,13 @@ public class StateMachineValues
 
             switch (className)
             {
-                  case "School" -> {
-                        var school = (List<School>) list;
-                        schoolList = school;
-                  }
+                  case "School" -> schoolList = (List<School>) list;
 
-                  case "Professor" -> {
-                        var professor = (List<Professor>) list;
-                        professorList = professor;
-                  }
+                  case "Professor" -> professorList = (List<Professor>) list;
 
-                  case "Classroom" -> {
-                        var classroom = (List<Classroom>) list;
-                        classroomList = classroom;
-                  }
+                  case "Classroom" -> classroomList = (List<Classroom>) list;
 
-                  case "Assignment" -> {
-                        var assignment = (List<Assignment>) list;
-                        assignmentList = assignment;
-                  }
+                  case "Assignment" -> assignmentList = (List<Assignment>) list;
 
                   default -> throw new IllegalStateException(String.format("%s is not supported", className));
 

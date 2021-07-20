@@ -58,8 +58,8 @@ public class ListClasses extends Command
 
                                 messageReceivedEventAction ->
                                 {
-                                      var number = Integer.parseInt(messageReceivedEventAction.getMessage().getContentRaw());
-                                      var school = schools.get(number);
+                                      var index = Integer.parseInt(messageReceivedEventAction.getMessage().getContentRaw()) - 1;
+                                      var school = schools.get(index);
 
                                       event.sendAsPaginatorWithPageNumbers(school.getClassroomList());
                                 }

@@ -4,7 +4,6 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.misc.interfaces.Paginatable;
 import schoolbot.objects.school.Classroom;
@@ -18,32 +17,6 @@ public class Processor
       {
       }
 
-      /**
-       * Returns the next state the state machine should goto
-       * The Event field is just so I can use the channel
-       * The Classroom List is the list that needs processing
-       *
-       * @param event         Event Passed through for channel
-       * @param classroomList Class List passed through for processing
-       * @return Returns state to go to
-       */
-      public static int processClassList(CommandEvent event, List<Classroom> classroomList, String UPDATE_MENU)
-      {
-
-            if (classroomList.size() == 1)
-            {
-                  Classroom classroom = classroomList.get(0);
-
-                  event.sendMessage(UPDATE_MENU, classroom.getName());
-                  return 3;
-
-            }
-            else
-            {
-                  event.sendAsPaginatorWithPageNumbers(classroomList);
-                  return 2;
-            }
-      }
 
       /**
        * Returns void

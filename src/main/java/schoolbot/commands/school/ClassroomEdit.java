@@ -460,7 +460,8 @@ public class ClassroomEdit extends Command
                         {
                               potentialRole.getManager()
                                       .setName(newNames)
-                                      .queue();
+                                      .queue(null, failure ->
+                                              event.getSchoolbot().getLogger().warn("Error occurred while trying to rename the role {} in the during the class edit process", newNames));
                         }
 
                         var potentialChannel = jda.getTextChannelById(classroom.getChannelID());
@@ -469,7 +470,8 @@ public class ClassroomEdit extends Command
                         {
                               potentialChannel.getManager()
                                       .setName(newNames)
-                                      .queue();
+                                      .queue(null, failure ->
+                                              event.getSchoolbot().getLogger().warn("Error occurred while trying to rename the channel {} in the during the class edit process", newNames));
                         }
 
                         event.updateClassroom(new DatabaseDTO(classroom, updateColumn, message));
@@ -485,12 +487,11 @@ public class ClassroomEdit extends Command
                         {
                               EmbedUtils.error(event, "Your class description was %d characters long. It cannot exceed 1024 characters", length);
                               return;
-
                         }
 
                         event.updateClassroom(new DatabaseDTO(classroom, updateColumn, message));
                         EmbedUtils.success(event, "Description changed successfully!");
-                        values.getJda().removeEventListener(values.getMachine());
+                        jda.removeEventListener(values.getMachine());
 
 
                   }
@@ -505,7 +506,7 @@ public class ClassroomEdit extends Command
 
                         event.updateClassroom(new DatabaseDTO(classroom, updateColumn, values.getProfessor().getId()));
                         EmbedUtils.success(event, "Professor changed successfully to %s", values.getProfessor().getFullName());
-                        values.getJda().removeEventListener(values.getMachine());
+                        jda.removeEventListener(values.getMachine());
 
                   }
 
@@ -575,7 +576,7 @@ public class ClassroomEdit extends Command
 
                         event.updateClassroom(new DatabaseDTO(classroom, updateColumn, LocalDateTime.of(date, time)));
                         EmbedUtils.success(event, "Date Successfully changed!");
-                        values.getJda().removeEventListener(values.getMachine());
+                        jda.removeEventListener(values.getMachine());
 
                   }
 
@@ -590,7 +591,7 @@ public class ClassroomEdit extends Command
 
                         event.updateClassroom(new DatabaseDTO(classroom, updateColumn, number));
                         EmbedUtils.success(event, "Class Number successfully changed to: %s", number);
-                        values.getJda().removeEventListener(values.getMachine());
+                        jda.removeEventListener(values.getMachine());
 
                   }
 
@@ -637,7 +638,7 @@ public class ClassroomEdit extends Command
                               }
                               EmbedUtils.success(event, "Channel successfully changed to: %s", textChannel.getAsMention());
                               event.updateClassroom(new DatabaseDTO(classroom, updateColumn, textChannel.getIdLong()));
-                              values.getJda().removeEventListener(values.getMachine());
+                              jda.removeEventListener(values.getMachine());
 
                         }
                         else
@@ -659,7 +660,7 @@ public class ClassroomEdit extends Command
 
                         event.updateClassroom(new DatabaseDTO(classroom, updateColumn, message));
                         EmbedUtils.success(event, "Time Successfully changed!");
-                        values.getJda().removeEventListener(values.getMachine());
+                        jda.removeEventListener(values.getMachine());
 
                   }
             }

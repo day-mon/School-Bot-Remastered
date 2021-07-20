@@ -1,7 +1,6 @@
 package schoolbot.handlers;
 
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import okhttp3.*;
 import org.apache.commons.io.IOUtils;

@@ -6,9 +6,7 @@ import net.dv8tion.jda.api.entities.Member;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import schoolbot.Constants;
 import schoolbot.handlers.CommandCooldownHandler;
-import schoolbot.objects.misc.Emoji;
 import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.util.EmbedUtils;
 
@@ -27,7 +25,7 @@ public abstract class Command
       private final List<Command> children;
       private final List<CommandFlag> commandFlags;
 
-      private boolean enabled;
+      private final boolean enabled;
 
       private final String name;
       private CommandCategory category;
@@ -38,7 +36,7 @@ public abstract class Command
 
       private final int minimalArgs;
 
-      private long cooldown;
+      private final long cooldown;
 
       private final Command parent;
 

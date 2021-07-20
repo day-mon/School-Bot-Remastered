@@ -115,7 +115,7 @@ public class AssignmentAdd extends Command
             }
 
 
-            // Redundant to repeat but youd have to do a lot of scrolling to remember why you are here
+            // Redundant to repeat but you'd have to do a lot of scrolling to remember why you are here
             if (classroom != null)
             {
                   values.getAssignment().setClassroom(classroom);

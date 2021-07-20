@@ -28,7 +28,7 @@ public class SelfLeaveListener extends ListenerAdapter
 
             if (!successful)
             {
-                  LOGGER.error("Error has occured whilist removing guild data for {} ({}", guild.getName(), guild.getIdLong());
+                  LOGGER.error("Error has occurred whilst removing guild data for {} ({}", guild.getName(), guild.getIdLong());
             }
       }
 

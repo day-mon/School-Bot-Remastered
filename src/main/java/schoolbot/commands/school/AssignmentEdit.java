@@ -128,7 +128,7 @@ public class AssignmentEdit extends Command
       static class AssignmentEditStateMachine extends ListenerAdapter implements StateMachine
       {
             private final StateMachineValues values;
-            private static final boolean selectionMenuOccured = false;
+            private static final boolean selectionMenuOccurred = false;
 
             public AssignmentEditStateMachine(@NotNull StateMachineValues values)
             {
