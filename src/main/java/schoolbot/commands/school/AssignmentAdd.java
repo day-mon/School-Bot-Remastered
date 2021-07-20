@@ -120,7 +120,7 @@ public class AssignmentAdd extends Command
             {
                   values.getAssignment().setClassroom(classroom);
                   EmbedUtils.information(event, """
-                          ** %s ** has been selected because it is the only class I can recognize.
+                          ** %s ** has been selected because you sent a message from this channel.
                                                                 
                           I would like to proceed with the assignment name you would like.
                                                                 

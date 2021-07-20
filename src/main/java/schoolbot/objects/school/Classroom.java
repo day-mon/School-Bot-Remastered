@@ -262,7 +262,14 @@ public class Classroom implements Paginatable, Remindable
             var startDatee = Instant.ofEpochMilli(startDate.getTime())
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
-            this.startDate = LocalDateTime.of(startDatee, LocalTime.of(0, 0));
+            if (this.startDate != null)
+            {
+                  this.startDate = LocalDateTime.of(startDatee, this.startDate.toLocalTime());
+            }
+            else
+            {
+                  this.startDate = LocalDateTime.of(startDatee, LocalTime.of(0, 0));
+            }
       }
 
 
@@ -303,7 +310,15 @@ public class Classroom implements Paginatable, Remindable
             var endDatee = Instant.ofEpochMilli(endDate.getTime())
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
-            this.endDate = LocalDateTime.of(endDatee, LocalTime.of(0, 0));
+            if (this.endDate != null)
+            {
+                  this.endDate = LocalDateTime.of(endDatee, this.endDate.toLocalTime());
+            }
+            else
+            {
+                  this.startDate = LocalDateTime.of(endDatee, LocalTime.of(0, 0));
+
+            }
       }
 
       public String getName()

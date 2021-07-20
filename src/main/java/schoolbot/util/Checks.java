@@ -160,22 +160,6 @@ public class Checks
             }
       }
 
-      public static Classroom messageSentFromClassChannel(CommandEvent event)
-      {
-            List<Classroom> classroomList = event.getGuildClasses();
-            long textChanel = event.getTextChannel().getIdLong();
-
-
-            // Get class room
-
-            return classroomList
-                    .stream()
-                    .filter(clazzroom -> clazzroom.getChannelID() == textChanel)
-                    .findFirst()
-                    .orElse(null);
-
-      }
-
       /**
        * <ul>
        * Returns a classroom if found <b>NULL</b> if otherwise.

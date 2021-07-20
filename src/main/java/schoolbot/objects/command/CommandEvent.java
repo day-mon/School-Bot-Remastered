@@ -33,7 +33,7 @@ import java.util.function.Consumer;
 
 public class CommandEvent
 {
-      private Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+      private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
       private final GuildMessageReceivedEvent event;
       private final Schoolbot schoolbot;
       private final Command command;
@@ -229,8 +229,10 @@ public class CommandEvent
 
       public void sendMenuAndAwait(String placeHolder, List<SelectOption> selectOptions, Consumer<SelectionMenuEvent> consumer)
       {
+            var stringToSend = placeHolder.length() >= 100 ? "Choose an option from the menu" : placeHolder;
+
             SelectionMenu menu = SelectionMenu.create("menu:class")
-                    .setPlaceholder(placeHolder)
+                    .setPlaceholder(stringToSend)
                     .setRequiredRange(1, 1)
                     .addOptions(selectOptions)
                     .build();

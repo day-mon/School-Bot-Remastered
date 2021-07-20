@@ -7,7 +7,7 @@ public class Stock extends Command
 
       public Stock()
       {
-            super("Gives a price or a quote of a given security", "[quote/price] [stock]", 1);
+            super("Gives a price or a quote of a given security", "[quote/price] [stock]", 0);
             addChildren(
                     new StockPrice(this),
                     new StockQuote(this)

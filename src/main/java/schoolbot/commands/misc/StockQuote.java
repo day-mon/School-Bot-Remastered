@@ -10,6 +10,7 @@ import schoolbot.util.StringUtils;
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class StockQuote extends Command
@@ -58,14 +59,15 @@ public class StockQuote extends Command
                     .addField("Exchange", stock.getStockExchange(), false)
                     .addBlankField(false)
                     .addField("Normal Trading Data", "", false)
-                    .addField("Price", "$" + stockQuote.getPrice().toPlainString(), false)
-                    .addField("Today's Change", stockQuote.getChange().toPlainString() + "$", false)
-                    .addField("Average Volume", StringUtils.parseNumberWithCommas(stockQuote.getAvgVolume()), false)
-                    .addField("Previous Close", StringUtils.parseNumberWithCommas(stockQuote.getPreviousClose()), false)
-                    .addField("Market Cap", StringUtils.parseNumberWithCommas(stock.getStats().getMarketCap()), false)
-                    .addField("52 Week High", StringUtils.parseNumberWithCommas(stockQuote.getYearHigh()), false)
-                    .addField("52 Week Low", stockQuote.getYearLow().toPlainString(), false)
-                    .addField("52 Week Change (High)", stockQuote.getChangeFromYearHigh().toPlainString() + "$", false)
+                    .addField("Price", stockQuote.getPrice() == null ? "N/A" : '$' + stockQuote.getPrice().toPlainString(), false)
+                    .addField("Today's Change", stockQuote.getChange() == null ? "N/A" : '$' + stockQuote.getChange().toPlainString(), false)
+                    .addField("Average Volume", stockQuote.getAvgVolume() == null ? "N/A" : StringUtils.parseNumberWithCommas(stockQuote.getAvgVolume()), false)
+                    .addField("Previous Close", stockQuote.getPreviousClose() == null ? "N/A" : StringUtils.parseNumberWithCommas(stockQuote.getPreviousClose()), false)
+                    .addField("Market Cap", stock.getStats().getMarketCap() == null ? "N/A" : StringUtils.parseNumberWithCommas(stock.getStats().getMarketCap()), false)
+                    .addField("52 Week High", stockQuote.getYearHigh() == null ? "N/A" : StringUtils.parseNumberWithCommas(stockQuote.getYearHigh()), false)
+                    .addField("52 Week Low", stockQuote.getYearLow() == null ? "N/A" : stockQuote.getYearLow().toPlainString(), false)
+                    .addField("52 Week Change (High)", stockQuote.getChangeFromYearHigh() == null ? "N/A" : '$' + stockQuote.getChangeFromYearHigh().toPlainString(), false)
+                    .setFooter("Live data as of " + StringUtils.formatDate(LocalDate.now()))
             );
       }
 }

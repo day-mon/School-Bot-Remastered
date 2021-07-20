@@ -91,7 +91,7 @@ public class Parser
 
             LocalDate ld = classroom.getStartDate().isBefore(LocalDate.now()) ? LocalDate.now() : classroom.getStartDate();
 
-            while (ld.isBefore(classroom.getEndDate()))
+            while (ld.isBefore(classroom.getEndDate()) || ld.isEqual(classroom.getEndDate()))
             {
                   DayOfWeek day = ld.getDayOfWeek();
                   if (localDateTimeMap.containsKey(day))

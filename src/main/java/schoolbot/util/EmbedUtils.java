@@ -16,6 +16,7 @@ import schoolbot.objects.misc.Emoji;
 
 import java.awt.*;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class EmbedUtils
@@ -217,14 +218,14 @@ public class EmbedUtils
                     new EmbedBuilder()
                             .setTitle("Tutorial")
                             .setDescription(embedDescription)
-                            .addField("Step 1", "Use " + prefix +"school add and read all of the instructions", false)
+                            .addField("Step 1", "Use " + prefix + "school add and read all of the instructions", false)
                             .addField("Step 2", "You now have a school. You will need a " + prefix + "professor for this school. Call professor add to do so, and follow the instructions. If you goto a University of Pittsburgh School you can bypass this step!", false)
                             .addField("Step 3", String.format("""
                                     Now that you have a Professor. You can use %sclass add. If you attend a University of Pittsburgh Campus I have a special system.
                                     During this process I will add class reminders, create a role and a text channel
                                     """, prefix), false)
-                            .addField("Step 4", "Now that you have a class. You can call "+prefix+"assignment add. This will add reminders and send them in the corresponding channels", false)
-                            .addField("Final Remarks", "Now when you have done all of those steps. To add additional schools, classes, professors, and assignments the process is the same! If you need help again you can just call "+prefix+"tutorial again!", false)
+                            .addField("Step 4", "Now that you have a class. You can call " + prefix + "assignment add. This will add reminders and send them in the corresponding channels", false)
+                            .addField("Final Remarks", "Now when you have done all of those steps. To add additional schools, classes, professors, and assignments the process is the same! If you need help again you can just call " + prefix + "tutorial again!. Also I count everytime you use space as an individual argument, use the ' character to keep things you would like to use spaces with as one argument", false)
                             .build()
             ).queue(null, failure ->
                     LOGGER.error("Could not send tutorial in any channel", failure));
@@ -239,6 +240,28 @@ public class EmbedUtils
                     .setColor(Constants.DEFAULT_EMBED_COLOR)
                     .build()
             ).queue();
+      }
+
+      public static void confirmation(CommandEvent event, String message, Consumer<MessageReactionAddEvent> doAfterConsumer, Object... args)
+      {
+            var eventWaiter = event.getSchoolbot().getEventWaiter();
+
+            event.getChannel().sendMessageEmbeds(
+                    new EmbedBuilder()
+                            .setTitle("Confirmation")
+                            .setDescription(String.format(message, args))
+                            .build()
+            ).queue(consumerMessage ->
+            {
+                  consumerMessage.addReaction(Emoji.WHITE_CHECK_MARK.getAsReaction()).queue();
+                  consumerMessage.addReaction(Emoji.CROSS_MARK.getAsReaction()).queue();
+
+                  eventWaiter.waitForEvent(MessageReactionAddEvent.class,
+                          messageReceivedEvent -> messageReceivedEvent.getMessageIdLong() == consumerMessage.getIdLong()
+                                                  && messageReceivedEvent.getMember().getIdLong() == event.getMember().getIdLong()
+                                                  && (messageReceivedEvent.getReaction().getReactionEmote().getName().equals(Emoji.WHITE_CHECK_MARK.getUnicode())
+                                                      || messageReceivedEvent.getReaction().getReactionEmote().getName().equals(Emoji.CROSS_MARK.getUnicode())), doAfterConsumer);
+            });
       }
 
 }

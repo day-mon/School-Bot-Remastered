@@ -137,8 +137,12 @@ public class GuildWrapper
 
                   case "professor_id" -> {
                         int professorId = (int) classroomDTO.valueBeingChanged();
+                        var oldProfessor = classroom.getProfessor();
                         Professor professor = schoolList.get(schoolName)
                                 .getProfessorByID(professorId);
+
+                        oldProfessor.removeClass(classroom);
+                        professor.addClass(classroom);
 
                         schoolList.get(schoolName)
                                 .getClassroomByID(classId)
@@ -159,6 +163,7 @@ public class GuildWrapper
                               schoolList.get(schoolName)
                                       .getClassroomByID(classId)
                                       .setEndDate(Date.valueOf(ld.toLocalDate()));
+
                         }
                   }
 
@@ -186,8 +191,12 @@ public class GuildWrapper
                         }
                   }
 
-                  case "time" -> schoolList.get(schoolName)
-                          .getClassroomByID(classId);
+                  case "time" -> {
+                        var newTime = (String) classroomDTO.valueBeingChanged();
+                        schoolList.get(schoolName)
+                                .getClassroomByID(classId)
+                                .setTime(newTime);
+                  }
 
             }
             DatabaseUtils.updateClassroom(classroomDTO, schoolbot);
