@@ -1,8 +1,6 @@
 package schoolbot.commands.school;
 
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.SelectionMenuEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -335,18 +333,20 @@ public class ClassroomEdit extends Command
                               event.sendMenuAndAwait("This class has no role assigned to it. Here are your options", selectOptionList, (selectionMenuEvent1) ->
                               {
                                     var itemChosen = selectionMenuEvent1.getValues().get(0);
-                                    Role roleCreated;
 
                                     if (itemChosen.equals("create"))
                                     {
-                                          roleCreated = guild.createRole()
+                                          guild.createRole()
                                                   .setName(className.toLowerCase().replaceAll("\\s", "-"))
                                                   .setColor(new Random().nextInt(0xFFFFFF))
-                                                  .complete();
+                                                  .queue(roleCreated ->
+                                                  {
+                                                        EmbedUtils.success(event, "Role successfully changed to: %s", roleCreated.getAsMention());
+                                                        event.updateClassroom(new DatabaseDTO(classroom, values.getUpdateColumn(), roleCreated.getIdLong()));
+                                                        jda.removeEventListener(machine);
+                                                  });
 
-                                          EmbedUtils.success(event, "Role successfully changed to: %s", roleCreated.getAsMention());
-                                          event.updateClassroom(new DatabaseDTO(classroom, values.getUpdateColumn(), roleCreated.getIdLong()));
-                                          jda.removeEventListener(machine);
+
                                     }
                                     else if (itemChosen.equals("assign"))
                                     {
@@ -379,10 +379,7 @@ public class ClassroomEdit extends Command
 
                                       (selectionMenuEvent1) ->
                                       {
-
-                                            System.out.println("state at beginning -> " + values.getState());
                                             var itemChosen = selectionMenuEvent1.getValues().get(0);
-                                            TextChannel channel;
 
                                             if (itemChosen.equals("create"))
                                             {
@@ -392,22 +389,30 @@ public class ClassroomEdit extends Command
                                                   {
                                                         EmbedUtils.warn(event, "This class does not have a role assigned to it. When setting up the channel I will only allow admins to view it.");
 
-                                                        channel = guild.createTextChannel(className)
+                                                        guild.createTextChannel(className)
                                                                 .setName(className)
                                                                 .addRolePermissionOverride(guild.getIdLong(), 0L, Permission.ALL_GUILD_PERMISSIONS)
-                                                                .complete();
+                                                                .queue(channel ->
+                                                                {
+                                                                      event.updateClassroom(new DatabaseDTO(classroom, values.getUpdateColumn(), channel.getIdLong()));
+                                                                      EmbedUtils.success(event, "TextChannel successfully changed to: %s", channel.getAsMention());
+                                                                      jda.removeEventListener(machine);
+                                                                });
                                                   }
                                                   else
                                                   {
-                                                        channel = guild.createTextChannel(className)
+                                                        guild.createTextChannel(className)
                                                                 .setName(className)
                                                                 .addRolePermissionOverride(potentialRole.getIdLong(), Permission.ALL_GUILD_PERMISSIONS, 0L)
                                                                 .addRolePermissionOverride(guild.getIdLong(), 0L, Permission.ALL_GUILD_PERMISSIONS)
-                                                                .complete();
+                                                                .queue(channel ->
+                                                                {
+                                                                      event.updateClassroom(new DatabaseDTO(classroom, values.getUpdateColumn(), channel.getIdLong()));
+                                                                      EmbedUtils.success(event, "TextChannel successfully changed to: %s", channel.getAsMention());
+                                                                      jda.removeEventListener(machine);
+                                                                });
                                                   }
-                                                  event.updateClassroom(new DatabaseDTO(classroom, values.getUpdateColumn(), channel.getIdLong()));
-                                                  EmbedUtils.success(event, "TextChannel successfully changed to: %s", channel.getAsMention());
-                                                  jda.removeEventListener(machine);
+
                                             }
                                             else if (itemChosen.equals("assign"))
                                             {

@@ -525,7 +525,7 @@ public class ClassroomAdd extends Command
 
                               EmbedUtils.information(event, "Awesome.. I will now add all of this information to my database.. One moment!");
 
-                              commandEvent.addClass(classroom);
+                              commandEvent.getCommandThreadPool().submit(() -> commandEvent.addClass(classroom));
                               jda.removeEventListener(this);
                         }
                   }
@@ -550,8 +550,6 @@ public class ClassroomAdd extends Command
                   var time = localTime.toLocalTime();
 
                   values.getClassroom().setTime(time);
-
-
 
 
                   return true;

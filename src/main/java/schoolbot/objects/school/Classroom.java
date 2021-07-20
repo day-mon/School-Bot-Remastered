@@ -316,7 +316,7 @@ public class Classroom implements Paginatable, Remindable
             }
             else
             {
-                  this.startDate = LocalDateTime.of(endDatee, LocalTime.of(0, 0));
+                  this.endDate = LocalDateTime.of(endDatee, LocalTime.of(0, 0));
 
             }
       }
