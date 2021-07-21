@@ -22,14 +22,14 @@ public class MessageHandler
               "js", "php", "r", "py", "go", "python", "ts", "html",
               "css", "scss"
       );
+      private final OkHttpClient client = new OkHttpClient();
       private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
       private final Schoolbot schoolbot;
-      private final OkHttpClient client;
+
 
       public MessageHandler(Schoolbot schoolbot)
       {
             this.schoolbot = schoolbot;
-            client = new OkHttpClient();
       }
 
       public void handle(GuildMessageReceivedEvent event)

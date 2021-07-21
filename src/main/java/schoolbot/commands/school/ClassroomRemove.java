@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
+import schoolbot.objects.misc.Emoji;
 import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.misc.interfaces.StateMachine;
 import schoolbot.objects.school.Classroom;
@@ -62,8 +63,22 @@ public class ClassroomRemove extends Command
 
                   if (classSuccess == 1)
                   {
-                        event.sendMessage("Are you sure you want to remove this class?");
-                        values.setState(3);
+                        var classroom = values.getClassroom();
+                        EmbedUtils.confirmation(event, "Are you sure you want to remove **%s**", (messageReactionAddEvent1) ->
+                        {
+                              var reactionEmote = messageReactionAddEvent1.getReactionEmote().getName();
+
+                              if (reactionEmote.equals(Emoji.CROSS_MARK.getUnicode()))
+                              {
+                                    event.sendMessage("Okay aborting!");
+                              }
+                              else if (reactionEmote.equals(Emoji.WHITE_CHECK_MARK.getUnicode()))
+                              {
+                                    values.getCommandEvent().removeClass(classroom);
+                                    EmbedUtils.success(event, "Removed **%s** successfully", classroom.getName());
+                              }
+                        }, classroom.getName());
+                        return;
                   }
                   else if (classSuccess == 2)
                   {
@@ -152,39 +167,29 @@ public class ClassroomRemove extends Command
 
                         case 2 -> {
 
-                              var success = Processor.validateMessage(event, values.getClassroomList());
+                              var success = Processor.validateMessage(values, values.getClassroomList());
 
-                              if (success == null)
-                              {
-                                    return;
-                              }
 
-                              values.setClassroom(success);
+                              if (!success) return;
 
-                              channel.sendMessageFormat("Are you sure you want to remove ** %s **", success.getName()).queue();
-                              values.incrementMachineState();
-                        }
-
-                        case 3 -> {
-
-                              var commandEvent = values.getCommandEvent();
                               var classroom = values.getClassroom();
 
-                              if (message.equalsIgnoreCase("yes") || message.equalsIgnoreCase("y"))
+                              EmbedUtils.confirmation(values.getCommandEvent(), "Are you sure you want to remove **%s**", (messageReactionAddEvent) ->
                               {
-                                    commandEvent.removeClass(values.getClassroom());
-                                    EmbedUtils.success(commandEvent, "Removed [** %s **] successfully", classroom.getName());
-                                    jda.removeEventListener(this);
-                              }
-                              else if (message.equalsIgnoreCase("no") || message.equalsIgnoreCase("n") || message.equalsIgnoreCase("nah"))
-                              {
-                                    channel.sendMessage("Okay.. aborting..").queue();
-                                    jda.removeEventListener(this);
-                              }
-                              else
-                              {
-                                    EmbedUtils.error(event, "[ ** %s ** ] is not a valid respond.. I will need a **Yes** OR a **No**", message);
-                              }
+                                    var reactionEmote = messageReactionAddEvent.getReactionEmote().getName();
+
+                                    if (reactionEmote.equals(Emoji.CROSS_MARK.getUnicode()))
+                                    {
+                                          channel.sendMessage("Okay.. aborting..").queue();
+                                    }
+                                    else if (reactionEmote.equals(Emoji.WHITE_CHECK_MARK.getUnicode()))
+                                    {
+                                          values.getCommandEvent().removeClass(classroom);
+                                          EmbedUtils.success(event, "Removed **%s** successfully", classroom.getName());
+                                    }
+
+                              }, classroom.getName());
+                              jda.removeEventListener(this);
                         }
                   }
             }

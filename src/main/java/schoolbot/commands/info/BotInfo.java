@@ -33,13 +33,9 @@ public class BotInfo extends Command
                             .addField("JVM Version:", SystemInfo.getJavaVersion(), true)
                             .addField("JDA Version:", JDAInfo.VERSION, true)
                             .addField("Schoolbot Version", Constants.VERSION, true)
-                            .addBlankField(true)
-
                             .addField("Host OS", SystemInfo.getOperatingSystem(), true)
                             .addField("Memory Usage:", ((runtime.totalMemory() - runtime.freeMemory()) >> 20) + "MB / " + (runtime.maxMemory() >> 20) + "MB", true)
                             .addField("Thread Count:", String.valueOf(ManagementFactory.getThreadMXBean().getThreadCount()), true)
-                            .addBlankField(true)
-
                             .addField("Guild Count:", String.valueOf(jda.getGuildCache().size()), true)
                             .addField("Guild Prefix:", event.getGuildPrefix(), true)
                             .addField("User Count", String.valueOf(event.getJDA()
@@ -47,7 +43,6 @@ public class BotInfo extends Command
                                     .stream()
                                     .mapToInt(Guild::getMemberCount)
                                     .sum()), true)
-                            .addBlankField(true)
                             .build()
             ).queue();
       }
