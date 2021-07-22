@@ -56,9 +56,8 @@ public class Schoolbot extends ListenerAdapter
 
       public void build() throws LoginException
       {
-            this.jda = JDABuilder.createDefault
-                    (
-                            configHandler.getString(ConfigOption.TOKEN),
+            this.jda = JDABuilder.createDefault(configHandler.getString(ConfigOption.TOKEN))
+                    .enableIntents(
                             GatewayIntent.DIRECT_MESSAGES,
                             GatewayIntent.DIRECT_MESSAGE_REACTIONS,
 
@@ -67,7 +66,6 @@ public class Schoolbot extends ListenerAdapter
                             GatewayIntent.GUILD_MESSAGES,
                             GatewayIntent.GUILD_MESSAGE_REACTIONS,
                             GatewayIntent.GUILD_VOICE_STATES
-
                     )
                     .addEventListeners(
                             this,

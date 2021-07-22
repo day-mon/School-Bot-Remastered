@@ -1,6 +1,6 @@
 create table if not exists professors
 (
-    id           serial not null
+    id bigserial not null
         constraint professors_pkey
             primary key,
     first_name   text,

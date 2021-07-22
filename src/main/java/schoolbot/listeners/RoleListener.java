@@ -12,7 +12,7 @@ import schoolbot.Schoolbot;
 public class RoleListener extends ListenerAdapter
 {
       private final Schoolbot schoolbot;
-      private final Logger LOGGER = LoggerFactory.getLogger(RoleListener.class);
+      private final Logger logger = LoggerFactory.getLogger(RoleListener.class);
 
       public RoleListener(Schoolbot schoolbot)
       {
@@ -29,7 +29,7 @@ public class RoleListener extends ListenerAdapter
 
             if (role.getName().equalsIgnoreCase(selfUser.getName()))
             {
-                  LOGGER.info("Most likely the RoleDeleteEvent. The role being deleted is the bots role");
+                  logger.info("Most likely the RoleDeleteEvent. The role being deleted is the bots role");
                   return;
             }
 
@@ -61,11 +61,11 @@ public class RoleListener extends ListenerAdapter
                                         {
                                               defaultChannel.sendMessageFormat
                                                       ("** %s ** has deleted.. It belonged to ** %s **. I can no longer alert you based off your role you can edit the class and set the role by using class edit.", role.getName(), classroom.getName()).queue();
-                                              LOGGER.info("{} has been warned in the default channel", guild.getName());
+                                              logger.info("{} has been warned in the default channel", guild.getName());
                                               return;
                                         }
 
-                                        LOGGER.warn("{} has no default or system channel!", event.getGuild().getName());
+                                        logger.warn("{} has no default or system channel!", event.getGuild().getName());
 
                                         if (user != null)
                                         {
@@ -73,13 +73,13 @@ public class RoleListener extends ListenerAdapter
                                                       .flatMap(privateMessage -> privateMessage.sendMessageFormat
                                                               ("** %s ** has deleted.. It belonged to ** %s **. I can no longer alert you based off your role you can edit the class and set the role by using class edit.", role.getName(), classroom.getName())).queue();
 
-                                              LOGGER.info("{} has been warned in their PM's", user.getAsMention());
+                                              logger.info("{} has been warned in their PM's", user.getAsMention());
                                               return;
 
                                         }
 
-                                        LOGGER.warn("{} is owner-less.. Nothing I can do to alert", event.getGuild().getName());
+                                        logger.warn("{} is owner-less.. Nothing I can do to alert", event.getGuild().getName());
                                   });
-                    }, failure -> LOGGER.warn("{} does not have access to audit logs to check who removed the role.", selfUser.getName()));
+                    }, failure -> logger.warn("{} does not have access to audit logs to check who removed the role.", selfUser.getName()));
       }
 }

@@ -1,6 +1,6 @@
 create table if not exists classes
 (
-    id           serial  not null
+    id bigserial not null
         constraint classes_pkey
             primary key,
     number       integer not null,

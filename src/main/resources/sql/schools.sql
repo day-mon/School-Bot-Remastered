@@ -1,6 +1,6 @@
 create table if not exists schools
 (
-    id             serial  not null
+    id bigserial not null
         constraint schools_pkey
             primary key,
     name           text    not null,

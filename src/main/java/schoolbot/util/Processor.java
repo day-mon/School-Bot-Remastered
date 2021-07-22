@@ -9,6 +9,7 @@ import schoolbot.objects.misc.interfaces.Paginatable;
 import schoolbot.objects.school.Classroom;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class Processor
@@ -31,6 +32,7 @@ public class Processor
             var event = values.getCommandEvent();
             int size = genericList.size();
             var schoolbot = event.getSchoolbot();
+            var channel = values.getCommandEvent().getChannel();
 
             if (genericList.isEmpty())
             {
@@ -41,7 +43,9 @@ public class Processor
             {
                   T object = genericList.get(0);
                   values.setValue(object);
-                  event.sendMessage(object.getAsEmbed(schoolbot));
+                  channel.sendMessageEmbeds(object.getAsEmbed(schoolbot))
+                          .append("This embed will be removed in 20 seconds to reduce clutter")
+                          .queue(message -> message.delete().queueAfter(20, TimeUnit.SECONDS));
                   return 1;
             }
             else

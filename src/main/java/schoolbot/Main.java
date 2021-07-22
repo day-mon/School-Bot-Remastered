@@ -12,16 +12,16 @@ public class Main
       public static void main(String[] args)
       {
             final Schoolbot bot = new Schoolbot();
-            final Logger MAIN_LOGGER = LoggerFactory.getLogger(Main.class);
+            final Logger logger = LoggerFactory.getLogger(Main.class);
 
             try
             {
                   bot.build();
-                  MAIN_LOGGER.info("Bot built successfully @ " + new Date());
+                  logger.info("Bot built successfully @ " + new Date());
             }
             catch (LoginException e)
             {
-                  MAIN_LOGGER.error("Token is invalid", e);
+                  logger.error("Token is invalid", e);
             }
       }
 }

@@ -1,6 +1,6 @@
 create table if not exists assignments
 (
-    id              bigserialserial    not null
+    id bigserial not null
         constraint assignments_pkey
             primary key,
     name            text      not null,

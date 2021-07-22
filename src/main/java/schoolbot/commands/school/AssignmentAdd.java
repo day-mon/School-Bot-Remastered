@@ -36,8 +36,6 @@ public class AssignmentAdd extends Command
 
       private static void processClassroomList(StateMachineValues values)
       {
-
-
             var commandEvent = values.getCommandEvent();
             var classroomList = values.getClassroomList();
 
@@ -93,7 +91,7 @@ public class AssignmentAdd extends Command
 
                         if (processedElement == 1)
                         {
-                              event.sendSelfDeletingMessage(String.format("** %s ** has been selected. **This message will be deleted in 10 seconds to reduce clutter!**", classroom.getName()));
+                              event.sendSelfDeletingMessage(String.format("** %s ** has been selected. **This message will be deleted in 10 seconds to reduce clutter!**", values.getSchool().getName()));
 
                               processClassroomList(values);
                         }

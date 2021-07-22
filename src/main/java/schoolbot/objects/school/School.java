@@ -567,38 +567,36 @@ public class School implements Paginatable
                     .setName(className.toLowerCase().replaceAll("\\s", "-"))
                     .setColor(new Random().nextInt(0xFFFFFF))
                     .queue(role ->
-                    {
-                          guild.createTextChannel(className)
-                                  .addPermissionOverride(role, Permission.ALL_CHANNEL_PERMISSIONS, 0L)
-                                  .addPermissionOverride(guild.getPublicRole(), 0L, Permission.ALL_CHANNEL_PERMISSIONS)
-                                  .queue(textChannel ->
-                                  {
-                                        schoolClass.setRoleID(role.getIdLong());
-                                        schoolClass.setChannelID(textChannel.getIdLong());
+                            guild.createTextChannel(className)
+                                    .addPermissionOverride(role, Permission.ALL_CHANNEL_PERMISSIONS, 0L)
+                                    .addPermissionOverride(guild.getPublicRole(), 0L, Permission.ALL_CHANNEL_PERMISSIONS)
+                                    .queue(textChannel ->
+                                    {
+                                          schoolClass.setRoleID(role.getIdLong());
+                                          schoolClass.setChannelID(textChannel.getIdLong());
 
 
-                                        schoolClass.setWasAutoFilled(true);
+                                          schoolClass.setWasAutoFilled(true);
 
-                                        int classCheck = DatabaseUtils.addClassPitt(event, schoolClass);
+                                          int classCheck = DatabaseUtils.addClassPitt(event, schoolClass);
 
-                                        if (classCheck == -1)
-                                        {
-                                              EmbedUtils.error(event, "Database failed to add ** %s **", schoolClass.getName());
-                                              removeSequence(event, schoolClass);
-                                              return;
-                                        }
+                                          if (classCheck == -1)
+                                          {
+                                                EmbedUtils.error(event, "Database failed to add ** %s **", schoolClass.getName());
+                                                removeSequence(event, schoolClass);
+                                                return;
+                                          }
 
-                                        schoolClass.setId(classCheck);
-                                        Parser.classTime(schoolbot, finalSave, schoolClass);
-                                        this.classroomList.add(schoolClass);
+                                          schoolClass.setId(classCheck);
+                                          Parser.classTime(schoolbot, finalSave, schoolClass);
+                                          this.classroomList.add(schoolClass);
 
-                                        professorCheck(schoolClass);
+                                          professorCheck(schoolClass);
 
-                                        channel.sendMessageEmbeds(schoolClass.getAsEmbed(schoolbot))
-                                                .append("Class creation completed successfully")
-                                                .queue();
-                                  });
-                    });
+                                          channel.sendMessageEmbeds(schoolClass.getAsEmbed(schoolbot))
+                                                  .append("Class creation completed successfully")
+                                                  .queue();
+                                    }));
       }
 
       private void professorCheck(Classroom schoolClass)

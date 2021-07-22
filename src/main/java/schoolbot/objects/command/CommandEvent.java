@@ -164,23 +164,8 @@ public class CommandEvent
 
       }
 
-      public <T extends Paginatable> void sendAsNormalPaginator(List<T> list)
-      {
-            List<Page> pages = new ArrayList<>();
-
-            for (T obj : list)
-            {
-                  pages.add(new Page(obj.getAsEmbed(schoolbot)));
-            }
-
-            getChannel().sendMessageEmbeds(
-                    (MessageEmbed) pages.get(0).getContent()
-            ).queue(success -> Pages.paginate(success, pages));
-      }
-
       public void sendAsPaginator(List<MessageEmbed> embeds)
       {
-
             if (embeds.size() == 1)
             {
                   var embed = embeds.get(0);
@@ -192,13 +177,11 @@ public class CommandEvent
 
             List<Page> pages = new ArrayList<>();
 
-            for (var embed : embeds)
-            {
-                  pages.add(new Page(embed));
-            }
+            embeds.forEach(embed -> pages.add(new Page(embed)));
+
             getChannel().sendMessageEmbeds(
                     (MessageEmbed) pages.get(0).getContent()
-            ).queue(success -> Pages.paginate(success, pages));
+            ).queue(message -> Pages.paginate(message, pages));
       }
 
 

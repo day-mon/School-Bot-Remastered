@@ -1,11 +1,9 @@
 package schoolbot.util;
 
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.misc.interfaces.StateMachine;
 import schoolbot.objects.school.Classroom;
@@ -14,11 +12,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 
 public class Checks
@@ -281,22 +276,5 @@ public class Checks
 
             return true;
       }
-
-      public static List<Long> validRoleCheck(CommandEvent event)
-      {
-
-            List<Long> classRoles = event.getGuildClasses()
-                    .stream()
-                    .map(Classroom::getRoleID)
-                    .collect(Collectors.toList());
-
-            return event.getMember()
-                    .getRoles()
-                    .stream()
-                    .map(Role::getIdLong)
-                    .filter(validRoles -> Collections.frequency(classRoles, validRoles) > 1)
-                    .collect(Collectors.toList());
-      }
-
 
 }

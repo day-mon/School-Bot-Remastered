@@ -2,7 +2,6 @@ package schoolbot.objects.misc;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import org.jetbrains.annotations.Nullable;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.misc.interfaces.Paginatable;
 import schoolbot.objects.misc.interfaces.StateMachine;
@@ -149,7 +148,6 @@ public class StateMachineValues
             this.machine = machine;
       }
 
-      @Nullable
       public Assignment getAssignment()
       {
             return assignment;
@@ -160,7 +158,6 @@ public class StateMachineValues
             this.assignment = assignment;
       }
 
-      @Nullable
       public Classroom getClassroom()
       {
             return classroom;
@@ -181,7 +178,6 @@ public class StateMachineValues
             return jda;
       }
 
-      @Nullable
       public School getSchool()
       {
             return school;
@@ -191,7 +187,6 @@ public class StateMachineValues
       {
             this.school = school;
       }
-
 
       public List<School> getPittClass()
       {
@@ -203,18 +198,12 @@ public class StateMachineValues
             this.pittClass = pittClass;
       }
 
-      @Nullable
       public StateMachine getMachine()
       {
             return machine;
       }
 
       public <T extends Paginatable> void setValue(T obj)
-      {
-            setAllValues(obj);
-      }
-
-      private <T extends Paginatable> void setAllValues(T obj)
       {
             String className = obj.getClass().getSimpleName();
 
@@ -267,6 +256,7 @@ public class StateMachineValues
             }
       }
 
+
       public void incrementMachineState()
       {
             state += 1;
@@ -308,8 +298,6 @@ public class StateMachineValues
                   case "Assignment" -> assignmentList = (List<Assignment>) list;
 
                   default -> throw new IllegalStateException(String.format("%s is not supported", className));
-
-
             }
       }
 
