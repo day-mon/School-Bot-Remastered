@@ -40,7 +40,6 @@ public class CommandHandler
 
       public Map<String, Command> initCommands()
       {
-
             Map<String, Command> commandMap = new LinkedHashMap<>();
             int uniqueCommands = 0;
 
@@ -111,7 +110,6 @@ public class CommandHandler
 
       public void handle(GuildMessageReceivedEvent event, String prefix)
       {
-
             String message = event.getMessage().getContentRaw();
 
             if (!message.startsWith(prefix))
@@ -127,7 +125,6 @@ public class CommandHandler
                     .filter(arg -> !arg.isBlank())
                     .collect(Collectors.toList());
 
-
             if (filteredArgs.isEmpty())
             {
                   return;
@@ -140,9 +137,7 @@ public class CommandHandler
                   return;
             }
 
-
             Command com = commands.get(alias);
-
 
             if (message.contains("”"))
             {
@@ -159,12 +154,9 @@ public class CommandHandler
                   return;
             }
 
-
             filteredArgs.remove(0);
 
-
             CommandEvent commandEvent = new CommandEvent(event, com, filteredArgs, schoolbot, executor);
-
 
             // If someone sends a parent command or doesnt have any children
             if (!com.hasChildren() || filteredArgs.isEmpty())
@@ -193,20 +185,20 @@ public class CommandHandler
                                     {
                                           try
                                           {
-                                                executor.submit(() -> child.process(new CommandEvent(event, child, filteredArgs.subList(1, filteredArgs.size()), schoolbot, executor)));
+                                                child.process(new CommandEvent(event, child, filteredArgs.subList(1, filteredArgs.size()), schoolbot, executor));
                                           }
                                           catch (Exception e)
                                           {
-                                                CMD_HANDLER_LOGGER.error("Error occurred in {}", com.getName(), e);
+                                                CMD_HANDLER_LOGGER.error("Error occurred in {}", child.getName(), e);
                                           }
                                     }),
+
                             () ->
                                     executor.submit(() ->
                                     {
                                           try
                                           {
-                                                executor.submit(() -> com.process(commandEvent));
-
+                                                com.process(commandEvent);
                                           }
                                           catch (Exception e)
                                           {

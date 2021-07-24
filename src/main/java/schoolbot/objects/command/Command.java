@@ -55,7 +55,7 @@ public abstract class Command
             this.parent = null;
             this.syntax = syntax;
             this.enabled = true;
-            this.cooldown = 1000;
+            this.cooldown = 5000;
             this.minimalArgs = minimalArgs;
             this.calls = new ArrayList<>();
             this.commandPermissions = new ArrayList<>();
@@ -79,7 +79,7 @@ public abstract class Command
             this.description = description;
             this.syntax = syntax;
             this.enabled = true;
-            this.cooldown = 1000;
+            this.cooldown = 5000;
             this.minimalArgs = minimalArgs;
             this.calls = new ArrayList<>();
             this.commandPermissions = new ArrayList<>();
@@ -211,7 +211,6 @@ public abstract class Command
             }
             else
             {
-
                   LOGGER.info("{} executed using args {} by {}", name, event.getArgs(), event.getUser().getAsMention());
                   addUserToCooldown(member);
                   if (hasCommandFlags(CommandFlag.STATE_MACHINE_COMMAND))

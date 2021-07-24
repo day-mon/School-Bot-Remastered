@@ -3,10 +3,10 @@ package schoolbot.commands.school;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -18,6 +18,7 @@ import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
 import schoolbot.util.EmbedUtils;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +38,119 @@ public class SchoolAdd extends Command
             addSelfPermissions(Permission.MANAGE_ROLES, Permission.MANAGE_CHANNEL);
             addFlags(CommandFlag.DATABASE);
 
+      }
+
+      @Override
+      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
+      {
+            var firstArg = args.get(0);
+            var channel = event.getChannel();
+
+            Document doc;
+            try
+            {
+                  doc = Jsoup.connect(API_URL + firstArg)
+                          .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
+                          .referrer("https://www.google.com")
+                          .ignoreContentType(true)
+                          .get();
+            }
+            catch (IOException e)
+            {
+                  EmbedUtils.error(event, "Could not connect to the [School API](https://schoolapi.schoolbot.dev/search?name=)");
+                  return;
+            }
+
+
+            String parseAbleJson =
+                    Jsoup.parse(doc.outerHtml())
+                            .body()
+                            .text();
+
+            JSONArray json;
+
+            try
+            {
+                  json = new JSONArray(parseAbleJson);
+            }
+            catch (JSONException e)
+            {
+                  EmbedUtils.error(event, "Error occurred while parsing JSON");
+                  return;
+            }
+
+
+            if (json.length() > 40)
+            {
+                  EmbedUtils.error(event, "Your search for ```" + firstArg + "``` contained ***" + json.length() + "*** elements.. Please narrow down your search");
+                  return;
+            }
+
+            Map<Integer, MessageEmbed> schools = evalSchools(json);
+
+            if (schools.isEmpty())
+            {
+                  EmbedUtils.error(event, "No schools matching " + firstArg + " found");
+            }
+            else if (schools.size() == 1)
+            {
+                  MessageEmbed embed = schools.get(1);
+
+                  if (addToDbAndCreateRole(embed, event))
+                  {
+                        channel.sendMessage("School Created")
+                                .setEmbeds(embed)
+                                .queue();
+                  }
+                  else
+                  {
+                        EmbedUtils.error(event, " ** %s ** already exist", firstArg);
+                  }
+            }
+            else
+            {
+                  event.sendMessage("More than one school that has been found with your search.. Type the number that matches your desired result");
+                  event.sendAsPaginator(List.copyOf(schools.values()));
+
+                  var eventWaiter = event.getSchoolbot().getEventWaiter();
+
+
+                  eventWaiter.waitForEvent(MessageReceivedEvent.class, messageEvent ->
+                          {
+                                if (messageEvent.getMember().getIdLong() != event.getMember().getIdLong()) return false;
+                                if (messageEvent.getChannel().getIdLong() != event.getChannel().getIdLong()) return false;
+                                var message = messageEvent.getMessage().getContentRaw();
+                                if (!Checks.isNumber(message)) return false;
+
+                                var number = Integer.parseInt(message);
+                                var maxInclusive = schools.values().size();
+
+                                if (!Checks.between(number, maxInclusive))
+                                {
+                                      EmbedUtils.error(event, "%d is not between 1-%d", number, maxInclusive);
+                                      return false;
+                                }
+                                return true;
+                          },
+
+                          onActionEvent ->
+                          {
+                                var schoolChoice = Integer.parseInt(onActionEvent.getMessage().getContentRaw());
+                                var embed = schools.get(schoolChoice);
+
+                                if (addToDbAndCreateRole(embed, event))
+                                {
+                                      event.getChannel().sendMessageEmbeds(embed)
+                                              .append("School Created")
+                                              .queue();
+                                }
+                                else
+                                {
+                                      EmbedUtils.error(event, "School already exist");
+                                }
+                          });
+
+            }
       }
 
       private static boolean addToDbAndCreateRole(MessageEmbed embed, CommandEvent event)
@@ -63,78 +177,6 @@ public class SchoolAdd extends Command
                             )));
             return true;
       }
-
-      @Override
-      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
-      {
-            String firstArg = args.get(0);
-
-
-            var channel = event.getChannel();
-
-            if (Checks.isNumber(firstArg))
-            {
-                  EmbedUtils.error(event, "Your school name cannot contain numbers!");
-                  return;
-            }
-            Document doc;
-            try
-            {
-                  doc = Jsoup.connect(API_URL + firstArg)
-                          .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
-                          .referrer("https://www.google.com")
-                          .ignoreContentType(true)
-                          .get();
-            }
-            catch (Exception e)
-            {
-                  channel.sendMessage("Cannot connect to API... exiting..").queue();
-                  return;
-            }
-
-
-            String parseAbleJson =
-                    Jsoup.parse(doc.outerHtml())
-                            .body()
-                            .text();
-
-
-            JSONArray json = new JSONArray(parseAbleJson);
-
-            if (json.length() > 40)
-            {
-                  EmbedUtils.error(event, "Your search for ```" + firstArg + "``` contained ***" + json.length() + "*** elements.. Please narrow down your search");
-                  return;
-            }
-
-            Map<Integer, MessageEmbed> schools = evalSchools(json);
-
-            if (schools.isEmpty())
-            {
-                  EmbedUtils.error(event, "No schools matching " + firstArg + " found");
-            }
-            else if (schools.size() == 1)
-            {
-                  MessageEmbed embed = schools.get(1);
-                  if (addToDbAndCreateRole(embed, event))
-                  {
-                        event.sendMessage("School Created");
-                        event.sendMessage(embed);
-                  }
-                  else
-                  {
-                        EmbedUtils.error(event, " ** %s ** already exist", firstArg);
-                  }
-            }
-            else
-            {
-                  event.sendMessage("More than one school that has been found with your search.. Type the number that matches your desired result");
-                  event.sendAsPaginator(List.copyOf(schools.values()));
-
-                  event.getJDA().addEventListener(new SchoolStateMachine(event, schools));
-            }
-      }
-
 
       private Map<Integer, MessageEmbed> evalSchools(JSONArray jsonArray)
       {
@@ -170,6 +212,7 @@ public class SchoolAdd extends Command
                         {
                               String[] splitDomain = schoolDomain.split("\\.");
                               var splitDomainLength = splitDomain.length;
+
                               for (int s = 0; s < splitDomainLength; s++)
                               {
                                     if (splitDomain[s].equals("edu"))
@@ -189,65 +232,13 @@ public class SchoolAdd extends Command
                           .addField("Country", country, false)
                           .addField("School #", String.valueOf(i + 1), false)
                           .setColor(Constants.DEFAULT_EMBED_COLOR)
-                          .setFooter(String.format("Page %d/%d", i+1, length))
+                          .setFooter(String.format("Page %d/%d", i + 1, length))
                           .setTimestamp(Instant.now())
                           .build()
                   );
             }
 
             return em;
-      }
-
-      private static class SchoolStateMachine extends ListenerAdapter
-      {
-            private final long channelID, authorID;
-            private final Map<Integer, MessageEmbed> schools;
-            private final CommandEvent cmdEvent;
-
-
-
-            private SchoolStateMachine(@NotNull CommandEvent event, @NotNull Map<Integer, MessageEmbed> schools)
-            {
-                  this.cmdEvent = event;
-                  this.authorID = event.getUser().getIdLong();
-                  this.channelID = event.getChannel().getIdLong();
-                  this.schools = schools;
-            }
-
-            @Override
-            public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event)
-            {
-                  if (event.getAuthor().getIdLong() != authorID) return;
-                  if (event.getChannel().getIdLong() != channelID) return;
-                  if (!event.getMessage().getContentRaw().chars().allMatch(Character::isDigit)) return;
-                  int pageNum = Integer.parseInt(event.getMessage().getContentRaw());
-                  if (!Checks.between(pageNum, schools.size())) return;
-
-                  int schoolChoice = Integer.parseInt(event.getMessage().getContentRaw());
-                  MessageEmbed embed = schools.get(schoolChoice);
-
-
-                  if (event.getMessage().getContentRaw().equalsIgnoreCase("stop"))
-                  {
-                        event.getChannel().sendMessage("Okay aborting..").queue();
-                        event.getJDA().removeEventListener(this);
-                        return;
-                  }
-
-
-                  if (addToDbAndCreateRole(embed, cmdEvent))
-                  {
-                        event.getChannel().sendMessageEmbeds(embed)
-                                .append("School Created")
-                                .queue();
-                  }
-                  else
-                  {
-                        EmbedUtils.error(event, "School already exist");
-                  }
-
-                  event.getJDA().removeEventListener(this);
-            }
       }
 }
 
