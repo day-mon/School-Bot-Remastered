@@ -105,7 +105,7 @@ public class Help extends Command
                           {
                                 var eventWaiter = event.getSchoolbot().getEventWaiter();
                                 eventWaiter.waitForEvent(SelectionMenuEvent.class,
-                                        selectionMenuEvent -> selectionMenuEvent.getMember().getIdLong() == event.getMember().getIdLong() &&
+                                        selectionMenuEvent -> selectionMenuEvent.getUser().getIdLong() == event.getMember().getIdLong() &&
                                                               event.getChannel().getIdLong() == channel.getIdLong(),
                                         selectionMenuEvent ->
                                         {

@@ -8,7 +8,6 @@ public class School extends Command
       {
             super("Adds, Removes, and Edits schools", "[add/edit/remove]", 1);
             addCalls("school", "university");
-
             addChildren(
                     new SchoolAdd(this),
                     new SchoolEdit(this),

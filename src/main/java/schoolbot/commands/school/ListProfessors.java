@@ -7,6 +7,8 @@ import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
 import schoolbot.objects.misc.StateMachineValues;
+import schoolbot.objects.misc.interfaces.StateMachine;
+import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
 import schoolbot.util.Processor;
@@ -52,7 +54,7 @@ public class ListProfessors extends Command
 
       }
 
-      private static class ListProfessorStateMachine extends ListenerAdapter
+      private static class ListProfessorStateMachine extends ListenerAdapter implements StateMachine
       {
 
             private final StateMachineValues values;
@@ -60,6 +62,7 @@ public class ListProfessors extends Command
 
             public ListProfessorStateMachine(StateMachineValues values)
             {
+                  values.setMachine(this);
                   this.values = values;
             }
 
@@ -67,8 +70,6 @@ public class ListProfessors extends Command
             public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event)
             {
                   values.setMessageReceivedEvent(event);
-                  var channel = event.getChannel();
-                  var schoolbot = values.getCommandEvent().getSchoolbot();
                   var jda = event.getJDA();
                   var requirementsMet = Checks.eventMeetsPrerequisites(values);
 
@@ -78,19 +79,14 @@ public class ListProfessors extends Command
                   }
 
                   var schoolList = values.getSchoolList();
-                  var validation = Processor.validateMessage(event, schoolList);
-                  var professorList = validation.getProfessorList();
+                  var validated = Processor.validateMessage(values, schoolList);
 
-                  if (professorList.size() == 1)
+                  if (!validated)
                   {
-                        var professor = professorList.get(0);
-                        channel.sendMessageEmbeds(professor.getAsEmbed(schoolbot)).queue();
+                        return;
                   }
-                  else
-                  {
-                        var commandEvent = values.getCommandEvent();
-                        commandEvent.sendAsPaginatorWithPageNumbers(professorList);
-                  }
+
+                  Processor.processGenericList(values, values.getProfessorList(), Professor.class);
 
                   jda.removeEventListener(this);
             }

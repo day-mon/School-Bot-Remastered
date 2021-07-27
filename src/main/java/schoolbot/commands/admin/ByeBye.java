@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
-import schoolbot.objects.misc.Emoji;
 import schoolbot.objects.school.Classroom;
 import schoolbot.util.DatabaseUtils;
 import schoolbot.util.EmbedUtils;
@@ -41,15 +40,11 @@ public class ByeBye extends Command
             }
 
 
-            EmbedUtils.confirmation(event, String.format("Hello %s.. calling this command means you will remove everything I created as well as me leaving the server. Are you sure you want to do this?", event.getUser().getAsMention()), (messageReactionAddEvent) ->
+            EmbedUtils.bConfirmation(event, "Hello %s.. calling this command means you will remove everything I created as well as me leaving the server. Are you sure you want to do this?", (buttonClickEvent) ->
             {
-                  var reactionEmote = messageReactionAddEvent.getReactionEmote().getName();
+                  var choice = buttonClickEvent.getComponentId();
 
-                  if (reactionEmote.equals(Emoji.CROSS_MARK.getUnicode()))
-                  {
-                        EmbedUtils.information(event, "Okay.. exiting!");
-                  }
-                  else if (reactionEmote.equals(Emoji.WHITE_CHECK_MARK.getUnicode()))
+                  if (choice.equals("confirm"))
                   {
                         removeAllRoles(event);
                         removeAllChannels(event);
@@ -57,7 +52,11 @@ public class ByeBye extends Command
 
                         channel.sendMessage("Goodbye!").queue(__ -> event.getGuild().leave().queue());
                   }
-            });
+                  else if (choice.equals("abort"))
+                  {
+                        EmbedUtils.abort(event);
+                  }
+            }, event.getUser().getAsMention());
 
       }
 

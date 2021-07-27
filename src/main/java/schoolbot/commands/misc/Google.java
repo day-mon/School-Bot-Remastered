@@ -19,7 +19,7 @@ public class Google extends Command
             super("Looks up google query", "[query] <index number>", 1);
             addCalls("g", "google", "duck");
             addFlags(CommandFlag.INTERNET);
-            addUsageExample("g \"How do trains go so fast\"");
+            addUsageExample("g 'How do trains go so fast'");
       }
 
 
@@ -55,7 +55,7 @@ public class Google extends Command
             {
                   if (!Checks.isNumber(args.get(1)))
                   {
-                        EmbedUtils.error(event, "Not a number");
+                        EmbedUtils.error(event, "Not a number \n " + this.getUsageExample());
                         return;
                   }
                   int num = Integer.parseInt(args.get(1));

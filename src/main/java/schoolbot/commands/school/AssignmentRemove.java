@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
-import schoolbot.objects.misc.Emoji;
 import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.misc.interfaces.StateMachine;
 import schoolbot.objects.school.Assignment;
@@ -102,29 +101,26 @@ public class AssignmentRemove extends Command
             var jda = event.getJDA();
             var stateMachine = values.getMachine();
 
-            EmbedUtils.confirmation(event, String.format("Are you sure you would like to delete **%s**?", assignment.getName()), (messageReactionAddEvent) ->
+            EmbedUtils.bConfirmation(event, "Are you sure you would like to delete **%s**?", (buttonClickEvent) ->
             {
-                  var reactionName = messageReactionAddEvent.getReactionEmote().getName();
-                  if (reactionName.equals(Emoji.WHITE_CHECK_MARK.getAsReaction()))
+
+                  var choice = buttonClickEvent.getComponentId();
+
+                  if (choice.equals("confirm"))
                   {
                         event.removeAssignment(assignment);
                         EmbedUtils.success(event, "Removed [** %s **] successfully", assignment.getName());
                   }
-                  else if (reactionName.equals(Emoji.CROSS_MARK.getAsReaction()))
+                  else if (choice.equals("abort"))
                   {
-                        EmbedUtils.error(event, "Okay aborting!");
+                        EmbedUtils.abort(event);
                   }
-                  else
-                  {
-                        EmbedUtils.error(event, "You attempted to add another reaction to the message... Aborting!");
-                  }
-
 
                   if (stateMachine != null)
                   {
                         jda.removeEventListener(stateMachine);
                   }
-            });
+            }, assignment.getName());
       }
 
       private static class AssignmentRemoveMachine extends ListenerAdapter implements StateMachine
@@ -136,7 +132,6 @@ public class AssignmentRemove extends Command
                   values.setMachine(this);
                   this.values = values;
             }
-
 
             @Override
             public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event)

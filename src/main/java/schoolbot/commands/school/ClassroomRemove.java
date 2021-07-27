@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
-import schoolbot.objects.misc.Emoji;
 import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.misc.interfaces.StateMachine;
 import schoolbot.objects.school.Classroom;
@@ -52,7 +51,6 @@ public class ClassroomRemove extends Command
             }
             else if (schoolSuccess == 1)
             {
-                  event.sendMessage("This is the only school available with deletable classes.");
                   List<Classroom> classrooms = event.getGuildClasses()
                           .stream()
                           .filter(classroom -> classroom.getAssignments().isEmpty())
@@ -63,21 +61,7 @@ public class ClassroomRemove extends Command
 
                   if (classSuccess == 1)
                   {
-                        var classroom = values.getClassroom();
-                        EmbedUtils.confirmation(event, "Are you sure you want to remove **%s**", (messageReactionAddEvent1) ->
-                        {
-                              var reactionEmote = messageReactionAddEvent1.getReactionEmote().getName();
-
-                              if (reactionEmote.equals(Emoji.CROSS_MARK.getUnicode()))
-                              {
-                                    event.sendMessage("Okay aborting!");
-                              }
-                              else if (reactionEmote.equals(Emoji.WHITE_CHECK_MARK.getUnicode()))
-                              {
-                                    values.getCommandEvent().removeClass(classroom);
-                                    EmbedUtils.success(event, "Removed **%s** successfully", classroom.getName());
-                              }
-                        }, classroom.getName());
+                        sendConfirmationMessage(values);
                         return;
                   }
                   else if (classSuccess == 2)
@@ -93,7 +77,7 @@ public class ClassroomRemove extends Command
 
       }
 
-      private static class ClassroomRemoveStateMachine extends ListenerAdapter implements StateMachine
+      private class ClassroomRemoveStateMachine extends ListenerAdapter implements StateMachine
       {
             private final StateMachineValues values;
 
@@ -119,9 +103,6 @@ public class ClassroomRemove extends Command
                   {
                         return;
                   }
-
-                  String message = event.getMessage().getContentRaw();
-
 
                   switch (state)
                   {
@@ -169,29 +150,38 @@ public class ClassroomRemove extends Command
 
                               var success = Processor.validateMessage(values, values.getClassroomList());
 
-
                               if (!success) return;
 
-                              var classroom = values.getClassroom();
-
-                              EmbedUtils.confirmation(values.getCommandEvent(), "Are you sure you want to remove **%s**", (messageReactionAddEvent) ->
-                              {
-                                    var reactionEmote = messageReactionAddEvent.getReactionEmote().getName();
-
-                                    if (reactionEmote.equals(Emoji.CROSS_MARK.getUnicode()))
-                                    {
-                                          channel.sendMessage("Okay.. aborting..").queue();
-                                    }
-                                    else if (reactionEmote.equals(Emoji.WHITE_CHECK_MARK.getUnicode()))
-                                    {
-                                          values.getCommandEvent().removeClass(classroom);
-                                          EmbedUtils.success(event, "Removed **%s** successfully", classroom.getName());
-                                    }
-
-                              }, classroom.getName());
-                              jda.removeEventListener(this);
+                              sendConfirmationMessage(values);
                         }
                   }
+            }
+      }
+
+      private void sendConfirmationMessage(StateMachineValues values)
+      {
+            var event = values.getCommandEvent();
+            var classroom = values.getClassroom();
+            var machine = values.getMachine();
+
+            EmbedUtils.bConfirmation(event, "Are you sure you would like to remove **%s**", (buttonClickEvent) ->
+            {
+                  var choice = buttonClickEvent.getComponentId();
+
+                  if (choice.equals("confirm"))
+                  {
+                        values.getCommandEvent().removeClass(values.getClassroom());
+                        EmbedUtils.success(event, "Removed **%s** successfully", classroom.getName());
+                  }
+                  else if (choice.equals("abort"))
+                  {
+                        EmbedUtils.abort(event);
+                  }
+            }, classroom.getName());
+
+            if (machine != null)
+            {
+                  values.getJda().removeEventListener(machine);
             }
       }
 }

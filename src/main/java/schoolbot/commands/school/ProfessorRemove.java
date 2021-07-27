@@ -32,13 +32,15 @@ public class ProfessorRemove extends Command
       public void run(@NotNull CommandEvent event, @NotNull List<String> args, @NotNull StateMachineValues values)
       {
             var jda = event.getJDA();
-            List<School> schoolList = event.getGuildSchools()
-                    .stream()
-                    .filter(school -> !school.getProfessorList().isEmpty())
-                    .collect(Collectors.toList());
-            values.setSchoolList(schoolList);
 
-            var processedList = Processor.processGenericList(values, schoolList, School.class);
+            values.setSchoolList(
+                    event.getGuildSchools()
+                            .stream()
+                            .filter(School::hasProfessors)
+                            .collect(Collectors.toList())
+            );
+
+            var processedList = Processor.processGenericListWithSendingList(values, values.getSchoolList(), School.class);
 
             if (processedList == 0)
             {
@@ -47,23 +49,27 @@ public class ProfessorRemove extends Command
 
             if (processedList == 1)
             {
+
+                  values.setProfessorList(
+                          values.getProfessorList().stream()
+                                  .filter(professor -> professor.getListOfClasses().isEmpty())
+                                  .collect(Collectors.toList())
+                  );
+
                   var school = values.getSchool();
 
-                  EmbedUtils.information(event, "** %s ** has been selected because it is the only school with professors that are available to delete", school.getName());
+                  event.sendSelfDeletingMessageFormat("** %s ** has been selected because it is the only school with professors that are available to delete", school.getName());
 
                   var processedProfessorList = Processor.processGenericList(values, values.getProfessorList(), Professor.class);
 
                   if (processedProfessorList == 1)
                   {
-                        var professor = values.getProfessor();
-
-                        EmbedUtils.information(event, "** %s ** is the only professor available to delete. Are you sure you want to delete them?", professor.getFullName());
-
-                        values.setState(4);
+                        sendConfirmationMessage(values);
+                        return;
                   }
                   else if (processedProfessorList == 2)
                   {
-                        values.setState(3);
+                        values.setState(2);
                   }
             }
 
@@ -72,7 +78,7 @@ public class ProfessorRemove extends Command
       }
 
 
-      private static class ProfessorRemoveStateMachine extends ListenerAdapter implements StateMachine
+      private class ProfessorRemoveStateMachine extends ListenerAdapter implements StateMachine
       {
             private final StateMachineValues values;
 
@@ -89,10 +95,6 @@ public class ProfessorRemove extends Command
                   values.setMessageReceivedEvent(event);
                   var requirementsMet = Checks.eventMeetsPrerequisites(values);
                   var jda = event.getJDA();
-                  var channel = event.getChannel();
-                  var commandEvent = values.getCommandEvent();
-
-                  String message = event.getMessage().getContentRaw();
 
                   if (!requirementsMet)
                   {
@@ -111,91 +113,52 @@ public class ProfessorRemove extends Command
                                     return;
                               }
 
-                              var professorList = values.getProfessorList()
-                                      .stream()
-                                      .filter(professor -> professor.getListOfClasses().isEmpty())
-                                      .collect(Collectors.toList());
+                              var processedList = Processor.processGenericList(values, values.getProfessorList(), Professor.class);
 
-                              values.setProfessorList(professorList);
 
-                              if (professorList.size() == 1)
+                              if (processedList == 1)
                               {
-                                    var professor = professorList.get(0);
-                                    values.setProfessor(professor);
-                                    channel.sendMessageFormat("** %s ** is the only professor available to delete at this time.. Would you like to delete them?", professor.getFullName()).queue();
-
-                                    values.setState(4);
-                                    return;
+                                    sendConfirmationMessage(values);
+                                    jda.removeEventListener(this);
                               }
-
-                              channel.sendMessage("Thank you for that.. Please select from a professor you would like to remove").queue();
-                              commandEvent.sendAsPaginatorWithPageNumbers(professorList);
-
                         }
 
                         case 2 -> {
-                              List<Professor> professorList = values.getProfessorList()
-                                      .stream()
-                                      .filter(professors -> professors.getListOfClasses().isEmpty())
-                                      .collect(Collectors.toList());
-                              values.setProfessorList(professorList);
-
-                              var listReturnCode = Processor.processGenericList(values, professorList, Professor.class);
-
-                              if (listReturnCode == 0)
-                              {
-                                    jda.removeEventListener(this);
-                                    return;
-                              }
-
-                              if (listReturnCode == 1)
-                              {
-                                    var professor = values.getProfessor();
-
-                                    channel.sendMessageFormat("** %s ** is the only professor available to delete at this time.. Would you like to delete them?", professor.getFullName()).queue();
-                                    values.setState(4);
-                              }
-
-                              // No need to check the listReturnCode == 2 because processGenericList handles that and increments state
-
-
-                        }
-
-                        case 3 -> {
 
                               var valid = Processor.validateMessage(values, values.getProfessorList());
-
 
                               if (!valid)
                               {
                                     return;
                               }
 
-                              var professor = values.getProfessor();
 
-                              channel.sendMessageFormat("Are you sure you want to delete Professor %s", professor.getLastName()).queue();
-                        }
-
-                        case 4 -> {
-                              var professor = values.getProfessor();
-                              if (message.equalsIgnoreCase("yes") || message.equalsIgnoreCase("y"))
-                              {
-                                    commandEvent.removeProfessor(professor);
-                                    EmbedUtils.success(event, "Removed [** %s **] successfully", professor.getFullName());
-                                    event.getJDA().removeEventListener(this);
-                              }
-                              else if (message.equalsIgnoreCase("no") || message.equalsIgnoreCase("n") || message.equalsIgnoreCase("nah"))
-                              {
-                                    channel.sendMessage("Okay.. aborting..").queue();
-                                    event.getJDA().removeEventListener(this);
-                              }
-                              else
-                              {
-                                    EmbedUtils.error(event, "[ ** %s ** ] is not a valid respond.. I will need a **Yes** OR a **No**", message);
-                              }
+                              sendConfirmationMessage(values);
+                              jda.removeEventListener(this);
                         }
                   }
             }
+      }
+
+      private void sendConfirmationMessage(StateMachineValues values)
+      {
+            var event = values.getCommandEvent();
+            var professor = values.getProfessor();
+
+            EmbedUtils.bConfirmation(event, "Are you sure you would like to remove **%s**", (buttonClickEvent) ->
+            {
+                  var choice = buttonClickEvent.getComponentId();
+
+                  if (choice.equals("confirm"))
+                  {
+                        event.removeProfessor(professor);
+                        EmbedUtils.success(event, "Removed **%s** successfully", professor.getFullName());
+                  }
+                  else if (choice.equals("abort"))
+                  {
+                        EmbedUtils.abort(event);
+                  }
+            }, professor.getFullName());
       }
 }
 

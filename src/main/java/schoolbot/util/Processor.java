@@ -52,7 +52,7 @@ public class Processor
             {
                   event.sendAsPaginatorWithPageNumbers(genericList);
                   values.setList(genericList);
-                  event.sendMessage("Choose a page number from the list of %s's.", tClass.getSimpleName());
+                  event.sendSelfDeletingMessageFormat("Choose a page number from the list of %s's.", tClass.getSimpleName());
                   return 2;
             }
       }
@@ -70,7 +70,6 @@ public class Processor
             var event = values.getCommandEvent();
 
             int size = genericList.size();
-            var schoolbot = event.getSchoolbot();
 
             if (genericList.isEmpty())
             {
@@ -85,9 +84,9 @@ public class Processor
             }
             else
             {
-                  event.sendAsPaginatorWithPageNumbers(genericList);
                   values.setList(genericList);
-                  event.sendMessage("Choose a page number from the list of %s's.", tClass.getSimpleName());
+                  event.sendAsPaginatorWithPageNumbers(genericList);
+                  event.sendSelfDeletingMessageFormat("Choose a page number from the list of %s's.", tClass.getSimpleName());
                   return 2;
             }
       }
@@ -105,7 +104,6 @@ public class Processor
             var event = values.getCommandEvent();
 
             int size = genericList.size();
-            var schoolbot = event.getSchoolbot();
 
             if (genericList.isEmpty())
             {

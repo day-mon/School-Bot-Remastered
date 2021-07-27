@@ -6,7 +6,6 @@ import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
-import schoolbot.objects.misc.Emoji;
 import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
@@ -30,7 +29,6 @@ public class SchoolRemove extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args, @NotNull StateMachineValues values)
       {
-            var jda = event.getJDA();
             List<School> schools = event.getGuildSchools()
                     .stream()
                     .filter(school -> school.getClassroomList().isEmpty())
@@ -48,19 +46,20 @@ public class SchoolRemove extends Command
             if (processedList == 1)
             {
                   var school = values.getSchool();
-                  EmbedUtils.confirmation(values.getCommandEvent(), "Are you sure you want to remove **%s**", (messageReactionAddEvent) ->
+                  EmbedUtils.bConfirmation(values.getCommandEvent(), "Are you sure you want to remove **%s**", (buttonClickEvent) ->
                   {
-                        var reactionEmote = messageReactionAddEvent.getReactionEmote().getName();
+                        var choice = buttonClickEvent.getComponentId();
 
-                        if (reactionEmote.equals(Emoji.CROSS_MARK.getUnicode()))
+                        if (choice.equals("confirm"))
                         {
-                              event.sendMessage("Okay.. aborting..");
-                        }
-                        else if (reactionEmote.equals(Emoji.WHITE_CHECK_MARK.getUnicode()))
-                        {
-                              values.getCommandEvent().removeSchool(school);
+                              event.removeSchool(school);
                               EmbedUtils.success(event, "Removed [** %s **] successfully", school.getName());
                         }
+                        else if (choice.equals("abort"))
+                        {
+                              EmbedUtils.abort(event);
+                        }
+
                   }, school.getName());
             }
 
@@ -70,7 +69,7 @@ public class SchoolRemove extends Command
 
                   eventWaiter.waitForEvent(MessageReceivedEvent.class,
                           messageReceivedEvent -> messageReceivedEvent.getChannel().getIdLong() == event.getChannel().getIdLong()
-                                                  && messageReceivedEvent.getMember().getIdLong() == event.getMember().getIdLong()
+                                                  && messageReceivedEvent.getAuthor().getIdLong() == event.getMember().getIdLong()
                                                   && messageReceivedEvent.getMessage().getContentRaw().chars().allMatch(Character::isDigit)
                                                   && Checks.between(Integer.parseInt(messageReceivedEvent.getMessage().getContentRaw()), schools.size()),
                           onEvent ->
@@ -78,20 +77,20 @@ public class SchoolRemove extends Command
                                 var index = Integer.parseInt(onEvent.getMessage().getContentRaw()) - 1;
 
                                 var school = schools.get(index);
-                                var channel = onEvent.getChannel();
 
-                                EmbedUtils.confirmation(values.getCommandEvent(), "Are you sure you want to remove **%s**", (messageReactionAddEvent) ->
+
+                                EmbedUtils.bConfirmation(values.getCommandEvent(), "Are you sure you want to remove **%s**", (buttonClickEvent) ->
                                 {
-                                      var reactionEmote = messageReactionAddEvent.getReactionEmote().getName();
+                                      var choice = buttonClickEvent.getComponentId();
 
-                                      if (reactionEmote.equals(Emoji.CROSS_MARK.getUnicode()))
-                                      {
-                                            channel.sendMessage("Okay.. aborting..").queue();
-                                      }
-                                      else if (reactionEmote.equals(Emoji.WHITE_CHECK_MARK.getUnicode()))
+                                      if (choice.equals("confirm"))
                                       {
                                             values.getCommandEvent().removeSchool(school);
                                             EmbedUtils.success(event, "Removed [** %s **] successfully", school.getName());
+                                      }
+                                      else if (choice.equals("abort"))
+                                      {
+                                            EmbedUtils.abort(event);
                                       }
                                 }, school.getName());
                           });

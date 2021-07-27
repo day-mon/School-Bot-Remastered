@@ -11,7 +11,6 @@ import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
 import schoolbot.objects.misc.DatabaseDTO;
-import schoolbot.objects.misc.Emoji;
 import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.misc.interfaces.StateMachine;
 import schoolbot.objects.school.Classroom;
@@ -175,20 +174,13 @@ public class ClassroomEdit extends Command
             var jda = values.getJda();
             var guild = event.getGuild();
             var machine = values.getMachine();
-            var autofilled = classroom.isAutoFilled();
             var prefix = event.getGuildPrefix();
             var className = classroom.getName().toLowerCase().replaceAll("\\s", "-");
+
 
             switch (optionChosen)
             {
                   case "name" -> {
-                        if (autofilled)
-                        {
-                              EmbedUtils.error(event, "You cannot edit the name of a class that was autofilled!");
-                              jda.removeEventListener(machine);
-                              return;
-                        }
-
                         values.setUpdateColumn("name");
                         EmbedUtils.information(event, "** %s ** is the current class name.. What would you like to change it to?", classroom.getName());
                   }
@@ -199,13 +191,6 @@ public class ClassroomEdit extends Command
                   }
 
                   case "professor" -> {
-                        if (autofilled)
-                        {
-                              EmbedUtils.error(event, "You cannot edit the name of a class that was auto filled! I will now stop listening for responses.");
-                              jda.removeEventListener(machine);
-                              return;
-                        }
-
                         var professorList = values.getProfessorList()
                                 .stream()
                                 .filter(professor -> !professor.equals(classroom.getProfessor()))
@@ -224,15 +209,17 @@ public class ClassroomEdit extends Command
                         {
                               var professor = values.getProfessor();
                               jda.removeEventListener(machine);
-                              EmbedUtils.confirmation(event, "**%s** is the only professor available to switch. Would you like to switch to them?", (messageReactionAddEvent) ->
-                              {
-                                    var reactionEmote = messageReactionAddEvent.getReactionEmote().getName();
 
-                                    if (reactionEmote.equals(Emoji.CROSS_MARK.getUnicode()))
+                              EmbedUtils.bConfirmation(event, "**%s** is the only professor available to switch. Would you like to switch to them?", (buttonClickEvent) ->
+                              {
+
+                                    var choice = buttonClickEvent.getComponentId();
+
+                                    if (choice.equals("abort"))
                                     {
-                                          EmbedUtils.warn(event, "Okay I am no longer listening on!");
+                                          EmbedUtils.abort(event);
                                     }
-                                    else if (reactionEmote.equals(Emoji.WHITE_CHECK_MARK.getUnicode()))
+                                    else if (choice.equals("confirm"))
                                     {
                                           var commandEvent = values.getCommandEvent();
 
@@ -270,13 +257,6 @@ public class ClassroomEdit extends Command
                   }
 
                   case "startDate", "endDate" -> {
-                        if (autofilled)
-                        {
-                              EmbedUtils.error(event, "You cannot edit the name of a class that was auto filled! I will now stop listening for responses.");
-                              jda.removeEventListener(machine);
-                              return;
-                        }
-
                         LocalDate date;
                         String dateName;
 
@@ -304,13 +284,6 @@ public class ClassroomEdit extends Command
                   }
 
                   case "number" -> {
-                        if (autofilled)
-                        {
-                              EmbedUtils.error(event, "You cannot edit the name of a class that was auto filled! I will now stop listening for responses.");
-                              jda.removeEventListener(machine);
-                              return;
-                        }
-
                         event.getChannel().sendMessageFormat("** %d ** is the class number. What would you like to change it to?", classroom.getNumber()).queue();
                         values.setUpdateColumn("number");
                   }
@@ -675,17 +648,33 @@ public class ClassroomEdit extends Command
       private void sendMenu(StateMachineValues values)
       {
             inSelectionMenu = true;
-            final List<SelectOption> selectOptionList = List.of(
-                    SelectOption.of("Name", "name"),
-                    SelectOption.of("Description", "description"),
-                    SelectOption.of("Professor", "professor"),
-                    SelectOption.of("Time", "time"),
-                    SelectOption.of("Start Date", "startDate"),
-                    SelectOption.of("End Date", "endDate"),
-                    SelectOption.of("Number", "number"),
-                    SelectOption.of("Role", "role"),
-                    SelectOption.of("Channel", "channel")
-            );
+            List<SelectOption> selectOptionList;
+
+            if (values.getClassroom().isAutoFilled())
+            {
+                  selectOptionList = List.of(
+                          SelectOption.of("Time", "time"),
+                          SelectOption.of("Start Date", "startDate"),
+                          SelectOption.of("End Date", "endDate"),
+                          SelectOption.of("Role", "role"),
+                          SelectOption.of("Channel", "channel")
+                  );
+            }
+            else
+            {
+
+                  selectOptionList = List.of(
+                          SelectOption.of("Name", "name"),
+                          SelectOption.of("Description", "description"),
+                          SelectOption.of("Professor", "professor"),
+                          SelectOption.of("Time", "time"),
+                          SelectOption.of("Start Date", "startDate"),
+                          SelectOption.of("End Date", "endDate"),
+                          SelectOption.of("Number", "number"),
+                          SelectOption.of("Role", "role"),
+                          SelectOption.of("Channel", "channel")
+                  );
+            }
 
 
             var stringToSend = values.getClassroom().getName().length() >= 100 ? "Your class has been chosen, What attribute would you like to update" : String.format("%s has been chosen, What attribute would you like to update", values.getClassroom().getName());

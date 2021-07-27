@@ -1,11 +1,6 @@
 package schoolbot.commands.school;
 
-import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
-import schoolbot.objects.command.CommandEvent;
-import schoolbot.util.EmbedUtils;
-
-import java.util.List;
 
 public class Professor extends Command
 {
@@ -18,19 +13,5 @@ public class Professor extends Command
                     new ProfessorEdit(this),
                     new ProfessorRemove(this)
             );
-      }
-
-
-      @Override
-      public void run(@NotNull CommandEvent event, @NotNull List<String> args)
-      {
-            EmbedUtils.information(event, """
-                    I believe you called this command on accident.. That's okay let me help you!
-                    You want to ** add ** a class? Use ** professor add **
-                    You want to ** edit ** a class? Use ** professor edit **
-                    or do you want to ** remove ** a class? Use ** professor remove **
-                                    
-                    I hope this helps!
-                    """);
       }
 }

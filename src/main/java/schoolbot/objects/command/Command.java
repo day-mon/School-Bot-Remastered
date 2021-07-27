@@ -247,6 +247,7 @@ public abstract class Command
             this.calls.addAll(List.of(calls));
       }
 
+
       public void addPermissions(Permission... permissions)
       {
             this.commandPermissions.addAll(List.of(permissions));
@@ -260,7 +261,11 @@ public abstract class Command
       public void addChildren(Command... children)
       {
             this.children.addAll(List.of(children));
+      }
 
+      public int getMinimalArgs()
+      {
+            return minimalArgs;
       }
 
       public void addFlags(CommandFlag... flags)

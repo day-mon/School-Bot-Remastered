@@ -4,8 +4,11 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
+import net.dv8tion.jda.api.exceptions.ErrorHandler;
+import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Constants;
@@ -16,6 +19,7 @@ import schoolbot.objects.misc.Emoji;
 
 import java.awt.*;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -153,7 +157,6 @@ public class EmbedUtils
                     .build()).queue();
       }
 
-
       public static void error(CommandEvent event, String message, Object... args)
       {
             event.sendMessage(new EmbedBuilder()
@@ -231,7 +234,6 @@ public class EmbedUtils
                     LOGGER.error("Could not send tutorial in any channel", failure));
       }
 
-
       public static void information(GuildMessageReceivedEvent event, String message, Object... args)
       {
             event.getChannel().sendMessageEmbeds(new EmbedBuilder()
@@ -242,26 +244,50 @@ public class EmbedUtils
             ).queue();
       }
 
-      public static void confirmation(CommandEvent event, String message, Consumer<MessageReactionAddEvent> doAfterConsumer, Object... args)
+      public static void bConfirmation(CommandEvent event, String message, Consumer<ButtonClickEvent> doAfterConsumer, Object... args)
       {
             var eventWaiter = event.getSchoolbot().getEventWaiter();
 
-            event.getChannel().sendMessageEmbeds(
+            event.getMessage().replyEmbeds(
                     new EmbedBuilder()
                             .setTitle("Confirmation")
                             .setDescription(String.format(message, args))
-                            .build()
-            ).queue(consumerMessage ->
-            {
-                  consumerMessage.addReaction(Emoji.WHITE_CHECK_MARK.getAsReaction()).queue();
-                  consumerMessage.addReaction(Emoji.CROSS_MARK.getAsReaction()).queue();
+                            .build())
+                    .setActionRow(
+                            Button.success("confirm", "Confirm Delete"),
+                            Button.danger("abort", "Abort"))
+                    .queue(consumerMessage ->
 
-                  eventWaiter.waitForEvent(MessageReactionAddEvent.class,
-                          messageReceivedEvent -> messageReceivedEvent.getMessageIdLong() == consumerMessage.getIdLong()
-                                                  && messageReceivedEvent.getMember().getIdLong() == event.getMember().getIdLong()
-                                                  && (messageReceivedEvent.getReaction().getReactionEmote().getName().equals(Emoji.WHITE_CHECK_MARK.getUnicode())
-                                                      || messageReceivedEvent.getReaction().getReactionEmote().getName().equals(Emoji.CROSS_MARK.getUnicode())), doAfterConsumer);
-            });
+                            eventWaiter.waitForEvent(ButtonClickEvent.class,
+                                    buttonClickEvent ->
+                                    {
+                                          if (buttonClickEvent.getMessageIdLong() != consumerMessage.getIdLong())
+                                                return false;
+                                          if (buttonClickEvent.getUser().getIdLong() != event.getUser().getIdLong())
+                                                return false;
+                                          buttonClickEvent.deferEdit().queue();
+                                          return true;
+                                    },
+
+                                    doAfterConsumer.andThen(buttonClickEvent ->
+                                    {
+                                          event.getMessage().delete().queue(null, failure -> LOGGER.error("Failure to delete command message", failure));
+
+                                          buttonClickEvent.getChannel().deleteMessageById(consumerMessage.getIdLong())
+                                                  .queueAfter(5, TimeUnit.SECONDS, null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
+                                    })
+                            ));
+      }
+
+
+      public static void abort(CommandEvent event)
+      {
+            event.getChannel().sendMessageEmbeds(new EmbedBuilder()
+                    .setColor(new Color(77, 0, 0))
+                    .setTitle("Aborting!")
+                    .setDescription("I am now aborting from " + event.getCommand().getName())
+                    .build()
+            ).queue(message1 -> message1.delete().queueAfter(5, TimeUnit.SECONDS));
       }
 
 }

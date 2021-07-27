@@ -70,7 +70,7 @@ public class Clear extends Command
 
                         event.getSchoolbot().getEventWaiter().waitForEvent(MessageReactionAddEvent.class,
                                 reactionEvent -> reactionEvent.getMessageIdLong() == prompt.getIdLong()
-                                                 && event.getMember().getIdLong() == reactionEvent.getMember().getIdLong(),
+                                                 && event.getMember().getIdLong() == reactionEvent.getUserIdLong(),
 
                                 reactionEvent ->
                                 {

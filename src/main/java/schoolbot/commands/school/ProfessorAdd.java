@@ -52,7 +52,7 @@ public class ProfessorAdd extends Command
                   this.values = values;
             }
 
-            public void onGuildMessageReceived(GuildMessageReceivedEvent event)
+            public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event)
             {
                   values.setMessageReceivedEvent(event);
                   var requirementsMet = Checks.eventMeetsPrerequisites(values);

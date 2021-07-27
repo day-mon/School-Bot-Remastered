@@ -49,7 +49,7 @@ public class ClassroomAdd extends Command
        * @param values All of the state machines possible values
        * @return False is PeopleSoft is up and functioning. Otherwise fails
        */
-      private static boolean isDown(@NotNull StateMachineValues values)
+      private boolean isDown(@NotNull StateMachineValues values)
       {
             var jda = values.getJda();
             var event = values.getCommandEvent();
@@ -157,7 +157,7 @@ public class ClassroomAdd extends Command
             return String.valueOf(termCharArr) + " " + term.split("\\s+")[1];
       }
 
-      private static class ClassAddStateMachine extends ListenerAdapter implements StateMachine
+      private class ClassAddStateMachine extends ListenerAdapter implements StateMachine
       {
             private String CLASS_SEARCH_URL = "https://psmobile.pitt.edu/app/catalog/classsection/UPITT/";
             private final StateMachineValues values;
@@ -334,8 +334,8 @@ public class ClassroomAdd extends Command
                               values.getClassroom().setNumber(Integer.parseInt(message));
 
                               commandEvent.getCommandThreadPool().execute(() -> commandEvent.addPittClass(classroom));
-
                               jda.removeEventListener(this);
+
                         }
 
 
@@ -527,6 +527,7 @@ public class ClassroomAdd extends Command
 
                               commandEvent.getCommandThreadPool().submit(() -> commandEvent.addClass(classroom));
                               jda.removeEventListener(this);
+
                         }
                   }
             }

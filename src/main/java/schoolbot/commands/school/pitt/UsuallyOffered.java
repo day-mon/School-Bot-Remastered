@@ -107,7 +107,7 @@ public class UsuallyOffered extends Command
                   return;
             }
 
-            event.sendAsPaginator(embedList);
+            event.bPaginator(embedList);
 
       }
 }

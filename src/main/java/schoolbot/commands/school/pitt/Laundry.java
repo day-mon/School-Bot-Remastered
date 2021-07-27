@@ -122,7 +122,7 @@ public class Laundry extends Command
             }
 
 
-            event.sendAsPaginator(embeds);
+            event.bPaginator(embeds);
 
 
       }

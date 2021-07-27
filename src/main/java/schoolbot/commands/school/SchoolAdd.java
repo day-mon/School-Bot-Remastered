@@ -17,6 +17,7 @@ import schoolbot.objects.command.CommandFlag;
 import schoolbot.objects.school.School;
 import schoolbot.util.Checks;
 import schoolbot.util.EmbedUtils;
+import schoolbot.util.StringUtils;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -57,7 +58,7 @@ public class SchoolAdd extends Command
             }
             catch (IOException e)
             {
-                  EmbedUtils.error(event, "Could not connect to the [School API](https://schoolapi.schoolbot.dev/search?name=)");
+                  EmbedUtils.error(event, "Could not connect to the " + StringUtils.hyperText("School API", API_URL));
                   return;
             }
 
@@ -109,15 +110,15 @@ public class SchoolAdd extends Command
             }
             else
             {
-                  event.sendMessage("More than one school that has been found with your search.. Type the number that matches your desired result");
-                  event.sendAsPaginator(List.copyOf(schools.values()));
+                  event.getMessage().reply("More than one school that has been found with your search.. Type the number that matches your desired result").queue();
+                  event.bPaginator(List.copyOf(schools.values()));
 
                   var eventWaiter = event.getSchoolbot().getEventWaiter();
 
 
                   eventWaiter.waitForEvent(MessageReceivedEvent.class, messageEvent ->
                           {
-                                if (messageEvent.getMember().getIdLong() != event.getMember().getIdLong()) return false;
+                                if (messageEvent.getAuthor().getIdLong() != event.getMember().getIdLong()) return false;
                                 if (messageEvent.getChannel().getIdLong() != event.getChannel().getIdLong()) return false;
                                 var message = messageEvent.getMessage().getContentRaw();
                                 if (!Checks.isNumber(message)) return false;

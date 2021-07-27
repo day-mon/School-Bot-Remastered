@@ -58,6 +58,6 @@ public class Commands extends Command
             }
 
 
-            event.sendAsPaginator(embeds);
+            event.bPaginator(embeds);
       }
 }

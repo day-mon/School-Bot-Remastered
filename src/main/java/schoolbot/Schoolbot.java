@@ -1,10 +1,5 @@
 package schoolbot;
 
-import com.github.ygimenez.exception.InvalidHandlerException;
-import com.github.ygimenez.method.Pages;
-import com.github.ygimenez.model.Paginator;
-import com.github.ygimenez.model.PaginatorBuilder;
-import com.github.ygimenez.type.Emote;
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -20,7 +15,6 @@ import schoolbot.handlers.*;
 import schoolbot.listeners.*;
 import schoolbot.objects.config.ConfigOption;
 import schoolbot.objects.info.SystemInfo;
-import schoolbot.objects.misc.Emoji;
 
 import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
@@ -94,25 +88,6 @@ public class Schoolbot extends ListenerAdapter
             LOGGER.info("Github Repo:       " + "https://github.com/tykoooo/School-Bot-Remastered");
             LOGGER.info("Startup Time:      " + Duration.between(botStartTime, LocalDateTime.now()).toMillis() + " ms");
 
-
-            try
-            {
-                  Paginator paginator = PaginatorBuilder.createPaginator()
-                          .setEmote(Emote.NEXT, Emoji.ARROW_RIGHT.getUnicode())
-                          .setEmote(Emote.PREVIOUS, Emoji.ARROW_LEFT.getUnicode())
-                          .setEmote(Emote.GOTO_FIRST, Emoji.TRACK_PREVIOUS.getUnicode())
-                          .setEmote(Emote.GOTO_LAST, Emoji.TRACK_NEXT.getUnicode())
-                          .setHandler(jda)
-                          .shouldRemoveOnReact(false)
-                          .build();
-
-                  Pages.activate(paginator);
-            }
-            catch (InvalidHandlerException e)
-            {
-                  LOGGER.error("Paginator Error... Exiting because half of the bot uses paginator", e);
-                  System.exit(1);
-            }
       }
 
 

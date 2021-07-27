@@ -33,4 +33,9 @@ public class StringUtils
             return new DecimalFormat("#,###.00").format(o);
       }
 
+      public static String hyperText(String text, String link)
+      {
+            return String.format("[%s](%s)", text, link);
+      }
+
 }

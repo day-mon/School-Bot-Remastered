@@ -17,7 +17,7 @@ public class ListClasses extends Command
       {
             super("List classes for given a target university", "<school name>", 0);
             addCalls("classes", "classlist");
-            addUsageExample("classes \" University of Pittsburgh \"");
+            addUsageExample("classes 'University of Pittsburgh' or classes");
       }
 
 
@@ -51,7 +51,7 @@ public class ListClasses extends Command
 
                         eventWaiter.waitForEvent(MessageReceivedEvent.class,
                                 messageReceivedEvent -> messageReceivedEvent.getMessageIdLong() == event.getMessage().getIdLong()
-                                                        && messageReceivedEvent.getMember().getIdLong() == event.getMember().getIdLong()
+                                                        && messageReceivedEvent.getAuthor().getIdLong() == event.getMember().getIdLong()
                                                         && messageReceivedEvent.getMessage().getContentRaw().chars().allMatch(Character::isDigit)
                                                         && Checks.between(Integer.parseInt(messageReceivedEvent.getMessage().getContentRaw()), schools.size())
                                 ,

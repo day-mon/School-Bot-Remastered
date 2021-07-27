@@ -1,8 +1,6 @@
 package schoolbot.objects.command;
 
 
-import com.github.ygimenez.method.Pages;
-import com.github.ygimenez.model.Page;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -16,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Constants;
 import schoolbot.Schoolbot;
+import schoolbot.interactions.ButtonPaginator;
 import schoolbot.objects.misc.DatabaseDTO;
 import schoolbot.objects.misc.interfaces.Paginatable;
 import schoolbot.objects.school.Assignment;
@@ -164,26 +163,17 @@ public class CommandEvent
 
       }
 
-      public void sendAsPaginator(List<MessageEmbed> embeds)
+      public void bPaginator(List<MessageEmbed> embeds)
       {
-            if (embeds.size() == 1)
-            {
-                  var embed = embeds.get(0);
-
-                  getChannel().sendMessageEmbeds(embed).queue();
-
-                  return;
-            }
-
-            List<Page> pages = new ArrayList<>();
-
-            embeds.forEach(embed -> pages.add(new Page(embed)));
-
-            getChannel().sendMessageEmbeds(
-                    (MessageEmbed) pages.get(0).getContent()
-            ).queue(message -> Pages.paginate(message, pages));
+            ButtonPaginator s = new ButtonPaginator.Builder()
+                    .setJDA(getJDA())
+                    .setEmbeds(embeds)
+                    .setTimeout(60)
+                    .setChannel(getChannel())
+                    .setWaiter(schoolbot.getEventWaiter())
+                    .build();
+            s.paginate();
       }
-
 
       public <T extends Paginatable> void sendAsPaginatorWithPageNumbers(List<T> list)
       {
@@ -207,7 +197,7 @@ public class CommandEvent
             }
 
 
-            sendAsPaginator(embeds);
+            bPaginator(embeds);
       }
 
 
@@ -228,8 +218,15 @@ public class CommandEvent
                     {
                           var eventWaiter = schoolbot.getEventWaiter();
 
-                          eventWaiter.waitForEvent(SelectionMenuEvent.class, selectionMenuEvent -> selectionMenuEvent.getMessage().getIdLong() == message.getIdLong() && selectionMenuEvent.getChannel().getIdLong() == getChannel().getIdLong()
-                                                                                                   && selectionMenuEvent.getMember().getIdLong() == this.getMember().getIdLong(), consumer);
+                          eventWaiter.waitForEvent(SelectionMenuEvent.class,
+                                  selectionMenuEvent ->
+                                  {
+                                        if (selectionMenuEvent.getMessageIdLong() != message.getIdLong()) return false;
+                                        if (getMember().getIdLong() != selectionMenuEvent.getUser().getIdLong())
+                                              return false;
+                                        selectionMenuEvent.deferEdit().queue();
+                                        return true;
+                                  }, consumer);
                     });
       }
 
@@ -237,6 +234,11 @@ public class CommandEvent
       public void sendSelfDeletingMessage(String message)
       {
             getChannel().sendMessage(message).queue(deleting -> deleting.delete().queueAfter(10, TimeUnit.SECONDS));
+      }
+
+      public void sendSelfDeletingMessageFormat(String message, Object... args)
+      {
+            getChannel().sendMessage(String.format(message, args)).queue(deleting -> deleting.delete().queueAfter(10, TimeUnit.SECONDS));
       }
 
       public List<School> getGuildSchools()
@@ -252,7 +254,6 @@ public class CommandEvent
       {
             return schoolbot.getWrapperHandler().getProfessors(this, schoolName);
       }
-
 
       public boolean schoolExist(String schoolName)
       {
@@ -350,5 +351,4 @@ public class CommandEvent
       {
             return schoolbot.getWrapperHandler().assignGuildPrefix(this, prefix);
       }
-
 }

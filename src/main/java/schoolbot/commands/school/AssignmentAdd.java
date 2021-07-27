@@ -308,7 +308,6 @@ public class AssignmentAdd extends Command
                                             
                                             Try again!
                                             """);
-
                                     return;
                               }
 
