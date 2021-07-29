@@ -61,6 +61,7 @@ public class WrapperHandler
       public boolean schoolCheck(CommandEvent event, String schoolName)
       {
             long guildID = event.getGuild().getIdLong();
+
             guildCheck(guildID);
             return guildWrappers.get(guildID).containsSchool(schoolName);
       }

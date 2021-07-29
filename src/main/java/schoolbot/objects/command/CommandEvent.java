@@ -165,6 +165,15 @@ public class CommandEvent
 
       public void bPaginator(List<MessageEmbed> embeds)
       {
+
+            if (embeds.size() == 1)
+            {
+                  var element = embeds.get(0);
+
+                  getChannel().sendMessageEmbeds(element).queue();
+                  return;
+            }
+
             ButtonPaginator s = new ButtonPaginator.Builder()
                     .setJDA(getJDA())
                     .setEmbeds(embeds)
@@ -178,7 +187,6 @@ public class CommandEvent
       public <T extends Paginatable> void sendAsPaginatorWithPageNumbers(List<T> list)
       {
 
-            // This is just in case I call a list with pages when theres only one page...
             if (list.size() == 1)
             {
                   this.sendMessage(list.get(0).getAsEmbed(schoolbot));
