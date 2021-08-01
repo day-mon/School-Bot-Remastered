@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 public class DatabaseHandler
@@ -75,7 +76,7 @@ public class DatabaseHandler
       {
             try
             {
-                 final var root = schoolbot.util.IOUtils.getJarFilesystem(DatabaseHandler.class).resolve("sql");
+                  final var root = schoolbot.util.IOUtils.getJarFilesystem(DatabaseHandler.class).resolve("sql");
 
                   if (root == null)
                   {
@@ -86,6 +87,7 @@ public class DatabaseHandler
 
                   final var sqlPaths = Files.walk(root)
                           .filter(path -> path.getFileName().toString().endsWith(".sql"))
+                          .sorted()
                           .collect(Collectors.toList());
 
 
@@ -99,7 +101,7 @@ public class DatabaseHandler
                   {
                         String fileName = file.getFileName().toString();
 
-                        var sqlTable = DatabaseUtils.class.getResourceAsStream("/sql/" + fileName + ".sql");
+                        var sqlTable = DatabaseUtils.class.getResourceAsStream("/sql/" + fileName);
 
                         if (sqlTable != null)
                         {
