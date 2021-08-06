@@ -4,14 +4,15 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import okhttp3.*;
 import org.apache.commons.io.IOUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
+import schoolbot.util.EmbedUtils;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -43,7 +44,6 @@ public class MessageHandler
             if (!message.getAttachments().isEmpty())
             {
                   handleFile(event);
-                  return;
             }
 
             if (isBotMention(event))
@@ -58,7 +58,6 @@ public class MessageHandler
             }
 
             schoolbot.getCommandHandler().handle(event, prefix);
-
       }
 
       private void handleFile(GuildMessageReceivedEvent event)
@@ -66,79 +65,84 @@ public class MessageHandler
             var message = event.getMessage();
             List<Message.Attachment> attachments = message.getAttachments();
 
-
             attachments.stream()
                     .filter(attachment -> FILE_EXTENSIONS.contains(attachment.getFileExtension()))
                     .map(future ->
                     {
-                          CompletableFuture<Message> messageFuture = event.getChannel().sendMessage("Uploading to pastecord...").submit();
-                          CompletableFuture<InputStream> inputStreamFuture = future.retrieveInputStream();
-                          CompletableFuture<Void> allFutures = CompletableFuture.allOf(messageFuture, inputStreamFuture);
+                          var messageFuture = event.getChannel().sendMessage("Uploading to pastecord...").submit();
+                          var inputStreamFuture = future.retrieveInputStream();
+                          var allFutures = CompletableFuture.allOf(messageFuture, inputStreamFuture);
                           return new Triple(messageFuture, inputStreamFuture, allFutures);
                     })
                     .forEach(trip ->
-                            trip.val3.whenCompleteAsync((empty, object) ->
+                            trip.val3.whenComplete((empty, throwable) ->
                             {
-                                  var sentMessage = trip.val1.getNow(null);
-                                  var inputStream = trip.val2.getNow(null);
-
-
-                                  if (sentMessage == null || inputStream == null)
+                                  if (throwable != null)
                                   {
-                                        event.getChannel().sendMessage("Could not upload to pastecord..").queue();
+                                        LOGGER.error("Error occurred whilst uploading to pastecord", throwable);
+                                        EmbedUtils.error(event, "Error occurred whilst uploading to pastecord");
                                         return;
                                   }
 
-                                  var urlToSend = "https://pastecord.com/" + sendPost(inputStream);
-                                  sentMessage.editMessageFormat("File uploaded for %s [%s] ", event.getAuthor().getAsMention(), urlToSend).queue();
-                                  message.delete().queue();
+                                  doUpload(trip, event);
 
                             }));
       }
 
 
-      private String sendPost(InputStream file)
+      private void doUpload(Triple trip, GuildMessageReceivedEvent event)
       {
+            Request request;
 
-            String url = "";
-            Response response = null;
+            var sentMessage = trip.val1.getNow(null);
+            var file = trip.val2.getNow(null);
+            var message = event.getMessage();
 
             try
             {
-                  RequestBody body = RequestBody.create(IOUtils.toString(file, StandardCharsets.UTF_8),
-                          MediaType.parse("application/json"));
-
-                  Request request = new Request.Builder()
+                  request = new Request.Builder()
                           .url("https://pastecord.com/documents")
                           .addHeader("User-Agent", "School bot (https://github.com/tykoooo/School-Bot-Remastered)")
-                          .post(body)
+                          .post(RequestBody.create(IOUtils.toString(file, StandardCharsets.UTF_8),
+                                  MediaType.parse("application/json")))
                           .build();
 
-                  LocalDateTime ldt = LocalDateTime.now();
-                  response = client.newCall(request).execute();
-                  LOGGER.debug("Response time to execute: {} ms", Duration.between(ldt, LocalDateTime.now()).toMillis());
-
-                  if (!response.isSuccessful())
-                  {
-                        LOGGER.error("Request not successful. Refer to pastecord or check your connection to it");
-                  }
-                  else
-                  {
-                        url = response.body().string().split("\"")[3];
-                  }
+                  file.close();
             }
             catch (Exception e)
             {
-                  LOGGER.error("Error occurred in MessageHandler", e);
+                  LOGGER.error("Error occurred while parsing input stream", e);
+                  return;
             }
-            finally
-            {
-                  if (response != null)
-                  {
-                        response.close();
-                  }
-            }
-            return url;
+
+            client.newCall(request).enqueue(
+                    new Callback()
+                    {
+                          @Override
+                          public void onFailure(@NotNull Call call, @NotNull IOException e)
+                          {
+                                sentMessage.editMessage("Error occurred while uploading to pastecord").queue();
+                                LOGGER.error("Error upon sending request!", e);
+                          }
+
+                          @Override
+                          public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException
+                          {
+
+                                if (!response.isSuccessful())
+                                {
+                                      LOGGER.error("Request was not successful. Returned a {} error", response.code());
+                                      return;
+                                }
+
+                                var pastecordEnding = response.body().string().split("\"")[3];
+                                var urlToSend = "https://pastecord.com/" + pastecordEnding;
+
+                                sentMessage.editMessageFormat("File uploaded for %s [%s] ", event.getAuthor().getAsMention(), urlToSend).queue();
+                                message.delete().queue();
+                          }
+                    }
+            );
       }
 
       public boolean isBotMention(GuildMessageReceivedEvent event)
@@ -150,7 +154,7 @@ public class MessageHandler
 
 
       private record Triple(CompletableFuture<Message> val1, CompletableFuture<InputStream> val2,
-                           CompletableFuture<Void> val3)
+                            CompletableFuture<Void> val3)
       {
       }
 

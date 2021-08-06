@@ -27,7 +27,7 @@ public class CommandHandler
       private final Logger CMD_HANDLER_LOGGER = LoggerFactory.getLogger(this.getClass());
 
       private final ClassGraph classGraph = new ClassGraph().acceptPackages(COMMANDS_PACKAGE);
-      private final ExecutorService executor = Executors.newScheduledThreadPool(5, runnable -> new Thread(runnable, "SchoolBot Command-Thread"));
+      private final ExecutorService executor = Executors.newFixedThreadPool(5, runnable -> new Thread(runnable, "SchoolBot Command-Thread"));
       private final Schoolbot schoolbot;
       private final Map<String, Command> commands;
 

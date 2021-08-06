@@ -28,7 +28,6 @@ public class SelfJoinListener extends ListenerAdapter
 
             if (channel == null)
             {
-
                   guild.retrieveOwner().queue(owner ->
                   {
                         var ownerUser = owner.getUser();
