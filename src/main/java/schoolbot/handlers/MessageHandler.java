@@ -2,6 +2,8 @@ package schoolbot.handlers;
 
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.exceptions.ErrorHandler;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 import okhttp3.*;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
@@ -139,7 +141,7 @@ public class MessageHandler
                                 var urlToSend = "https://pastecord.com/" + pastecordEnding;
 
                                 sentMessage.editMessageFormat("File uploaded for %s [%s] ", event.getAuthor().getAsMention(), urlToSend).queue();
-                                message.delete().queue();
+                                message.delete().queue(null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
                           }
                     }
             );
