@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public class SchoolAdd extends Command
 {
@@ -149,7 +150,9 @@ public class SchoolAdd extends Command
                                 {
                                       EmbedUtils.error(event, "School already exist");
                                 }
-                          });
+                          }, 60, TimeUnit.SECONDS, () ->
+                                  EmbedUtils.warn(event, "Command timed out after 60 seconds!"));
+
 
             }
       }
