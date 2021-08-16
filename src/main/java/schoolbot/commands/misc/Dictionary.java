@@ -14,6 +14,7 @@ import schoolbot.util.EmbedUtils;
 
 import java.awt.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Dictionary extends Command
@@ -56,16 +57,18 @@ public class Dictionary extends Command
 
             event.sendMessage(parseJson(args, document));
 
+
+
+
       }
 
 
       private MessageEmbed parseJson(List<String> args, Document document)
       {
-
-
             String audioPronounce = "https://google.com";
             String pronounce = "N/A";
 
+            List<MessageEmbed> embeds = new ArrayList<>();
 
             String parseAbleJson =
                     Jsoup.parse(document.outerHtml())
@@ -83,19 +86,20 @@ public class Dictionary extends Command
             if (!phoneticsArray.isEmpty())
             {
                   JSONObject phonetics = phoneticsArray.getJSONObject(0);
-                  pronounce = phonetics.getString("text");
-                  audioPronounce = phonetics.getString("audio");
+                  pronounce = phonetics.has("text") ? phonetics.getString("text") : "N/A";
+                  audioPronounce = phonetics.has("audio") ? "https:" + phonetics.getString("audio") : audioPronounce;
+
             }
 
             JSONArray meaningsArray = (JSONArray) jsonObject.get("meanings");
 
             JSONObject meanings = meaningsArray.getJSONObject(0);
 
-            String partOfSpeech = meanings.getString("partOfSpeech");
+            String partOfSpeech = meanings.has("partOfSpeech") ? meanings.getString("partOfSpeech") : "N/A";
 
             JSONArray definitionArray = meanings.getJSONArray("definitions");
             JSONObject _definition = definitionArray.getJSONObject(0);
-            String definition = _definition.getString("definition");
+            String definition = _definition.has("definition") ? _definition.getString("definition") : "N/A";
 
             return new EmbedBuilder()
                     .setTitle(name, audioPronounce)
@@ -105,5 +109,7 @@ public class Dictionary extends Command
                     .setColor(Color.ORANGE)
                     .setFooter("Definition generated at " + LocalDate.now())
                     .build();
+
       }
+
 }

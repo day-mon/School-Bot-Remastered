@@ -33,7 +33,7 @@ public class Parser
 
             for (int i = 0; i < length; i++)
             {
-                  if (splitArgs[i].contains("'") || splitArgs[i].contains("”"))
+                  if (splitArgs[i].contains("'") || splitArgs[i].contains("’"))
                   {
                         quoteCount++;
                         int temp = i;
@@ -43,13 +43,13 @@ public class Parser
                               tempString.append(splitArgs[i]).append(" ");
                               if (i + 1 != splitArgs.length) i++;
                               else break;
-                              if (i != temp && splitArgs[i].contains("'") || splitArgs[i].contains("”"))
+                              if (i != temp && splitArgs[i].contains("'") || splitArgs[i].contains("’"))
                               {
                                     quoteCount++;
                                     tempString.append(splitArgs[i]);
                               }
                         }
-                        tempString = new StringBuilder(tempString.toString().trim().replaceAll("'", ""));
+                        tempString = new StringBuilder(tempString.toString().trim().replaceAll("'", "").replaceAll("’", ""));
                         args.add(tempString.toString());
                         quoteCount = 0;
                         tempString = new StringBuilder();

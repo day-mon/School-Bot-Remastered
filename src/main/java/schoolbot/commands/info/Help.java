@@ -73,11 +73,6 @@ public class Help extends Command
                   List<SelectOption> selectOptions = new ArrayList<>();
 
 
-
-
-
-
-
                   var comHasMethod = cmd.getClass().getDeclaredMethods().length != 0;
 
                   if (comHasMethod)
