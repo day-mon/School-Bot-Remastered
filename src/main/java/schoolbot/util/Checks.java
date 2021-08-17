@@ -95,7 +95,6 @@ public class Checks
 
       public static LocalDate checkValidDate(String potentialDate)
       {
-
             try
             {
                   return LocalDate.parse(potentialDate, DateTimeFormatter.ofPattern("M/d/yyyy"));
