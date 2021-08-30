@@ -58,7 +58,6 @@ public class ScheduleHandler
 
             List<Activity> activityList = List.of(
                     Activity.watching("mark sleep"),
-                    Activity.listening("blitiski gaslighting us"),
                     Activity.streaming("warner growing", "https://www.youtube.com/watch?v=PLOPygVcaVE"),
                     Activity.streaming("chakara balancing seminar", "https://www.youtube.com/watch?v=vqklftk89Nw")
             );
@@ -157,7 +156,7 @@ public class ScheduleHandler
                    * or
                    * B. The bot was just offline and couldn't alert
                    */
-                  boolean overDueCheck = Duration.between(classroom.getStartDateWithTime(), LocalDateTime.now()).getSeconds() > 70;
+                  boolean overDueCheck = Duration.between(classroom.getStartDateWithTime().toLocalTime(), LocalDateTime.now()).getSeconds() > 70;
 
                   if (overDueCheck)
                   {
