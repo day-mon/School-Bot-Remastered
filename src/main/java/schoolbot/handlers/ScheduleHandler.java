@@ -96,11 +96,13 @@ public class ScheduleHandler
                    * or
                    * B. The bot was just offline and couldn't alert
                    */
-                  boolean overDueCheck = Duration.between(assignment.getDueDate(), LocalDateTime.now()).getSeconds() > 70;
+                  var secondsBetween = Duration.between(classroom.getStartDateWithTime().toLocalTime(), LocalDateTime.now()).getSeconds();
+                  boolean overDueCheck = secondsBetween > 70;
 
                   if (overDueCheck)
                   {
                         dueMessage = String.format("%s, ** %s ** at ** %s ** but we could not alert you due to some unfortunate down time. I am working to improve.", mention, assignment.getName(), StringUtils.formatDate(assignment.getDueDate()));
+                        LOGGER.warn("Overdue by: {} seconds", secondsBetween);
                   }
 
 
@@ -156,11 +158,13 @@ public class ScheduleHandler
                    * or
                    * B. The bot was just offline and couldn't alert
                    */
-                  boolean overDueCheck = Duration.between(classroom.getStartDateWithTime().toLocalTime(), LocalDateTime.now()).getSeconds() > 70;
+                  var secondsBetween = Duration.between(classroom.getStartDateWithTime().toLocalTime(), LocalDateTime.now()).getSeconds();
+                  boolean overDueCheck = secondsBetween > 70;
 
                   if (overDueCheck)
                   {
                         dueMessage = String.format("%s, ** %s ** was due at ** %s ** but we could not alert you due to some unfortunate down time. I am working to improve", mention, classroom.getName(), StringUtils.formatDate(classroom.getStartDateWithTime()));
+                        LOGGER.warn("Overdue by: {} seconds", secondsBetween);
                   }
 
 
