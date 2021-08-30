@@ -274,7 +274,7 @@ public class EmbedUtils
                                           event.getMessage().delete().queue(null, failure -> LOGGER.error("Failure to delete command message", failure));
 
                                           buttonClickEvent.getChannel().deleteMessageById(consumerMessage.getIdLong())
-                                                  .queueAfter(5, TimeUnit.SECONDS, null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE));
+                                                  .queueAfter(5, TimeUnit.SECONDS, null, new ErrorHandler().ignore(ErrorResponse.UNKNOWN_MESSAGE, ErrorResponse.UNKNOWN_CHANNEL));
                                     })
                             ));
       }

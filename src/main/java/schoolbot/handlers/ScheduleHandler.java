@@ -13,6 +13,7 @@ import schoolbot.util.StringUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Executors;
@@ -59,6 +60,7 @@ public class ScheduleHandler
             List<Activity> activityList = List.of(
                     Activity.watching("mark sleep"),
                     Activity.streaming("warner growing", "https://www.youtube.com/watch?v=PLOPygVcaVE"),
+                    Activity.watching("damon bench joesphs weight"),
                     Activity.streaming("chakara balancing seminar", "https://www.youtube.com/watch?v=vqklftk89Nw")
             );
 
@@ -81,7 +83,7 @@ public class ScheduleHandler
                         return;
                   }
 
-                  var due = Duration.between(LocalDateTime.now(), assignment.getDueDate()).toMinutes();
+                  var due = Duration.between(LocalTime.now(), assignment.getDueDate().toLocalTime()).toMinutes();
 
                   String mention = role != null ? role.getAsMention() : "Students of " + classroom.getName();
                   String dueMessage = (due <= 0) ?
@@ -96,7 +98,7 @@ public class ScheduleHandler
                    * or
                    * B. The bot was just offline and couldn't alert
                    */
-                  var secondsBetween = Duration.between(classroom.getStartDateWithTime().toLocalTime(), LocalDateTime.now()).getSeconds();
+                  var secondsBetween = Duration.between(assignment.getDueDate().toLocalTime(), LocalDateTime.now()).getSeconds();
                   boolean overDueCheck = secondsBetween > 70;
 
                   if (overDueCheck)
@@ -131,7 +133,7 @@ public class ScheduleHandler
             try
             {
                   var classroom = (Classroom) reminder.obj();
-                  var due = Duration.between(LocalDateTime.now(), classroom.getStartDateWithTime()).toMinutes();
+                  var due = Duration.between(LocalTime.now(), classroom.getStartDateWithTime().toLocalTime()).toMinutes();
                   var channel = schoolbot.getJda().getTextChannelById(classroom.getChannelID());
                   var role = schoolbot.getJda().getRoleById(classroom.getRoleID());
 
@@ -148,7 +150,7 @@ public class ScheduleHandler
                           :
                           String.format("%s, ** %s ** is starting in ** %d ** minutes", mention, classroom.getName(), due + 1);
 
-                  LOGGER.info("Due time: {} min", classroom.getStartDateWithTime().minusMinutes(LocalDateTime.now().getMinute()));
+                  LOGGER.info("Due time: {} min", due);
 
 
                   /*
