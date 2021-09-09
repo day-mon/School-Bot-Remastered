@@ -14,7 +14,6 @@ import schoolbot.util.EmbedUtils;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -56,10 +55,11 @@ public class ClearUser extends Command
                                 .thenApplyAsync(messages ->
                                 {
                                       List<Message> channelMessages = messages.stream()
-                                              .filter(deleteAbleMessages -> Objects.equals(deleteAbleMessages.getMember(), member))
+                                              .filter(deleteAbleMessages -> deleteAbleMessages.getAuthor().getIdLong() == member.getIdLong())
                                               .filter(deleteAbleMessages -> Duration.between(message.getTimeCreated(), deleteAbleMessages.getTimeCreated()).toHours() < 24)
                                               .limit(26)
                                               .collect(Collectors.toList());
+                                      System.out.println(channelMessages);
                                       var newList = channelMessages.subList(1, channelMessages.size());
 
                                       event.getChannel().purgeMessages(newList);
@@ -117,18 +117,16 @@ public class ClearUser extends Command
                                 {
                                       List<Message> channelMessages = messages
                                               .stream()
-                                              .filter(deleteAbleMessages -> Objects.equals(deleteAbleMessages.getMember(), member))
+                                              .filter(deleteAbleMessages -> deleteAbleMessages.getAuthor().getIdLong() == member.getIdLong())
                                               .filter(deleteAbleMessages -> Duration.between(message.getTimeCreated(), deleteAbleMessages.getTimeCreated()).toHours() < 24)
                                               .limit(messagesToRemove + 1)
                                               .collect(Collectors.toList());
 
-                                      var newList = channelMessages.subList(1, channelMessages.size());
-
+                                      var newList = channelMessages.subList(1, channelMessages.size()-1);
                                       event.getChannel().purgeMessages(newList);
 
                                       return newList.size();
-                                }).whenCompleteAsync((channelMessageSize, throwable) ->
-                        {
+                                }).whenCompleteAsync((channelMessageSize, throwable) -> {
 
                               if (throwable != null)
                               {
