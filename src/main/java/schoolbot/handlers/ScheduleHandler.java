@@ -83,13 +83,13 @@ public class ScheduleHandler
                         return;
                   }
 
-                  var due = Duration.between(LocalTime.now(), assignment.getDueDate().toLocalTime()).toMinutes();
+                  var due = Duration.between(LocalDateTime.now(), assignment.getDueDate());
 
                   String mention = role != null ? role.getAsMention() : "Students of " + classroom.getName();
-                  String dueMessage = (due <= 0) ?
+                  String dueMessage = (due.toMinutes() <= 0) ?
                           String.format("%s, ** %s ** is **now due**", mention, assignment.getName())
                           :
-                          String.format("%s, ** %s ** is due in ** %d ** minutes", mention, assignment.getName(), due + 1);
+                          String.format("%s, ** %s ** is due in **%d days**, **%d hours**, **%d minutes**, and **%d seconds.**", mention, assignment.getName(), due.toDaysPart(), due.toHoursPart(), due.toMinutesPart(), due.toSecondsPart());
 
                   /*
                    * This will check if the assignment is pass due by one minute and 10 seconds
@@ -111,7 +111,7 @@ public class ScheduleHandler
                   LOGGER.info("{} has been notified", classroom.getName());
                   channel.sendMessage(dueMessage).queue();
 
-                  if (due <= 0)
+                  if (due.toMinutes() <= 0)
                   {
                         var guildId = channel.getGuild().getIdLong();
 
