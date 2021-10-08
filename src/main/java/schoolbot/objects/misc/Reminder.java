@@ -1,6 +1,8 @@
 package schoolbot.objects.misc;
 
 
-public record Reminder(int id, Object obj)
+import java.time.LocalDateTime;
+
+public record Reminder(int id, Object obj, LocalDateTime... time)
 {
 }
