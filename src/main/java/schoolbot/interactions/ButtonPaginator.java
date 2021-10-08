@@ -34,6 +34,7 @@ public class ButtonPaginator implements Paginator
       private boolean deleteOnTimeout;
 
       private long messageId = -1;
+      private long ogUser = -1L;
       private final long channelId;
 
       private int page = 0;
@@ -52,6 +53,7 @@ public class ButtonPaginator implements Paginator
             this.jda = builder.jda;
             this.deleteOnTimeout = builder.deleteOnTimeOut;
             this.maxPage = embeds.size();
+            this.ogUser = builder.user;
       }
 
       private void switchPage(ButtonClickEvent event)
@@ -107,7 +109,7 @@ public class ButtonPaginator implements Paginator
 
       private void doWait()
       {
-            waiter.waitForEvent(ButtonClickEvent.class, event -> messageId == event.getMessageIdLong() && event.getUser().getIdLong() == event.getUser().getIdLong(), this::switchPage, timeout, timeUnit, () ->
+            waiter.waitForEvent(ButtonClickEvent.class, event -> messageId == event.getMessageIdLong() && event.getUser().getIdLong() == ogUser, this::switchPage, timeout, timeUnit, () ->
             {
                   if (this.deleteOnTimeout)
                   {
@@ -191,7 +193,7 @@ public class ButtonPaginator implements Paginator
             private EventWaiter eventWaiter = null;
             private long channelId = -1L;
             private JDA jda = null;
-
+            private long user = 1L;
 
             public Builder setEmojis(List<Button> emojis)
             {
@@ -214,6 +216,12 @@ public class ButtonPaginator implements Paginator
             public Builder setChannel(MessageChannel channel)
             {
                   this.channelId = channel.getIdLong();
+                  return this;
+            }
+
+            public Builder setUser(long user)
+            {
+                  this.user = user;
                   return this;
             }
 

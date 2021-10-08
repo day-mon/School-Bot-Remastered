@@ -12,7 +12,10 @@ import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -275,6 +278,47 @@ public class DatabaseUtils
             {
                   LOGGER.error("Database error", e);
                   return -1;
+            }
+      }
+
+      public static List<Reminder> getRemindersOnDate(CommandEvent event, Object obj, LocalDate date)
+      {
+            List<Reminder> reminders = new ArrayList<>();
+            var table = obj.getClass().getSimpleName().equals("Assignment") ? "assignments_reminders" : "class_reminders";
+            var schoolbot = event.getSchoolbot();
+            var fDate = LocalDateTime.of(date, LocalTime.MAX).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            var lDate = LocalDateTime.of(date, LocalTime.MIN).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+
+            try (var connection = schoolbot.getDatabaseHandler().getDbConnection())
+            {
+                  var statement = connection.prepareStatement(
+                          """
+                                  select *
+                                  from ?
+                                  where remind_time >= timestamp ?
+                                    and remind_time < timestamp ?;
+                             """
+                  );
+
+                  statement.setString(1, table);
+                  statement.setString(2, fDate);
+                  statement.setString(3, lDate);
+                  var resultSet = statement.executeQuery();
+                  var object = obj.getClass().getSimpleName().equals("Assignment") ? (Classroom) obj : (Assignment) obj;
+
+                  while (resultSet.next())
+                  {
+                        reminders.add(new Reminder(resultSet.getInt("id"), object, resultSet.getTimestamp("remind_time").toLocalDateTime()));
+                  }
+
+                  return reminders;
+
+            }
+            catch (SQLException throwables)
+            {
+                  LOGGER.error("Database Error", throwables);
+                  return null;
             }
       }
 

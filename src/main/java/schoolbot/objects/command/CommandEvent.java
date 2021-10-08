@@ -177,7 +177,8 @@ public class CommandEvent
             ButtonPaginator s = new ButtonPaginator.Builder()
                     .setJDA(getJDA())
                     .setEmbeds(embeds)
-                    .setTimeout(60)
+                    .setTimeout(180)
+                    .setUser(event.getAuthor().getIdLong())
                     .setChannel(getChannel())
                     .setWaiter(schoolbot.getEventWaiter())
                     .build();

@@ -165,7 +165,7 @@ public class ScheduleHandler
 
                   if (overDueCheck)
                   {
-                        dueMessage = String.format("%s, ** %s ** was due at ** %s ** but we could not alert you due to some unfortunate down time. I am working to improve", mention, classroom.getName(), StringUtils.formatDate(classroom.getStartDateWithTime()));
+                        dueMessage = String.format("%s, ** %s ** was at ** %s ** but we could not alert you due to some unfortunate down time. I am working to improve", mention, classroom.getName(), StringUtils.formatDate(classroom.getStartDateWithTime()));
                         LOGGER.warn("Overdue by: {} seconds", secondsBetween);
                   }
 

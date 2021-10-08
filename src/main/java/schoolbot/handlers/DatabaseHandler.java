@@ -13,7 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Comparator;
 import java.util.stream.Collectors;
 
 public class DatabaseHandler
@@ -125,7 +124,7 @@ public class DatabaseHandler
             catch (SQLException throwable)
             {
                   LOGGER.error("Database Error has occurred", throwable);
-                  return getDbConnection();
+                  return null;
             }
       }
 
