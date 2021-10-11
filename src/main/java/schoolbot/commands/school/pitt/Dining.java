@@ -21,7 +21,7 @@ public class Dining extends Command
       public Dining()
       {
             super("Tells students whats for breakfast/lunch/dinner", "[time period]", 1);
-            addUsageExample("dinning lunch");
+            addUsageExample("dining lunch");
             addCalls("dining");
             addChildren(
                     new DiningStatus(this)
