@@ -71,7 +71,7 @@ public class Dining extends Command
        */
       private String getPeriod(CommandEvent event, String period)
       {
-            var requestUrl = "https://api.dineoncampus.com/v1/location/5f3c3313a38afc0ed9478518/periods/61607fafa9f13a05fca1ee6d?platform=0&date=" + DateTimeFormatter.ofPattern("yyyy-MM-dd").format(LocalDate.now());
+            var requestUrl = "https://api.dineoncampus.com/v1/location/5f3c3313a38afc0ed9478518/periods?platform=0&date=" + DateTimeFormatter.ofPattern("yyyy-MM-dd").format(LocalDate.now());
 
             Document doc;
 
