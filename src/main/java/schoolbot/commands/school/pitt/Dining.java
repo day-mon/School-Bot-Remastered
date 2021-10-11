@@ -35,7 +35,7 @@ public class Dining extends Command
 
             if (!(arg.equalsIgnoreCase("breakfast") || arg.equalsIgnoreCase("lunch") || arg.equalsIgnoreCase("dinner")))
             {
-                  EmbedUtils.error(event, "%s is not a valid period, please choose a correct time period **breakfast**, **lunch** or **dinner*", arg);
+                  EmbedUtils.error(event, "%s is not a valid period, please choose a correct time period **breakfast**, **lunch** or **dinner**", arg);
                   return;
             }
 
