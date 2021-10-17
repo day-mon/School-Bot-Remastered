@@ -44,10 +44,12 @@ public class Dining extends Command
 
             var localdate = LocalDate.now();
 
+
             if ((arg.equalsIgnoreCase("breakfast") && (localdate.getDayOfWeek() == DayOfWeek.SUNDAY || localdate.getDayOfWeek() == DayOfWeek.SATURDAY)))
             {
                   arg = "lunch";
             }
+
 
             var period = getPeriod(event, arg);
 
@@ -60,8 +62,7 @@ public class Dining extends Command
 
             event.sendSelfDeletingMessage("This may take a while to sit back and relax");
 
-            var baseUrl = "https://api.dineoncampus.com/v1/location/5f3c3313a38afc0ed9478518/?platform=0&date=".formatted(period);
-
+            var baseUrl = "https://api.dineoncampus.com/v1/location/5f3c3313a38afc0ed9478518/periods/%s?platform=0&date=".formatted(period);
 
             var embeds = getEmbeds(event, baseUrl);
 
@@ -129,6 +130,7 @@ public class Dining extends Command
 
             url += DateTimeFormatter.ofPattern("yyyy-MM-dd").format(LocalDate.now());
 
+
             Document doc;
 
             try
@@ -147,7 +149,6 @@ public class Dining extends Command
             var json = Jsoup.parse(doc.outerHtml())
                     .body()
                     .text();
-
 
             var jsonArray = new JSONObject(json)
                     .getJSONObject("menu")
