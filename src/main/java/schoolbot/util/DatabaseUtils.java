@@ -285,30 +285,39 @@ public class DatabaseUtils
       {
             List<Reminder> reminders = new ArrayList<>();
             var table = obj.getClass().getSimpleName().equals("Assignment") ? "assignments_reminders" : "class_reminders";
+            var ID = obj.getClass().getSimpleName().equals("Assignment") ? "assignment_id" : "class_id";
+
             var schoolbot = event.getSchoolbot();
-            var fDate = LocalDateTime.of(date, LocalTime.MAX).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            var lDate = LocalDateTime.of(date, LocalTime.MIN).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            var fDate = LocalDateTime.of(date, LocalTime.MAX).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
 
             try (var connection = schoolbot.getDatabaseHandler().getDbConnection())
             {
+                  var query = """
+                            SELECT *
+                            FROM %s
+                            WHERE DATE(remind_time) = '%s'
+                            AND %s = ?;
+                          """.formatted(table, fDate, ID);
+
+
+                  System.out.println(query);
                   var statement = connection.prepareStatement(
-                          """
-                                  select *
-                                  from ?
-                                  where remind_time >= timestamp ?
-                                    and remind_time < timestamp ?;
-                             """
+                          query
                   );
+                  var object = obj.getClass().getSimpleName().equals("Assignment") ? (Assignment) obj : (Classroom) obj;
 
-                  statement.setString(1, table);
-                  statement.setString(2, fDate);
-                  statement.setString(3, lDate);
+                  statement.setInt(1, object.getId());
+
+
                   var resultSet = statement.executeQuery();
-                  var object = obj.getClass().getSimpleName().equals("Assignment") ? (Classroom) obj : (Assignment) obj;
 
+
+                  var k = 0;
                   while (resultSet.next())
                   {
+
+                        System.out.println(k++);
                         reminders.add(new Reminder(resultSet.getInt("id"), object, resultSet.getTimestamp("remind_time").toLocalDateTime()));
                   }
 

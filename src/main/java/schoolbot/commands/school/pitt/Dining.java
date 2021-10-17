@@ -11,6 +11,7 @@ import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.util.EmbedUtils;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -33,10 +34,19 @@ public class Dining extends Command
       {
             var arg = args.get(0);
 
+
             if (!(arg.equalsIgnoreCase("breakfast") || arg.equalsIgnoreCase("lunch") || arg.equalsIgnoreCase("dinner")))
             {
                   EmbedUtils.error(event, "%s is not a valid period, please choose a correct time period **breakfast**, **lunch** or **dinner**", arg);
                   return;
+            }
+
+
+            var localdate = LocalDate.now();
+
+            if ((arg.equalsIgnoreCase("breakfast") && (localdate.getDayOfWeek() == DayOfWeek.SUNDAY || localdate.getDayOfWeek() == DayOfWeek.SATURDAY)))
+            {
+                  arg = "lunch";
             }
 
             var period = getPeriod(event, arg);
@@ -47,9 +57,10 @@ public class Dining extends Command
                   return;
             }
 
+
             event.sendSelfDeletingMessage("This may take a while to sit back and relax");
 
-            var baseUrl = "https://api.dineoncampus.com/v1/location/5f3c3313a38afc0ed9478518/periods/%s?platform=0&date=".formatted(period);
+            var baseUrl = "https://api.dineoncampus.com/v1/location/5f3c3313a38afc0ed9478518/?platform=0&date=".formatted(period);
 
 
             var embeds = getEmbeds(event, baseUrl);

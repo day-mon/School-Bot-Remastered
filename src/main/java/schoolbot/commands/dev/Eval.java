@@ -59,7 +59,7 @@ public class Eval extends Command
                   status = "Error found";
             }
 
-            Color color = status.equals("Error found") ? Color.RED : Color.GREEN;
+            var color = status.equals("Error found") ? Color.RED : Color.GREEN;
 
             event.sendMessage(new EmbedBuilder()
                             .setTitle("Evaluated Result")
