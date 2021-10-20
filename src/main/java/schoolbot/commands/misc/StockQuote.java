@@ -50,7 +50,7 @@ public class StockQuote extends Command
                   return;
             }
 
-            yahoofinance.quotes.stock.StockQuote stockQuote = stock.getQuote();
+            var stockQuote = stock.getQuote();
 
             event.sendMessage(new EmbedBuilder()
                     .setTitle(stockQuote.getSymbol() + " Quote")
@@ -59,7 +59,7 @@ public class StockQuote extends Command
                     .addField("Exchange", stock.getStockExchange(), false)
                     .addBlankField(false)
                     .addField("Normal Trading Data", "", false)
-                    .addField("Price", stockQuote.getPrice() == null ? "N/A" : '$' + StringUtils.parseNumberWithCommas(stockQuote.getPrice().toPlainString()), false)
+                    .addField("Price", stockQuote.getPrice() == null ? "N/A" : '$' + StringUtils.parseNumberWithCommas(stockQuote.getPrice()), false)
                     .addField("Today's Change", stockQuote.getChange() == null ? "N/A" : '$' + stockQuote.getChange().toPlainString(), false)
                     .addField("Average Volume", stockQuote.getAvgVolume() == null ? "N/A" : StringUtils.parseNumberWithCommas(stockQuote.getAvgVolume()), false)
                     .addField("Previous Close", stockQuote.getPreviousClose() == null ? "N/A" : StringUtils.parseNumberWithCommas(stockQuote.getPreviousClose()), false)
