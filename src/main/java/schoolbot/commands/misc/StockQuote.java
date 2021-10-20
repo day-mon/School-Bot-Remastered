@@ -25,7 +25,7 @@ public class StockQuote extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
-            String stockSymbol = args.get(0);
+            var stockSymbol = args.get(0);
 
             if (Checks.isNumber(stockSymbol))
             {
