@@ -163,7 +163,7 @@ public class Dining extends Command
                   var jsonArr = jsonArray.getJSONObject(k);
                   var g = jsonArr.getJSONArray("items");
                   var whereFrom = jsonArr.getString("name");
-                  var calories = jsonArr.getString("calories");
+                  var calories = jsonArr.getInt("calories");
 
                   for (var l = 0; l < g.length(); l++)
                   {
@@ -175,7 +175,7 @@ public class Dining extends Command
                                 .setTitle("Whats for " + StringUtils.capitalize(event.getArgs().get(0)) + " Today")
                                 .addField("Name", name, false)
                                 .addField("Ingredients", ingredients, false)
-                                .addField("Calories", calories, false)
+                                .addField("Calories", String.valueOf(calories), false)
                                 .addField("From", whereFrom, true)
                                 .setFooter("Page " + ++c + " of many")
                                 .build());
