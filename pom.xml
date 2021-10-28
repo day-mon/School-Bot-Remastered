@@ -54,7 +54,7 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>4.3.0_334</version>
+            <version>4.3.0_339</version>
         </dependency>
         <dependency>
             <groupId>com.github.ygimenez</groupId>
