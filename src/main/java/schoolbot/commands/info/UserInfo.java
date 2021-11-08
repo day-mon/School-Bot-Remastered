@@ -1,6 +1,7 @@
 package schoolbot.commands.info;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
@@ -68,6 +69,7 @@ public class UserInfo extends Command
                     .addField("Account Creation Date", StringUtils.formatDate(member.getTimeCreated()), false)
                     .addField("User ID", member.getId(), false)
                     .addField("Roles", member.getRoles().stream().map(Role::getAsMention).collect(Collectors.joining(", ")), false)
+                    .addField("Permissions", member.getPermissions().stream().map(Permission::getName).collect(Collectors.joining(", ")), false)
                     .setThumbnail(user.getAvatarUrl())
                     .setColor(Color.black)
                     .build()).queue();
