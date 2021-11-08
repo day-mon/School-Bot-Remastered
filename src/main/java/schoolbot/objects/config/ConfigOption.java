@@ -7,6 +7,7 @@ public enum ConfigOption
       DBPASSWORD("DBPASSWORD", "password"),
       DBHOSTNAME("DBHOSTANME", "HOSTNAME"),
       JDBCURL("JDBCURL", "URL"),
+      CANVASTOKEN("CANVASTOKEN", "TOKEN"),
       DBDRIVER("DBDRIVER", "DRIVER");
 
 
