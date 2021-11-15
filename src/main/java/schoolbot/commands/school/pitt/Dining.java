@@ -164,18 +164,24 @@ public class Dining extends Command
                   var g = jsonArr.getJSONArray("items");
                   var whereFrom = jsonArr.getString("name");
 
+
                   for (var l = 0; l < g.length(); l++)
                   {
+
+                        // key set: [rev, mrn_full, portion, mrn, filters, calories, nutrients, custom_allergens, qty, name, webtrition_id, ingredients, id, sort_order, desc]
                         var ks = g.getJSONObject(l);
                         var name = ks.getString("name");
                         var ingredients = ks.getString("ingredients");
+                        var calories = ks.getInt("calories");
+                        var portion = ks.getString("portion");
 
                         list.add(new EmbedBuilder()
                                 .setTitle("Whats for " + StringUtils.capitalize(event.getArgs().get(0)) + " Today")
                                 .addField("Name", name, false)
                                 .addField("Ingredients", ingredients, false)
+                                .addField("Calories", String.valueOf(calories), false)
+                                .addField("Portion", portion, false)
                                 .addField("From", whereFrom, true)
-                                .setFooter("Page " + ++c + " of many")
                                 .build());
                   }
             }
