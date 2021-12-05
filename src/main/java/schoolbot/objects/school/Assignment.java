@@ -200,10 +200,17 @@ public class Assignment implements Comparable<Assignment>, Paginatable, Remindab
       @Override
       public EmbedBuilder getAsEmbedBuilder(@NotNull Schoolbot schoolbot)
       {
-            Role role = schoolbot.getJda().getRoleById(this.classroom.getRoleID());
+            var role = schoolbot.getJda().getRoleById(this.classroom.getRoleID());
+            var builder = new StringBuilder("");
+            if (description.length() >= 1024)
+            {
+                  builder.append(description, 0, 1021)
+                          .append("...");
+            }
+
             return new EmbedBuilder()
                     .setTitle(this.name)
-                    .addField("Description", this.description, false)
+                    .addField("Description", builder.equals("") ? description  : builder.toString() , false)
                     .addField("Type", type.getAssignmentType(), false)
                     .addField("Points", String.valueOf(this.points), false)
                     .addField("Class", classroom.getName(), false)
@@ -221,7 +228,7 @@ public class Assignment implements Comparable<Assignment>, Paginatable, Remindab
             EXTRA_CREDIT("Extra Credit"),
             PAPER("PAPER");
 
-            private String assignmentType;
+            private final String assignmentType;
 
             AssignmentType(String assignmentType)
             {
