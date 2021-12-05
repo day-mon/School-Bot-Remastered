@@ -31,7 +31,7 @@ public class ButtonPaginator implements Paginator
       private final List<MessageEmbed> embeds;
       private final List<Button> buttons;
 
-      private boolean deleteOnTimeout;
+      private final boolean deleteOnTimeout;
 
       private long messageId = -1;
       private long ogUser = -1L;

@@ -156,7 +156,6 @@ public class Dining extends Command
                     .getJSONArray("categories");
 
 
-            var c = 0;
 
             for (var k = 0; k < jsonArray.length(); k++)
             {
