@@ -349,6 +349,10 @@ public abstract class Command
             return parent;
       }
 
+      public Logger getLOGGER()
+      {
+            return LOGGER;
+      }
 
       @Override
       public String toString()

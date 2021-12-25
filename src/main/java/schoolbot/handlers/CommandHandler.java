@@ -158,14 +158,16 @@ public class CommandHandler
 
             CommandEvent commandEvent = new CommandEvent(event, com, filteredArgs, schoolbot, executor);
 
-            // If someone sends a parent command or doesnt have any children
+            // If someone sends a parent command or doesn't have any children
             if (!com.hasChildren() || filteredArgs.isEmpty())
             {
                   executor.submit(() ->
                   {
                         try
                         {
+                              var time = System.currentTimeMillis();
                               com.process(commandEvent);
+                              CMD_HANDLER_LOGGER.debug("{} took {}ms", commandEvent.getCommand().getName(), (System.currentTimeMillis() - time));
                         }
                         catch (Exception e)
                         {
@@ -185,7 +187,10 @@ public class CommandHandler
                                     {
                                           try
                                           {
+                                                var time = System.currentTimeMillis();
                                                 child.process(new CommandEvent(event, child, filteredArgs.subList(1, filteredArgs.size()), schoolbot, executor));
+                                                CMD_HANDLER_LOGGER.debug("{} took {}ms", commandEvent.getCommand().getName(), (System.currentTimeMillis() - time));
+
                                           }
                                           catch (Exception e)
                                           {
@@ -198,7 +203,9 @@ public class CommandHandler
                                     {
                                           try
                                           {
+                                                var time = System.currentTimeMillis();
                                                 com.process(commandEvent);
+                                                CMD_HANDLER_LOGGER.debug("{} took {}ms", commandEvent.getCommand().getName(), (System.currentTimeMillis() - time));
                                           }
                                           catch (Exception e)
                                           {

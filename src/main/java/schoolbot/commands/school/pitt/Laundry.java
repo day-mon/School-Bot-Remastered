@@ -1,6 +1,9 @@
 package schoolbot.commands.school.pitt;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +14,9 @@ import org.jsoup.nodes.Document;
 import schoolbot.objects.command.Command;
 import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
+import schoolbot.objects.school.LaundryModel;
 import schoolbot.util.EmbedUtils;
+
 
 import java.awt.*;
 import java.math.BigDecimal;
@@ -21,22 +26,7 @@ import java.util.Map;
 
 public class Laundry extends Command
 {
-      private static final String BASE_URL = "https://www.laundryview.com/api/currentRoomData?school_desc_key=4590&location=";
-      private static final Map<String, String> LAUNDRY_API_CALLS = Map.ofEntries(
-              Map.entry("HICKORY", "5813396"),
-              Map.entry("BRIAR", "581339005"),
-              Map.entry("BUCKHORN", "5813393"),
-              Map.entry("LLC", "58133912"),
-              Map.entry("OAK", "5813391"),
-              Map.entry("HAWTHORN", "5813397"),
-              Map.entry("HEATHER", "5813398"),
-              Map.entry("HEMLOCK", "5813392"),
-              Map.entry("MAPLE", "5813399"),
-              Map.entry("WILLOW", "58133912"),
-              Map.entry("LARKSPUR", "58133911"),
-              Map.entry("LAUREL", "5813394"),
-              Map.entry("CPAS", "581339013")
-      );
+      private static final String BASE_URL = "https://johnstown.schoolbot.dev/api/laundry/";
 
 
       public Laundry()
@@ -50,15 +40,8 @@ public class Laundry extends Command
       @Override
       public void run(@NotNull CommandEvent event, @NotNull List<String> args)
       {
-            String potLaundryName = args.get(0).toUpperCase();
-
-            if (!LAUNDRY_API_CALLS.containsKey(potLaundryName))
-            {
-                  EmbedUtils.error(event, "Housing doesnt exist");
-                  return;
-            }
-
-            String laundryURL = BASE_URL + LAUNDRY_API_CALLS.get(potLaundryName);
+            var potLaundryName = args.get(0).toUpperCase();
+            var laundryURL = BASE_URL + potLaundryName;
 
             Document doc;
             try
@@ -75,52 +58,41 @@ public class Laundry extends Command
                   return;
             }
 
-            String parseAbleJson =
-                    Jsoup.parse(doc.outerHtml())
-                            .body()
-                            .text();
-
-
-            JSONObject jsonObject = new JSONObject(parseAbleJson);
-            JSONArray jsonArray = jsonObject.getJSONArray("objects");
-            ArrayList<MessageEmbed> embeds = new ArrayList<>();
-
-
-            var length = jsonArray.length();
-
-            for (int i = 0; i < length; i++)
+            var om = new ObjectMapper();
+            List<LaundryModel> models;
+            try
             {
-                  JSONObject ele = jsonArray.getJSONObject(i);
-                  String typeString = ele.get("type").toString();
-                  String applianceType = typeString.toUpperCase().startsWith("D") ? "Dryer" : "Washer";
-                  if (typeString.toUpperCase().contains("DRY") || typeString.contains("washFL"))
-                  {
-                        String working = ele.getBigDecimal("percentage").compareTo(new BigDecimal("5.0")) <= 0 ? "Yes" : "No";
-
-
-                        if (ele.getInt("status_toggle") > 0)
-                        {
-                              embeds.add(new EmbedBuilder()
-                                      .setTitle("# " + i + " Appliance ID [" + ele.getString("appliance_desc") + "]")
-                                      .addField("Appliance Type", applianceType, false)
-                                      .addField("Working", working, false)
-                                      .addField("Time Remaining", ele.getString("time_left_lite"), false)
-                                      .setColor(Color.red)
-                                      .build());
-                        }
-                        else
-                        {
-                              embeds.add(new EmbedBuilder()
-                                      .setTitle("# " + i + " Appliance ID [" + ele.getString("appliance_desc") + "]")
-                                      .addField("Appliance Type", applianceType, false)
-                                      .addField("Working", working, false)
-                                      .addField("In use", "No", false)
-                                      .setColor(Color.green)
-                                      .build());
-                        }
-                  }
+                  models = om.readValue(Jsoup.parse(doc.outerHtml()).body().text(), new TypeReference<>() { });
+            }
+            catch (JsonProcessingException e)
+            {
+                  event.sendMessage("API provided a bad response");
+                  event.getCommand().getLOGGER().error("Error has occurred parsing JSON. \n Stack Trace: {}", e.getMessage());
+                  return;
             }
 
+            if (models.isEmpty())
+            {
+                  event.sendMessage("%s is not a valid laundry name", potLaundryName);
+                  return;
+            }
+
+
+            var embeds = new ArrayList<MessageEmbed>();
+
+
+            for (var model : models)
+            {
+                  embeds.add(
+                          new EmbedBuilder()
+                                  .setTitle(String.format("Appliance ID [#%s]", model.applianceID.replaceAll("0", "")))
+                                  .addField("Appliance Type", model.type, false)
+                                  .addField("Working", model.isWorking ? "Yes" : "No" , false)
+                                  .addField(model.isInUse ? "Time Remaining" : "In use",  model.isInUse ? model.timeRemaining : "No", false)
+                                  .setColor(model.isWorking ? Color.green : Color.red)
+                                  .build()
+                  );
+            }
 
             event.bPaginator(embeds);
 
