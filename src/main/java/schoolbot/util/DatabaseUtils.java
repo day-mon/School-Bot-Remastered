@@ -334,9 +334,9 @@ public class DatabaseUtils
       public static int addClassPitt(CommandEvent event, Classroom clazz)
       {
             Schoolbot schoolbot = event.getSchoolbot();
-            try (Connection con = schoolbot.getDatabaseHandler().getDbConnection())
+            try (var con = schoolbot.getDatabaseHandler().getDbConnection())
             {
-                  PreparedStatement statement = con.prepareStatement("""
+                  var statement = con.prepareStatement("""
                           INSERT INTO public.classes(
                            number, professor_id, location, start_date, end_date, time, preqs,
                            level, school_id, identifier, term, description, guild_id, name,
@@ -387,7 +387,7 @@ public class DatabaseUtils
 
             try (Connection con = schoolbot.getDatabaseHandler().getDbConnection())
             {
-                  PreparedStatement statement = con.prepareStatement("""
+                  var statement = con.prepareStatement("""
                           INSERT INTO schools
                           (name, role_id, email_suffix, guild_id, is_pitt_campus, url)
                           VALUES (?, ?, ?, ?, ?, ?)
@@ -447,24 +447,7 @@ public class DatabaseUtils
             }
       }
 
-      public static void removeClassroom(CommandEvent event, Classroom classroom)
-      {
-            int id = classroom.getId();
-            Schoolbot schoolbot = event.getSchoolbot();
-            try (Connection con = schoolbot.getDatabaseHandler().getDbConnection())
-            {
-                  removeClassReminders(con, id);
-                  PreparedStatement statement = con.prepareStatement(
-                          "DELETE FROM classes WHERE id=?"
-                  );
-                  statement.setInt(1, id);
-                  statement.execute();
-            }
-            catch (Exception e)
-            {
-                  LOGGER.error("Database error", e);
-            }
-      }
+
 
       public static void removeClassroom(Schoolbot schoolbot, Classroom classroom)
       {

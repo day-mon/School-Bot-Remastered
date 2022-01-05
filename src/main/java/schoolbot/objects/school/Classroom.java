@@ -346,6 +346,11 @@ public class Classroom implements Paginatable, Remindable
             return channelID;
       }
 
+      public boolean hasChannel()
+      {
+            return channelID != 0;
+      }
+
       public void setChannelID(long channelID)
       {
             this.channelID = channelID;
@@ -355,6 +360,14 @@ public class Classroom implements Paginatable, Remindable
       {
             return roleID;
       }
+
+      public boolean hasRole()
+      {
+            return roleID != 0;
+      }
+
+
+
 
       public void setRoleID(long roleID)
       {

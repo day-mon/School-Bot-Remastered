@@ -210,7 +210,7 @@ public class WrapperHandler
             long guildID = event.getGuild().getIdLong();
             guildCheck(guildID);
 
-            guildWrappers.get(guildID).removeClassroom(event, classroom);
+            guildWrappers.get(guildID).removeClassroom(classroom, event.getSchoolbot());
       }
 
       public void removeClassroom(Classroom classroom, Schoolbot schoolbot)
@@ -220,33 +220,18 @@ public class WrapperHandler
 
             guildCheck(guildId);
 
-            Classroom newClass = guildWrappers.get(guildId)
+            var newClass = guildWrappers.get(guildId)
                     .getAllClasses()
                     .stream()
                     .filter(classroom::equals)
                     .findFirst()
                     .orElseThrow(() -> new IllegalStateException("Classroom Exist in Database but not in cache"));
 
-            guildWrappers.get(guildId).removeClassroom(guildId, newClass, schoolbot);
+            guildWrappers.get(guildId).removeClassroom(newClass, schoolbot);
       }
 
 
-      public List<MessageEmbed> getProfessorsAsPaginator(CommandEvent event, School school)
-      {
-            Schoolbot schoolbot = event.getSchoolbot();
 
-            long guildID = event.getGuild().getIdLong();
-            guildCheck(guildID);
-
-            List<Professor> professorList = getProfessors(event, school.getName().toLowerCase());
-            List<MessageEmbed> embeds = new ArrayList<>();
-
-            for (Professor professor : professorList)
-            {
-                  embeds.add(professor.getAsEmbed(schoolbot));
-            }
-            return embeds;
-      }
 
       private void guildCheck(long guildID)
       {
