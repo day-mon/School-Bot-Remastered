@@ -210,7 +210,7 @@ public class WrapperHandler
             long guildID = event.getGuild().getIdLong();
             guildCheck(guildID);
 
-            guildWrappers.get(guildID).removeClassroom(classroom, event.getSchoolbot());
+            guildWrappers.get(guildID).removeClassroom(event, classroom);
       }
 
       public void removeClassroom(Classroom classroom, Schoolbot schoolbot)

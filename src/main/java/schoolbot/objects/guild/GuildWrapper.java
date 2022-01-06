@@ -375,10 +375,10 @@ public class GuildWrapper
             }
 
 
-            DatabaseUtils.removeClassroom(event, classroom);
+            DatabaseUtils.removeClassroom(event.getSchoolbot(), classroom);
       }
 
-      public void removeClassroom(long guildID, Classroom classroom, Schoolbot schoolbot)
+      public void removeClassroom(Classroom classroom, Schoolbot schoolbot)
       {
             var jda = schoolbot.getJda();
             classroom.getSchool().removeClass(classroom);
