@@ -342,42 +342,6 @@ public class GuildWrapper
             DatabaseUtils.removeProfessor(schoolbot, professor);
       }
 
-      public void removeClassroom(CommandEvent event, Classroom classroom)
-      {
-
-            var jda = event.getJDA();
-            classroom.getSchool().removeClass(classroom);
-            classrooms.remove(classroom);
-
-            if (classroom.getRoleID() != 0)
-            {
-                  if (jda.getRoleById(classroom.getRoleID()) != null)
-                  {
-                        jda.getRoleById(classroom.getRoleID()).delete().queue(success ->
-                                        LOGGER.info("Successfully deleted role for {}", classroom.getName()),
-                                failure ->
-                                        LOGGER.warn("Could not delete role for {} ", classroom.getName(), failure)
-                        );
-                  }
-            }
-
-            if (classroom.getChannelID() != 0)
-            {
-                  if (jda.getTextChannelById(classroom.getChannelID()) != null)
-                  {
-                        jda.getTextChannelById(classroom.getChannelID()).delete().queue(
-                                success ->
-                                        LOGGER.info("Successfully deleted channel for {}", classroom.getName()),
-                                failure ->
-                                        LOGGER.warn("Could not delete class for {} ", classroom.getName(), failure)
-                        );
-                  }
-            }
-
-
-            DatabaseUtils.removeClassroom(event.getSchoolbot(), classroom);
-      }
-
       public void removeClassroom(Classroom classroom, Schoolbot schoolbot)
       {
             var jda = schoolbot.getJda();
