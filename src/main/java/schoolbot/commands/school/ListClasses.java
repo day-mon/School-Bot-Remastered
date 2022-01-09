@@ -53,15 +53,21 @@ public class ListClasses extends Command
                                 messageReceivedEvent -> messageReceivedEvent.getMessageIdLong() == event.getMessage().getIdLong()
                                                         && messageReceivedEvent.getAuthor().getIdLong() == event.getMember().getIdLong()
                                                         && messageReceivedEvent.getMessage().getContentRaw().chars().allMatch(Character::isDigit)
-                                                        && Checks.between(Integer.parseInt(messageReceivedEvent.getMessage().getContentRaw()), schools.size())
-                                ,
+                                                        && Checks.between(Integer.parseInt(messageReceivedEvent.getMessage().getContentRaw()), schools.size()),
 
                                 messageReceivedEventAction ->
                                 {
                                       var index = Integer.parseInt(messageReceivedEventAction.getMessage().getContentRaw()) - 1;
                                       var school = schools.get(index);
 
-                                      event.sendAsPaginatorWithPageNumbers(school.getClassroomList());
+                                      var list = school.getClassroomList();
+
+                                      if (list.isEmpty())
+                                      {
+                                            event.sendMessage("There are currently no classes to list that are in the future");
+                                            return;
+                                      }
+                                      event.sendAsPaginatorWithPageNumbers(list);
                                 }
                         );
                   }
