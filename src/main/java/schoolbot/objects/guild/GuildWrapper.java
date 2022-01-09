@@ -1,5 +1,6 @@
 package schoolbot.objects.guild;
 
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.IntConsumer;
 
 public class GuildWrapper
 {
@@ -38,9 +40,9 @@ public class GuildWrapper
       }
 
       /*
-            This is meant to serve kinda as a cache..
-            Each Guild will have there own wrapper so I can easily list, add, edit, and remove schools without having to make many database connections
-            Things like ListSchools, ListProfessor, ListAssignments, and ListClasses should not have database calls.. Not really needed and slow
+            This is meant to serve kinda as a cache…
+            Each Guild will have their own wrapper, so I can easily list, add, edit, and remove schools without having to make many database connections
+            Things like ListSchools, ListProfessor, ListAssignments, and ListClasses should not have database calls… Not really needed and slow
        */
 
       public void addSchool(CommandEvent event, School school)
@@ -55,6 +57,8 @@ public class GuildWrapper
             schoolList.put(lowerCaseSchoolName, school);
 
       }
+
+
 
       public School getSchool(String schoolName)
       {

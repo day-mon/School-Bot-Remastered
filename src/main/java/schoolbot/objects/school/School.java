@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.function.IntConsumer;
 import java.util.stream.Collectors;
 
 
@@ -235,7 +236,10 @@ public class School implements Paginatable
 
       public List<Classroom> getClassroomList()
       {
-            return classroomList;
+            return classroomList
+                    .stream()
+                    .filter(classroom -> classroom.getStartDate().isAfter(LocalDate.now()))
+                    .collect(Collectors.toList());
       }
 
 
@@ -313,34 +317,34 @@ public class School implements Paginatable
                           return firstAndLast.equalsIgnoreCase(text);
                     })
                     .findFirst().map(professor ->
-            {
-                  classroom.setInstructor(text);
-                  classroom.setProfessor(professor);
-                  return professor;
+                    {
+                          classroom.setInstructor(text);
+                          classroom.setProfessor(professor);
+                          return professor;
 
-            }).orElseGet(() ->
-            {
-                  event.getChannel().sendMessage("This professor has not been found in my database for this server... adding him now!").queue();
-                  int length = text.split("\\s+").length;
+                    }).orElseGet(() ->
+                    {
+                          event.getChannel().sendMessage("This professor has not been found in my database for this server... adding him now!").queue();
+                          int length = text.split("\\s+").length;
 
-                  String firstName = text.split("\\s+")[0];
-                  String lastName = (length < 2) ? "Unknown" : text.split("\\s+")[1];
+                          String firstName = text.split("\\s+")[0];
+                          String lastName = (length < 2) ? "Unknown" : text.split("\\s+")[1];
 
 
-                  Professor prof = new Professor(
-                          firstName,
-                          lastName,
-                          classroom.getSchool()
-                  );
+                          Professor prof = new Professor(
+                                  firstName,
+                                  lastName,
+                                  classroom.getSchool()
+                          );
 
-                  if (!event.addProfessor(prof))
-                  {
-                        removeSequence(event, classroom);
-                        return null;
-                  }
-                  classroom.setProfessor(prof);
-                  return prof;
-            });
+                          if (!event.addProfessor(prof))
+                          {
+                                removeSequence(event, classroom);
+                                return null;
+                          }
+                          classroom.setProfessor(prof);
+                          return prof;
+                    });
       }
 
       private static boolean evaluateCampus(Classroom classroom, String campus)
