@@ -1,9 +1,7 @@
 package schoolbot.objects.school;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.*;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.Constants;
 import schoolbot.Schoolbot;
@@ -272,7 +270,6 @@ public class Classroom implements Paginatable, Remindable
             }
       }
 
-
       public void setStartDate(LocalDateTime localDateTime)
       {
             this.startDate = localDateTime;
@@ -365,8 +362,6 @@ public class Classroom implements Paginatable, Remindable
       {
             return roleID != 0;
       }
-
-
 
 
       public void setRoleID(long roleID)
@@ -501,8 +496,8 @@ public class Classroom implements Paginatable, Remindable
 
       public EmbedBuilder getAsEmbedBuilder(@NotNull Schoolbot schoolbot)
       {
-            Role role = schoolbot.getJda().getRoleById(this.roleID);
-            TextChannel textChannel = schoolbot.getJda().getTextChannelById(this.channelID);
+            var role = schoolbot.getJda().getRoleById(this.roleID);
+            var textChannel = schoolbot.getJda().getTextChannelById(this.channelID);
 
             if (description.length() > Constants.MAX_FIELD_VALUE)
             {

@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+import org.slf4j.LoggerFactory;
 import schoolbot.Constants;
 import schoolbot.Schoolbot;
 import schoolbot.objects.command.CommandEvent;
@@ -134,12 +135,22 @@ public class School implements Paginatable
             event.removeProfessor(classroom.getProfessor());
             if (roleID != 0)
             {
-                  guild.getRoleById(classroom.getRoleID()).delete().queue();
+                  var role = guild.getRoleById(classroom.getRoleID());
+
+                  if (role != null)
+                  {
+                        role.delete().queue();
+                  }
             }
 
             if (channelID != 0)
             {
-                  guild.getTextChannelById(classroom.getChannelID()).delete().queue();
+                  var channel = guild.getTextChannelById(classroom.getChannelID());
+
+                  if (channel != null)
+                  {
+                        channel.delete().queue();
+                  }
             }
       }
 
@@ -238,7 +249,7 @@ public class School implements Paginatable
       {
             return classroomList
                     .stream()
-                    .filter(classroom -> classroom.getStartDate().isAfter(LocalDate.now()))
+                    .filter(classroom -> classroom.getEndDate().plusWeeks(1).isAfter(LocalDate.now().plusDays(1)))
                     .collect(Collectors.toList());
       }
 

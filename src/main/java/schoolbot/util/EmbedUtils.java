@@ -41,15 +41,20 @@ public class EmbedUtils
                     .build()).queue();
       }
 
+      public static void sendNonClassroomMessage(CommandEvent event)
+      {
+            error(event, "You did not send this message from a channel that is associated with a classroom. Try again!");
+      }
+
       public static void success(GuildMessageReceivedEvent event, String message, Object... args)
       {
             var channel = event.getChannel();
 
             channel.sendMessageEmbeds(new EmbedBuilder()
-                    .setTitle(Emoji.WHITE_CHECK_MARK.getAsChat() + " Success " + Emoji.WHITE_CHECK_MARK.getAsChat())
-                    .setColor(Color.GREEN)
-                    .setDescription(String.format(message, args))
-                    .build())
+                            .setTitle(Emoji.WHITE_CHECK_MARK.getAsChat() + " Success " + Emoji.WHITE_CHECK_MARK.getAsChat())
+                            .setColor(Color.GREEN)
+                            .setDescription(String.format(message, args))
+                            .build())
                     .queue(null, failure ->
                     {
                           var user = event.getAuthor();
@@ -71,10 +76,10 @@ public class EmbedUtils
 
 
             channel.sendMessageEmbeds(new EmbedBuilder()
-                    .setTitle(Emoji.WHITE_CHECK_MARK.getAsChat() + " Success " + Emoji.WHITE_CHECK_MARK.getAsChat())
-                    .setColor(Color.GREEN)
-                    .setDescription(String.format(message, args))
-                    .build())
+                            .setTitle(Emoji.WHITE_CHECK_MARK.getAsChat() + " Success " + Emoji.WHITE_CHECK_MARK.getAsChat())
+                            .setColor(Color.GREEN)
+                            .setDescription(String.format(message, args))
+                            .build())
                     .queue(null, failure ->
                     {
                           var user = event.getUser();
@@ -249,10 +254,10 @@ public class EmbedUtils
             var eventWaiter = event.getSchoolbot().getEventWaiter();
 
             event.getMessage().replyEmbeds(
-                    new EmbedBuilder()
-                            .setTitle("Confirmation")
-                            .setDescription(String.format(message, args))
-                            .build())
+                            new EmbedBuilder()
+                                    .setTitle("Confirmation")
+                                    .setDescription(String.format(message, args))
+                                    .build())
                     .setActionRow(
                             Button.success("confirm", "Confirm Delete"),
                             Button.danger("abort", "Abort"))

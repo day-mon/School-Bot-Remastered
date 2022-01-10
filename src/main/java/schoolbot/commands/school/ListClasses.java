@@ -41,7 +41,14 @@ public class ListClasses extends Command
                   else if (schools.size() == 1)
                   {
                         var school = schools.get(0);
-                        event.sendAsPaginatorWithPageNumbers(school.getClassroomList());
+                        var list = school.getClassroomList();
+
+                        if (list.isEmpty())
+                        {
+                              event.sendMessage("There are currently no classes to list that are in the future");
+                              return;
+                        }
+                        event.sendAsPaginatorWithPageNumbers(list);
                   }
 
                   else

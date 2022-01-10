@@ -2,6 +2,7 @@ package schoolbot.util;
 
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.objects.misc.StateMachineValues;
@@ -170,6 +171,7 @@ public class Checks
        * @param values StateMachineValues passed through to set classroom if possible
        * @return Classroom if found, <b>NULL</b> if otherwise
        */
+      @Nullable
       public static Classroom messageSentFromClassChannel(StateMachineValues values)
       {
             var commandEvent = values.getCommandEvent();
@@ -179,7 +181,7 @@ public class Checks
 
 
             return classroomList.stream()
-                    .filter(clazzroom -> clazzroom.getChannelID() == textChanel)
+                    .filter(classroom -> classroom.getChannelID() == textChanel)
                     .limit(1)
                     .peek(values::setClassroom)
                     .findAny()

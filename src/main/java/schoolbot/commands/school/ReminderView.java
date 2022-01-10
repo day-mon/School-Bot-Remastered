@@ -39,7 +39,7 @@ public class ReminderView extends Command
 
             if (classroom == null)
             {
-                  EmbedUtils.error(event, "You did not send this message from a channel that is associated with a classroom");
+                  EmbedUtils.sendNonClassroomMessage(event);
                   return;
             }
 
