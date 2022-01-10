@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public class Classroom implements Paginatable, Remindable
 {
@@ -508,6 +509,7 @@ public class Classroom implements Paginatable, Remindable
                     .setTitle(this.name + " | (" + this.classIdentifier + ")", URL)
                     .addField("Class number", String.valueOf(this.number), false)
                     .addField("Meeting time", this.time, false)
+                    .addField("Room", this.room == null ? "N/A" : this.room, false)
                     .addField("Description", this.description, false)
                     .addField("Start Date", this.startDate == null ? Arrays.toString(this.inputClassStartDate) : StringUtils.formatDate(this.startDate), false)
                     .addField("End Date", this.endDate == null ? Arrays.toString(this.inputClassEndDate) : StringUtils.formatDate(this.endDate), false)
