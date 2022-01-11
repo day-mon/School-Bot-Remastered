@@ -193,7 +193,7 @@ public class Parser
 
       public static LocalDateTime parseTimeString(Date time, String strTime)
       {
-            LocalDate localDate = Instant.ofEpochMilli(time.getTime())
+            var localDate = Instant.ofEpochMilli(time.getTime())
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate();
 

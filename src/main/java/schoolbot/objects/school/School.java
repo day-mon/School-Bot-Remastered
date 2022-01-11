@@ -523,7 +523,7 @@ public class School implements Paginatable
             for (int left = 1, right = 2; right <= elementSize; left++, right++)
             {
 
-                  // Gotta check if the current tag w e are on is a div because if its not we are not on something we wanna scrape.
+                  // I've got to check if the current tag w e are on is a div because if it's not we are not on something we wanna scrape.
                   while (!elementsRight.get(right).tag().getName().equalsIgnoreCase("div"))
                   {
                         right++;

@@ -326,7 +326,7 @@ public class AssignmentAdd extends Command
                               var time = Checks.validTime(values, date);
 
 
-                              if (Objects.isNull(time))
+                              if (null == time)
                               {
                                     EmbedUtils.error(event, """
                                             **%s** could not be parsed. Here are some of the reasons!

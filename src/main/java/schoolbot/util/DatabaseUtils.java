@@ -281,11 +281,20 @@ public class DatabaseUtils
             }
       }
 
-      public static List<Reminder> getRemindersOnDate(CommandEvent event, Object obj, LocalDate date)
+      public static List<Reminder> getRemindersOnDate(CommandEvent event, LocalDate date, Object... obj)
       {
             List<Reminder> reminders = new ArrayList<>();
-            var table = obj.getClass().getSimpleName().equals("Assignment") ? "assignments_reminders" : "class_reminders";
-            var ID = obj.getClass().getSimpleName().equals("Assignment") ? "assignment_id" : "class_id";
+            var list = (ArrayList) obj[0];
+
+            if (list.isEmpty())
+            {
+                  return Collections.emptyList();
+            }
+
+            var type = list.get(0).getClass().getSimpleName().equals("Assignment");
+
+            var table = type ? "assignments_reminders" : "class_reminders";
+            var ID = type ? "assignment_id" : "class_id";
 
             var schoolbot = event.getSchoolbot();
             var fDate = LocalDateTime.of(date, LocalTime.MAX).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -301,33 +310,37 @@ public class DatabaseUtils
                           """.formatted(table, fDate, ID);
 
 
-                  System.out.println(query);
                   var statement = connection.prepareStatement(
                           query
                   );
-                  var object = obj.getClass().getSimpleName().equals("Assignment") ? (Assignment) obj : (Classroom) obj;
-
-                  statement.setInt(1, object.getId());
 
 
-                  var resultSet = statement.executeQuery();
-
-
-                  var k = 0;
-                  while (resultSet.next())
+                  for (Object objTrav : list)
                   {
+                        var object = type ? (Assignment) objTrav : (Classroom) objTrav;
+                        statement.setInt(1, object.getId());
 
-                        System.out.println(k++);
-                        reminders.add(new Reminder(resultSet.getInt("id"), object, resultSet.getTimestamp("remind_time").toLocalDateTime()));
+
+                        var resultSet = statement.executeQuery();
+
+                        while (resultSet.next())
+                        {
+                              reminders.add(
+                                      new Reminder(
+                                              resultSet.getInt("id"),
+                                              objTrav,
+                                              resultSet.getTimestamp("remind_time").toLocalDateTime()
+                                      )
+                              );
+                        }
                   }
-
                   return reminders;
 
             }
             catch (SQLException throwables)
             {
                   LOGGER.error("Database Error", throwables);
-                  return null;
+                  return Collections.emptyList();
             }
       }
 
@@ -446,7 +459,6 @@ public class DatabaseUtils
                   LOGGER.error("Database error", e);
             }
       }
-
 
 
       public static void removeClassroom(Schoolbot schoolbot, Classroom classroom)

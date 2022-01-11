@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class Classroom implements Paginatable, Remindable
 {
@@ -317,6 +318,13 @@ public class Classroom implements Paginatable, Remindable
                   this.endDate = LocalDateTime.of(endDatee, LocalTime.of(0, 0));
 
             }
+      }
+
+      public List<Assignment> getAssignmentsOnDate(LocalDate date)
+      {
+            return assignments.stream()
+                    .filter(assignment -> assignment.getDueDate().toLocalDate().isEqual(date))
+                    .collect(Collectors.toList());
       }
 
       public String getName()

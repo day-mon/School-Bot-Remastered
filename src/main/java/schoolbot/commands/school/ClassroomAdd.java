@@ -43,8 +43,8 @@ public class ClassroomAdd extends Command
 
 
       /**
-       * Returns true if PeopleSoft is up and functioning if not it return false
-       * The values parameter is all of the state machines possible values
+       * Returns true if PeopleSoft is up and functioning if not it returns false
+       * The value's parameter is all the state machines possible values
        *
        * @param values All of the state machines possible values
        * @return False is PeopleSoft is up and functioning. Otherwise fails
@@ -223,7 +223,7 @@ public class ClassroomAdd extends Command
                                           values.setState(3);
                                     }
                                     else if (success == 2) values.setState(2);
-                                    // else case here dont forget
+                                    // else case here don't forget
 
 
                               }
@@ -333,7 +333,9 @@ public class ClassroomAdd extends Command
                               values.getClassroom().setURL(CLASS_SEARCH_URL);
                               values.getClassroom().setNumber(Integer.parseInt(message));
 
-                              commandEvent.getCommandThreadPool().execute(() -> commandEvent.addPittClass(classroom));
+                              commandEvent.getCommandThreadPool().execute(
+                                      () -> commandEvent.addPittClass(classroom))
+                              ;
                               jda.removeEventListener(this);
 
                         }
@@ -577,7 +579,7 @@ public class ClassroomAdd extends Command
                   {
                         startDate = LocalDate.parse(splitDate[0], format);
                   }
-                  catch (RuntimeException e)
+                  catch (Exception e)
                   {
                         EmbedUtils.error(commandEvent, "Error parsing Start Date. Please try again!");
                         return false;
@@ -587,7 +589,7 @@ public class ClassroomAdd extends Command
                   {
                         endDate = LocalDate.parse(splitDate[1], format);
                   }
-                  catch (RuntimeException e)
+                  catch (Exception e)
                   {
                         EmbedUtils.error(commandEvent, "Error parsing End Date. Please try again!");
                         return false;

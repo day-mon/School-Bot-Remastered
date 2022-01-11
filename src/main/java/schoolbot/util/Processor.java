@@ -10,6 +10,7 @@ import schoolbot.objects.school.Classroom;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class Processor
@@ -55,6 +56,41 @@ public class Processor
                   event.sendSelfDeletingMessageFormat("Choose a page number from the list of %s's.", tClass.getSimpleName());
                   return 2;
             }
+      }
+
+      public static <P extends Paginatable> void processGenericListAndDoAction(StateMachineValues values, Consumer<P> doOne, Consumer<List<P>> doTwo, List<P> genericList, Class<?> tClass)
+      {
+            var event = values.getCommandEvent();
+            var size = genericList.size();
+
+            if (genericList.isEmpty())
+            {
+                  EmbedUtils.error(event, processErrorMessage(tClass, values));
+            }
+            else if (size == 1)
+            {
+                  var object = genericList.get(0);
+                  doOne.accept(object);
+            }
+            else
+            {
+                  doTwo.accept(genericList);
+            }
+      }
+
+      public static <P extends Paginatable> void processGenericListAndDoOneAction(StateMachineValues values, Consumer<List<P>> action, List<P> genericList, Class<?> tClass)
+      {
+            var event = values.getCommandEvent();
+
+            if (genericList.isEmpty())
+            {
+                  EmbedUtils.error(event, processErrorMessage(tClass, values));
+            }
+            else
+            {
+                  action.accept(genericList);
+            }
+
       }
 
       /**

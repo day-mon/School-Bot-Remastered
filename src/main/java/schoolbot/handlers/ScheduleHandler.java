@@ -61,7 +61,7 @@ public class ScheduleHandler
                     Activity.watching("mark sleep"),
                     Activity.streaming("warner growing", "https://www.youtube.com/watch?v=PLOPygVcaVE"),
                     Activity.watching("damon bench joesphs weight"),
-                    Activity.streaming("chakara balancing seminar", "https://www.youtube.com/watch?v=vqklftk89Nw")
+                    Activity.streaming("chakra balancing seminar", "https://www.youtube.com/watch?v=vqklftk89Nw")
             );
 
             reminderExecutor.scheduleAtFixedRate(() ->
@@ -114,7 +114,6 @@ public class ScheduleHandler
                   if (due.toMinutes() <= 0)
                   {
                         var guildId = channel.getGuild().getIdLong();
-
                         schoolbot.getWrapperHandler().removeAssignment(guildId, assignment);
                         LOGGER.debug("Assignment list size {}", classroom.getAssignments().size());
                   }
@@ -165,16 +164,16 @@ public class ScheduleHandler
 
                   if (overDueCheck)
                   {
-                        var remindtime = reminder.time()[0];
-                        dueMessage = String.format("%s, ** %s ** was at ** %s ** but we could not alert you due to some unfortunate down time. I am working to improve", mention, classroom.getName(), StringUtils.formatDate(remindtime));
-                        LOGGER.warn("Overdue by: {} seconds", secondsBetween);
+
+                        LOGGER.warn("{} overdue by: {} seconds", classroom.getName() , secondsBetween);
+                        var remindTime = reminder.time().length != 0 ? StringUtils.formatDate(reminder.time()[0]) : "SOME TIME";
+                        dueMessage = String.format("%s, ** %s ** was at ** %s ** but we could not alert you due to some unfortunate down time. I am working to improve", mention, classroom.getName(), remindTime);
                   }
 
-
+                  DatabaseUtils.removeReminder(schoolbot, reminder);
                   LOGGER.info("{} has been notified", classroom.getName());
                   channel.sendMessage(dueMessage).queue();
 
-                  DatabaseUtils.removeReminder(schoolbot, reminder);
 
                   var lastReminder = DatabaseUtils.lastClassReminder(schoolbot, reminder);
 

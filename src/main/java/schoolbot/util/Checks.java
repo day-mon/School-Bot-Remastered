@@ -42,14 +42,6 @@ public class Checks
             }
       }
 
-
-      public static boolean isValidEmail(String potentialEmail)
-      {
-            Pattern pattern = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.(?:[A-Z]{2}|com|org|edu|net|)$\n");
-            Matcher matcher = pattern.matcher(potentialEmail);
-            return matcher.matches();
-      }
-
       public static boolean between(int i, int maxValueInclusive)
       {
             return (i >= 1 && i <= maxValueInclusive);

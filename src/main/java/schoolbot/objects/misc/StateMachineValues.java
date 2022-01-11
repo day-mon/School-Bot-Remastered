@@ -198,6 +198,11 @@ public class StateMachineValues
             this.pittClass = pittClass;
       }
 
+      public void setAssignmentList(List<Assignment> assignmentList)
+      {
+            this.assignmentList = assignmentList;
+      }
+
       public StateMachine getMachine()
       {
             return machine;

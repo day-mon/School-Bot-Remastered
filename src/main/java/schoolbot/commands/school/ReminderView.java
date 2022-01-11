@@ -2,6 +2,8 @@ package schoolbot.commands.school;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import org.jetbrains.annotations.NotNull;
 import schoolbot.objects.command.Command;
@@ -9,6 +11,7 @@ import schoolbot.objects.command.CommandEvent;
 import schoolbot.objects.command.CommandFlag;
 import schoolbot.objects.misc.Reminder;
 import schoolbot.objects.misc.StateMachineValues;
+import schoolbot.objects.misc.interfaces.StateMachine;
 import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
 import schoolbot.util.Checks;
@@ -60,35 +63,33 @@ public class ReminderView extends Command
 
                   event.sendMenuAndAwait("View for assignments or class", selectionOptions, (buttonEvent) ->
                   {
+                        var assignments = classroom.getAssignmentsOnDate(potentialDate);
+                        values.setAssignmentList(assignments);
                         var option = buttonEvent.getValues().get(0);
 
                         if (option.equals("assignment"))
                         {
-                              var finalValue = Processor.processGenericList(values, classroom.getAssignments(), Assignment.class);
+                              Processor.processGenericListAndDoOneAction(values, (paginatables) ->
+                                      {
+                                            var reminders = DatabaseUtils.getRemindersOnDate(event, potentialDate, paginatables);
 
-                              if (finalValue == 1)
-                              {
-                                    var assignment = values.getAssignment();
-                                    var list = DatabaseUtils.getRemindersOnDate(event, assignment, potentialDate);
+                                            if (reminders.isEmpty())
+                                            {
+                                                  EmbedUtils.error(event, "Error occurred while attempting to retrieve reminders");
+                                                  return;
+                                            }
 
-                                    if (list == null)
-                                    {
-                                          EmbedUtils.error(event, "Error occurred while attempting to retrieve reminders");
-                                          return;
-                                    }
+                                            var subList = generateEmbed(reminders, option);
 
-
-                                    var subList = generateEmbed(list, option);
-
-                                    event.bPaginator(subList);
-
-                              }
+                                            event.bPaginator(subList);
+                                      }, values.getAssignmentList(),
+                                      Assignment.class);
                         }
                         else if (option.equals("class"))
                         {
-                              var list = DatabaseUtils.getRemindersOnDate(event, values.getClassroom(), potentialDate);
+                              var list = DatabaseUtils.getRemindersOnDate(event, potentialDate, values.getClassroom());
 
-                              if (list == null)
+                              if (list.isEmpty())
                               {
                                     EmbedUtils.error(event, "Error occurred while attempting to retrieve reminders");
                                     return;
@@ -105,13 +106,8 @@ public class ReminderView extends Command
             // clarify because its so far down :)
             else if (!classroom.hasAssignments())
             {
-                  var list = DatabaseUtils.getRemindersOnDate(event, values.getClassroom(), potentialDate);
+                  var list = DatabaseUtils.getRemindersOnDate(event, potentialDate, values.getClassroom());
 
-                  if (list == null)
-                  {
-                        EmbedUtils.error(event, "Error occurred while attempting to retrieve reminders");
-                        return;
-                  }
 
                   if (list.isEmpty())
                   {
@@ -148,16 +144,18 @@ public class ReminderView extends Command
             else
             {
                   return list.stream()
-                    .map(item ->
-                    {
-                          var assignment1 = (Assignment) item.obj();
-                          return new EmbedBuilder()
-                                  .setTitle("Reminder for " + assignment1.getName() + " ID (#" + item.id() + ")")
-                                  .addField("Remind Time", String.valueOf(item.time()), false)
-                                  .addField("Due Date", String.valueOf(assignment1.getDueDate()), false)
-                                  .build();
-                    })
-                    .collect(Collectors.toList());
+                          .map(item ->
+                          {
+                                var assignment1 = (Assignment) item.obj();
+                                var time = item.time()[0];
+                                var delta = Duration.between(time.toLocalTime(), assignment1.getDueDate().toLocalTime()).toMinutes();
+                                return new EmbedBuilder()
+                                        .setTitle("Reminder for " + assignment1.getName() + " ID (#" + item.id() + ")")
+                                        .addField("Remind Time", time.format(DateTimeFormatter.ofPattern("MM-dd-yyy @ HH:mm")) + " | ** " + delta + "** (minutes before)", false)
+                                        .addField("Due Date", String.valueOf(assignment1.getDueDate()), false)
+                                        .build();
+                          })
+                          .collect(Collectors.toList());
             }
       }
 
