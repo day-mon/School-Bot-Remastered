@@ -6,7 +6,6 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
-import schoolbot.objects.config.ConfigOption;
 import schoolbot.util.DatabaseUtils;
 
 import java.nio.charset.StandardCharsets;
@@ -32,10 +31,10 @@ public class DatabaseHandler
       private HikariDataSource initHikari()
       {
             HikariConfig hikariConfig = new HikariConfig();
-            hikariConfig.setDriverClassName(configHandler.getString(ConfigOption.DBDRIVER));
-            hikariConfig.setJdbcUrl(configHandler.getString(ConfigOption.JDBCURL) + configHandler.getString(ConfigOption.DBHOSTNAME));
-            hikariConfig.setUsername(configHandler.getString(ConfigOption.DBUSER));
-            hikariConfig.setPassword(configHandler.getString(ConfigOption.DBPASSWORD));
+            hikariConfig.setDriverClassName(configHandler.getConfig().getDbDriver());
+            hikariConfig.setJdbcUrl(configHandler.getConfig().getJdbcUrl() + configHandler.getConfig().getDbHostName());
+            hikariConfig.setUsername(configHandler.getConfig().getDbUser());
+            hikariConfig.setPassword(configHandler.getConfig().getDbPassword());
 
             /*
                     The property controls the maximum size that the pool is allowed to reach, including both idle and in-use connections.
@@ -77,7 +76,7 @@ public class DatabaseHandler
             {
                   final var root = schoolbot.util.IOUtils.getJarFilesystem(DatabaseHandler.class).resolve("sql");
 
-                  if (root == null)
+                  if (null == root)
                   {
                         LOGGER.error("SQL Folder inside resources does not exist.. Try placing a folder in resources named 'sql'");
                         System.exit(1);

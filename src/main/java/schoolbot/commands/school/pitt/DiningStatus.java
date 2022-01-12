@@ -51,7 +51,6 @@ public class DiningStatus extends Command
             var size = jsonObject.length() - 1;
             //this is really lazy
 
-            var k = 0;
 
             for (var c = 0; c < size; c++)
             {
@@ -66,7 +65,6 @@ public class DiningStatus extends Command
                           new EmbedBuilder()
                                   .setTitle(name)
                                   .addField("Status", StringUtils.capitalize(openOrNot), false)
-                                  .setFooter("Page " + ++k + "/" + (size))
                                   .build()
                   );
             }

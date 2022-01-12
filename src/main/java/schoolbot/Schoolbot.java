@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schoolbot.handlers.*;
 import schoolbot.listeners.*;
-import schoolbot.objects.config.ConfigOption;
 import schoolbot.objects.info.SystemInfo;
 
 import javax.annotation.Nonnull;
@@ -50,7 +49,7 @@ public class Schoolbot extends ListenerAdapter
 
       public void build() throws LoginException
       {
-            this.jda = JDABuilder.createDefault(configHandler.getString(ConfigOption.TOKEN))
+            this.jda = JDABuilder.createDefault(configHandler.getConfig().getToken())
                     .enableIntents(
                             GatewayIntent.DIRECT_MESSAGES,
                             GatewayIntent.DIRECT_MESSAGE_REACTIONS,
@@ -80,14 +79,14 @@ public class Schoolbot extends ListenerAdapter
 
             this.scheduleHandler = new ScheduleHandler(this);
 
-            LOGGER.info("Account:           " + jda.getSelfUser());
-            LOGGER.info("Java Version:      " + SystemInfo.getJavaVersion());
-            LOGGER.info("JDA Version:       " + JDAInfo.VERSION);
-            LOGGER.info("Schoolbot Version: " + Constants.VERSION);
-            LOGGER.info("Operating System:  " + SystemInfo.getOperatingSystem());
-            LOGGER.info("Github Repo:       " + "https://github.com/tykoooo/School-Bot-Remastered");
-            LOGGER.info("Startup Time:      " + Duration.between(botStartTime, LocalDateTime.now()).toMillis() + " ms");
-
+            LOGGER.info("Account:             " + jda.getSelfUser());
+            LOGGER.info("Java Version:        " + SystemInfo.getJavaVersion());
+            LOGGER.info("JDA Version:         " + JDAInfo.VERSION);
+            LOGGER.info("Schoolbot Version:   " + Constants.VERSION);
+            LOGGER.info("Operating System:    " + SystemInfo.getOperatingSystem());
+            LOGGER.info("Github Repo:         " + "https://github.com/tykoooo/School-Bot-Remastered");
+            LOGGER.info("Startup Time:        " + Duration.between(botStartTime, LocalDateTime.now()).toMillis() + " ms");
+            LOGGER.info("Developer User Ids:  " + configHandler.getConfig().getDeveloperIds());
       }
 
 

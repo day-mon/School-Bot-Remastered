@@ -1,27 +1,33 @@
 package schoolbot.handlers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import schoolbot.Schoolbot;
-import schoolbot.objects.config.ConfigOption;
+import schoolbot.objects.config.Config;
+import schoolbot.util.Checks;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class ConfigHandler
 {
+
       public static final File CONFIG_FOLDER = new File("config");
       public static final File CONFIG_FILE = new File(CONFIG_FOLDER, "schoolbot.cfg");
-      private final List<ConfigurationValue> configValues;
+      private final Config config;
       private final Schoolbot schoolbot;
-
+      private final Logger CONFIG_LOGGER = LoggerFactory.getLogger(this.getClass());
 
       public ConfigHandler(Schoolbot schoolbot)
       {
             initFolder();
             initFile();
-            this.configValues = loadValues();
             this.schoolbot = schoolbot;
+            this.config = loadValues();
+
       }
 
       private void initFolder()
@@ -50,76 +56,58 @@ public class ConfigHandler
             }
       }
 
-      private List<ConfigurationValue> loadDefaults(List<ConfigurationValue> configValues)
+      private Config loadValues()
       {
-            for (ConfigOption configOption : ConfigOption.values())
-            {
-                  if (configValues.stream().map(ConfigurationValue::getKey).noneMatch(key -> configOption.getKey().equals(key)))
-                  {
-                        configValues.add(new ConfigurationValue(configOption.getKey(), configOption.getDefaultValue()));
-                  }
-            }
-            save(configValues);
-            return configValues;
-
-      }
-
-      private List<ConfigurationValue> loadValues()
-      {
+            Config config = new Config();
+            var om = new ObjectMapper();
             try
             {
-                  List<ConfigurationValue> values = new ArrayList<>();
-                  BufferedReader br = new BufferedReader(new FileReader(CONFIG_FILE));
-                  String line;
-                  while ((line = br.readLine()) != null)
+                  var json = Files.readString(Path.of(String.valueOf(CONFIG_FILE)));
+
+                  if (!Checks.isValidJson(json))
                   {
-                        if (!line.contains("=") || line.startsWith("*"))
-                        {
-                              continue;
-                        }
-                        String[] elementSplit = line.split("=");
-                        values.add(new ConfigurationValue(elementSplit[0], elementSplit[1]));
+                        save(config);
+                        return config;
                   }
-                  return loadDefaults(values);
+
+
+                  config = om.readValue(
+                          json,
+                          Config.class
+                  );
+
+
+                  return config;
             }
-            catch (Exception e)
+            catch (JsonProcessingException exception)
             {
-                  System.err.print("Something went wrong!");
-                  e.printStackTrace();
-                  return Collections.emptyList();
+                  CONFIG_LOGGER.error("Could not parse config. Loading default values", exception);
+                  save(config);
+                  return config;
+            }
+            catch (IOException exception)
+            {
+                  CONFIG_LOGGER.error("Error occurred while. loading the file", exception);
+                  save(config);
+                  return config;
             }
       }
 
-      public String getString(ConfigOption configOption)
-      {
-            synchronized (configValues)
-            {
-                  for (ConfigurationValue configurationValue : configValues)
-                  {
-                        if (configurationValue.key.equals(configOption.getKey()))
-                        {
-                              return configurationValue.getValue();
-                        }
-                  }
-                  return configOption.getDefaultValue();
-            }
-      }
 
-      private void save(List<ConfigurationValue> configValues)
+      private void save(Config config)
       {
-            StringBuilder stringBuilder = new StringBuilder();
-            for (ConfigurationValue configurationValue : configValues)
+            var json = config.getAsJson();
+
+            if (json.isBlank())
             {
-                  stringBuilder
-                          .append(configurationValue.key)
-                          .append("=")
-                          .append(configurationValue.value)
-                          .append("\n");
+                  CONFIG_LOGGER.error("Error occurred while attempting to process json");
+                  return;
             }
+
             try
             {
                   FileWriter fileWriter = new FileWriter(CONFIG_FILE);
-                  fileWriter.write(stringBuilder.toString());
+                  fileWriter.write(json);
                   fileWriter.flush();
             }
             catch (IOException exception)
@@ -128,37 +116,8 @@ public class ConfigHandler
             }
       }
 
-
-      private static class ConfigurationValue
+      public Config getConfig()
       {
-            private String key;
-            private String value;
-
-            public ConfigurationValue(String key, String value)
-            {
-                  this.key = key;
-                  this.value = value;
-            }
-
-            public String getKey()
-            {
-                  return key;
-            }
-
-            public void setKey(String key)
-            {
-                  this.key = key;
-            }
-
-            public String getValue()
-            {
-                  return value;
-            }
-
-            public void setValue(String value)
-            {
-                  this.value = value;
-            }
+            return config;
       }
-
 }

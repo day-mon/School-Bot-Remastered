@@ -1,5 +1,8 @@
 package schoolbot.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -82,9 +85,26 @@ public class Checks
             }
 
             return null;
-
-
       }
+
+      public static boolean isValidJson(String string)
+      {
+            try
+            {
+                  final var mapper = new ObjectMapper();
+                  mapper.readTree(string);
+                  return true;
+            }
+            catch (JsonMappingException e)
+            {
+                  return false;
+            }
+            catch (JsonProcessingException exception)
+            {
+                  return false;
+            }
+      }
+
 
       public static LocalDate checkValidDate(String potentialDate)
       {
