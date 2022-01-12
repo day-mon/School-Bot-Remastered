@@ -16,11 +16,15 @@ import schoolbot.Constants;
 import schoolbot.Schoolbot;
 import schoolbot.interactions.ButtonPaginator;
 import schoolbot.objects.misc.DatabaseDTO;
+import schoolbot.objects.misc.StateMachineValues;
 import schoolbot.objects.misc.interfaces.Paginatable;
 import schoolbot.objects.school.Assignment;
 import schoolbot.objects.school.Classroom;
 import schoolbot.objects.school.Professor;
 import schoolbot.objects.school.School;
+import schoolbot.util.Checks;
+import schoolbot.util.EmbedUtils;
+import schoolbot.util.Processor;
 
 import java.awt.*;
 import java.time.Instant;
@@ -142,8 +146,8 @@ public class CommandEvent
       public void sendMessage(EmbedBuilder embedBuilder)
       {
             getChannel().sendMessageEmbeds(
-                    embedBuilder.setColor(Constants.DEFAULT_EMBED_COLOR)
-                            .setTimestamp(Instant.now()).build())
+                            embedBuilder.setColor(Constants.DEFAULT_EMBED_COLOR)
+                                    .setTimestamp(Instant.now()).build())
                     .queue(null, failure -> LOGGER.error("Failure whilst sending Embed"));
       }
 
@@ -208,7 +212,6 @@ public class CommandEvent
 
             bPaginator(embeds);
       }
-
 
       public void sendMenuAndAwait(String placeHolder, List<SelectOption> selectOptions, Consumer<SelectionMenuEvent> consumer)
       {
@@ -346,7 +349,9 @@ public class CommandEvent
 
       public boolean isDeveloper()
       {
-            return event.getAuthor().getIdLong() == Constants.GENIUS_OWNER_ID;
+            var developers = schoolbot.getConfigHandler().getConfig().getDeveloperIds();
+            var user = event.getAuthor().getIdLong();
+            return developers.contains(user);
       }
 
 
