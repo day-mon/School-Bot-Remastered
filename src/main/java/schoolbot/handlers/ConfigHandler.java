@@ -64,7 +64,7 @@ public class ConfigHandler
             {
                   var json = Files.readString(Path.of(String.valueOf(CONFIG_FILE)));
 
-                  if (!Checks.isValidJson(json))
+                  if (!Checks.isValidJson(json) || json.isEmpty())
                   {
                         save(config);
                         return config;

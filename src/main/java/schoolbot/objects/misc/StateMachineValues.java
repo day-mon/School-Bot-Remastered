@@ -97,11 +97,6 @@ public class StateMachineValues
             return event;
       }
 
-      public void setEvent(CommandEvent event)
-      {
-            this.event = event;
-      }
-
       public List<School> getSchoolList()
       {
             return schoolList;

@@ -68,7 +68,6 @@ public class Dictionary extends Command
             String audioPronounce = "https://google.com";
             String pronounce = "N/A";
 
-            List<MessageEmbed> embeds = new ArrayList<>();
 
             String parseAbleJson =
                     Jsoup.parse(document.outerHtml())

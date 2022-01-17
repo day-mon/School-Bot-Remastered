@@ -30,11 +30,12 @@ public class DatabaseHandler
 
       private HikariDataSource initHikari()
       {
+            var config = configHandler.getConfig();
             HikariConfig hikariConfig = new HikariConfig();
-            hikariConfig.setDriverClassName(configHandler.getConfig().getDbDriver());
-            hikariConfig.setJdbcUrl(configHandler.getConfig().getJdbcUrl() + configHandler.getConfig().getDbHostName());
-            hikariConfig.setUsername(configHandler.getConfig().getDbUser());
-            hikariConfig.setPassword(configHandler.getConfig().getDbPassword());
+            hikariConfig.setDriverClassName(config.databaseConfig().dbDriver());
+            hikariConfig.setJdbcUrl(config.databaseConfig().jbdcUrl() + config.databaseConfig().dbHostName());
+            hikariConfig.setUsername(config.databaseConfig().dbUser());
+            hikariConfig.setPassword(config.databaseConfig().dbPassword());
 
             /*
                     The property controls the maximum size that the pool is allowed to reach, including both idle and in-use connections.
@@ -86,7 +87,7 @@ public class DatabaseHandler
                   final var sqlPaths = Files.walk(root)
                           .filter(path -> path.getFileName().toString().endsWith(".sql"))
                           .sorted()
-                          .collect(Collectors.toList());
+                          .toList();
 
 
                   if (sqlPaths.isEmpty())

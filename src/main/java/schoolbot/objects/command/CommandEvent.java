@@ -349,7 +349,7 @@ public class CommandEvent
 
       public boolean isDeveloper()
       {
-            var developers = schoolbot.getConfigHandler().getConfig().getDeveloperIds();
+            var developers = schoolbot.getConfigHandler().getConfig().developerIds();
             var user = event.getAuthor().getIdLong();
             return developers.contains(user);
       }

@@ -49,7 +49,7 @@ public class Schoolbot extends ListenerAdapter
 
       public void build() throws LoginException
       {
-            this.jda = JDABuilder.createDefault(configHandler.getConfig().getToken())
+            this.jda = JDABuilder.createDefault(configHandler.getConfig().token())
                     .enableIntents(
                             GatewayIntent.DIRECT_MESSAGES,
                             GatewayIntent.DIRECT_MESSAGE_REACTIONS,
@@ -86,7 +86,7 @@ public class Schoolbot extends ListenerAdapter
             LOGGER.info("Operating System:    " + SystemInfo.getOperatingSystem());
             LOGGER.info("Github Repo:         " + "https://github.com/tykoooo/School-Bot-Remastered");
             LOGGER.info("Startup Time:        " + Duration.between(botStartTime, LocalDateTime.now()).toMillis() + " ms");
-            LOGGER.info("Developer User Ids:  " + configHandler.getConfig().getDeveloperIds());
+            LOGGER.info("Developer User Ids:  " + configHandler.getConfig().developerIds());
       }
 
 
